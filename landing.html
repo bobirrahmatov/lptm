@@ -108,7 +108,7 @@
                     </div>
 
                     <!-- Search Results Container -->
-                    <div id="lptm-search-results" class="absolute w-full mt-3 bg-white rounded-2xl border-2 border-gray-200 shadow-2xl hidden z-50 max-h-[600px] overflow-y-auto">
+                    <div id="lptm-search-results" class="absolute w-full mt-3 bg-white rounded-2xl border-2 border-gray-200 shadow-2xl hidden max-h-[500px] overflow-y-auto" style="z-index: 9999;">
                         <div id="lptm-results-list" class="p-3"></div>
                         <div id="lptm-no-results" class="hidden p-8 text-center text-gray-500">
                             <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -198,7 +198,8 @@
 
     async function searchConfluenceSpace(query, spaceConfig) {
         try {
-            const cqlQuery = `(text ~ "*${query}*" AND space = ${spaceConfig.space})`;
+            // Exclude attachments from search results
+            const cqlQuery = `(text ~ "*${query}*" AND space = ${spaceConfig.space} AND type = page)`;
             const encodedCql = encodeURIComponent(cqlQuery);
             const apiUrl = `${CONFLUENCE_BASE_URL}/rest/api/content/search?cql=${encodedCql}&limit=5&expand=space,body.view`;
 
@@ -218,11 +219,13 @@
 
             const data = await response.json();
             
-            // Add space config to each result
-            return (data.results || []).map(result => ({
-                ...result,
-                spaceConfig: spaceConfig
-            }));
+            // Add space config to each result and filter out attachments
+            return (data.results || [])
+                .filter(result => result.type === 'page')
+                .map(result => ({
+                    ...result,
+                    spaceConfig: spaceConfig
+                }));
             
         } catch (error) {
             if (error.name !== 'AbortError') {
@@ -303,7 +306,7 @@
         const div = document.createElement('div');
         div.className = 'p-5 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-all duration-200 hover:shadow-sm';
         
-        const pageUrl = `${CONFLUENCE_BASE_URL}${result._links.webui}`;
+        const pageUrl = result._links && result._links.webui ? `${CONFLUENCE_BASE_URL}${result._links.webui}` : '';
         
         // Extract and clean content
         let excerpt = '';
@@ -317,6 +320,12 @@
         const highlightedTitle = highlightLptmSearchTerms(result.title, query);
         const highlightedExcerpt = highlightLptmSearchTerms(excerpt, query);
         const color = result.spaceConfig.color;
+
+        // Only show URL if it exists
+        const urlSection = pageUrl ? `
+            <span class="text-gray-400">•</span>
+            <span class="text-gray-500 truncate hover:text-gray-700">${pageUrl}</span>
+        ` : '';
 
         div.innerHTML = `
             <div class="flex items-start gap-4">
@@ -338,8 +347,7 @@
                             </svg>
                             ${result.spaceConfig.name}
                         </span>
-                        <span class="text-gray-400">•</span>
-                        <span class="text-gray-500 truncate hover:text-gray-700">${pageUrl}</span>
+                        ${urlSection}
                     </div>
                 </div>
                 <div class="flex-shrink-0">
@@ -350,9 +358,11 @@
             </div>
         `;
 
-        div.addEventListener('click', () => {
-            window.open(pageUrl, '_blank');
-        });
+        if (pageUrl) {
+            div.addEventListener('click', () => {
+                window.open(pageUrl, '_blank');
+            });
+        }
 
         return div;
     }

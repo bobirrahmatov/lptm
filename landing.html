@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LPTM Hub - Search</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        /* Ensure hidden class works */
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Custom scrollbar for results */
+        #lptm-search-results::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #lptm-search-results::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        #lptm-search-results::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        #lptm-search-results        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Smooth rotating text animation */
+        .flip-container {
+            display: inline-block;
+            min-width: 140px;
+            position: relative;
+        }
+
+        .flip-word {
+            display: inline-block;
+            transition: all 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .flip-word.slide-out {
+            animation: slideOut 0.5s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+        }
+
+        .flip-word.slide-in {
+            animation: slideIn 0.5s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+        }
+
+        @keyframes slideOut {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-30px);
+                opacity: 0;
+            }
+        }
+
+        @keyframes slideIn {
+            0% {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 p-4">
+<div class="min-h-screen rounded-2xl border border-gray-200 px-5 py-7 relative overflow-hidden bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]">
+    <!-- Subtle Gradient Overlay -->
+    <div class="absolute inset-0 bg-[radial-gradient(circle_500px_at_50%_200px,rgba(96,165,250,0.15),transparent)] pointer-events-none"></div>
+    
+    <main class="overflow-hidden relative z-10">
+        <section class="relative flex items-center justify-center min-h-screen">
+            <div class="mx-auto px-6 max-w-4xl w-full">
+                <!-- LPTM Hub Title -->
+                <div class="text-center mb-12">
+                    <h1 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+                        <span>LPTM </span>
+                        <span class="flip-container bg-blue-600 text-white px-4 py-1 rounded-lg">
+                            <span class="flip-word" id="flip-text">Hub</span>
+                        </span>
+                    </h1>
+                    <p class="text-lg text-gray-600">Your central resource for Loan Product & Transaction Management</p>
+                </div>
+                
+                <!-- Search Section -->
+                <div class="relative">
+                    <div class="bg-white border-2 border-gray-300 rounded-full flex items-center h-16 px-6 shadow-md hover:shadow-lg transition-all duration-300 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 512 512" class="text-gray-400 mr-3 flex-shrink-0">
+                            <path d="M497.913 497.913c-18.782 18.782-49.225 18.782-68.008 0l-84.862-84.863c-34.889 22.382-76.13 35.717-120.659 35.717C100.469 448.767 0 348.312 0 224.383S100.469 0 224.384 0c123.931 0 224.384 100.452 224.384 224.383 0 44.514-13.352 85.771-35.718 120.676l84.863 84.863c18.782 18.782 18.782 49.209 0 67.991zM224.384 64.109c-88.511 0-160.274 71.747-160.274 160.273s71.764 160.274 160.274 160.274c88.525 0 160.273-71.748 160.273-160.274S312.909 64.109 224.384 64.109z" fill="currentColor"></path>
+                        </svg>
+                        <input type="text" placeholder="Search documentation, processes, and resources..." class="w-full outline-none text-base" id="lptm-search-input" autocomplete="off">
+                        <div id="lptm-search-loading" class="hidden ml-3 flex-shrink-0">
+                            <div class="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-500"></div>
+                        </div>
+                    </div>
+
+                    <!-- Search Results Container -->
+                    <div id="lptm-search-results" class="absolute w-full mt-3 bg-white rounded-2xl border-2 border-gray-200 shadow-2xl hidden z-50 max-h-[600px] overflow-y-auto">
+                        <div id="lptm-results-list" class="p-3"></div>
+                        <div id="lptm-no-results" class="hidden p-8 text-center text-gray-500">
+                            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p class="text-lg font-semibold">No results found</p>
+                            <p class="text-sm mt-2">Try different keywords or check your spelling</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+    // LPTM Search Functionality
+    const lptmSearchInput = document.getElementById('lptm-search-input');
+    const lptmSearchResults = document.getElementById('lptm-search-results');
+    const lptmResultsList = document.getElementById('lptm-results-list');
+    const lptmNoResults = document.getElementById('lptm-no-results');
+    const lptmSearchLoading = document.getElementById('lptm-search-loading');
+    
+    let lptmSearchTimeout;
+    let lptmCurrentAbortController;
+
+    // Configure 6 different Confluence spaces
+    const CONFLUENCE_SPACES = [
+        { name: 'Credit Management Reporting', space: 'creditmanagementreporting', color: 'blue' },
+        { name: 'Credit Information Management', space: 'creditinformationmanagement', color: 'green' },
+        { name: 'Credit Service Management', space: 'creditservicemanagement', color: 'purple' },
+        { name: 'Deal Closing', space: 'dealclosing', color: 'orange' },
+        { name: 'Loan Management', space: 'loanmanagement', color: 'indigo' },
+        { name: 'Credit Approval Control', space: 'creditapprovalcontrol', color: 'red' }
+    ];
+
+    const CONFLUENCE_BASE_URL = 'https://cedt-confluence.nam.nsroot.net/confluence';
+
+    lptmSearchInput.addEventListener('input', function () {
+        const query = this.value.trim();
+        
+        if (lptmSearchTimeout) {
+            clearTimeout(lptmSearchTimeout);
+        }
+
+        if (lptmCurrentAbortController) {
+            lptmCurrentAbortController.abort();
+        }
+
+        if (query.length < 2) {
+            hideLptmResults();
+            return;
+        }
+
+        lptmSearchLoading.classList.remove('hidden');
+        
+        lptmSearchTimeout = setTimeout(() => {
+            performMultiSpaceSearch(query);
+        }, 300);
+    });
+
+    async function performMultiSpaceSearch(query) {
+        try {
+            lptmCurrentAbortController = new AbortController();
+            
+            // Search all spaces in parallel
+            const searchPromises = CONFLUENCE_SPACES.map(space => 
+                searchConfluenceSpace(query, space)
+            );
+
+            const results = await Promise.allSettled(searchPromises);
+            
+            // Combine all successful results
+            const allResults = results
+                .filter(result => result.status === 'fulfilled' && result.value.length > 0)
+                .flatMap(result => result.value);
+
+            displayLptmResults(allResults, query);
+            
+        } catch (error) {
+            console.error('Multi-space search error:', error);
+            showMockLptmResults(query);
+        } finally {
+            lptmSearchLoading.classList.add('hidden');
+        }
+    }
+
+    async function searchConfluenceSpace(query, spaceConfig) {
+        try {
+            const cqlQuery = `(text ~ "*${query}*" AND space = ${spaceConfig.space})`;
+            const encodedCql = encodeURIComponent(cqlQuery);
+            const apiUrl = `${CONFLUENCE_BASE_URL}/rest/api/content/search?cql=${encodedCql}&limit=5&expand=space,body.view`;
+
+            const response = await fetch(apiUrl, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                signal: lptmCurrentAbortController.signal,
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                return [];
+            }
+
+            const data = await response.json();
+            
+            // Add space config to each result
+            return (data.results || []).map(result => ({
+                ...result,
+                spaceConfig: spaceConfig
+            }));
+            
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                console.error(`Error searching ${spaceConfig.name}:`, error);
+            }
+            return [];
+        }
+    }
+
+    function stripHtmlTags(html) {
+        if (!html) return '';
+        
+        // Create a temporary div to parse HTML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        
+        // Remove script and style tags
+        const scripts = tempDiv.querySelectorAll('script, style');
+        scripts.forEach(script => script.remove());
+        
+        // Get text content and clean it up
+        let text = tempDiv.textContent || tempDiv.innerText || '';
+        
+        // Replace multiple spaces with single space
+        text = text.replace(/\s+/g, ' ').trim();
+        
+        return text;
+    }
+
+    function displayLptmResults(results, query) {
+        lptmResultsList.innerHTML = '';
+        
+        if (!results || results.length === 0) {
+            showLptmNoResults();
+            return;
+        }
+
+        // Group results by space
+        const groupedResults = {};
+        results.forEach(result => {
+            const spaceName = result.spaceConfig.name;
+            if (!groupedResults[spaceName]) {
+                groupedResults[spaceName] = [];
+            }
+            groupedResults[spaceName].push(result);
+        });
+
+        // Display results grouped by space
+        Object.keys(groupedResults).forEach(spaceName => {
+            const spaceResults = groupedResults[spaceName];
+            const spaceConfig = spaceResults[0].spaceConfig;
+            
+            // Space header
+            const spaceHeader = document.createElement('div');
+            spaceHeader.className = `px-4 py-3 bg-${spaceConfig.color}-50 border-l-4 border-${spaceConfig.color}-500 font-semibold text-${spaceConfig.color}-700 text-sm mb-2`;
+            spaceHeader.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+                        <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
+                    </svg>
+                    ${spaceName} <span class="ml-auto bg-${spaceConfig.color}-100 text-${spaceConfig.color}-800 px-2 py-0.5 rounded-full text-xs">${spaceResults.length}</span>
+                </div>
+            `;
+            lptmResultsList.appendChild(spaceHeader);
+
+            // Results for this space
+            spaceResults.forEach(result => {
+                const resultElement = createLptmResultElement(result, query);
+                lptmResultsList.appendChild(resultElement);
+            });
+        });
+
+        showLptmResults();
+    }
+
+    function createLptmResultElement(result, query) {
+        const div = document.createElement('div');
+        div.className = 'p-5 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-all duration-200 hover:shadow-sm';
+        
+        const pageUrl = `${CONFLUENCE_BASE_URL}${result._links.webui}`;
+        
+        // Extract and clean content
+        let excerpt = '';
+        if (result.body && result.body.view && result.body.view.value) {
+            const cleanText = stripHtmlTags(result.body.view.value);
+            excerpt = cleanText.length > 200 ? cleanText.substring(0, 200) + '...' : cleanText;
+        } else {
+            excerpt = 'Click to view the full page content';
+        }
+
+        const highlightedTitle = highlightLptmSearchTerms(result.title, query);
+        const highlightedExcerpt = highlightLptmSearchTerms(excerpt, query);
+        const color = result.spaceConfig.color;
+
+        div.innerHTML = `
+            <div class="flex items-start gap-4">
+                <div class="flex-shrink-0 mt-1">
+                    <div class="w-10 h-10 rounded-lg bg-${color}-100 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-${color}-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+                            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="flex-grow min-w-0">
+                    <h3 class="text-${color}-700 hover:text-${color}-800 font-semibold text-lg mb-2 leading-tight">${highlightedTitle}</h3>
+                    <p class="text-gray-700 text-sm mb-3 leading-relaxed">${highlightedExcerpt}</p>
+                    <div class="flex items-center gap-3 text-xs">
+                        <span class="inline-flex items-center gap-1 text-${color}-600 font-medium">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clip-rule="evenodd"></path>
+                            </svg>
+                            ${result.spaceConfig.name}
+                        </span>
+                        <span class="text-gray-400">•</span>
+                        <span class="text-gray-500 truncate hover:text-gray-700">${pageUrl}</span>
+                    </div>
+                </div>
+                <div class="flex-shrink-0">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </div>
+            </div>
+        `;
+
+        div.addEventListener('click', () => {
+            window.open(pageUrl, '_blank');
+        });
+
+        return div;
+    }
+
+    function highlightLptmSearchTerms(text, query) {
+        if (!query || !text) return text;
+        const terms = query.split(' ').filter(term => term.length > 0);
+        const regex = new RegExp(`(${terms.join('|')})`, 'gi');
+        return text.replace(regex, '<mark class="bg-yellow-200 font-semibold px-0.5 rounded">$1</mark>');
+    }
+
+    function showMockLptmResults(query) {
+        const mockResults = CONFLUENCE_SPACES.flatMap((space, index) => [
+            {
+                title: `${query} Documentation - ${space.name}`,
+                _links: { webui: `/display/${space.space}/mock-page-${index}` },
+                spaceConfig: space,
+                body: { view: { value: `<p>This is documentation about ${query} in the ${space.name} space. This content shows how processes and procedures are documented for your reference.</p>` } }
+            }
+        ]);
+        displayLptmResults(mockResults, query);
+    }
+
+    function showLptmResults() {
+        lptmNoResults.classList.add('hidden');
+        lptmSearchResults.classList.remove('hidden');
+    }
+
+    function showLptmNoResults() {
+        lptmNoResults.classList.remove('hidden');
+        lptmSearchResults.classList.remove('hidden');
+    }
+
+    function hideLptmResults() {
+        lptmSearchResults.classList.add('hidden');
+        lptmNoResults.classList.add('hidden');
+    }
+
+    // Hide results when clicking outside
+    document.addEventListener('click', function (event) {
+        if (lptmSearchInput && !lptmSearchInput.contains(event.target) && 
+            lptmSearchResults && !lptmSearchResults.contains(event.target)) {
+            hideLptmResults();
+        }
+    });
+
+    // Handle escape key
+    if (lptmSearchInput) {
+        lptmSearchInput.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                hideLptmResults();
+                this.blur();
+            }
+        });
+    }
+
+    // Focus search input on page load
+    if (lptmSearchInput) {
+        lptmSearchInput.focus();
+    }
+
+    // Smooth rotating text animation for LPTM title
+    const flipWords = ['Hub', 'Portal', 'Center', 'Resource', 'Platform'];
+    let currentFlipIndex = 0;
+    const flipTextElement = document.getElementById('flip-text');
+
+    function flipText() {
+        if (!flipTextElement) return;
+        
+        // Slide out current word
+        flipTextElement.classList.add('slide-out');
+        
+        // After slide out completes, change text and slide in
+        setTimeout(() => {
+            currentFlipIndex = (currentFlipIndex + 1) % flipWords.length;
+            flipTextElement.textContent = flipWords[currentFlipIndex];
+            
+            // Remove slide-out and add slide-in
+            flipTextElement.classList.remove('slide-out');
+            flipTextElement.classList.add('slide-in');
+            
+            // Clean up slide-in class after animation
+            setTimeout(() => {
+                flipTextElement.classList.remove('slide-in');
+            }, 500);
+        }, 500);
+    }
+
+    // Start rotating every 3 seconds
+    setInterval(flipText, 3000);
+</script>
+
+</body>
+</html>
+

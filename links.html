@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Useful Links</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Only keep essential webkit scrollbar styles that can't be done with Tailwind */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Loading shimmer animation - can't be replicated with Tailwind alone */
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+        .loading-shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="p-4">
+        <div class="rounded-2xl border border-gray-200 bg-white">
+            <div class="px-5 py-4 sm:px-6 sm:py-5">
+                <h3 class="!text-2xl font-medium text-gray-800">
+                    Useful Links
+                </h3>
+            </div>
+            <div class="border-t border-gray-100 p-5 sm:p-6">
+                <!-- Search Section -->
+                <div class="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="flex flex-1 items-center gap-4">
+                        <div class="w-[512px]">
+                            <div class="relative">
+                                <span class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2">
+                                    <svg class="fill-gray-500" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M3.04199 9.37381C3.04199 5.87712 5.87735 3.04218 9.37533 3.04218C12.8733 3.04218 15.7087 5.87712 15.7087 9.37381C15.7087 12.8705 12.8733 15.7055 9.37533 15.7055C5.87735 15.7055 3.04199 12.8705 3.04199 9.37381ZM9.37533 1.54218C5.04926 1.54218 1.54199 5.04835 1.54199 9.37381C1.54199 13.6993 5.04926 17.2055 9.37533 17.2055C11.2676 17.2055 13.0032 16.5346 14.3572 15.4178L17.1773 18.2381C17.4702 18.531 17.945 18.5311 18.2379 18.2382C18.5308 17.9453 18.5309 17.4704 18.238 17.1775L15.4182 14.3575C16.5367 13.0035 17.2087 11.2671 17.2087 9.37381C17.2087 5.04835 13.7014 1.54218 9.37533 1.54218Z" fill=""></path>
+                                    </svg>
+                                </span>
+                                <input type="text" id="simple-search" placeholder="Search links..." class="shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 h-[42px] w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pr-4 pl-[42px] !text-lg !text-gray-800 placeholder:!text-gray-400 focus:ring-3 focus:outline-hidden">
+                            </div>
+                        </div>
+                        <button onclick="openAddLinkModal()" class="flex items-center gap-2 rounded-lg border border-blue-500 bg-blue-500 px-3 py-2 !text-lg font-medium !text-white hover:bg-blue-700 transition-all duration-200 ease-in-out hover:scale-105">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Add Link
+                        </button>
+                        <button onclick="refreshData()" class="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 !text-lg font-medium !text-gray-700 hover:bg-gray-50 hover:!text-gray-800 transition-all duration-200 ease-in-out hover:scale-105">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="mb-6">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="filterByCategory('all')" class="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 !text-lg font-medium !text-gray-700 hover:bg-gray-50 hover:!text-gray-800 transition-all duration-200 ease-in-out hover:scale-105">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                            All
+                        </button>
+                        <button onclick="filterByCategory('Documentation')" class="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 !text-lg font-medium !text-blue-700 hover:bg-blue-100 transition-all duration-200 ease-in-out hover:scale-105">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Documentation
+                        </button>
+                        <button onclick="filterByCategory('Tools')" class="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 !text-lg font-medium !text-emerald-700 hover:bg-emerald-100 transition-all duration-200 ease-in-out hover:scale-105">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            Tools
+                        </button>
+                        <button onclick="filterByCategory('Development')" class="flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 !text-lg font-medium !text-rose-700 hover:bg-rose-100 transition-all duration-200 ease-in-out hover:scale-105">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                            </svg>
+                            Development
+                        </button>
+                        <button onclick="filterByCategory('Resources')" class="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 !text-lg font-medium !text-amber-700 hover:bg-amber-100 transition-all duration-200 ease-in-out hover:scale-105">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                            </svg>
+                            Resources
+                        </button>
+                        <button onclick="filterByCategory('Training')" class="flex items-center gap-2 rounded-lg border border-purple-200 bg-purple-50 px-3 py-2 !text-lg font-medium !text-purple-700 hover:bg-purple-100 transition-all duration-200 ease-in-out hover:scale-105">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                            </svg>
+                            Training
+                        </button>
+                        <button onclick="filterByCategory('Other')" class="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 !text-lg font-medium !text-slate-700 hover:bg-slate-100 transition-all duration-200 ease-in-out hover:scale-105">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/>
+                            </svg>
+                            Other
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Links Grid -->
+                <div id="cardsContainer" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    <!-- Link cards will be dynamically added here -->
+                </div>
+
+                <!-- No Results State -->
+                <div id="noResultsState" class="hidden">
+                    <div class="flex flex-col items-center justify-center py-12">
+                        <svg class="mb-4 h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                        </svg>
+                        <h3 class="mb-2 !text-lg font-medium !text-gray-900">No links found</h3>
+                        <p class="!text-gray-500">Try adjusting your search or filter criteria</p>
+                    </div>
+                </div>
+
+                    <div class="border-t border-gray-200 px-6 py-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="!text-lg !text-gray-700">Show</span>
+                                <select id="itemsPerPage" class="rounded-lg border border-gray-300 bg-white px-2 py-1 !text-lg !text-gray-700">
+                                    <option value="6">6</option>
+                                    <option value="12" selected>12</option>
+                                    <option value="24">24</option>
+                                    <option value="48">48</option>
+                                </select>
+                                <span class="!text-lg !text-gray-700">items per page</span>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <button onclick="previousPage()" class="!text-lg shadow-theme-xs flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-2 py-2 font-medium !text-gray-700 hover:bg-gray-50 hover:!text-gray-800 sm:px-3.5">
+                                    <svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M2.58301 9.99868C2.58272 10.1909 2.65588 10.3833 2.80249 10.53L7.79915 15.5301C8.09194 15.8231 8.56682 15.8233 8.85981 15.5305C9.15281 15.2377 9.15297 14.7629 8.86018 14.4699L5.14009 10.7472L16.6675 10.7472C17.0817 10.7472 17.4175 10.4114 17.4175 9.99715C17.4175 9.58294 17.0817 9.24715 16.6675 9.24715L5.14554 9.24715L8.86017 5.53016C9.15297 5.23717 9.15282 4.7623 8.85983 4.4695C8.56684 4.1767 8.09197 4.17685 7.79917 4.46984L2.84167 9.43049C2.68321 9.568 2.58301 9.77087 2.58301 9.99715C2.58301 9.99766 2.58301 9.99817 2.58301 9.99868Z" fill=""></path>
+                                    </svg>
+                                    <span class="hidden sm:inline">Previous</span>
+                                </button>
+
+                                <span class="block !text-lg font-medium !text-gray-700 sm:hidden">
+                                    Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
+                                </span>
+
+                                <ul class="hidden items-center gap-0.5 sm:flex" id="pagination">
+                                    <!-- Pagination will be dynamically added here -->
+                                </ul>
+
+                                <button onclick="nextPage()" class="!text-lg shadow-theme-xs flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-2 py-2 font-medium !text-gray-700 hover:bg-gray-50 hover:!text-gray-800 sm:px-3.5">
+                                    <span class="hidden sm:inline">Next</span>
+                                    <svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M17.4175 9.9986C17.4178 10.1909 17.3446 10.3832 17.198 10.53L12.2013 15.5301C11.9085 15.8231 11.4337 15.8233 11.1407 15.5305C10.8477 15.2377 10.8475 14.7629 11.1403 14.4699L14.8604 10.7472L3.33301 10.7472C2.91879 10.7472 2.58301 10.4114 2.58301 9.99715C2.58301 9.58294 2.91879 9.24715 3.33301 9.24715L14.8549 9.24715L11.1403 5.53016C10.8475 5.23717 10.8477 4.7623 11.1407 4.4695C11.4336 4.1767 11.9085 4.17685 12.2013 4.46984L17.1588 9.43049C17.3173 9.568 17.4175 9.77087 17.4175 9.99715C17.4175 9.99763 17.4175 9.99812 17.4175 9.9986Z" fill=""></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Component -->
+    <div class="fixed bottom-4 right-4 z-50" id="notificationsContainer">
+        <div class="flex flex-col gap-4">
+            <!-- Notifications will be dynamically added here -->
+        </div>
+    </div>
+
+    <!-- Add Link Modal -->
+    <div id="addLinkModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                <div class="rounded-2xl border border-gray-200 bg-white">
+                    <div class="px-5 py-4 sm:px-6 sm:py-5">
+                        <h3 class="!text-2xl font-medium text-gray-800">
+                            Add New Link
+                        </h3>
+                    </div>
+                    <div class="p-5 space-y-6 border-t border-gray-100 sm:p-6">
+                        <form id="addLinkForm" onsubmit="handleAddLink(event)">
+                            <div class="-mx-2.5 flex flex-wrap gap-y-5">
+                                <div class="w-full px-2.5">
+                                    <label class="mb-1.5 block !text-lg font-medium !text-gray-700">
+                                        Title
+                                    </label>
+                                    <input type="text" id="linkTitle" required placeholder="Enter link title" class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-lg !text-gray-800 shadow-theme-xs placeholder:!text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                                </div>
+
+                                <div class="w-full px-2.5">
+                                    <label class="mb-1.5 block !text-lg font-medium !text-gray-700">
+                                        Description
+                                    </label>
+                                    <textarea id="linkDescription" required placeholder="Enter link description" rows="3" class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-lg !text-gray-800 shadow-theme-xs placeholder:!text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10"></textarea>
+                                </div>
+
+                                <div class="w-full px-2.5">
+                                    <label class="mb-1.5 block !text-lg font-medium !text-gray-700">
+                                        Category
+                                    </label>
+                                    <div class="relative z-20 bg-transparent">
+                                        <select id="linkCategory" required class="z-20 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 !text-lg !text-gray-800 shadow-theme-xs placeholder:!text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                                            <option value="">Select a category</option>
+                                            <option value="Documentation">Documentation</option>
+                                            <option value="Tools">Tools</option>
+                                            <option value="Development">Development</option>
+                                            <option value="Resources">Resources</option>
+                                            <option value="Training">Training</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                        <span class="absolute z-30 text-gray-500 -translate-y-1/2 right-4 top-1/2">
+                                            <svg class="stroke-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396" stroke="" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                            </svg>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="w-full px-2.5">
+                                    <label class="mb-1.5 block !text-lg font-medium !text-gray-700">
+                                        URL
+                                    </label>
+                                    <input type="text" id="linkUrl" required placeholder="Enter link URL (e.g., www.example.com)" pattern="^(https?:\/\/)?(www\.)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$" class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-lg !text-gray-800 shadow-theme-xs placeholder:!text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                                </div>
+
+                                <div class="w-full px-2.5">
+                                    <div class="flex justify-end gap-3">
+                                        <button type="button" onclick="closeAddLinkModal()" class="flex items-center justify-center gap-2 px-4 py-2 !text-lg font-medium !text-gray-700 transition-colors rounded-lg border border-gray-300 bg-gray-200 hover:bg-gray-300">
+                                            Cancel
+                                        </button>
+                                        <button type="submit" class="flex items-center justify-center gap-2 px-4 py-2 !text-lg font-medium !text-white transition-colors rounded-lg bg-blue-500 hover:bg-blue-600">
+                                            Save
+                                            <svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M4.98481 2.44399C3.11333 1.57147 1.15325 3.46979 1.96543 5.36824L3.82086 9.70527C3.90146 9.89367 3.90146 10.1069 3.82086 10.2953L1.96543 14.6323C1.15326 16.5307 3.11332 18.4291 4.98481 17.5565L16.8184 12.0395C18.5508 11.2319 18.5508 8.76865 16.8184 7.961L4.98481 2.44399ZM3.34453 4.77824C3.0738 4.14543 3.72716 3.51266 4.35099 3.80349L16.1846 9.32051C16.762 9.58973 16.762 10.4108 16.1846 10.68L4.35098 16.197C3.72716 16.4879 3.0738 15.8551 3.34453 15.2223L5.19996 10.8853C5.21944 10.8397 5.23735 10.7937 5.2537 10.7473L9.11784 10.7473C9.53206 10.7473 9.86784 10.4115 9.86784 9.99726C9.86784 9.58304 9.53206 9.24726 9.11784 9.24726L5.25157 9.24726C5.2358 9.20287 5.2186 9.15885 5.19996 9.11528L3.34453 4.77824Z" fill=""></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Button -->
+    <button onclick="toggleFeedbackForm()" class="fixed left-4 bottom-4 z-50 flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 !text-lg font-medium !text-white hover:bg-blue-700">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+        </svg>
+        Feedback
+    </button>
+
+    <!-- Feedback Form Modal -->
+    <div id="feedbackModal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black bg-opacity-50" onclick="toggleFeedbackForm()"></div>
+        <div class="fixed left-4 bottom-4 w-full max-w-md">
+            <div class="rounded-2xl border border-gray-200 bg-white">
+                <div class="px-5 py-4 sm:px-6 sm:py-5">
+                    <div class="flex items-center justify-between">
+                        <h3 class="!text-2xl font-medium text-gray-800">
+                            Feedback Form
+                        </h3>
+                        <button onclick="toggleFeedbackForm()" class="text-gray-400 hover:text-gray-500">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-5 space-y-6 border-t border-gray-100 sm:p-6">
+                        <form id="feedbackForm" onsubmit="submitFeedback(event)">
+                            <div class="-mx-2.5 flex flex-wrap gap-y-5">
+                                <div class="w-full px-2.5">
+                                    <input type="text" id="feedbackName" placeholder="Your Name (Optional)"
+                                        class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-lg !text-gray-800 shadow-theme-xs placeholder:!text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                                </div>
+
+                                <div class="w-full px-2.5">
+                                    <select id="feedbackType" required
+                                        class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-lg !text-gray-800 shadow-theme-xs placeholder:!text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10">
+                                        <option value="">Select Feedback Type</option>
+                                        <option value="suggestion">Suggestion</option>
+                                        <option value="bug">Bug Report</option>
+                                        <option value="improvement">Improvement</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+
+                                <div class="w-full px-2.5">
+                                    <textarea id="feedbackMessage" placeholder="Your Feedback" required rows="4"
+                                        class="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 !text-lg !text-gray-800 shadow-theme-xs placeholder:!text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10"></textarea>
+                                </div>
+
+                                <div class="w-full px-2.5">
+                                    <button type="submit" class="w-full p-3 !text-lg font-medium !text-white transition-colors rounded-lg bg-blue-500 hover:bg-blue-800">
+                                        Submit Feedback
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables for table data
+        let tableData = [];
+        let filteredData = [];
+        let currentPage = 1;
+        let itemsPerPage = 12; // Changed default to 12 for better grid layout
+
+        // Function to refresh data
+        async function refreshData() {
+            showLoadingState();
+            try {
+                const data = await fetchDataFromConfluence();
+                if (data && data.length > 0) {
+                    tableData = data;
+                    currentPage = 1;
+                    itemsPerPage = parseInt(document.getElementById('itemsPerPage').value);
+                    filterLinks();
+                    showNotification('Success', `Refreshed ${data.length} links successfully`, 'notification');
+                } else {
+                    showNoDataState();
+                    showNotification('Error', 'Failed to refresh data from Confluence', 'error');
+                }
+            } catch (error) {
+                console.error('Error refreshing data:', error);
+                showNoDataState();
+                showNotification('Error', 'Failed to refresh data', 'error');
+            }
+        }
+
+        // Function to fetch JSON data from Confluence
+        async function fetchDataFromConfluence() {
+            try {
+                // Change the file extension to .json
+                const response = await fetch('https://cedt-confluence.net/confluence/download/attachments/2740868871/useful_links.json?api=v2');
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to load data: ${response.status} ${response.statusText}`);
+                }
+
+                // Parse the response as JSON
+                const data = await response.json();
+                
+                // Check if data has a links array or is directly an array
+                if (data.links && Array.isArray(data.links)) {
+                    return data.links;
+                } else if (Array.isArray(data)) {
+                    return data;
+                } else {
+                    console.warn('Unexpected data format:', data);
+                    return [];
+                }
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                return null;
+            }
+        }
+
+        // Function to get category styling information
+        function getCategoryInfo(category) {
+            const categories = {
+                'Documentation': {
+                    classes: 'bg-blue-50 !text-blue-700 border border-blue-200',
+                    icon: '<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'
+                },
+                'Tools': {
+                    classes: 'bg-emerald-50 !text-emerald-700 border border-emerald-200',
+                    icon: '<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>'
+                },
+                'Development': {
+                    classes: 'bg-rose-50 !text-rose-700 border border-rose-200',
+                    icon: '<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>'
+                },
+                'Resources': {
+                    classes: 'bg-amber-50 !text-amber-700 border border-amber-200',
+                    icon: '<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>'
+                },
+                'Training': {
+                    classes: 'bg-purple-50 !text-purple-700 border border-purple-200',
+                    icon: '<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>'
+                },
+                'Other': {
+                    classes: 'bg-slate-50 !text-slate-700 border border-slate-200',
+                    icon: '<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/></svg>'
+                }
+            };
+
+            return categories[category] || categories['Other'];
+        }
+
+        // Function to create card
+        function createCard(item) {
+            const categoryInfo = getCategoryInfo(item.category);
+            return `
+                <div class="rounded-lg border border-gray-200 bg-white p-4 flex flex-col h-full transition-all duration-200 ease-in-out hover:border-blue-600 cursor-pointer" onclick="openLink('${item.url}')">
+                    <div class="mb-4">
+                        <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 !text-lg font-medium transition-all duration-200 ease-in-out hover:scale-105 ${categoryInfo.classes}">
+                            ${categoryInfo.icon}
+                            ${item.category}
+                        </span>
+                    </div>
+                    <h3 class="mb-2 !text-lg font-medium !text-gray-900">${item.title}</h3>
+                    <p class="mb-4 !text-lg !text-gray-600 line-clamp-3">${item.description}</p>
+                    <div class="mt-auto flex items-center justify-end gap-2">
+                        <button onclick="event.stopPropagation(); openLink('${item.url}')" class="group relative rounded-lg bg-blue-100 p-2 !text-blue-600 hover:bg-blue-200 transition-all duration-200 ease-in-out hover:scale-105">
+                            <span class="invisible absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-blue-600 px-2 py-1 !text-lg !text-white opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100">
+                                Open link
+                                <span class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-blue-600"></span>
+                            </span>
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                </svg>
+                            </button>
+                        <button onclick="event.stopPropagation(); copyItem('${item.url}')" class="group relative rounded-lg bg-green-100 p-2 !text-green-600 hover:bg-green-200 transition-all duration-200 ease-in-out hover:scale-105">
+                            <span class="invisible absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-green-600 px-2 py-1 !text-lg !text-white opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100">
+                                Copy link
+                                <span class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-green-600"></span>
+                            </span>
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                                </svg>
+                            </button>
+                        </div>
+                </div>
+            `;
+        }
+
+        // Function to update pagination
+        function updatePagination() {
+            const pagination = document.getElementById('pagination');
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            pagination.innerHTML = '';
+            
+            if (totalPages > 0) {
+                addPageButton(1);
+            }
+
+            if (currentPage > 3) {
+                addEllipsis();
+            }
+
+            for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+                if (i > 1 && i < totalPages) {
+                    addPageButton(i);
+                }
+            }
+
+            if (currentPage < totalPages - 2) {
+                addEllipsis();
+            }
+
+            if (totalPages > 1) {
+                addPageButton(totalPages);
+            }
+
+            document.getElementById('currentPage').textContent = currentPage;
+            document.getElementById('totalPages').textContent = totalPages;
+
+            const prevButton = document.querySelector('button[onclick="previousPage()"]');
+            const nextButton = document.querySelector('button[onclick="nextPage()"]');
+            
+            if (prevButton) prevButton.disabled = currentPage === 1;
+            if (nextButton) nextButton.disabled = currentPage === totalPages;
+        }
+
+        function addPageButton(pageNum) {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = '#';
+            a.className = pageNum === currentPage 
+                ? 'bg-brand-500/[0.08] !text-lg !text-brand-500 hover:bg-brand-500/[0.08] hover:!text-brand-500 flex h-10 w-10 items-center justify-center rounded-lg font-medium'
+                : '!text-lg hover:bg-brand-500/[0.08] hover:!text-brand-500 flex h-10 w-10 items-center justify-center rounded-lg font-medium !text-gray-700';
+            a.textContent = pageNum;
+            a.onclick = (e) => {
+                e.preventDefault();
+                currentPage = pageNum;
+                updateCards();
+            };
+            li.appendChild(a);
+            pagination.appendChild(li);
+        }
+
+        function addEllipsis() {
+            const li = document.createElement('li');
+            li.className = '!text-lg flex h-10 w-10 items-center justify-center !text-gray-700';
+            li.textContent = '...';
+            pagination.appendChild(li);
+        }
+
+        // Function to update cards
+        function updateCards() {
+            const container = document.getElementById('cardsContainer');
+            const noResultsState = document.getElementById('noResultsState');
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageData = filteredData.slice(start, end);
+
+            if (pageData.length === 0) {
+                container.classList.add('hidden');
+                noResultsState.classList.remove('hidden');
+            } else {
+                container.classList.remove('hidden');
+                noResultsState.classList.add('hidden');
+                container.innerHTML = pageData.map(createCard).join('');
+            }
+            updatePagination();
+        }
+
+        // Function to handle next page
+        function nextPage() {
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                updateCards();
+            }
+        }
+
+        // Function to handle previous page
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                updateCards();
+            }
+        }
+
+        // Global variables for filtering
+        let selectedCategory = 'all';
+
+        // Filter by category
+        function filterByCategory(category) {
+            selectedCategory = category;
+            currentPage = 1;
+
+            // Update button styles
+            document.querySelectorAll('button[onclick^="filterByCategory"]').forEach(btn => {
+                btn.classList.remove('border-blue-200', 'bg-blue-50', 'text-blue-700',
+                    'border-emerald-200', 'bg-emerald-50', 'text-emerald-700',
+                    'border-rose-200', 'bg-rose-50', 'text-rose-700',
+                    'border-amber-200', 'bg-amber-50', 'text-amber-700',
+                    'border-purple-200', 'bg-purple-50', 'text-purple-700',
+                    'border-slate-200', 'bg-slate-50', 'text-slate-700',
+                    'border-gray-300', 'bg-gray-50', 'text-gray-800');
+                btn.classList.add('border-gray-300', 'bg-white', 'text-gray-700');
+            });
+
+            // Apply selected category style
+            const selectedBtn = document.querySelector(`[onclick="filterByCategory('${category}')"]`);
+            if (selectedBtn) {
+                selectedBtn.classList.remove('border-gray-300', 'bg-white', 'text-gray-700');
+                if (category === 'all') {
+                    selectedBtn.classList.add('border-gray-300', 'bg-gray-50', 'text-gray-800');
+                } else {
+                    const categoryInfo = getCategoryInfo(category);
+                    const classes = categoryInfo.classes.split(' ');
+                    selectedBtn.classList.add(...classes);
+                }
+            }
+
+            filterLinks();
+        }
+
+        // Filter links based on search term and category
+        function filterLinks() {
+            const searchTerm = document.getElementById('simple-search').value.toLowerCase();
+            
+            filteredData = tableData.filter(item => {
+                const matchesSearch = !searchTerm || 
+                    Object.values(item).some(value => 
+                        String(value).toLowerCase().includes(searchTerm)
+                    );
+                const matchesCategory = selectedCategory === 'all' || 
+                    item.category === selectedCategory;
+                
+                return matchesSearch && matchesCategory;
+            });
+
+            currentPage = 1;
+            updateCards();
+        }
+
+        // Action functions
+        function openLink(url) {
+            // Ensure URL has protocol
+            let fullUrl = url;
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                fullUrl = 'https://' + url;
+            }
+            window.open(fullUrl, '_blank');
+        }
+
+        function copyItem(link) {
+            const button = event.currentTarget;
+            button.classList.add('animate-pulse');
+            navigator.clipboard.writeText(link).then(() => {
+                setTimeout(() => {
+                    button.classList.remove('animate-pulse');
+                }, 300);
+                showNotification('Copied!', 'Link has been copied to clipboard', 'notification');
+            });
+        }
+
+        // Add loading state (match trainings.html styling)
+        function showLoadingState() {
+            const container = document.getElementById('cardsContainer');
+            container.innerHTML = `
+                <div class="col-span-full py-16">
+                    <div class="flex flex-col items-center justify-center">
+                        <div class="relative">
+                            <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-200"></div>
+                            <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent absolute top-0 left-0"></div>
+                        </div>
+                        <div class="mt-6 text-center">
+                            <span class="!text-lg font-medium !text-gray-700">Loading links...</span>
+                            <p class="!text-sm !text-gray-500 mt-1">Please wait while we fetch the latest data</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Show no data state
+        function showNoDataState() {
+            const container = document.getElementById('cardsContainer');
+            container.innerHTML = `
+                <div class="col-span-full py-16">
+                    <div class="flex flex-col items-center justify-center text-center">
+                        <div class="relative mb-6">
+                            <div class="w-24 h-24 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center">
+                                <svg class="w-12 h-12 !text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <h3 class="!text-xl font-semibold !text-gray-700 mb-2">No links found</h3>
+                        <p class="!text-gray-500 mb-4 max-w-md">We couldn't find any links. Try refreshing or adjusting your filters.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Update notification function to handle error type
+        function showNotification(title, message, type = 'notification') {
+            const container = document.getElementById('notificationsContainer');
+            const notification = document.createElement('div');
+            
+            const bgColor = type === 'error' 
+                ? 'bg-red-100' 
+                : type === 'message' 
+                    ? 'bg-blue-100' 
+                    : 'bg-green-100';
+            
+            const iconColor = type === 'error'
+                ? '!text-red-600'
+                : type === 'message'
+                    ? '!text-blue-600'
+                    : '!text-green-600';
+
+            const icon = type === 'error'
+                ? `<svg class="h-6 w-6 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>`
+                : type === 'message'
+                    ? `<svg class="h-6 w-6 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                    </svg>`
+                    : `<svg class="h-6 w-6 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                    </svg>`;
+
+            notification.className = `flex items-center gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-lg notification-item`;
+            
+            notification.innerHTML = `
+                <div class="flex h-10 w-10 items-center justify-center rounded-full ${bgColor}">
+                    ${icon}
+                </div>
+                <div class="flex-1">
+                    <h4 class="!text-lg font-medium !text-gray-900">${title}</h4>
+                    <p class="!text-lg !text-gray-500">${message}</p>
+                </div>
+                <button class="!text-gray-400 hover:!text-gray-500 close-notification">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            `;
+
+            container.appendChild(notification);
+
+            // Add close button functionality
+            const closeButton = notification.querySelector('.close-notification');
+            closeButton.addEventListener('click', () => {
+                notification.remove();
+            });
+
+            // Auto close after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Initialize cards with data
+        async function initializeCards() {
+            showLoadingState();
+            try {
+                const data = await fetchDataFromConfluence();
+                if (data && data.length > 0) {
+                    tableData = data;
+                    currentPage = 1;
+                    itemsPerPage = parseInt(document.getElementById('itemsPerPage').value);
+                    filterLinks();
+                    showNotification('Success', `Loaded ${data.length} links successfully`, 'notification');
+                } else {
+                    showNoDataState();
+                    showNotification('Error', 'No data available from Confluence', 'error');
+                }
+            } catch (error) {
+                console.error('Error initializing cards:', error);
+                showNoDataState();
+                showNotification('Error', 'Failed to load data from Confluence', 'error');
+            }
+        }
+
+        // Call initialize when the page loads
+        document.addEventListener('DOMContentLoaded', async function() {
+            await initializeCards();
+
+            // Items per page change handler
+            document.getElementById('itemsPerPage').addEventListener('change', function(e) {
+                itemsPerPage = parseInt(e.target.value);
+                currentPage = 1;
+                filterLinks();
+            });
+
+            // Search functionality
+            const searchInput = document.getElementById('simple-search');
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    filterLinks();
+                });
+
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                    }
+                });
+            }
+        });
+
+        // Add click handlers for the close buttons
+        document.querySelectorAll('.close-notification').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const notification = e.target.closest('.notification-item');
+                if (notification) {
+                    notification.remove();
+                }
+            });
+        });
+
+        // Auto close existing notifications after 5 seconds
+        document.querySelectorAll('.notification-item').forEach(notification => {
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        });
+
+        // Function to open the add link modal
+        function openAddLinkModal() {
+            const modal = document.getElementById('addLinkModal');
+            modal.classList.remove('hidden');
+        }
+
+        // Function to close the add link modal
+        function closeAddLinkModal() {
+            const modal = document.getElementById('addLinkModal');
+            modal.classList.add('hidden');
+        }
+
+        // Function to handle form submission
+        async function handleAddLink(event) {
+            event.preventDefault();
+            
+            const newLink = {
+                id: `link_${Date.now()}`,
+                title: document.getElementById('linkTitle').value,
+                description: document.getElementById('linkDescription').value,
+                category: document.getElementById('linkCategory').value,
+                url: document.getElementById('linkUrl').value,
+                timestamp: new Date().toISOString()
+            };
+
+            // Close form and reset first
+            document.getElementById('addLinkForm').reset();
+            closeAddLinkModal();
+
+            try {
+                // First, get the attachment ID for useful_links.json
+                const attachmentsResponse = await fetch('https://cedt-confluence.net/confluence/rest/api/content/2740868871/child/attachment?filename=useful_links.json');
+                const attachmentsData = await attachmentsResponse.json();
+                
+                let attachmentId;
+                let existingLinks = { links: [], metadata: { lastUpdated: '', totalLinks: 0, categories: {} } };
+
+                if (attachmentsData.results && attachmentsData.results.length > 0) {
+                    // If useful_links.json exists, get its content
+                    attachmentId = attachmentsData.results[0].id;
+                    const linksResponse = await fetch(`https://cedt-confluence.net/confluence/download/attachments/2740868871/useful_links.json?api=v2`);
+                    if (linksResponse.ok) {
+                        existingLinks = await linksResponse.json();
+                    }
+                }
+
+                // Add new link
+                existingLinks.links.unshift(newLink);
+
+                // Update metadata
+                existingLinks.metadata = {
+                    lastUpdated: newLink.timestamp,
+                    totalLinks: existingLinks.links.length,
+                    categories: existingLinks.links.reduce((acc, link) => {
+                        acc[link.category] = (acc[link.category] || 0) + 1;
+                        return acc;
+                    }, {})
+                };
+
+                // Create or update the attachment
+                const formData = new FormData();
+                const blob = new Blob([JSON.stringify(existingLinks, null, 2)], { type: 'application/json' });
+                formData.append('file', blob, 'useful_links.json');
+
+                const response = await fetch(`https://cedt-confluence.net/confluence/rest/api/content/2740868871/child/attachment${attachmentId ? `/${attachmentId}` : ''}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Atlassian-Token': 'no-check'
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to save link: ${response.status} ${response.statusText}`);
+                }
+
+                // Add to local data
+                tableData.unshift(newLink);
+                currentPage = 1;
+                filterLinks();
+                
+                showNotification('Success', 'Link saved successfully!', 'notification');
+            } catch (error) {
+                console.error('Error saving link:', error);
+                showNotification('Error', 'Failed to save link. Please try again.', 'error');
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('addLinkModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeAddLinkModal();
+            }
+        });
+
+        // Close modal when pressing Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeAddLinkModal();
+            }
+        });
+
+        // Feedback form functions
+        function toggleFeedbackForm() {
+            const modal = document.getElementById('feedbackModal');
+            modal.classList.toggle('hidden');
+        }
+
+        async function submitFeedback(event) {
+            event.preventDefault();
+            
+            const feedbackData = {
+                id: `fb_${Date.now()}`,
+                name: document.getElementById('feedbackName').value || 'Anonymous',
+                type: document.getElementById('feedbackType').value,
+                message: document.getElementById('feedbackMessage').value,
+                timestamp: new Date().toISOString()
+            };
+
+            try {
+                // First, get the attachment ID for feedback.json
+                const attachmentsResponse = await fetch('https://cedt-confluence.net/confluence/rest/api/content/2740868871/child/attachment?filename=feedback.json');
+                const attachmentsData = await attachmentsResponse.json();
+                
+                let attachmentId;
+                let existingFeedback = { feedback: [], metadata: { lastUpdated: '', totalFeedback: 0, feedbackTypes: {} } };
+
+                if (attachmentsData.results && attachmentsData.results.length > 0) {
+                    // If feedback.json exists, get its content
+                    attachmentId = attachmentsData.results[0].id;
+                    const feedbackResponse = await fetch(`https://cedt-confluence.net/confluence/download/attachments/2740868871/feedback.json?api=v2`);
+                    if (feedbackResponse.ok) {
+                        existingFeedback = await feedbackResponse.json();
+                    }
+                }
+
+                // Add new feedback
+                existingFeedback.feedback.unshift(feedbackData);
+
+                // Update metadata
+                existingFeedback.metadata = {
+                    lastUpdated: feedbackData.timestamp,
+                    totalFeedback: existingFeedback.feedback.length,
+                    feedbackTypes: existingFeedback.feedback.reduce((acc, fb) => {
+                        acc[fb.type] = (acc[fb.type] || 0) + 1;
+                        return acc;
+                    }, {})
+                };
+
+                // Create or update the attachment
+                const formData = new FormData();
+                const blob = new Blob([JSON.stringify(existingFeedback, null, 2)], { type: 'application/json' });
+                formData.append('file', blob, 'feedback.json');
+
+                const response = await fetch(`https://cedt-confluence.net/confluence/rest/api/content/2740868871/child/attachment${attachmentId ? `/${attachmentId}` : ''}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Atlassian-Token': 'no-check'
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to save feedback: ${response.status} ${response.statusText}`);
+                }
+
+                showNotification('Success', 'Thank you for your feedback!', 'success');
+                document.getElementById('feedbackForm').reset();
+                toggleFeedbackForm();
+            } catch (error) {
+                console.error('Error submitting feedback:', error);
+                showNotification('Error', 'Failed to submit feedback. Please try again.', 'error');
+            }
+        }
+    </script>
+</body>
+</html>

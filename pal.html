@@ -541,6 +541,26 @@
             console.log('File:', CONFLUENCE_FILE_NAME);
             console.log('=====================================');
             
+            // Verify all required libraries are loaded
+            if (typeof ApexCharts === 'undefined') {
+                console.error('❌ ApexCharts library not loaded! Charts will not work.');
+                showNotification('Error', 'ApexCharts library failed to load. Please refresh the page.', 'error');
+            } else {
+                console.log('✓ ApexCharts library loaded successfully');
+            }
+            
+            if (typeof jsVectorMap === 'undefined') {
+                console.warn('⚠️  jsVectorMap library not loaded. Map will not be displayed.');
+            } else {
+                console.log('✓ jsVectorMap library loaded successfully');
+            }
+            
+            if (typeof XLSX === 'undefined') {
+                console.warn('⚠️  XLSX library not loaded. Excel file parsing may not work.');
+            } else {
+                console.log('✓ XLSX library loaded successfully');
+            }
+            
             // Load data from Confluence attachment
             loadDataFromCSV();
             
@@ -1455,11 +1475,29 @@
                 }
             };
 
-            if (expirationChartInstance) {
-                expirationChartInstance.destroy();
+            // Get the chart element and verify it exists
+            const chartElement = document.querySelector("#expirationChart");
+            if (!chartElement) {
+                console.error('Filtered expiration chart element #expirationChart not found in DOM');
+                return;
             }
-            expirationChartInstance = new ApexCharts(document.querySelector("#expirationChart"), options);
-            expirationChartInstance.render();
+            
+            // Verify ApexCharts is loaded
+            if (typeof ApexCharts === 'undefined') {
+                console.error('ApexCharts library not loaded');
+                return;
+            }
+            
+            try {
+                if (expirationChartInstance) {
+                    expirationChartInstance.destroy();
+                }
+                expirationChartInstance = new ApexCharts(chartElement, options);
+                expirationChartInstance.render();
+                console.log('Filtered expiration chart rendered successfully');
+            } catch (error) {
+                console.error('Error rendering filtered expiration chart:', error);
+            }
         }
 
         // Create regional chart from filtered data
@@ -1735,13 +1773,20 @@
                 }
             };
 
+            // Get the chart element and verify it exists
+            const chartElement = document.querySelector("#relationshipChart");
+            if (!chartElement) {
+                console.error('Filtered relationship chart element #relationshipChart not found in DOM');
+                return;
+            }
+            
+            // Verify ApexCharts is loaded
+            if (typeof ApexCharts === 'undefined') {
+                console.error('ApexCharts library not loaded');
+                return;
+            }
+            
             try {
-                const chartElement = document.querySelector("#relationshipChart");
-                if (!chartElement) {
-                    console.error('Relationship chart element not found');
-                    return;
-                }
-                
                 if (relationshipChartInstance) {
                     relationshipChartInstance.destroy();
                 }
@@ -1955,11 +2000,29 @@
                 }
             };
 
-            if (expirationChartInstance) {
-                expirationChartInstance.destroy();
+            // Get the chart element and verify it exists
+            const chartElement = document.querySelector("#expirationChart");
+            if (!chartElement) {
+                console.error('Expiration chart element #expirationChart not found in DOM');
+                return;
             }
-            expirationChartInstance = new ApexCharts(document.querySelector("#expirationChart"), options);
-            expirationChartInstance.render();
+            
+            // Verify ApexCharts is loaded
+            if (typeof ApexCharts === 'undefined') {
+                console.error('ApexCharts library not loaded');
+                return;
+            }
+            
+            try {
+                if (expirationChartInstance) {
+                    expirationChartInstance.destroy();
+                }
+                expirationChartInstance = new ApexCharts(chartElement, options);
+                expirationChartInstance.render();
+                console.log('Expiration chart rendered successfully');
+            } catch (error) {
+                console.error('Error rendering expiration chart:', error);
+            }
         }
 
         // Parse date in dd/mm/yyyy format
@@ -2311,13 +2374,20 @@
                 }
             };
 
+            // Get the chart element and verify it exists
+            const chartElement = document.querySelector("#relationshipChart");
+            if (!chartElement) {
+                console.error('Relationship chart element #relationshipChart not found in DOM');
+                return;
+            }
+            
+            // Verify ApexCharts is loaded
+            if (typeof ApexCharts === 'undefined') {
+                console.error('ApexCharts library not loaded');
+                return;
+            }
+            
             try {
-                const chartElement = document.querySelector("#relationshipChart");
-                if (!chartElement) {
-                    console.error('Relationship chart element not found');
-                    return;
-                }
-                
                 if (relationshipChartInstance) {
                     relationshipChartInstance.destroy();
                 }

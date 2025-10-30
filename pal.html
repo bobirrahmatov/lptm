@@ -44,8 +44,8 @@
             
             <!-- Search and Action Buttons -->
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div class="flex flex-1 items-center gap-4">
-                    <div class="flex-1 max-w-[512px]">
+                <div class="flex flex-1 items-center gap-4 flex-wrap">
+                    <div class="flex-1 max-w-[512px] min-w-[200px]">
                         <div class="relative">
                             <span class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2">
                                 <svg class="fill-gray-500" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -56,6 +56,19 @@
                                 class="shadow-sm h-[42px] w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pr-4 pl-[42px] text-sm text-gray-800 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none">
                         </div>
                     </div>
+                    
+                    <!-- Global Level Type Toggle -->
+                    <div class="inline-flex w-fit items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
+                        <button id="btnGlobalFacilityLevel" onclick="selectGlobalLevel('facility')" 
+                            class="px-3 py-2 font-medium transition-colors rounded-md text-sm shadow-sm text-gray-900 bg-white">
+                            Facility Level
+                        </button>
+                        <button id="btnGlobalCALevel" onclick="selectGlobalLevel('ca')" 
+                            class="px-3 py-2 font-medium transition-colors rounded-md text-sm text-gray-500 hover:text-gray-900">
+                            CA Level
+                        </button>
+                    </div>
+                    
                     <button onclick="toggleFilterPopover()" id="filterButton"
                         class="relative flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 transition-all duration-200 ease-in-out hover:scale-105">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -229,49 +242,30 @@
 
         <!-- Top 4 Metric Cards -->
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 xl:grid-cols-4 mb-6">
-            <!-- Card 1: Total Facility Amount -->
+            <!-- Card 1: Total Number of Relationships -->
             <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
                 <div class="mb-6 flex items-center gap-3">
                     <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100">
                         <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-medium text-gray-500">Total Facility Amount</h3>
+                        <h3 class="text-sm font-medium text-gray-500">Total Relationships</h3>
                     </div>
                 </div>
                 <div class="flex items-end justify-between">
                     <div>
-                        <h4 class="text-2xl font-bold text-gray-800" id="totalFacAmount">$0.00</h4>
+                        <h4 class="text-2xl font-bold text-gray-800" id="totalRelationships">0</h4>
                     </div>
                 </div>
             </div>
 
-            <!-- Card 2: Total Direct OS -->
+            <!-- Card 2: Total Number of Facilities -->
             <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
                 <div class="mb-6 flex items-center gap-3">
                     <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
                         <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-medium text-gray-500">Total Direct OS</h3>
-                    </div>
-                </div>
-                <div class="flex items-end justify-between">
-                    <div>
-                        <h4 class="text-2xl font-bold text-gray-800" id="totalDirectOS">$0.00</h4>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 3: Total Number of Facilities -->
-            <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
-                <div class="mb-6 flex items-center gap-3">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100">
-                        <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                         </svg>
                     </div>
@@ -286,21 +280,40 @@
                 </div>
             </div>
 
-            <!-- Card 4: Total Number of CAIDs -->
+            <!-- Card 3: Total Number of CAs -->
             <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
                 <div class="mb-6 flex items-center gap-3">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100">
-                        <svg class="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100">
+                        <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-medium text-gray-500">Total CAIDs</h3>
+                        <h3 class="text-sm font-medium text-gray-500">Total CAs</h3>
                     </div>
                 </div>
                 <div class="flex items-end justify-between">
                     <div>
-                        <h4 class="text-2xl font-bold text-gray-800" id="totalCAIDs">0</h4>
+                        <h4 class="text-2xl font-bold text-gray-800" id="totalCAs">0</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4: Total Facility Amount -->
+            <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
+                <div class="mb-6 flex items-center gap-3">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100">
+                        <svg class="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-500">Total Facility Amount</h3>
+                    </div>
+                </div>
+                <div class="flex items-end justify-between">
+                    <div>
+                        <h4 class="text-2xl font-bold text-gray-800" id="totalFacAmount">$0.00</h4>
                     </div>
                 </div>
             </div>
@@ -345,21 +358,10 @@
             <!-- Regional Distribution with Map -->
             <div class="col-span-12 xl:col-span-4">
                 <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6">
-                    <div class="flex flex-col gap-3 mb-4">
+                    <div class="flex justify-between">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800">Regional Distribution</h3>
                             <p class="mt-1 text-sm text-gray-500">Expiring soon by region</p>
-                        </div>
-                        <!-- Level Type Toggle -->
-                        <div class="inline-flex w-fit items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
-                            <button id="btnFacilityLevel" onclick="selectRegionalLevel('facility')" 
-                                class="px-3 py-2 font-medium transition-colors rounded-md text-sm shadow-sm text-gray-900 bg-white">
-                                Facility Level
-                            </button>
-                            <button id="btnCALevel" onclick="selectRegionalLevel('ca')" 
-                                class="px-3 py-2 font-medium transition-colors rounded-md text-sm text-gray-500 hover:text-gray-900">
-                                CA Level
-                            </button>
                         </div>
                     </div>
                     <div class="border-gray-200 my-6 overflow-hidden rounded-2xl border bg-gray-50 px-4 py-6 sm:px-6">
@@ -1111,21 +1113,36 @@
 
         // Calculate metrics from filtered data
         function calculateMetricsFromFiltered() {
+            // Total Facility Amount
             const totalFacAmount = filteredData.reduce((sum, row) => {
                 return sum + (parseFloat(row.Fac_Amount) || 0);
             }, 0);
             
-            const totalDirectOS = filteredData.reduce((sum, row) => {
-                return sum + (parseFloat(row.Direct_OS) || 0);
-            }, 0);
+            // Total Number of Relationships
+            const uniqueRelationships = new Set(
+                filteredData
+                    .map(row => row.Relationship_ID || row.Relationship_Name)
+                    .filter(Boolean)
+            ).size;
             
-            const uniqueFacilities = new Set(filteredData.map(row => row.Facility_ID)).size;
-            const uniqueCAIDs = new Set(filteredData.filter(row => row.CAID).map(row => row.CAID)).size;
+            // Total Number of Facilities
+            const uniqueFacilities = new Set(
+                filteredData
+                    .map(row => row.Facility_ID)
+                    .filter(Boolean)
+            ).size;
             
-            document.getElementById('totalFacAmount').textContent = formatCurrency(totalFacAmount);
-            document.getElementById('totalDirectOS').textContent = formatCurrency(totalDirectOS);
+            // Total Number of CAs
+            const uniqueCAs = new Set(
+                filteredData
+                    .map(row => row.CAID)
+                    .filter(Boolean)
+            ).size;
+            
+            document.getElementById('totalRelationships').textContent = uniqueRelationships.toLocaleString();
             document.getElementById('totalFacilities').textContent = uniqueFacilities.toLocaleString();
-            document.getElementById('totalCAIDs').textContent = uniqueCAIDs.toLocaleString();
+            document.getElementById('totalCAs').textContent = uniqueCAs.toLocaleString();
+            document.getElementById('totalFacAmount').textContent = formatCurrency(totalFacAmount);
         }
 
         // Create expiration chart from filtered data
@@ -1477,23 +1494,71 @@
             relationshipChartInstance.render();
         }
 
+        // Select global level (affects all charts)
+        function selectGlobalLevel(level) {
+            selectedRegionalLevel = level;
+            
+            // Update button styles
+            const btnGlobalFacilityLevel = document.getElementById('btnGlobalFacilityLevel');
+            const btnGlobalCALevel = document.getElementById('btnGlobalCALevel');
+            
+            if (level === 'facility') {
+                btnGlobalFacilityLevel.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm shadow-sm text-gray-900 bg-white';
+                btnGlobalCALevel.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm text-gray-500 hover:text-gray-900';
+            } else {
+                btnGlobalFacilityLevel.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm text-gray-500 hover:text-gray-900';
+                btnGlobalCALevel.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm shadow-sm text-gray-900 bg-white';
+            }
+            
+            // Update ALL charts based on the global level
+            if (Object.keys(activeFilters).length > 0) {
+                createExpirationChartFromFiltered();
+                createRegionalChartFromFiltered();
+            } else {
+                createExpirationChart();
+                createRegionalChart();
+            }
+        }
+
         // Calculate top metrics
         function calculateMetrics() {
+            // Total Facility Amount
             const totalFacAmount = portfolioData.reduce((sum, row) => {
                 return sum + (parseFloat(row.Fac_Amount) || 0);
             }, 0);
             
-            const totalDirectOS = portfolioData.reduce((sum, row) => {
-                return sum + (parseFloat(row.Direct_OS) || 0);
-            }, 0);
+            // Total Number of Relationships
+            const uniqueRelationships = new Set(
+                portfolioData
+                    .map(row => row.Relationship_ID || row.Relationship_Name)
+                    .filter(Boolean)
+            ).size;
             
-            const uniqueFacilities = new Set(portfolioData.map(row => row.Facility_ID)).size;
-            const uniqueCAIDs = new Set(portfolioData.filter(row => row.CAID).map(row => row.CAID)).size;
+            // Total Number of Facilities
+            const uniqueFacilities = new Set(
+                portfolioData
+                    .map(row => row.Facility_ID)
+                    .filter(Boolean)
+            ).size;
             
-            document.getElementById('totalFacAmount').textContent = formatCurrency(totalFacAmount);
-            document.getElementById('totalDirectOS').textContent = formatCurrency(totalDirectOS);
+            // Total Number of CAs
+            const uniqueCAs = new Set(
+                portfolioData
+                    .map(row => row.CAID)
+                    .filter(Boolean)
+            ).size;
+            
+            document.getElementById('totalRelationships').textContent = uniqueRelationships.toLocaleString();
             document.getElementById('totalFacilities').textContent = uniqueFacilities.toLocaleString();
-            document.getElementById('totalCAIDs').textContent = uniqueCAIDs.toLocaleString();
+            document.getElementById('totalCAs').textContent = uniqueCAs.toLocaleString();
+            document.getElementById('totalFacAmount').textContent = formatCurrency(totalFacAmount);
+            
+            console.log('Metrics calculated:', {
+                relationships: uniqueRelationships,
+                facilities: uniqueFacilities,
+                cas: uniqueCAs,
+                facAmount: totalFacAmount
+            });
         }
 
         // Format currency
@@ -1718,30 +1783,6 @@
             });
         }
         
-        // Select regional level type
-        function selectRegionalLevel(level) {
-            selectedRegionalLevel = level;
-            
-            // Update button styles
-            const btnFacilityLevel = document.getElementById('btnFacilityLevel');
-            const btnCALevel = document.getElementById('btnCALevel');
-            
-            if (level === 'facility') {
-                btnFacilityLevel.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm shadow-sm text-gray-900 bg-white';
-                btnCALevel.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm text-gray-500 hover:text-gray-900';
-            } else {
-                btnFacilityLevel.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm text-gray-500 hover:text-gray-900';
-                btnCALevel.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm shadow-sm text-gray-900 bg-white';
-            }
-            
-            // Update the regional chart
-            if (Object.keys(activeFilters).length > 0) {
-                createRegionalChartFromFiltered();
-            } else {
-                createRegionalChart();
-            }
-        }
-
         // Get region counts for facilities/CAIDs expiring soon
         function getRegionCounts() {
             const regionCounts = {};

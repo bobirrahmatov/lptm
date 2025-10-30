@@ -1384,11 +1384,11 @@
                 .slice(0, 5);
             
             const regionInfo = {
-                'NAM': { name: 'United States', color: 'bg-blue-500' },
-                'EMEA': { name: 'Luxembourg', color: 'bg-green-500' },
-                'APAC': { name: 'Malaysia', color: 'bg-orange-500' },
-                'LATAM': { name: 'Brazil', color: 'bg-purple-500' },
-                'MEA': { name: 'Middle East & Africa', color: 'bg-red-500' }
+                'NAM': { code: 'NAM', name: 'United States', color: 'bg-blue-500' },
+                'EMEA': { code: 'EMEA', name: 'Luxembourg', color: 'bg-green-500' },
+                'APAC': { code: 'APAC', name: 'Malaysia', color: 'bg-orange-500' },
+                'LATAM': { code: 'LATAM', name: 'Brazil', color: 'bg-purple-500' },
+                'MEA': { code: 'MEA', name: 'Middle East & Africa', color: 'bg-red-500' }
             };
             
             const regionList = document.getElementById('regionList');
@@ -1398,17 +1398,17 @@
             
             sortedRegions.forEach(([region, count]) => {
                 const percentage = totalCount > 0 ? ((count / totalCount) * 100).toFixed(0) : 0;
-                const info = regionInfo[region] || { name: region, color: 'bg-gray-500' };
+                const info = regionInfo[region] || { code: region, name: region, color: 'bg-gray-500' };
                 
                 const regionItem = document.createElement('div');
                 regionItem.className = 'flex items-center justify-between';
                 regionItem.innerHTML = `
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 flex items-center justify-center rounded-full ${info.color} text-white font-semibold text-xs">
-                            ${region}
+                            ${info.code}
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-800">${info.name}</p>
+                            <p class="text-sm font-semibold text-gray-800">${info.code}</p>
                             <span class="block text-xs text-gray-500">${count} ${countLabel}</span>
                         </div>
                     </div>
@@ -1440,11 +1440,11 @@
                 }
                 
                 const regionCoords = {
-                    'NAM': [37.0902, -95.7129], // United States
-                    'EMEA': [49.6116, 6.1319], // Luxembourg
-                    'APAC': [3.1390, 101.6869], // Malaysia (Kuala Lumpur)
-                    'LATAM': [-23.5505, -46.6333], // Brazil (São Paulo)
-                    'MEA': [25.2048, 55.2708] // Middle East (Dubai)
+                    'NAM': { coords: [37.0902, -95.7129], name: 'United States' },
+                    'EMEA': { coords: [49.6116, 6.1319], name: 'Luxembourg' },
+                    'APAC': { coords: [3.1390, 101.6869], name: 'Malaysia' },
+                    'LATAM': { coords: [-23.5505, -46.6333], name: 'Brazil' },
+                    'MEA': { coords: [25.2048, 55.2708], name: 'Middle East' }
                 };
                 
                 const regionCounts = getRegionCountsFromFiltered();
@@ -1455,8 +1455,8 @@
                 Object.keys(regionCounts).forEach(region => {
                     if (regionCoords[region]) {
                         markers.push({
-                            name: region,
-                            coords: regionCoords[region]
+                            name: regionCoords[region].name,
+                            coords: regionCoords[region].coords
                         });
                     }
                 });
@@ -1953,11 +1953,11 @@
                 
                 // Get region coordinates for markers
                 const regionCoords = {
-                    'NAM': [37.0902, -95.7129], // United States
-                    'EMEA': [49.6116, 6.1319], // Luxembourg
-                    'APAC': [3.1390, 101.6869], // Malaysia (Kuala Lumpur)
-                    'LATAM': [-23.5505, -46.6333], // Brazil (São Paulo)
-                    'MEA': [25.2048, 55.2708] // Middle East (Dubai)
+                    'NAM': { coords: [37.0902, -95.7129], name: 'United States' },
+                    'EMEA': { coords: [49.6116, 6.1319], name: 'Luxembourg' },
+                    'APAC': { coords: [3.1390, 101.6869], name: 'Malaysia' },
+                    'LATAM': { coords: [-23.5505, -46.6333], name: 'Brazil' },
+                    'MEA': { coords: [25.2048, 55.2708], name: 'Middle East' }
                 };
                 
                 const regionCounts = getRegionCounts();
@@ -1968,8 +1968,8 @@
                 Object.keys(regionCounts).forEach(region => {
                     if (regionCoords[region]) {
                         markers.push({
-                            name: region,
-                            coords: regionCoords[region]
+                            name: regionCoords[region].name,
+                            coords: regionCoords[region].coords
                         });
                     }
                 });
@@ -2082,11 +2082,11 @@
             
             // Region flag/icon mapping
             const regionInfo = {
-                'NAM': { name: 'United States', color: 'bg-blue-500' },
-                'EMEA': { name: 'Luxembourg', color: 'bg-green-500' },
-                'APAC': { name: 'Malaysia', color: 'bg-orange-500' },
-                'LATAM': { name: 'Brazil', color: 'bg-purple-500' },
-                'MEA': { name: 'Middle East & Africa', color: 'bg-red-500' }
+                'NAM': { code: 'NAM', name: 'United States', color: 'bg-blue-500' },
+                'EMEA': { code: 'EMEA', name: 'Luxembourg', color: 'bg-green-500' },
+                'APAC': { code: 'APAC', name: 'Malaysia', color: 'bg-orange-500' },
+                'LATAM': { code: 'LATAM', name: 'Brazil', color: 'bg-purple-500' },
+                'MEA': { code: 'MEA', name: 'Middle East & Africa', color: 'bg-red-500' }
             };
             
             const regionList = document.getElementById('regionList');
@@ -2096,17 +2096,17 @@
             
             sortedRegions.forEach(([region, count]) => {
                 const percentage = totalCount > 0 ? ((count / totalCount) * 100).toFixed(0) : 0;
-                const info = regionInfo[region] || { name: region, color: 'bg-gray-500' };
+                const info = regionInfo[region] || { code: region, name: region, color: 'bg-gray-500' };
                 
                 const regionItem = document.createElement('div');
                 regionItem.className = 'flex items-center justify-between';
                 regionItem.innerHTML = `
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 flex items-center justify-center rounded-full ${info.color} text-white font-semibold text-xs">
-                            ${region}
+                            ${info.code}
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-800">${info.name}</p>
+                            <p class="text-sm font-semibold text-gray-800">${info.code}</p>
                             <span class="block text-xs text-gray-500">${count} ${countLabel}</span>
                         </div>
                     </div>

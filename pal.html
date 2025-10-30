@@ -34,125 +34,196 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar -->
-        <aside class="hidden lg:flex lg:w-64 lg:flex-col">
-            <div class="relative flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6">
-                <div class="relative flex h-16 shrink-0 items-center">
-                    <img src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600" alt="Your Company" class="h-8 w-auto" />
-                </div>
-                <nav class="relative flex flex-1 flex-col">
-                    <ul role="list" class="flex flex-1 flex-col gap-y-7">
-                        <li>
-                            <ul role="list" class="-mx-2 space-y-1">
-                                <li>
-                                    <!-- Current: "bg-gray-50 text-indigo-600", Default: "text-gray-700 hover:text-indigo-600 hover:bg-gray-50" -->
-                                    <a href="#" class="group flex gap-x-3 rounded-md bg-gray-50 p-2 text-sm/6 font-semibold text-indigo-600">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-indigo-600">
-                                            <path d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" stroke-linecap="round" stroke-linejoin="round" />
-                                        </svg>
-                                        Dashboard
-                                        <span aria-hidden="true" class="ml-auto w-9 min-w-max rounded-full bg-white px-2.5 py-0.5 text-center text-xs/5 font-medium whitespace-nowrap text-gray-600 outline-1 -outline-offset-1 outline-gray-200">5</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-indigo-600">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
-                                            <path d="M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H6.911a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661Z" stroke-linecap="round" stroke-linejoin="round" />
-                                        </svg>
-                                        Portfolio Overview
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-indigo-600">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
-                                            <path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" stroke-linecap="round" stroke-linejoin="round" />
-                                        </svg>
-                                        Analytics
-                                        <span aria-hidden="true" class="ml-auto w-9 min-w-max rounded-full bg-white px-2.5 py-0.5 text-center text-xs/5 font-medium whitespace-nowrap text-gray-600 outline-1 -outline-offset-1 outline-gray-200">12</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-indigo-600">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
-                                            <path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" stroke-linecap="round" stroke-linejoin="round" />
-                                        </svg>
-                                        Calendar
-                                        <span aria-hidden="true" class="ml-auto w-9 min-w-max rounded-full bg-white px-2.5 py-0.5 text-center text-xs/5 font-medium whitespace-nowrap text-gray-600 outline-1 -outline-offset-1 outline-gray-200">20+</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-indigo-600">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
-                                            <path d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" stroke-linecap="round" stroke-linejoin="round" />
-                                        </svg>
-                                        Documents
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-indigo-600">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 shrink-0 text-gray-400 group-hover:text-indigo-600">
-                                            <path d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6Z" stroke-linecap="round" stroke-linejoin="round" />
-                                            <path d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z" stroke-linecap="round" stroke-linejoin="round" />
-                                        </svg>
-                                        Reports
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li>
-                            <div class="text-xs/6 font-semibold text-gray-400">Your teams</div>
-                            <ul role="list" class="-mx-2 mt-2 space-y-1">
-                                <li>
-                                    <!-- Current: "bg-gray-50 text-indigo-600", Default: "text-gray-700 hover:text-indigo-600 hover:bg-gray-50" -->
-                                    <a href="#" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-indigo-600">
-                                        <span class="flex size-6 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-[0.625rem] font-medium text-gray-400 group-hover:border-indigo-600 group-hover:text-indigo-600">L</span>
-                                        <span class="truncate">Lending Team</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-indigo-600">
-                                        <span class="flex size-6 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-[0.625rem] font-medium text-gray-400 group-hover:border-indigo-600 group-hover:text-indigo-600">R</span>
-                                        <span class="truncate">Risk Management</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" class="group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-indigo-600">
-                                        <span class="flex size-6 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-[0.625rem] font-medium text-gray-400 group-hover:border-indigo-600 group-hover:text-indigo-600">C</span>
-                                        <span class="truncate">Compliance</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="-mx-6 mt-auto">
-                            <a href="#" class="flex items-center gap-x-4 px-6 py-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-50">
-                                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" class="size-8 rounded-full bg-gray-50 outline -outline-offset-1 outline-black/5" />
-                                <span class="sr-only">Your profile</span>
-                                <span aria-hidden="true">Tom Cook</span>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="flex-1 overflow-y-auto">
-            <div class="p-4 md:p-6">
-                <!-- Page Header -->
+    <div class="p-4 md:p-6">
+        <!-- Page Header -->
         <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-800">Portfolio Analytics Lending</h1>
-                    <p class="mt-2 text-gray-600">Comprehensive lending portfolio analysis and metrics</p>
+            <div class="mb-4">
+                <h1 class="text-3xl font-bold text-gray-800">Portfolio Analytics Lending</h1>
+                <p class="mt-2 text-gray-600">Comprehensive lending portfolio analysis and metrics</p>
+            </div>
+            
+            <!-- Search and Action Buttons -->
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex flex-1 items-center gap-4">
+                    <div class="flex-1 max-w-[512px]">
+                        <div class="relative">
+                            <span class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2">
+                                <svg class="fill-gray-500" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M3.04199 9.37381C3.04199 5.87712 5.87735 3.04218 9.37533 3.04218C12.8733 3.04218 15.7087 5.87712 15.7087 9.37381C15.7087 12.8705 12.8733 15.7055 9.37533 15.7055C5.87735 15.7055 3.04199 12.8705 3.04199 9.37381ZM9.37533 1.54218C5.04926 1.54218 1.54199 5.04835 1.54199 9.37381C1.54199 13.6993 5.04926 17.2055 9.37533 17.2055C11.2676 17.2055 13.0032 16.5346 14.3572 15.4178L17.1773 18.2381C17.4702 18.531 17.945 18.5311 18.2379 18.2382C18.5308 17.9453 18.5309 17.4704 18.238 17.1775L15.4182 14.3575C16.5367 13.0035 17.2087 11.2671 17.2087 9.37381C17.2087 5.04835 13.7014 1.54218 9.37533 1.54218Z" fill=""></path>
+                                </svg>
+                            </span>
+                            <input type="text" id="searchInput" placeholder="Search portfolio..." 
+                                class="shadow-sm h-[42px] w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pr-4 pl-[42px] text-sm text-gray-800 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none">
+                        </div>
+                    </div>
+                    <button onclick="toggleFilterPopover()" id="filterButton"
+                        class="relative flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 transition-all duration-200 ease-in-out hover:scale-105">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                        </svg>
+                        <span class="hidden sm:inline">Filters</span>
+                        <span id="filterCount" class="hidden absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs font-semibold text-white"></span>
+                    </button>
+                    <button onclick="refreshData()" 
+                        class="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 transition-all duration-200 ease-in-out hover:scale-105">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        <span class="hidden sm:inline">Refresh</span>
+                    </button>
                 </div>
-                <button onclick="refreshData()" 
-                    class="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all duration-200 hover:scale-105">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    <span>Refresh Data</span>
-                </button>
+            </div>
+
+            <!-- Active Filters Badges -->
+            <div id="activeFiltersBadges" class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-200" style="display: none;">
+                <!-- Badges will be dynamically added here -->
+            </div>
+        </div>
+
+        <!-- Filter Popover -->
+        <div id="filterPopover" class="hidden fixed inset-0 z-[9999] overflow-y-auto">
+            <!-- Backdrop -->
+            <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onclick="toggleFilterPopover()"></div>
+            
+            <!-- Popover Content -->
+            <div class="flex min-h-full items-center justify-center p-4">
+                <div class="relative bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-800">Filter Portfolio</h3>
+                            <p class="text-sm text-gray-500 mt-1">Apply filters to refine your data</p>
+                        </div>
+                        <button onclick="toggleFilterPopover()" class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Filter Content -->
+                    <div class="overflow-y-auto max-h-[calc(90vh-180px)] px-6 py-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Region Filter -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Region</label>
+                                <select id="filterRegion"
+                                    class="w-full h-10 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none">
+                                    <option value="">All Regions</option>
+                                </select>
+                            </div>
+
+                            <!-- Product Type Filter -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Product Program</label>
+                                <select id="filterProductProgram"
+                                    class="w-full h-10 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none">
+                                    <option value="">All Products</option>
+                                </select>
+                            </div>
+
+                            <!-- Extending Unit Filter -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Extending Unit</label>
+                                <select id="filterExtendingUnit"
+                                    class="w-full h-10 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none">
+                                    <option value="">All Units</option>
+                                </select>
+                            </div>
+
+                            <!-- Facility Type Filter -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Facility Type</label>
+                                <select id="filterFacilityType"
+                                    class="w-full h-10 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none">
+                                    <option value="">All Types</option>
+                                </select>
+                            </div>
+
+                            <!-- Committed/Uncommitted Filter -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Commitment Status</label>
+                                <select id="filterCommitment"
+                                    class="w-full h-10 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none">
+                                    <option value="">All</option>
+                                </select>
+                            </div>
+
+                            <!-- Management Status Filter -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Management Status</label>
+                                <select id="filterManagementStatus"
+                                    class="w-full h-10 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none">
+                                    <option value="">All (DM/CM)</option>
+                                </select>
+                            </div>
+
+                            <!-- Team Lead Filter -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Team Lead</label>
+                                <select id="filterTeamLead"
+                                    class="w-full h-10 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none">
+                                    <option value="">All Team Leads</option>
+                                </select>
+                            </div>
+
+                            <!-- Underwriter Filter -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Underwriter</label>
+                                <select id="filterUnderwriter"
+                                    class="w-full h-10 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none">
+                                    <option value="">All Underwriters</option>
+                                </select>
+                            </div>
+
+                            <!-- CA Maturity Filter -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">CAs Maturing</label>
+                                <select id="filterCAMaturity"
+                                    class="w-full h-10 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none">
+                                    <option value="">All Dates</option>
+                                    <option value="30">Next 30 Days</option>
+                                    <option value="60">Next 60 Days</option>
+                                    <option value="90">Next 90 Days</option>
+                                    <option value="180">Next 6 Months</option>
+                                    <option value="365">Next Year</option>
+                                </select>
+                            </div>
+
+                            <!-- Facility Maturity Filter -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">Facilities Maturing</label>
+                                <select id="filterFacilityMaturity"
+                                    class="w-full h-10 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none">
+                                    <option value="">All Dates</option>
+                                    <option value="30">Next 30 Days</option>
+                                    <option value="60">Next 60 Days</option>
+                                    <option value="90">Next 90 Days</option>
+                                    <option value="180">Next 6 Months</option>
+                                    <option value="365">Next Year</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="flex items-center justify-between border-t border-gray-200 px-6 py-4">
+                        <button onclick="clearAllFilters()" 
+                            class="text-sm font-medium text-gray-600 hover:text-gray-800">
+                            Clear All
+                        </button>
+                        <div class="flex gap-3">
+                            <button onclick="toggleFilterPopover()" 
+                                class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900">
+                                Cancel
+                            </button>
+                            <button onclick="applyFiltersAndClose()" 
+                                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+                                Apply Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -274,10 +345,21 @@
             <!-- Regional Distribution with Map -->
             <div class="col-span-12 xl:col-span-4">
                 <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6">
-                    <div class="flex justify-between">
+                    <div class="flex flex-col gap-3 mb-4">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800">Regional Distribution</h3>
-                            <p class="mt-1 text-sm text-gray-500">Facilities expiring soon by region</p>
+                            <p class="mt-1 text-sm text-gray-500">Expiring soon by region</p>
+                        </div>
+                        <!-- Level Type Toggle -->
+                        <div class="inline-flex w-fit items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
+                            <button id="btnFacilityLevel" onclick="selectRegionalLevel('facility')" 
+                                class="px-3 py-2 font-medium transition-colors rounded-md text-sm shadow-sm text-gray-900 bg-white">
+                                Facility Level
+                            </button>
+                            <button id="btnCALevel" onclick="selectRegionalLevel('ca')" 
+                                class="px-3 py-2 font-medium transition-colors rounded-md text-sm text-gray-500 hover:text-gray-900">
+                                CA Level
+                            </button>
                         </div>
                     </div>
                     <div class="border-gray-200 my-6 overflow-hidden rounded-2xl border bg-gray-50 px-4 py-6 sm:px-6">
@@ -290,15 +372,27 @@
             </div>
         </div>
 
-        <!-- Bar Chart: Top Relationships by Total Facility Amount -->
+        <!-- Bar Chart: Top Relationships by Total Facility Amount / Direct OS -->
         <div class="mb-6">
             <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 sm:pt-5">
                 <div class="flex flex-col gap-5 mb-6 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-800">Top Relationships by Facility Amount</h3>
-                        <p class="mt-1 text-gray-500 text-sm">Total facility amount by relationship</p>
+                        <h3 class="text-lg font-semibold text-gray-800">Top Relationships by Amount</h3>
+                        <p class="mt-1 text-gray-500 text-sm">View by facility amount or direct outstanding</p>
                     </div>
-                    <div>
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                        <!-- Metric Type Toggle -->
+                        <div class="inline-flex w-fit items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
+                            <button id="btnFacilityAmount" onclick="selectMetricType('facilityAmount')" 
+                                class="px-3 py-2 font-medium transition-colors rounded-md text-sm shadow-sm text-gray-900 bg-white">
+                                Facility Amount
+                            </button>
+                            <button id="btnDirectOS" onclick="selectMetricType('directOS')" 
+                                class="px-3 py-2 font-medium transition-colors rounded-md text-sm text-gray-500 hover:text-gray-900">
+                                Direct OS
+                            </button>
+                        </div>
+                        <!-- Top N Selector -->
                         <select id="topNFilter" onchange="updateBarChart()" 
                             class="h-11 rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800">
                             <option value="5">Top 5</option>
@@ -322,16 +416,6 @@
                     <p class="text-sm text-gray-500">Detailed lending portfolio data</p>
                 </div>
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-center">
-                    <!-- Search -->
-                    <div class="relative">
-                        <input type="text" id="searchInput" placeholder="Search..." 
-                            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pl-10 text-sm text-gray-800 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none sm:w-64">
-                        <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2">
-                            <svg class="fill-gray-500" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                <path fill-rule="evenodd" clip-rule="evenodd" d="M3.04199 9.37381C3.04199 5.87712 5.87735 3.04218 9.37533 3.04218C12.8733 3.04218 15.7087 5.87712 15.7087 9.37381C15.7087 12.8705 12.8733 15.7055 9.37533 15.7055C5.87735 15.7055 3.04199 12.8705 3.04199 9.37381ZM9.37533 1.54218C5.04926 1.54218 1.54199 5.04835 1.54199 9.37381C1.54199 13.6993 5.04926 17.2055 9.37533 17.2055C11.2676 17.2055 13.0032 16.5346 14.3572 15.4178L17.1773 18.2381C17.4702 18.531 17.945 18.5311 18.2379 18.2382C18.5308 17.9453 18.5309 17.4704 18.238 17.1775L15.4182 14.3575C16.5367 13.0035 17.2087 11.2671 17.2087 9.37381C17.2087 5.04835 13.7014 1.54218 9.37533 1.54218Z" fill=""></path>
-                            </svg>
-                        </span>
-                    </div>
                     <!-- Export Button -->
                     <button onclick="exportToCSV()" 
                         class="flex h-11 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
@@ -385,17 +469,19 @@
                 </div>
             </div>
         </div>
-            </div>
-        </main>
     </div>
 
     <script>
-        // ===== CONFIGURATION =====
+        // ===== PORTFOLIO ANALYTICS CONFIGURATION =====
+        // This dashboard loads data from Confluence in READ-ONLY mode
+        // Similar to cmps.html, data is fetched from an attachment but never modified
+        // All filters and options are dynamically populated from the loaded data
+        
         // Update these values to match your Confluence page and attachment
         const CONFLUENCE_PAGE_ID = '2740868871'; // Your Confluence page ID
         const CONFLUENCE_FILE_NAME = 'palDashboard.csv'; // Your attachment filename (can be .csv, .xlsx, or .xls)
         const CONFLUENCE_BASE_URL = 'https://cedt-confluence.net/confluence';
-        // =======================
+        // ==========================================
 
         // Global variables
         let portfolioData = [];
@@ -404,10 +490,19 @@
         let rowsPerPage = 20;
         let expirationChartInstance = null;
         let relationshipChartInstance = null;
+        let activeFilters = {};
+        let selectedMetricType = 'facilityAmount'; // Default to Facility Amount
+        let selectedRegionalLevel = 'facility'; // Default to Facility Level (Facility ID count)
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
-            // Load data from CSV file
+            console.log('=== Portfolio Analytics Dashboard ===');
+            console.log('READ-ONLY mode - Loading data from Confluence');
+            console.log('Page ID:', CONFLUENCE_PAGE_ID);
+            console.log('File:', CONFLUENCE_FILE_NAME);
+            console.log('=====================================');
+            
+            // Load data from Confluence attachment
             loadDataFromCSV();
             
             // Setup search functionality
@@ -416,55 +511,72 @@
             });
         });
 
-        // Refresh data from Confluence
+        // Refresh data from Confluence (read-only, no write operations)
         async function refreshData() {
             showLoadingState();
             try {
+                console.log('Refreshing data from Confluence...');
                 const data = await fetchDataFromConfluence();
+                
                 if (data && data.length > 0) {
                     portfolioData = data;
+                    
+                    // Repopulate filter options with fresh data
+                    populateFilterOptions();
+                    
+                    // Recalculate all metrics and charts
                     calculateMetrics();
                     createExpirationChart();
                     createRegionalChart();
                     createRelationshipChart();
+                    
+                    // Reset filters and reload data
+                    activeFilters = {};
+                    displayFilterBadges();
+                    updateFilterCount();
                     filterData();
+                    
                     showNotification('Success', `Refreshed ${data.length} records successfully`, 'success');
                 } else {
+                    console.error('No data received from Confluence');
                     showNotification('Error', 'Failed to refresh data from Confluence', 'error');
                 }
             } catch (error) {
                 console.error('Error refreshing data:', error);
-                showNotification('Error', 'Failed to refresh data', 'error');
+                showNotification('Error', 'Failed to refresh data: ' + error.message, 'error');
             }
         }
 
-        // Load data from Confluence attachment
+        // Load data from Confluence attachment (read-only)
         async function loadDataFromCSV() {
             showLoadingState();
             try {
                 const data = await fetchDataFromConfluence();
                 if (data && data.length > 0) {
                     portfolioData = data;
+                    console.log(`Loaded ${data.length} records from Confluence`);
                     initializeDashboard();
                     showNotification('Success', `Loaded ${data.length} records successfully`, 'success');
                 } else {
                     console.warn('No data from Confluence, using sample data');
+                    showNotification('Warning', 'No data found in Confluence attachment', 'warning');
                     loadSampleData();
                 }
             } catch (error) {
-                console.error('Error loading data:', error);
-                showNotification('Warning', 'Using sample data', 'warning');
+                console.error('Error loading data from Confluence:', error);
+                showNotification('Warning', 'Failed to load from Confluence, using sample data', 'warning');
                 loadSampleData();
             }
         }
 
-        // Fetch data from Confluence attachment
+        // Fetch data from Confluence attachment (read-only, no updates)
         async function fetchDataFromConfluence() {
             try {
-                // Fetch the file from Confluence
+                // Construct Confluence API URL
                 const url = `${CONFLUENCE_BASE_URL}/download/attachments/${CONFLUENCE_PAGE_ID}/${CONFLUENCE_FILE_NAME}?api=v2`;
                 
-                console.log('Fetching data from:', url);
+                console.log('Fetching portfolio data from Confluence:', url);
+                console.log('File name:', CONFLUENCE_FILE_NAME);
                 
                 const response = await fetch(url, {
                     headers: {
@@ -473,27 +585,31 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Failed to fetch ${CONFLUENCE_FILE_NAME} file: ${response.status} ${response.statusText}`);
+                    throw new Error(`Failed to fetch ${CONFLUENCE_FILE_NAME}: ${response.status} ${response.statusText}`);
                 }
 
+                console.log('Successfully fetched file from Confluence');
                 const blob = await response.blob();
+                console.log('Blob size:', blob.size, 'bytes');
                 
-                // Check if it's a CSV or Excel file
+                // Parse based on file type
                 if (CONFLUENCE_FILE_NAME.endsWith('.csv')) {
+                    console.log('Parsing CSV file...');
                     return await parseCSVBlob(blob);
                 } else if (CONFLUENCE_FILE_NAME.endsWith('.xlsx') || CONFLUENCE_FILE_NAME.endsWith('.xls')) {
+                    console.log('Parsing Excel file...');
                     return await parseExcelBlob(blob);
                 }
                 
                 throw new Error('Unsupported file format. Please use .csv, .xlsx, or .xls files.');
 
             } catch (error) {
-                console.error('Error fetching data from Confluence:', error);
+                console.error('Error fetching data from Confluence:', error.message);
                 return null;
             }
         }
 
-        // Parse CSV blob
+        // Parse CSV blob (read-only)
         async function parseCSVBlob(blob) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -503,6 +619,8 @@
                         const lines = text.split('\n');
                         const headers = lines[0].split(',').map(h => h.trim());
                         
+                        console.log('CSV Headers:', headers);
+                        
                         const data = [];
                         for (let i = 1; i < lines.length; i++) {
                             if (lines[i].trim()) {
@@ -511,22 +629,29 @@
                                 headers.forEach((header, index) => {
                                     row[header] = values[index] ? values[index].trim() : '';
                                 });
-                                if (row.Facility_ID) { // Only add rows with Facility_ID
+                                // Only add rows with Facility_ID
+                                if (row.Facility_ID) {
                                     data.push(row);
                                 }
                             }
                         }
+                        
+                        console.log(`Parsed ${data.length} records from CSV`);
                         resolve(data);
                     } catch (error) {
+                        console.error('Error parsing CSV:', error);
                         reject(error);
                     }
                 };
-                reader.onerror = () => reject(new Error('Failed to read CSV file'));
+                reader.onerror = () => {
+                    console.error('FileReader error while reading CSV');
+                    reject(new Error('Failed to read CSV file'));
+                };
                 reader.readAsText(blob);
             });
         }
 
-        // Parse Excel blob
+        // Parse Excel blob (read-only)
         async function parseExcelBlob(blob) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -535,16 +660,33 @@
                         const data = new Uint8Array(e.target.result);
                         const workbook = XLSX.read(data, { type: 'array' });
                         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        
+                        console.log('Excel Sheet Name:', workbook.SheetNames[0]);
+                        
                         const jsonData = XLSX.utils.sheet_to_json(firstSheet);
                         
-                        // Filter out empty rows
+                        console.log(`Total rows in Excel: ${jsonData.length}`);
+                        
+                        // Filter out empty rows (rows without Facility_ID)
                         const filteredData = jsonData.filter(row => row.Facility_ID);
+                        
+                        console.log(`Parsed ${filteredData.length} valid records from Excel`);
+                        
+                        // Log sample data structure for debugging
+                        if (filteredData.length > 0) {
+                            console.log('Sample record fields:', Object.keys(filteredData[0]));
+                        }
+                        
                         resolve(filteredData);
                     } catch (error) {
+                        console.error('Error parsing Excel:', error);
                         reject(error);
                     }
                 };
-                reader.onerror = () => reject(new Error('Failed to read Excel file'));
+                reader.onerror = () => {
+                    console.error('FileReader error while reading Excel file');
+                    reject(new Error('Failed to read Excel file'));
+                };
                 reader.readAsArrayBuffer(blob);
             });
         }
@@ -642,11 +784,697 @@
 
         // Initialize dashboard with data
         function initializeDashboard() {
+            populateFilterOptions();
             calculateMetrics();
             createExpirationChart();
             createRegionalChart();
             createRelationshipChart();
             filterData();
+        }
+
+        // Populate filter dropdowns with unique values from Confluence data (read-only)
+        function populateFilterOptions() {
+            if (!portfolioData || portfolioData.length === 0) {
+                console.warn('No portfolio data available to populate filters');
+                return;
+            }
+
+            console.log('Populating filter options from', portfolioData.length, 'records');
+            
+            // Region
+            const regions = [...new Set(portfolioData.map(row => row.Region).filter(Boolean))].sort();
+            populateSelect('filterRegion', regions);
+            console.log('Regions:', regions.length, 'options');
+            
+            // Product Program
+            const products = [...new Set(portfolioData.map(row => row.Product_Program).filter(Boolean))].sort();
+            populateSelect('filterProductProgram', products);
+            console.log('Product Programs:', products.length, 'options');
+            
+            // Extending Unit (Control_Unit)
+            const units = [...new Set(portfolioData.map(row => row.Control_Unit).filter(Boolean))].sort();
+            populateSelect('filterExtendingUnit', units);
+            console.log('Extending Units:', units.length, 'options');
+            
+            // Facility Type
+            const facilityTypes = [...new Set(portfolioData.map(row => row.Facility_Type).filter(Boolean))].sort();
+            populateSelect('filterFacilityType', facilityTypes);
+            console.log('Facility Types:', facilityTypes.length, 'options');
+            
+            // Committed/Uncommitted
+            const commitments = [...new Set(portfolioData.map(row => row['Committed/Uncommitted']).filter(Boolean))].sort();
+            populateSelect('filterCommitment', commitments);
+            console.log('Commitment Status:', commitments.length, 'options');
+            
+            // Management Status (DM/CM)
+            const statuses = [...new Set(portfolioData.map(row => row.Management_Status).filter(Boolean))].sort();
+            populateSelect('filterManagementStatus', statuses);
+            console.log('Management Status:', statuses.length, 'options');
+            
+            // Team Lead (Underwriter_Team_Lead)
+            const teamLeads = [...new Set(portfolioData.map(row => row.Underwriting_Team_Lead).filter(Boolean))].sort();
+            populateSelect('filterTeamLead', teamLeads);
+            console.log('Team Leads:', teamLeads.length, 'options');
+            
+            // Underwriter (Lead_Underwriter)
+            const underwriters = [...new Set(portfolioData.map(row => row.Lead_Underwriter).filter(Boolean))].sort();
+            populateSelect('filterUnderwriter', underwriters);
+            console.log('Underwriters:', underwriters.length, 'options');
+        }
+
+        // Helper to populate a select element
+        function populateSelect(selectId, options) {
+            const select = document.getElementById(selectId);
+            const currentValue = select.value;
+            
+            // Keep the first option (All...)
+            while (select.options.length > 1) {
+                select.remove(1);
+            }
+            
+            options.forEach(option => {
+                const opt = document.createElement('option');
+                opt.value = option;
+                opt.textContent = option;
+                select.appendChild(opt);
+            });
+            
+            // Restore previous value if it still exists
+            if (currentValue && options.includes(currentValue)) {
+                select.value = currentValue;
+            }
+        }
+
+        // Apply all filters
+        function applyFilters() {
+            const filters = {
+                region: document.getElementById('filterRegion').value,
+                productProgram: document.getElementById('filterProductProgram').value,
+                extendingUnit: document.getElementById('filterExtendingUnit').value,
+                facilityType: document.getElementById('filterFacilityType').value,
+                commitment: document.getElementById('filterCommitment').value,
+                managementStatus: document.getElementById('filterManagementStatus').value,
+                teamLead: document.getElementById('filterTeamLead').value,
+                underwriter: document.getElementById('filterUnderwriter').value,
+                caMaturity: document.getElementById('filterCAMaturity').value,
+                facilityMaturity: document.getElementById('filterFacilityMaturity').value
+            };
+            
+            // Update active filters object
+            activeFilters = {};
+            if (filters.region) activeFilters['Region'] = filters.region;
+            if (filters.productProgram) activeFilters['Product Program'] = filters.productProgram;
+            if (filters.extendingUnit) activeFilters['Extending Unit'] = filters.extendingUnit;
+            if (filters.facilityType) activeFilters['Facility Type'] = filters.facilityType;
+            if (filters.commitment) activeFilters['Commitment Status'] = filters.commitment;
+            if (filters.managementStatus) activeFilters['Management Status'] = filters.managementStatus;
+            if (filters.teamLead) activeFilters['Team Lead'] = filters.teamLead;
+            if (filters.underwriter) activeFilters['Underwriter'] = filters.underwriter;
+            if (filters.caMaturity) {
+                const days = filters.caMaturity;
+                activeFilters['CAs Maturing'] = days === '30' ? 'Next 30 Days' :
+                                               days === '60' ? 'Next 60 Days' :
+                                               days === '90' ? 'Next 90 Days' :
+                                               days === '180' ? 'Next 6 Months' : 'Next Year';
+            }
+            if (filters.facilityMaturity) {
+                const days = filters.facilityMaturity;
+                activeFilters['Facilities Maturing'] = days === '30' ? 'Next 30 Days' :
+                                                       days === '60' ? 'Next 60 Days' :
+                                                       days === '90' ? 'Next 90 Days' :
+                                                       days === '180' ? 'Next 6 Months' : 'Next Year';
+            }
+            
+            // Display filter badges and update count
+            displayFilterBadges();
+            updateFilterCount();
+            
+            // Filter the data
+            filteredData = portfolioData.filter(row => {
+                // Region filter
+                if (filters.region && row.Region !== filters.region) return false;
+                
+                // Product Program filter
+                if (filters.productProgram && row.Product_Program !== filters.productProgram) return false;
+                
+                // Extending Unit filter
+                if (filters.extendingUnit && row.Control_Unit !== filters.extendingUnit) return false;
+                
+                // Facility Type filter
+                if (filters.facilityType && row.Facility_Type !== filters.facilityType) return false;
+                
+                // Commitment filter
+                if (filters.commitment && row['Committed/Uncommitted'] !== filters.commitment) return false;
+                
+                // Management Status filter
+                if (filters.managementStatus && row.Management_Status !== filters.managementStatus) return false;
+                
+                // Team Lead filter
+                if (filters.teamLead && row.Underwriting_Team_Lead !== filters.teamLead) return false;
+                
+                // Underwriter filter
+                if (filters.underwriter && row.Lead_Underwriter !== filters.underwriter) return false;
+                
+                // CA Maturity filter (date range)
+                if (filters.caMaturity) {
+                    const caDate = new Date(row.CA_Expiration_Date);
+                    const today = new Date();
+                    const futureDate = new Date(today.getTime() + parseInt(filters.caMaturity) * 24 * 60 * 60 * 1000);
+                    if (caDate < today || caDate > futureDate) return false;
+                }
+                
+                // Facility Maturity filter (date range)
+                if (filters.facilityMaturity) {
+                    const maturityDate = new Date(row.Maturity_Date);
+                    const today = new Date();
+                    const futureDate = new Date(today.getTime() + parseInt(filters.facilityMaturity) * 24 * 60 * 60 * 1000);
+                    if (maturityDate < today || maturityDate > futureDate) return false;
+                }
+                
+                return true;
+            });
+            
+            // Apply search filter if there is one
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            if (searchTerm) {
+                filteredData = filteredData.filter(row => {
+                    return Object.values(row).some(value => 
+                        String(value).toLowerCase().includes(searchTerm)
+                    );
+                });
+            }
+            
+            // Recalculate metrics and charts with filtered data
+            calculateMetricsFromFiltered();
+            createExpirationChartFromFiltered();
+            createRegionalChartFromFiltered();
+            createRelationshipChartFromFiltered();
+            
+            // Reset to first page and render table
+            currentPage = 1;
+            renderTable();
+        }
+
+        // Display filter badges
+        function displayFilterBadges() {
+            const badgesContainer = document.getElementById('activeFiltersBadges');
+            badgesContainer.innerHTML = '';
+            
+            if (Object.keys(activeFilters).length === 0) {
+                badgesContainer.style.display = 'none';
+                return;
+            }
+            
+            badgesContainer.style.display = 'flex';
+            
+            Object.entries(activeFilters).forEach(([label, value]) => {
+                const badge = document.createElement('span');
+                badge.className = 'inline-flex items-center bg-white text-sm text-gray-600 border border-gray-300 rounded-lg gap-x-2 py-1.5 pl-3 pr-1';
+                badge.innerHTML = `
+                    <span class="text-gray-600">${label}</span>
+                    <span class="h-4 w-px bg-gray-300"></span>
+                    <span class="font-medium text-gray-800">${value}</span>
+                    <button type="button" onclick="removeFilter('${label}')" 
+                        class="flex h-5 w-5 items-center justify-center rounded text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                        aria-label="Remove">
+                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                `;
+                badgesContainer.appendChild(badge);
+            });
+        }
+
+        // Remove a specific filter
+        function removeFilter(label) {
+            const filterMap = {
+                'Region': 'filterRegion',
+                'Product Program': 'filterProductProgram',
+                'Extending Unit': 'filterExtendingUnit',
+                'Facility Type': 'filterFacilityType',
+                'Commitment Status': 'filterCommitment',
+                'Management Status': 'filterManagementStatus',
+                'Team Lead': 'filterTeamLead',
+                'Underwriter': 'filterUnderwriter',
+                'CAs Maturing': 'filterCAMaturity',
+                'Facilities Maturing': 'filterFacilityMaturity'
+            };
+            
+            const selectId = filterMap[label];
+            if (selectId) {
+                document.getElementById(selectId).value = '';
+                applyFilters();
+            }
+        }
+
+        // Clear all filters
+        function clearAllFilters() {
+            document.getElementById('filterRegion').value = '';
+            document.getElementById('filterProductProgram').value = '';
+            document.getElementById('filterExtendingUnit').value = '';
+            document.getElementById('filterFacilityType').value = '';
+            document.getElementById('filterCommitment').value = '';
+            document.getElementById('filterManagementStatus').value = '';
+            document.getElementById('filterTeamLead').value = '';
+            document.getElementById('filterUnderwriter').value = '';
+            document.getElementById('filterCAMaturity').value = '';
+            document.getElementById('filterFacilityMaturity').value = '';
+            
+            activeFilters = {};
+            applyFilters();
+            updateFilterCount();
+        }
+
+        // Store temporary filter state when opening popover
+        let tempFilterState = {};
+
+        // Toggle filter popover
+        function toggleFilterPopover() {
+            const popover = document.getElementById('filterPopover');
+            if (popover.classList.contains('hidden')) {
+                // Opening popover - save current filter state
+                tempFilterState = {
+                    region: document.getElementById('filterRegion').value,
+                    productProgram: document.getElementById('filterProductProgram').value,
+                    extendingUnit: document.getElementById('filterExtendingUnit').value,
+                    facilityType: document.getElementById('filterFacilityType').value,
+                    commitment: document.getElementById('filterCommitment').value,
+                    managementStatus: document.getElementById('filterManagementStatus').value,
+                    teamLead: document.getElementById('filterTeamLead').value,
+                    underwriter: document.getElementById('filterUnderwriter').value,
+                    caMaturity: document.getElementById('filterCAMaturity').value,
+                    facilityMaturity: document.getElementById('filterFacilityMaturity').value
+                };
+                
+                popover.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            } else {
+                // Closing popover - restore previous filter state (cancel changes)
+                document.getElementById('filterRegion').value = tempFilterState.region || '';
+                document.getElementById('filterProductProgram').value = tempFilterState.productProgram || '';
+                document.getElementById('filterExtendingUnit').value = tempFilterState.extendingUnit || '';
+                document.getElementById('filterFacilityType').value = tempFilterState.facilityType || '';
+                document.getElementById('filterCommitment').value = tempFilterState.commitment || '';
+                document.getElementById('filterManagementStatus').value = tempFilterState.managementStatus || '';
+                document.getElementById('filterTeamLead').value = tempFilterState.teamLead || '';
+                document.getElementById('filterUnderwriter').value = tempFilterState.underwriter || '';
+                document.getElementById('filterCAMaturity').value = tempFilterState.caMaturity || '';
+                document.getElementById('filterFacilityMaturity').value = tempFilterState.facilityMaturity || '';
+                
+                popover.classList.add('hidden');
+                document.body.style.overflow = ''; // Restore scrolling
+            }
+        }
+
+        // Apply filters and close popover
+        function applyFiltersAndClose() {
+            applyFilters();
+            // Close popover without restoring state (we're applying changes)
+            const popover = document.getElementById('filterPopover');
+            popover.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        // Update filter count badge
+        function updateFilterCount() {
+            const count = Object.keys(activeFilters).length;
+            const badge = document.getElementById('filterCount');
+            
+            if (count > 0) {
+                badge.textContent = count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        // Calculate metrics from filtered data
+        function calculateMetricsFromFiltered() {
+            const totalFacAmount = filteredData.reduce((sum, row) => {
+                return sum + (parseFloat(row.Fac_Amount) || 0);
+            }, 0);
+            
+            const totalDirectOS = filteredData.reduce((sum, row) => {
+                return sum + (parseFloat(row.Direct_OS) || 0);
+            }, 0);
+            
+            const uniqueFacilities = new Set(filteredData.map(row => row.Facility_ID)).size;
+            const uniqueCAIDs = new Set(filteredData.filter(row => row.CAID).map(row => row.CAID)).size;
+            
+            document.getElementById('totalFacAmount').textContent = formatCurrency(totalFacAmount);
+            document.getElementById('totalDirectOS').textContent = formatCurrency(totalDirectOS);
+            document.getElementById('totalFacilities').textContent = uniqueFacilities.toLocaleString();
+            document.getElementById('totalCAIDs').textContent = uniqueCAIDs.toLocaleString();
+        }
+
+        // Create expiration chart from filtered data
+        function createExpirationChartFromFiltered() {
+            const facilityData = aggregateByMonthYear(filteredData, 'Maturity_Date');
+            const caidData = aggregateByMonthYear(filteredData.filter(r => r.CA_Expiration_Date), 'CA_Expiration_Date');
+            
+            const allMonths = [...new Set([...facilityData.map(d => d.month), ...caidData.map(d => d.month)])].sort();
+            
+            const facilitySeries = allMonths.map(month => {
+                const item = facilityData.find(d => d.month === month);
+                return item ? item.count : 0;
+            });
+            
+            const caidSeries = allMonths.map(month => {
+                const item = caidData.find(d => d.month === month);
+                return item ? item.count : 0;
+            });
+            
+            const totalExpiring = facilitySeries.reduce((a, b) => a + b, 0) + caidSeries.reduce((a, b) => a + b, 0);
+            document.getElementById('totalExpiring').textContent = totalExpiring.toLocaleString();
+            
+            const options = {
+                series: [
+                    {
+                        name: 'Facilities',
+                        data: facilitySeries
+                    },
+                    {
+                        name: 'CAIDs',
+                        data: caidSeries
+                    }
+                ],
+                legend: {
+                    show: false,
+                    position: 'top',
+                    horizontalAlign: 'left'
+                },
+                colors: ['#465FFF', '#9CB9FF'],
+                chart: {
+                    fontFamily: 'system-ui, -apple-system, sans-serif',
+                    height: 310,
+                    type: 'area',
+                    toolbar: {
+                        show: false
+                    }
+                },
+                fill: {
+                    gradient: {
+                        enabled: true,
+                        opacityFrom: 0.55,
+                        opacityTo: 0
+                    }
+                },
+                stroke: {
+                    curve: 'smooth',
+                    width: [2, 2]
+                },
+                markers: {
+                    size: 0
+                },
+                labels: {
+                    show: false,
+                    position: 'top'
+                },
+                grid: {
+                    xaxis: {
+                        lines: {
+                            show: false
+                        }
+                    },
+                    yaxis: {
+                        lines: {
+                            show: true
+                        }
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                tooltip: {
+                    x: {
+                        formatter: function(value, { dataPointIndex }) {
+                            const monthStr = allMonths[dataPointIndex];
+                            if (monthStr) {
+                                const date = new Date(monthStr + '-01');
+                                return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                            }
+                            return value;
+                        }
+                    }
+                },
+                xaxis: {
+                    type: 'category',
+                    categories: allMonths.map(m => {
+                        const date = new Date(m + '-01');
+                        return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                    }),
+                    axisBorder: {
+                        show: false
+                    },
+                    axisTicks: {
+                        show: false
+                    }
+                },
+                yaxis: {
+                    title: {
+                        style: {
+                            fontSize: '0px'
+                        }
+                    }
+                }
+            };
+
+            if (expirationChartInstance) {
+                expirationChartInstance.destroy();
+            }
+            expirationChartInstance = new ApexCharts(document.querySelector("#expirationChart"), options);
+            expirationChartInstance.render();
+        }
+
+        // Create regional chart from filtered data
+        function createRegionalChartFromFiltered() {
+            initializeMapFromFiltered();
+            
+            const regionCounts = getRegionCountsFromFiltered();
+            const totalCount = Object.values(regionCounts).reduce((a, b) => a + b, 0);
+            
+            const sortedRegions = Object.entries(regionCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+            
+            const regionInfo = {
+                'NAM': { name: 'North America', color: 'bg-blue-500' },
+                'EMEA': { name: 'Europe & Middle East', color: 'bg-green-500' },
+                'APAC': { name: 'Asia Pacific', color: 'bg-orange-500' },
+                'LATAM': { name: 'Latin America', color: 'bg-purple-500' },
+                'MEA': { name: 'Middle East & Africa', color: 'bg-red-500' }
+            };
+            
+            const regionList = document.getElementById('regionList');
+            regionList.innerHTML = '';
+            
+            const countLabel = selectedRegionalLevel === 'facility' ? 'Facilities' : 'CAIDs';
+            
+            sortedRegions.forEach(([region, count]) => {
+                const percentage = totalCount > 0 ? ((count / totalCount) * 100).toFixed(0) : 0;
+                const info = regionInfo[region] || { name: region, color: 'bg-gray-500' };
+                
+                const regionItem = document.createElement('div');
+                regionItem.className = 'flex items-center justify-between';
+                regionItem.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full ${info.color} text-white font-semibold text-xs">
+                            ${region}
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">${info.name}</p>
+                            <span class="block text-xs text-gray-500">${count} ${countLabel}</span>
+                        </div>
+                    </div>
+                    <div class="flex w-full max-w-[140px] items-center gap-3">
+                        <div class="relative block h-2 w-full max-w-[100px] rounded-sm bg-gray-200">
+                            <div class="absolute left-0 top-0 flex h-full items-center justify-center rounded-sm bg-blue-500 text-xs font-medium text-white"
+                                style="width: ${percentage}%"></div>
+                        </div>
+                        <p class="text-sm font-medium text-gray-800">${percentage}%</p>
+                    </div>
+                `;
+                regionList.appendChild(regionItem);
+            });
+        }
+
+        // Initialize map from filtered data
+        function initializeMapFromFiltered() {
+            const regionCoords = {
+                'NAM': [37.0902, -95.7129],
+                'EMEA': [51.5074, -0.1278],
+                'APAC': [35.6762, 139.6503],
+                'LATAM': [-23.5505, -46.6333],
+                'MEA': [25.2048, 55.2708]
+            };
+            
+            const regionCounts = getRegionCountsFromFiltered();
+            const markers = [];
+            
+            Object.keys(regionCounts).forEach(region => {
+                if (regionCoords[region]) {
+                    markers.push({
+                        name: region,
+                        coords: regionCoords[region]
+                    });
+                }
+            });
+            
+            const mapElement = document.getElementById('mapOne');
+            mapElement.innerHTML = '';
+            
+            const map = new jsVectorMap({
+                selector: '#mapOne',
+                map: 'world',
+                zoomButtons: false,
+                regionStyle: {
+                    initial: {
+                        fill: '#D9D9D9'
+                    },
+                    hover: {
+                        fillOpacity: 1,
+                        fill: '#465fff'
+                    }
+                },
+                markers: markers,
+                markerStyle: {
+                    initial: {
+                        strokeWidth: 1,
+                        fill: '#465fff',
+                        fillOpacity: 1,
+                        r: 4
+                    },
+                    hover: {
+                        fill: '#465fff',
+                        fillOpacity: 1
+                    }
+                }
+            });
+        }
+
+        // Get region counts from filtered data
+        function getRegionCountsFromFiltered() {
+            const regionCounts = {};
+            const today = new Date();
+            const threeMonthsLater = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000);
+            
+            if (selectedRegionalLevel === 'facility') {
+                // Count unique Facility IDs
+                const regionFacilities = {};
+                filteredData.forEach(row => {
+                    const maturityDate = new Date(row.Maturity_Date);
+                    if (maturityDate <= threeMonthsLater && maturityDate >= today) {
+                        const region = row.Region || 'Unknown';
+                        const facilityId = row.Facility_ID;
+                        
+                        if (!regionFacilities[region]) {
+                            regionFacilities[region] = new Set();
+                        }
+                        if (facilityId) {
+                            regionFacilities[region].add(facilityId);
+                        }
+                    }
+                });
+                
+                // Convert Set sizes to counts
+                Object.keys(regionFacilities).forEach(region => {
+                    regionCounts[region] = regionFacilities[region].size;
+                });
+            } else {
+                // Count unique CAIDs
+                const regionCAIDs = {};
+                filteredData.forEach(row => {
+                    const caExpDate = new Date(row.CA_Expiration_Date);
+                    if (caExpDate <= threeMonthsLater && caExpDate >= today) {
+                        const region = row.Region || 'Unknown';
+                        const caid = row.CAID;
+                        
+                        if (!regionCAIDs[region]) {
+                            regionCAIDs[region] = new Set();
+                        }
+                        if (caid) {
+                            regionCAIDs[region].add(caid);
+                        }
+                    }
+                });
+                
+                // Convert Set sizes to counts
+                Object.keys(regionCAIDs).forEach(region => {
+                    regionCounts[region] = regionCAIDs[region].size;
+                });
+            }
+            
+            return regionCounts;
+        }
+
+        // Create relationship chart from filtered data
+        function createRelationshipChartFromFiltered() {
+            const topN = parseInt(document.getElementById('topNFilter').value);
+            
+            // Determine which field to aggregate based on selected metric
+            const fieldName = selectedMetricType === 'facilityAmount' ? 'Fac_Amount' : 'Direct_OS';
+            const seriesName = selectedMetricType === 'facilityAmount' ? 'Total Facility Amount' : 'Total Direct OS';
+            
+            const relationshipTotals = {};
+            filteredData.forEach(row => {
+                const relId = row.Relationship_Name || row.Relationship_ID || 'Unknown';
+                const amount = parseFloat(row[fieldName]) || 0;
+                relationshipTotals[relId] = (relationshipTotals[relId] || 0) + amount;
+            });
+            
+            const sorted = Object.entries(relationshipTotals)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, topN);
+            
+            const relationships = sorted.map(item => item[0]);
+            const amounts = sorted.map(item => item[1]);
+            
+            const options = {
+                series: [{
+                    name: seriesName,
+                    data: amounts
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 400,
+                    toolbar: { show: true }
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: true,
+                        borderRadius: 4
+                    }
+                },
+                colors: ['#3B82F6'],
+                xaxis: {
+                    categories: relationships,
+                    labels: {
+                        formatter: function(val) {
+                            return formatCurrency(val);
+                        }
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                grid: {
+                    borderColor: '#E5E7EB'
+                },
+                tooltip: {
+                    y: {
+                        formatter: function(val) {
+                            return formatCurrency(val);
+                        }
+                    }
+                }
+            };
+
+            if (relationshipChartInstance) {
+                relationshipChartInstance.destroy();
+            }
+            relationshipChartInstance = new ApexCharts(document.querySelector("#relationshipChart"), options);
+            relationshipChartInstance.render();
         }
 
         // Calculate top metrics
@@ -890,19 +1718,81 @@
             });
         }
         
-        // Get region counts for facilities expiring soon
+        // Select regional level type
+        function selectRegionalLevel(level) {
+            selectedRegionalLevel = level;
+            
+            // Update button styles
+            const btnFacilityLevel = document.getElementById('btnFacilityLevel');
+            const btnCALevel = document.getElementById('btnCALevel');
+            
+            if (level === 'facility') {
+                btnFacilityLevel.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm shadow-sm text-gray-900 bg-white';
+                btnCALevel.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm text-gray-500 hover:text-gray-900';
+            } else {
+                btnFacilityLevel.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm text-gray-500 hover:text-gray-900';
+                btnCALevel.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm shadow-sm text-gray-900 bg-white';
+            }
+            
+            // Update the regional chart
+            if (Object.keys(activeFilters).length > 0) {
+                createRegionalChartFromFiltered();
+            } else {
+                createRegionalChart();
+            }
+        }
+
+        // Get region counts for facilities/CAIDs expiring soon
         function getRegionCounts() {
             const regionCounts = {};
             const today = new Date();
             const threeMonthsLater = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000);
             
-            portfolioData.forEach(row => {
-                const maturityDate = new Date(row.Maturity_Date);
-                if (maturityDate <= threeMonthsLater && maturityDate >= today) {
-                    const region = row.Region || 'Unknown';
-                    regionCounts[region] = (regionCounts[region] || 0) + 1;
-                }
-            });
+            if (selectedRegionalLevel === 'facility') {
+                // Count unique Facility IDs
+                const regionFacilities = {};
+                portfolioData.forEach(row => {
+                    const maturityDate = new Date(row.Maturity_Date);
+                    if (maturityDate <= threeMonthsLater && maturityDate >= today) {
+                        const region = row.Region || 'Unknown';
+                        const facilityId = row.Facility_ID;
+                        
+                        if (!regionFacilities[region]) {
+                            regionFacilities[region] = new Set();
+                        }
+                        if (facilityId) {
+                            regionFacilities[region].add(facilityId);
+                        }
+                    }
+                });
+                
+                // Convert Set sizes to counts
+                Object.keys(regionFacilities).forEach(region => {
+                    regionCounts[region] = regionFacilities[region].size;
+                });
+            } else {
+                // Count unique CAIDs
+                const regionCAIDs = {};
+                portfolioData.forEach(row => {
+                    const caExpDate = new Date(row.CA_Expiration_Date);
+                    if (caExpDate <= threeMonthsLater && caExpDate >= today) {
+                        const region = row.Region || 'Unknown';
+                        const caid = row.CAID;
+                        
+                        if (!regionCAIDs[region]) {
+                            regionCAIDs[region] = new Set();
+                        }
+                        if (caid) {
+                            regionCAIDs[region].add(caid);
+                        }
+                    }
+                });
+                
+                // Convert Set sizes to counts
+                Object.keys(regionCAIDs).forEach(region => {
+                    regionCounts[region] = regionCAIDs[region].size;
+                });
+            }
             
             return regionCounts;
         }
@@ -931,8 +1821,10 @@
             const regionList = document.getElementById('regionList');
             regionList.innerHTML = '';
             
+            const countLabel = selectedRegionalLevel === 'facility' ? 'Facilities' : 'CAIDs';
+            
             sortedRegions.forEach(([region, count]) => {
-                const percentage = ((count / totalCount) * 100).toFixed(0);
+                const percentage = totalCount > 0 ? ((count / totalCount) * 100).toFixed(0) : 0;
                 const info = regionInfo[region] || { name: region, color: 'bg-gray-500' };
                 
                 const regionItem = document.createElement('div');
@@ -944,7 +1836,7 @@
                         </div>
                         <div>
                             <p class="text-sm font-semibold text-gray-800">${info.name}</p>
-                            <span class="block text-xs text-gray-500">${count} Facilities</span>
+                            <span class="block text-xs text-gray-500">${count} ${countLabel}</span>
                         </div>
                     </div>
                     <div class="flex w-full max-w-[140px] items-center gap-3">
@@ -963,10 +1855,14 @@
         function createRelationshipChart() {
             const topN = parseInt(document.getElementById('topNFilter').value);
             
+            // Determine which field to aggregate based on selected metric
+            const fieldName = selectedMetricType === 'facilityAmount' ? 'Fac_Amount' : 'Direct_OS';
+            const seriesName = selectedMetricType === 'facilityAmount' ? 'Total Facility Amount' : 'Total Direct OS';
+            
             const relationshipTotals = {};
             portfolioData.forEach(row => {
                 const relId = row.Relationship_Name || row.Relationship_ID || 'Unknown';
-                const amount = parseFloat(row.Fac_Amount) || 0;
+                const amount = parseFloat(row[fieldName]) || 0;
                 relationshipTotals[relId] = (relationshipTotals[relId] || 0) + amount;
             });
             
@@ -979,7 +1875,7 @@
             
             const options = {
                 series: [{
-                    name: 'Total Facility Amount',
+                    name: seriesName,
                     data: amounts
                 }],
                 chart: {
@@ -1007,6 +1903,13 @@
                 },
                 grid: {
                     borderColor: '#E5E7EB'
+                },
+                tooltip: {
+                    y: {
+                        formatter: function(val) {
+                            return formatCurrency(val);
+                        }
+                    }
                 }
             };
 
@@ -1017,27 +1920,57 @@
             relationshipChartInstance.render();
         }
 
-        // Update bar chart
-        function updateBarChart() {
-            createRelationshipChart();
-        }
-
-        // Filter data based on search
-        function filterData() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        // Select metric type for relationship chart
+        function selectMetricType(type) {
+            selectedMetricType = type;
             
-            if (searchTerm === '') {
-                filteredData = [...portfolioData];
+            // Update button styles
+            const btnFacilityAmount = document.getElementById('btnFacilityAmount');
+            const btnDirectOS = document.getElementById('btnDirectOS');
+            
+            if (type === 'facilityAmount') {
+                btnFacilityAmount.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm shadow-sm text-gray-900 bg-white';
+                btnDirectOS.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm text-gray-500 hover:text-gray-900';
             } else {
-                filteredData = portfolioData.filter(row => {
-                    return Object.values(row).some(value => 
-                        String(value).toLowerCase().includes(searchTerm)
-                    );
-                });
+                btnFacilityAmount.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm text-gray-500 hover:text-gray-900';
+                btnDirectOS.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm shadow-sm text-gray-900 bg-white';
             }
             
-            currentPage = 1;
-            renderTable();
+            // Update the chart
+            updateBarChart();
+        }
+
+        // Update bar chart
+        function updateBarChart() {
+            if (Object.keys(activeFilters).length > 0) {
+                createRelationshipChartFromFiltered();
+            } else {
+                createRelationshipChart();
+            }
+        }
+
+        // Filter data based on search (works with existing filters)
+        function filterData() {
+            // If no filters are active, just apply search to all data
+            if (Object.keys(activeFilters).length === 0) {
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                
+                if (searchTerm === '') {
+                    filteredData = [...portfolioData];
+                } else {
+                    filteredData = portfolioData.filter(row => {
+                        return Object.values(row).some(value => 
+                            String(value).toLowerCase().includes(searchTerm)
+                        );
+                    });
+                }
+                
+                currentPage = 1;
+                renderTable();
+            } else {
+                // If filters are active, reapply them (which will include search)
+                applyFilters();
+            }
         }
 
         // Render table

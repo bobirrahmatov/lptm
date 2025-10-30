@@ -34,6 +34,20 @@
     </style>
 </head>
 <body class="bg-gray-50">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-[10000] flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4 max-w-sm mx-4">
+            <div class="relative">
+                <div class="w-16 h-16 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+            </div>
+            <div class="text-center">
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">Loading Portfolio Data</h3>
+                <p class="text-sm text-gray-500" id="loadingMessage">Please wait while we fetch your data...</p>
+                <p class="text-xs text-gray-400 mt-2" id="loadingProgress"></p>
+            </div>
+        </div>
+    </div>
+
     <div class="p-4 md:p-6">
         <!-- Page Header -->
         <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-6">
@@ -508,8 +522,9 @@
         let portfolioData = [];
         let filteredData = [];
         let currentPage = 1;
-        let rowsPerPage = 20;
+        let rowsPerPage = 10; // Start with 10 rows for initial load
         let expirationChartInstance = null;
+        let searchDebounceTimer = null;
         let relationshipChartInstance = null;
         let activeFilters = {};
         let selectedMetricType = 'facilityAmount'; // Default to Facility Amount
@@ -526,9 +541,17 @@
             // Load data from Confluence attachment
             loadDataFromCSV();
             
-            // Setup search functionality
+            // Setup search functionality with debouncing
             document.getElementById('searchInput').addEventListener('input', function() {
-                filterData();
+                // Clear previous timer
+                if (searchDebounceTimer) {
+                    clearTimeout(searchDebounceTimer);
+                }
+                
+                // Set new timer - wait 300ms after user stops typing
+                searchDebounceTimer = setTimeout(() => {
+                    filterData();
+                }, 300);
             });
         });
 
@@ -570,21 +593,33 @@
 
         // Load data from Confluence attachment (read-only)
         async function loadDataFromCSV() {
+            showLoadingOverlay('Fetching data from Confluence...', 'Connecting to server...');
             showLoadingState();
+            
             try {
                 const data = await fetchDataFromConfluence();
+                
                 if (data && data.length > 0) {
                     portfolioData = data;
                     console.log(`Loaded ${data.length} records from Confluence`);
-                    initializeDashboard();
-                    showNotification('Success', `Loaded ${data.length} records successfully`, 'success');
+                    
+                    showLoadingOverlay('Processing data...', `Loading ${data.length.toLocaleString()} records...`);
+                    
+                    // Use setTimeout to allow UI to update
+                    setTimeout(() => {
+                        initializeDashboard();
+                        hideLoadingOverlay();
+                        showNotification('Success', `Loaded ${data.length.toLocaleString()} records successfully`, 'success');
+                    }, 100);
                 } else {
                     console.warn('No data from Confluence, using sample data');
+                    hideLoadingOverlay();
                     showNotification('Warning', 'No data found in Confluence attachment', 'warning');
                     loadSampleData();
                 }
             } catch (error) {
                 console.error('Error loading data from Confluence:', error);
+                hideLoadingOverlay();
                 showNotification('Warning', 'Failed to load from Confluence, using sample data', 'warning');
                 loadSampleData();
             }
@@ -712,6 +747,27 @@
             });
         }
 
+        // Show loading overlay
+        function showLoadingOverlay(message = 'Please wait while we fetch your data...', progress = '') {
+            const overlay = document.getElementById('loadingOverlay');
+            const messageEl = document.getElementById('loadingMessage');
+            const progressEl = document.getElementById('loadingProgress');
+            
+            if (overlay) {
+                overlay.classList.remove('hidden');
+                if (messageEl) messageEl.textContent = message;
+                if (progressEl) progressEl.textContent = progress;
+            }
+        }
+
+        // Hide loading overlay
+        function hideLoadingOverlay() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.classList.add('hidden');
+            }
+        }
+
         // Show loading state
         function showLoadingState() {
             const tbody = document.getElementById('tableBody');
@@ -803,14 +859,35 @@
             initializeDashboard();
         }
 
-        // Initialize dashboard with data
+        // Initialize dashboard with data (optimized for large datasets)
         function initializeDashboard() {
+            const startTime = performance.now();
+            console.log('Initializing dashboard with', portfolioData.length, 'records...');
+            
+            // Step 1: Populate filters
+            console.time('Populate Filters');
             populateFilterOptions();
+            console.timeEnd('Populate Filters');
+            
+            // Step 2: Calculate metrics
+            console.time('Calculate Metrics');
             calculateMetrics();
+            console.timeEnd('Calculate Metrics');
+            
+            // Step 3: Create charts (batch these as they're expensive)
+            console.time('Create Charts');
             createExpirationChart();
             createRegionalChart();
             createRelationshipChart();
+            console.timeEnd('Create Charts');
+            
+            // Step 4: Filter and render table
+            console.time('Filter and Render Table');
             filterData();
+            console.timeEnd('Filter and Render Table');
+            
+            const endTime = performance.now();
+            console.log(`Dashboard initialized in ${((endTime - startTime) / 1000).toFixed(2)} seconds`);
         }
 
         // Populate filter dropdowns with unique values from Confluence data (read-only)
@@ -1347,46 +1424,54 @@
 
         // Initialize map from filtered data
         function initializeMapFromFiltered() {
-            const regionCoords = {
-                'NAM': [37.0902, -95.7129],
-                'EMEA': [51.5074, -0.1278],
-                'APAC': [35.6762, 139.6503],
-                'LATAM': [-23.5505, -46.6333],
-                'MEA': [25.2048, 55.2708]
-            };
-            
-            const regionCounts = getRegionCountsFromFiltered();
-            const markers = [];
-            
-            Object.keys(regionCounts).forEach(region => {
-                if (regionCoords[region]) {
-                    markers.push({
-                        name: region,
-                        coords: regionCoords[region]
-                    });
-                }
-            });
-            
-            const mapElement = document.getElementById('mapOne');
-            mapElement.innerHTML = '';
-            
-            const map = new jsVectorMap({
-                selector: '#mapOne',
-                map: 'world',
-                zoomButtons: false,
-                regionStyle: {
-                    initial: {
-                        fill: '#D9D9D9'
-                    },
-                    hover: {
-                        fillOpacity: 1,
-                        fill: '#465fff'
+            try {
+                const regionCoords = {
+                    'NAM': [37.0902, -95.7129],
+                    'EMEA': [51.5074, -0.1278],
+                    'APAC': [35.6762, 139.6503],
+                    'LATAM': [-23.5505, -46.6333],
+                    'MEA': [25.2048, 55.2708]
+                };
+                
+                const regionCounts = getRegionCountsFromFiltered();
+                console.log('Filtered region counts for map:', regionCounts);
+                
+                const markers = [];
+                
+                Object.keys(regionCounts).forEach(region => {
+                    if (regionCoords[region]) {
+                        markers.push({
+                            name: region,
+                            coords: regionCoords[region]
+                        });
                     }
-                },
-                markers: markers,
-                markerStyle: {
-                    initial: {
-                        strokeWidth: 1,
+                });
+                
+                const mapElement = document.getElementById('mapOne');
+                if (!mapElement) {
+                    console.error('Map element #mapOne not found');
+                    return;
+                }
+                
+                mapElement.innerHTML = '';
+                
+                const map = new jsVectorMap({
+                    selector: '#mapOne',
+                    map: 'world',
+                    zoomButtons: false,
+                    regionStyle: {
+                        initial: {
+                            fill: '#D9D9D9'
+                        },
+                        hover: {
+                            fillOpacity: 1,
+                            fill: '#465fff'
+                        }
+                    },
+                    markers: markers,
+                    markerStyle: {
+                        initial: {
+                            strokeWidth: 1,
                         fill: '#465fff',
                         fillOpacity: 1,
                         r: 4
@@ -1397,6 +1482,10 @@
                     }
                 }
             });
+            } catch (error) {
+                console.error('Error initializing filtered map:', error);
+                // Map is optional, continue without it
+            }
         }
 
         // Get region counts from filtered data
@@ -1457,6 +1546,7 @@
         // Create relationship chart from filtered data
         function createRelationshipChartFromFiltered() {
             const topN = parseInt(document.getElementById('topNFilter').value);
+            console.log('Creating filtered relationship chart with topN:', topN, 'metric:', selectedMetricType);
             
             // Determine which field to aggregate based on selected metric
             const fieldName = selectedMetricType === 'facilityAmount' ? 'Fac_Amount' : 'Direct_OS';
@@ -1469,9 +1559,13 @@
                 relationshipTotals[relId] = (relationshipTotals[relId] || 0) + amount;
             });
             
+            console.log('Filtered relationships found:', Object.keys(relationshipTotals).length);
+            
             const sorted = Object.entries(relationshipTotals)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, topN);
+            
+            console.log('Top filtered relationships:', sorted.slice(0, 3));
             
             const relationships = sorted.map(item => item[0]);
             const amounts = sorted.map(item => item[1]);
@@ -1516,11 +1610,22 @@
                 }
             };
 
-            if (relationshipChartInstance) {
-                relationshipChartInstance.destroy();
+            try {
+                const chartElement = document.querySelector("#relationshipChart");
+                if (!chartElement) {
+                    console.error('Relationship chart element not found');
+                    return;
+                }
+                
+                if (relationshipChartInstance) {
+                    relationshipChartInstance.destroy();
+                }
+                relationshipChartInstance = new ApexCharts(chartElement, options);
+                relationshipChartInstance.render();
+                console.log('Filtered relationship chart rendered successfully');
+            } catch (error) {
+                console.error('Error creating filtered relationship chart:', error);
             }
-            relationshipChartInstance = new ApexCharts(document.querySelector("#relationshipChart"), options);
-            relationshipChartInstance.render();
         }
 
         // Select global level (affects all charts)
@@ -1739,10 +1844,21 @@
         function aggregateByMonthYear(data, dateField) {
             const grouped = {};
             data.forEach(row => {
-                const date = row[dateField];
-                if (date) {
-                    const monthYear = date.substring(0, 7); // YYYY-MM
-                    grouped[monthYear] = (grouped[monthYear] || 0) + 1;
+                const dateValue = row[dateField];
+                if (dateValue) {
+                    try {
+                        // Parse date to ensure it's valid
+                        const dateObj = new Date(dateValue);
+                        if (!isNaN(dateObj.getTime())) {
+                            // Format as YYYY-MM
+                            const year = dateObj.getFullYear();
+                            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                            const monthYear = `${year}-${month}`;
+                            grouped[monthYear] = (grouped[monthYear] || 0) + 1;
+                        }
+                    } catch (e) {
+                        console.warn('Invalid date:', dateValue);
+                    }
                 }
             });
             
@@ -1769,46 +1885,58 @@
 
         // Initialize world map
         function initializeMap() {
-            // Get region coordinates for markers
-            const regionCoords = {
-                'NAM': [37.0902, -95.7129], // North America (USA)
-                'EMEA': [51.5074, -0.1278], // Europe (London)
-                'APAC': [35.6762, 139.6503], // Asia Pacific (Tokyo)
-                'LATAM': [-23.5505, -46.6333], // Latin America (São Paulo)
-                'MEA': [25.2048, 55.2708] // Middle East (Dubai)
-            };
-            
-            const regionCounts = getRegionCounts();
-            const markers = [];
-            
-            Object.keys(regionCounts).forEach(region => {
-                if (regionCoords[region]) {
-                    markers.push({
-                        name: region,
-                        coords: regionCoords[region]
-                    });
-                }
-            });
-            
-            const map = new jsVectorMap({
-                selector: '#mapOne',
-                map: 'world',
-                zoomButtons: false,
-                regionStyle: {
-                    initial: {
-                        fill: '#D9D9D9'
-                    },
-                    hover: {
-                        fillOpacity: 1,
-                        fill: '#465fff'
+            try {
+                // Get region coordinates for markers
+                const regionCoords = {
+                    'NAM': [37.0902, -95.7129], // North America (USA)
+                    'EMEA': [51.5074, -0.1278], // Europe (London)
+                    'APAC': [35.6762, 139.6503], // Asia Pacific (Tokyo)
+                    'LATAM': [-23.5505, -46.6333], // Latin America (São Paulo)
+                    'MEA': [25.2048, 55.2708] // Middle East (Dubai)
+                };
+                
+                const regionCounts = getRegionCounts();
+                console.log('Region counts for map:', regionCounts);
+                
+                const markers = [];
+                
+                Object.keys(regionCounts).forEach(region => {
+                    if (regionCoords[region]) {
+                        markers.push({
+                            name: region,
+                            coords: regionCoords[region]
+                        });
                     }
-                },
-                markers: markers,
-                markerStyle: {
-                    initial: {
-                        strokeWidth: 1,
-                        fill: '#465fff',
-                        fillOpacity: 1,
+                });
+                
+                const mapElement = document.getElementById('mapOne');
+                if (!mapElement) {
+                    console.error('Map element #mapOne not found');
+                    return;
+                }
+                
+                // Clear existing map
+                mapElement.innerHTML = '';
+                
+                const map = new jsVectorMap({
+                    selector: '#mapOne',
+                    map: 'world',
+                    zoomButtons: false,
+                    regionStyle: {
+                        initial: {
+                            fill: '#D9D9D9'
+                        },
+                        hover: {
+                            fillOpacity: 1,
+                            fill: '#465fff'
+                        }
+                    },
+                    markers: markers,
+                    markerStyle: {
+                        initial: {
+                            strokeWidth: 1,
+                            fill: '#465fff',
+                            fillOpacity: 1,
                         r: 4
                     },
                     hover: {
@@ -1817,6 +1945,10 @@
                     }
                 }
             });
+            } catch (error) {
+                console.error('Error initializing map:', error);
+                // Map is optional, continue without it
+            }
         }
         
         // Get region counts for facilities/CAIDs expiring soon
@@ -1931,6 +2063,7 @@
         // Create relationship bar chart
         function createRelationshipChart() {
             const topN = parseInt(document.getElementById('topNFilter').value);
+            console.log('Creating relationship chart with topN:', topN, 'metric:', selectedMetricType);
             
             // Determine which field to aggregate based on selected metric
             const fieldName = selectedMetricType === 'facilityAmount' ? 'Fac_Amount' : 'Direct_OS';
@@ -1943,9 +2076,13 @@
                 relationshipTotals[relId] = (relationshipTotals[relId] || 0) + amount;
             });
             
+            console.log('Total relationships found:', Object.keys(relationshipTotals).length);
+            
             const sorted = Object.entries(relationshipTotals)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, topN);
+            
+            console.log('Top relationships:', sorted.slice(0, 3));
             
             const relationships = sorted.map(item => item[0]);
             const amounts = sorted.map(item => item[1]);
@@ -1990,11 +2127,22 @@
                 }
             };
 
-            if (relationshipChartInstance) {
-                relationshipChartInstance.destroy();
+            try {
+                const chartElement = document.querySelector("#relationshipChart");
+                if (!chartElement) {
+                    console.error('Relationship chart element not found');
+                    return;
+                }
+                
+                if (relationshipChartInstance) {
+                    relationshipChartInstance.destroy();
+                }
+                relationshipChartInstance = new ApexCharts(chartElement, options);
+                relationshipChartInstance.render();
+                console.log('Relationship chart rendered successfully');
+            } catch (error) {
+                console.error('Error creating relationship chart:', error);
             }
-            relationshipChartInstance = new ApexCharts(document.querySelector("#relationshipChart"), options);
-            relationshipChartInstance.render();
         }
 
         // Select metric type for relationship chart
@@ -2050,33 +2198,40 @@
             }
         }
 
-        // Render table
+        // Render table (optimized for large datasets)
         function renderTable() {
             const tbody = document.getElementById('tableBody');
             const startIdx = (currentPage - 1) * rowsPerPage;
             const endIdx = startIdx + rowsPerPage;
             const pageData = filteredData.slice(startIdx, endIdx);
             
-            tbody.innerHTML = '';
-            
-            pageData.forEach(row => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-gray-50';
-                tr.innerHTML = `
-                    <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatDate(row.Report_Date)}</td>
-                    <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${row.Region || 'N/A'}</td>
-                    <td class="p-4 text-sm font-medium text-gray-800 whitespace-nowrap">${row.Facility_ID || 'N/A'}</td>
-                    <td class="p-4 text-sm text-gray-700">${row.Relationship_Name || 'N/A'}</td>
-                    <td class="p-4 text-sm text-gray-700">${row.Product_Program || 'N/A'}</td>
-                    <td class="p-4 text-sm font-medium text-gray-800 whitespace-nowrap">${formatCurrency(parseFloat(row.Fac_Amount) || 0)}</td>
-                    <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatCurrency(parseFloat(row.Direct_OS) || 0)}</td>
-                    <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatDate(row.Maturity_Date)}</td>
-                    <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatDate(row.CA_Expiration_Date)}</td>
-                `;
-                tbody.appendChild(tr);
+            // Use requestAnimationFrame for smooth rendering
+            requestAnimationFrame(() => {
+                // Use DocumentFragment for batch DOM insertion (much faster)
+                const fragment = document.createDocumentFragment();
+                
+                pageData.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-gray-50';
+                    tr.innerHTML = `
+                        <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatDate(row.Report_Date)}</td>
+                        <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${row.Region || 'N/A'}</td>
+                        <td class="p-4 text-sm font-medium text-gray-800 whitespace-nowrap">${row.Facility_ID || 'N/A'}</td>
+                        <td class="p-4 text-sm text-gray-700">${row.Relationship_Name || 'N/A'}</td>
+                        <td class="p-4 text-sm text-gray-700">${row.Product_Program || 'N/A'}</td>
+                        <td class="p-4 text-sm font-medium text-gray-800 whitespace-nowrap">${formatCurrency(parseFloat(row.Fac_Amount) || 0)}</td>
+                        <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatCurrency(parseFloat(row.Direct_OS) || 0)}</td>
+                        <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatDate(row.Maturity_Date)}</td>
+                        <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatDate(row.CA_Expiration_Date)}</td>
+                    `;
+                    fragment.appendChild(tr);
+                });
+                
+                // Single DOM operation instead of multiple
+                tbody.innerHTML = '';
+                tbody.appendChild(fragment);
+                updatePagination();
             });
-            
-            updatePagination();
         }
 
         // Update pagination

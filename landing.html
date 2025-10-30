@@ -9,6 +9,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
+        /* Prevent unnecessary scrolling */
+        html, body {
+            overflow: auto;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
         /* Ensure hidden class works */
         .hidden {
             display: none !important;
@@ -76,23 +84,23 @@
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900 p-4">
-<div class="min-h-screen rounded-2xl border border-gray-200 px-5 py-7 relative overflow-hidden bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]">
+<body class="bg-gray-50 text-gray-900" style="padding: 1rem;">
+<div style="height: calc(100vh - 2rem);" class="rounded-2xl border border-gray-200 px-5 py-7 relative overflow-hidden bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]">
     <!-- Subtle Gradient Overlay -->
     <div class="absolute inset-0 bg-[radial-gradient(circle_500px_at_50%_200px,rgba(96,165,250,0.15),transparent)] pointer-events-none"></div>
     
-    <main class="overflow-hidden relative z-10">
-        <section class="relative flex items-center justify-center min-h-screen">
+    <main class="relative z-10 h-full">
+        <section class="h-full flex items-center justify-center">
             <div class="mx-auto px-6 max-w-4xl w-full">
                 <!-- LPTM Hub Title -->
                 <div class="text-center mb-12">
-                    <h1 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+                    <h1 class="!text-5xl md:!text-6xl font-bold text-gray-900 mb-6">
                         <span>LPTM </span>
                         <span class="flip-container bg-blue-600 text-white px-4 py-1 rounded-lg">
                             <span class="flip-word" id="flip-text">Hub</span>
                         </span>
                     </h1>
-                    <p class="text-lg text-gray-600">Your central resource for Loan Product & Transaction Management</p>
+                    <p class="!text-lg text-gray-600">Your central resource for Loan Product & Transaction Management</p>
                 </div>
                 
                 <!-- Search Section -->
@@ -114,8 +122,8 @@
                             <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <p class="text-lg font-semibold">No results found</p>
-                            <p class="text-sm mt-2">Try different keywords or check your spelling</p>
+                            <p class="!text-lg font-semibold">No results found</p>
+                            <p class="!text-sm mt-2">Try different keywords or check your spelling</p>
                         </div>
                     </div>
                 </div>
@@ -280,14 +288,14 @@
             
             // Space header
             const spaceHeader = document.createElement('div');
-            spaceHeader.className = `px-4 py-3 bg-${spaceConfig.color}-50 border-l-4 border-${spaceConfig.color}-500 font-semibold text-${spaceConfig.color}-700 text-sm mb-2`;
+            spaceHeader.className = `px-4 py-3 bg-${spaceConfig.color}-50 border-l-4 border-${spaceConfig.color}-500 font-semibold text-${spaceConfig.color}-700 !text-sm mb-2`;
             spaceHeader.innerHTML = `
                 <div class="flex items-center gap-2">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
                         <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
                     </svg>
-                    ${spaceName} <span class="ml-auto bg-${spaceConfig.color}-100 text-${spaceConfig.color}-800 px-2 py-0.5 rounded-full text-xs">${spaceResults.length}</span>
+                    ${spaceName} <span class="ml-auto bg-${spaceConfig.color}-100 text-${spaceConfig.color}-800 px-2 py-0.5 rounded-full !text-xs">${spaceResults.length}</span>
                 </div>
             `;
             lptmResultsList.appendChild(spaceHeader);
@@ -338,9 +346,9 @@
                     </div>
                 </div>
                 <div class="flex-grow min-w-0">
-                    <h3 class="text-${color}-700 hover:text-${color}-800 font-semibold text-lg mb-2 leading-tight">${highlightedTitle}</h3>
-                    <p class="text-gray-700 text-sm mb-3 leading-relaxed">${highlightedExcerpt}</p>
-                    <div class="flex items-center gap-3 text-xs">
+                    <h3 class="text-${color}-700 hover:text-${color}-800 font-semibold !text-lg mb-2 leading-tight">${highlightedTitle}</h3>
+                    <p class="text-gray-700 !text-sm mb-3 leading-relaxed">${highlightedExcerpt}</p>
+                    <div class="flex items-center gap-3 !text-xs">
                         <span class="inline-flex items-center gap-1 text-${color}-600 font-medium">
                             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clip-rule="evenodd"></path>

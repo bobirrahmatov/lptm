@@ -930,6 +930,17 @@
             const startTime = performance.now();
             console.log('Initializing dashboard with', portfolioData.length, 'records...');
             
+            // Safety check
+            if (!portfolioData || portfolioData.length === 0) {
+                console.error('No portfolio data loaded!');
+                showNotification('Error', 'No portfolio data available', 'error');
+                return;
+            }
+            
+            // Log sample data to verify structure
+            console.log('Sample data row:', portfolioData[0]);
+            console.log('Available fields:', Object.keys(portfolioData[0]));
+            
             // Step 1: Build indexes (one-time, makes filtering much faster)
             console.time('Build Indexes');
             buildIndexes();
@@ -1339,6 +1350,13 @@
         function createExpirationChartFromFiltered() {
             const facilityData = aggregateByMonthYear(filteredData, 'Maturity_Date');
             
+            // Handle empty data
+            if (!facilityData || facilityData.length === 0) {
+                console.warn('No filtered facility data for expiration chart');
+                document.getElementById('totalExpiring').textContent = '0';
+                return;
+            }
+            
             const allMonths = facilityData.map(d => d.month).sort();
             
             const facilitySeries = allMonths.map(month => {
@@ -1636,28 +1654,38 @@
             const fieldName = selectedMetricType === 'facilityAmount' ? 'Fac_Amount' : 'Direct_OS';
             const seriesName = selectedMetricType === 'facilityAmount' ? 'Total Facility Amount' : 'Total Direct OS';
             
+            console.log('Creating filtered relationship chart, field:', fieldName, 'dataLength:', filteredData.length);
+            
             // Use Map for better performance
             const relationshipTotals = new Map();
             
             for (let i = 0; i < filteredData.length; i++) {
                 const row = filteredData[i];
-                const relId = row.Relationship_Name || row.Relationship_ID || 'Unknown';
+                const relId = row.Relationship_Name || row.Relationship_ID;
                 const amount = parseFloat(row[fieldName]) || 0;
                 
-                if (amount > 0 && relId !== 'Unknown') {
+                if (relId && amount > 0) {
                     relationshipTotals.set(relId, (relationshipTotals.get(relId) || 0) + amount);
                 }
             }
+            
+            console.log('Total unique filtered relationships:', relationshipTotals.size);
             
             // Convert to array and sort
             const sorted = Array.from(relationshipTotals.entries())
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, topN);
             
-            console.log(`Filtered chart aggregated ${filteredData.length} rows in ${(performance.now() - startTime).toFixed(2)}ms`);
+            console.log(`Filtered chart aggregated ${filteredData.length} rows, found ${relationshipTotals.size} relationships in ${(performance.now() - startTime).toFixed(2)}ms`);
             
             const relationships = sorted.map(item => item[0]);
             const amounts = sorted.map(item => item[1]);
+            
+            // Handle empty data
+            if (relationships.length === 0) {
+                console.warn('No filtered relationship data for chart');
+                return;
+            }
             
             const options = {
                 series: [{
@@ -1820,6 +1848,13 @@
         // Create expiration timeline chart (Area chart for facilities)
         function createExpirationChart() {
             const facilityData = aggregateByMonthYear(portfolioData, 'Maturity_Date');
+            
+            // Handle empty data
+            if (!facilityData || facilityData.length === 0) {
+                console.warn('No facility data for expiration chart');
+                document.getElementById('totalExpiring').textContent = '0';
+                return;
+            }
             
             const allMonths = facilityData.map(d => d.month).sort();
             
@@ -2190,28 +2225,43 @@
             const fieldName = selectedMetricType === 'facilityAmount' ? 'Fac_Amount' : 'Direct_OS';
             const seriesName = selectedMetricType === 'facilityAmount' ? 'Total Facility Amount' : 'Total Direct OS';
             
+            console.log('Creating relationship chart, field:', fieldName, 'dataLength:', portfolioData.length);
+            
             // Use Map for better performance with large datasets
             const relationshipTotals = new Map();
             
             for (let i = 0; i < portfolioData.length; i++) {
                 const row = portfolioData[i];
-                const relId = row.Relationship_Name || row.Relationship_ID || 'Unknown';
+                const relId = row.Relationship_Name || row.Relationship_ID;
                 const amount = parseFloat(row[fieldName]) || 0;
                 
-                if (amount > 0 && relId !== 'Unknown') {
+                // Debug first few rows
+                if (i < 3) {
+                    console.log(`Row ${i}: relId="${relId}", amount=${amount}, fieldName=${fieldName}, row[fieldName]=${row[fieldName]}`);
+                }
+                
+                if (relId && amount > 0) {
                     relationshipTotals.set(relId, (relationshipTotals.get(relId) || 0) + amount);
                 }
             }
+            
+            console.log('Total unique relationships:', relationshipTotals.size);
             
             // Convert to array and sort (only what we need)
             const sorted = Array.from(relationshipTotals.entries())
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, topN);
             
-            console.log(`Chart aggregated ${portfolioData.length} rows in ${(performance.now() - startTime).toFixed(2)}ms`);
+            console.log(`Chart aggregated ${portfolioData.length} rows, found ${relationshipTotals.size} relationships in ${(performance.now() - startTime).toFixed(2)}ms`);
             
             const relationships = sorted.map(item => item[0]);
             const amounts = sorted.map(item => item[1]);
+            
+            // Handle empty data
+            if (relationships.length === 0) {
+                console.warn('No relationship data for chart');
+                return;
+            }
             
             const options = {
                 series: [{

@@ -240,9 +240,9 @@
             </div>
         </div>
 
-        <!-- Top 4 Metric Cards -->
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 xl:grid-cols-4 mb-6">
-            <!-- Card 1: Total Number of Relationships -->
+        <!-- Top 5 Metric Cards -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 md:gap-6 mb-6">
+            <!-- Card 1: Total # of Relationships -->
             <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
                 <div class="mb-6 flex items-center gap-3">
                     <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100">
@@ -251,7 +251,7 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-medium text-gray-500">Total Relationships</h3>
+                        <h3 class="text-sm font-medium text-gray-500">Total # of Relationships</h3>
                     </div>
                 </div>
                 <div class="flex items-end justify-between">
@@ -261,7 +261,7 @@
                 </div>
             </div>
 
-            <!-- Card 2: Total Number of Facilities -->
+            <!-- Card 2: Total # of Facilities -->
             <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
                 <div class="mb-6 flex items-center gap-3">
                     <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
@@ -270,7 +270,7 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-medium text-gray-500">Total Facilities</h3>
+                        <h3 class="text-sm font-medium text-gray-500">Total # of Facilities</h3>
                     </div>
                 </div>
                 <div class="flex items-end justify-between">
@@ -280,7 +280,7 @@
                 </div>
             </div>
 
-            <!-- Card 3: Total Number of CAs -->
+            <!-- Card 3: Total # of CAs -->
             <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
                 <div class="mb-6 flex items-center gap-3">
                     <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100">
@@ -289,7 +289,7 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-medium text-gray-500">Total CAs</h3>
+                        <h3 class="text-sm font-medium text-gray-500">Total # of CAs</h3>
                     </div>
                 </div>
                 <div class="flex items-end justify-between">
@@ -299,16 +299,35 @@
                 </div>
             </div>
 
-            <!-- Card 4: Total Facility Amount -->
+            <!-- Card 4: Total $ of OSUC -->
             <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
                 <div class="mb-6 flex items-center gap-3">
                     <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100">
                         <svg class="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-500">Total $ of OSUC</h3>
+                    </div>
+                </div>
+                <div class="flex items-end justify-between">
+                    <div>
+                        <h4 class="text-2xl font-bold text-gray-800" id="totalOSUC">$0.00</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 5: Total $ of Facility Amount -->
+            <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
+                <div class="mb-6 flex items-center gap-3">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100">
+                        <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-medium text-gray-500">Total Facility Amount</h3>
+                        <h3 class="text-sm font-medium text-gray-500">Total $ of Facility Amount</h3>
                     </div>
                 </div>
                 <div class="flex items-end justify-between">
@@ -847,6 +866,10 @@
         // Helper to populate a select element
         function populateSelect(selectId, options) {
             const select = document.getElementById(selectId);
+            if (!select) {
+                console.warn(`Select element with id '${selectId}' not found`);
+                return;
+            }
             const currentValue = select.value;
             
             // Keep the first option (All...)
@@ -1118,6 +1141,11 @@
                 return sum + (parseFloat(row.Fac_Amount) || 0);
             }, 0);
             
+            // Total OSUC from filtered data
+            const totalOSUC = filteredData.reduce((sum, row) => {
+                return sum + (parseFloat(row.Total_Comm_Exposure) || 0);
+            }, 0);
+            
             // Total Number of Relationships
             const uniqueRelationships = new Set(
                 filteredData
@@ -1142,6 +1170,7 @@
             document.getElementById('totalRelationships').textContent = uniqueRelationships.toLocaleString();
             document.getElementById('totalFacilities').textContent = uniqueFacilities.toLocaleString();
             document.getElementById('totalCAs').textContent = uniqueCAs.toLocaleString();
+            document.getElementById('totalOSUC').textContent = formatCurrency(totalOSUC);
             document.getElementById('totalFacAmount').textContent = formatCurrency(totalFacAmount);
         }
 
@@ -1527,6 +1556,11 @@
                 return sum + (parseFloat(row.Fac_Amount) || 0);
             }, 0);
             
+            // Total OSUC (Outstanding + Unused Committed = Total_Comm_Exposure)
+            const totalOSUC = portfolioData.reduce((sum, row) => {
+                return sum + (parseFloat(row.Total_Comm_Exposure) || 0);
+            }, 0);
+            
             // Total Number of Relationships
             const uniqueRelationships = new Set(
                 portfolioData
@@ -1551,12 +1585,14 @@
             document.getElementById('totalRelationships').textContent = uniqueRelationships.toLocaleString();
             document.getElementById('totalFacilities').textContent = uniqueFacilities.toLocaleString();
             document.getElementById('totalCAs').textContent = uniqueCAs.toLocaleString();
+            document.getElementById('totalOSUC').textContent = formatCurrency(totalOSUC);
             document.getElementById('totalFacAmount').textContent = formatCurrency(totalFacAmount);
             
             console.log('Metrics calculated:', {
                 relationships: uniqueRelationships,
                 facilities: uniqueFacilities,
                 cas: uniqueCAs,
+                osuc: totalOSUC,
                 facAmount: totalFacAmount
             });
         }

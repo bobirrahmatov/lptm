@@ -1368,12 +1368,22 @@
 
         // Create expiration chart from filtered data
         function createExpirationChartFromFiltered() {
+            console.log('📊 Creating filtered expiration chart with', filteredData.length, 'records');
+            
             const facilityData = aggregateByMonthYear(filteredData, 'Maturity_Date');
+            
+            console.log('Filtered aggregated facility data:', facilityData);
             
             // Handle empty data
             if (!facilityData || facilityData.length === 0) {
-                console.warn('No filtered facility data for expiration chart');
+                console.warn('⚠️ No filtered facility data for expiration chart');
                 document.getElementById('totalExpiring').textContent = '0';
+                
+                // Show empty chart message
+                const chartElement = document.querySelector("#expirationChart");
+                if (chartElement) {
+                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No expiration data available for filtered results</div>';
+                }
                 return;
             }
             
@@ -1385,6 +1395,7 @@
             });
             
             const totalExpiring = facilitySeries.reduce((a, b) => a + b, 0);
+            console.log('Total filtered facilities expiring:', totalExpiring);
             document.getElementById('totalExpiring').textContent = totalExpiring.toLocaleString();
             
             const options = {
@@ -1932,8 +1943,33 @@
             return parseFloat(str) || 0;
         }
         
-        // Format currency
+        // Format currency with M/B notation
         function formatCurrency(value) {
+            if (!value || value === 0) return '$0';
+            
+            const absValue = Math.abs(value);
+            
+            // Billions
+            if (absValue >= 1000000000) {
+                return '$' + (value / 1000000000).toFixed(2) + 'B';
+            }
+            
+            // Millions
+            if (absValue >= 1000000) {
+                return '$' + (value / 1000000).toFixed(2) + 'M';
+            }
+            
+            // Thousands
+            if (absValue >= 1000) {
+                return '$' + (value / 1000).toFixed(2) + 'K';
+            }
+            
+            // Less than 1000
+            return '$' + value.toFixed(2);
+        }
+        
+        // Format currency for detailed display (with commas)
+        function formatCurrencyDetailed(value) {
             return new Intl.NumberFormat('en-US', {
                 style: 'currency',
                 currency: 'USD',
@@ -1952,24 +1988,38 @@
 
         // Create expiration timeline chart (Area chart for facilities)
         function createExpirationChart() {
+            console.log('📊 Creating expiration chart with', portfolioData.length, 'records');
+            
             const facilityData = aggregateByMonthYear(portfolioData, 'Maturity_Date');
+            
+            console.log('Aggregated facility data:', facilityData);
             
             // Handle empty data
             if (!facilityData || facilityData.length === 0) {
-                console.warn('No facility data for expiration chart');
+                console.warn('⚠️ No facility data for expiration chart - no valid maturity dates found');
                 document.getElementById('totalExpiring').textContent = '0';
+                
+                // Show empty chart message
+                const chartElement = document.querySelector("#expirationChart");
+                if (chartElement) {
+                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No expiration data available</div>';
+                }
                 return;
             }
             
             const allMonths = facilityData.map(d => d.month).sort();
+            console.log('Months with data:', allMonths);
             
             const facilitySeries = allMonths.map(month => {
                 const item = facilityData.find(d => d.month === month);
                 return item ? item.count : 0;
             });
             
+            console.log('Facility series:', facilitySeries);
+            
             // Calculate total expiring
             const totalExpiring = facilitySeries.reduce((a, b) => a + b, 0);
+            console.log('Total facilities expiring:', totalExpiring);
             document.getElementById('totalExpiring').textContent = totalExpiring.toLocaleString();
             
             const options = {
@@ -2085,12 +2135,29 @@
             }
         }
 
-        // Parse date in dd/mm/yyyy format
+        // Parse date in multiple formats (YYYY-MM-DD, DD/MM/YYYY, etc.)
         function parseDate(dateStr) {
             if (!dateStr) return null;
             
             try {
-                // Handle dd/mm/yyyy format
+                // Handle YYYY-MM-DD format (most common in CSV)
+                if (dateStr.includes('-')) {
+                    const parts = dateStr.split('-');
+                    if (parts.length === 3) {
+                        // Check if it's YYYY-MM-DD
+                        if (parts[0].length === 4) {
+                            const year = parseInt(parts[0]);
+                            const month = parseInt(parts[1]) - 1; // JavaScript months are 0-indexed
+                            const day = parseInt(parts[2]);
+                            const date = new Date(year, month, day);
+                            if (!isNaN(date.getTime())) {
+                                return date;
+                            }
+                        }
+                    }
+                }
+                
+                // Handle DD/MM/YYYY format
                 if (dateStr.includes('/')) {
                     const parts = dateStr.split('/');
                     if (parts.length === 3) {
@@ -2110,27 +2177,50 @@
                     return date;
                 }
             } catch (e) {
-                console.warn('Invalid date:', dateStr);
+                // Only log occasionally to avoid console spam
+                if (Math.random() < 0.01) {
+                    console.warn('Invalid date:', dateStr);
+                }
             }
             return null;
         }
 
         // Aggregate data by month and year
         function aggregateByMonthYear(data, dateField) {
+            console.log(`Aggregating ${data.length} rows by ${dateField}`);
             const grouped = {};
-            data.forEach(row => {
+            let validDates = 0;
+            let invalidDates = 0;
+            
+            data.forEach((row, index) => {
                 const dateValue = row[dateField];
                 if (dateValue) {
                     const dateObj = parseDate(dateValue);
                     if (dateObj) {
+                        validDates++;
                         // Format as YYYY-MM
                         const year = dateObj.getFullYear();
                         const month = String(dateObj.getMonth() + 1).padStart(2, '0');
                         const monthYear = `${year}-${month}`;
                         grouped[monthYear] = (grouped[monthYear] || 0) + 1;
+                        
+                        // Log first few dates for debugging
+                        if (index < 3) {
+                            console.log(`  Row ${index}: ${dateField}="${dateValue}" → ${monthYear}`);
+                        }
+                    } else {
+                        invalidDates++;
+                        if (index < 3) {
+                            console.log(`  Row ${index}: ${dateField}="${dateValue}" → INVALID`);
+                        }
                     }
+                } else {
+                    invalidDates++;
                 }
             });
+            
+            console.log(`Valid dates: ${validDates}, Invalid/Empty: ${invalidDates}`);
+            console.log(`Unique months: ${Object.keys(grouped).length}`);
             
             return Object.entries(grouped)
                 .map(([month, count]) => ({ month, count }))
@@ -2563,8 +2653,8 @@
                         <td class="p-4 text-sm font-medium text-gray-800 whitespace-nowrap">${row.Facility_ID || 'N/A'}</td>
                         <td class="p-4 text-sm text-gray-700">${row.Relationship_Name || 'N/A'}</td>
                         <td class="p-4 text-sm text-gray-700">${row.Product_Program || 'N/A'}</td>
-                        <td class="p-4 text-sm font-medium text-gray-800 whitespace-nowrap">${formatCurrency(parseNumber(row.Fac_Amount))}</td>
-                        <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatCurrency(parseNumber(row.Direct_OS))}</td>
+                        <td class="p-4 text-sm font-medium text-gray-800 whitespace-nowrap">${formatCurrencyDetailed(parseNumber(row.Fac_Amount))}</td>
+                        <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatCurrencyDetailed(parseNumber(row.Direct_OS))}</td>
                         <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatDate(row.Maturity_Date)}</td>
                         <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatDate(row.CA_Expiration_Date)}</td>
                     `;

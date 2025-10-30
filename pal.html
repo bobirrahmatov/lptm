@@ -340,8 +340,8 @@
                 <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 sm:pt-6 h-full flex flex-col">
                     <div class="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-800">Facilities and CAs Expiring in the Next 6 Months</h3>
-                            <p class="mt-1 text-gray-500 text-sm">Monthly count of unique Relationships and Facilities expiring</p>
+                            <h3 class="text-lg font-semibold text-gray-800" id="expirationChartTitle">Facilities Expiring in the Next 3 Months</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Monthly count of facilities expiring</p>
                         </div>
                         <div class="flex flex-row-reverse items-center justify-end gap-0.5 sm:flex-col sm:items-start">
                             <div class="flex flex-row-reverse items-center gap-3 sm:flex-row sm:gap-2">
@@ -356,10 +356,6 @@
                     <div class="flex items-center gap-5 mb-5">
                         <div class="flex items-center gap-1.5">
                             <div class="h-2.5 w-2.5 rounded-full" style="background-color: #465FFF;"></div>
-                            <p class="text-sm text-gray-500">Relationships</p>
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                            <div class="h-2.5 w-2.5 rounded-full" style="background-color: #93A8FF;"></div>
                             <p class="text-sm text-gray-500">Facilities</p>
                         </div>
                     </div>
@@ -1427,56 +1423,73 @@
         function createExpirationChartFromFiltered() {
             console.log('📊 Creating filtered expiration chart with', filteredData.length, 'records');
             
+            // Update title dynamically based on active filters
+            const titleElement = document.getElementById('expirationChartTitle');
+            if (titleElement) {
+                // Build filter description
+                const filterParts = [];
+                if (activeFilters.Region && activeFilters.Region.length > 0) {
+                    filterParts.push(activeFilters.Region.join(', '));
+                }
+                if (activeFilters.Product_Program && activeFilters.Product_Program.length > 0) {
+                    if (activeFilters.Product_Program.length === 1) {
+                        filterParts.push(activeFilters.Product_Program[0]);
+                    } else {
+                        filterParts.push(`${activeFilters.Product_Program.length} Products`);
+                    }
+                }
+                if (activeFilters.Relationship_Name && activeFilters.Relationship_Name.length > 0) {
+                    if (activeFilters.Relationship_Name.length === 1) {
+                        filterParts.push(activeFilters.Relationship_Name[0]);
+                    } else {
+                        filterParts.push(`${activeFilters.Relationship_Name.length} Relationships`);
+                    }
+                }
+                
+                const filterText = filterParts.length > 0 ? ` (${filterParts.join(', ')})` : '';
+                titleElement.textContent = `Facilities Expiring in the Next 3 Months${filterText}`;
+            }
+            
             const expirationData = aggregateExpirationData(filteredData);
             
             console.log('Filtered aggregated expiration data:', expirationData);
             
             // Handle empty data
             if (!expirationData || expirationData.allMonths.length === 0) {
-                console.warn('⚠️ No filtered expiration data found for the next 6 months');
+                console.warn('⚠️ No filtered expiration data found for the next 3 months');
                 document.getElementById('totalExpiring').textContent = '0';
                 
                 // Show empty chart message
                 const chartElement = document.querySelector("#expirationChart");
                 if (chartElement) {
-                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No filtered data expiring in the next 6 months</div>';
+                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No filtered data expiring in the next 3 months</div>';
                 }
                 return;
             }
             
             const allMonths = expirationData.allMonths;
             
-            const relationshipSeries = expirationData.relationships.map(d => d.count);
             const facilitySeries = expirationData.facilities.map(d => d.count);
             
-            console.log('Filtered relationship series:', relationshipSeries);
             console.log('Filtered facility series:', facilitySeries);
             
-            const totalRelationships = relationshipSeries.reduce((a, b) => a + b, 0);
-            const totalFacilities = facilitySeries.reduce((a, b) => a + b, 0);
-            const totalExpiring = totalRelationships + totalFacilities;
-            console.log('Total filtered relationships expiring:', totalRelationships);
-            console.log('Total filtered facilities expiring:', totalFacilities);
-            console.log('Total filtered expiring:', totalExpiring);
+            const totalExpiring = facilitySeries.reduce((a, b) => a + b, 0);
+            console.log('Total filtered facilities expiring:', totalExpiring);
             document.getElementById('totalExpiring').textContent = totalExpiring.toLocaleString();
             
             const options = {
                 series: [
-                    {
-                        name: 'Relationships',
-                        data: relationshipSeries
-                    },
                     {
                         name: 'Facilities',
                         data: facilitySeries
                     }
                 ],
                 legend: {
-                    show: true,
+                    show: false,
                     position: 'top',
                     horizontalAlign: 'left'
                 },
-                colors: ['#465FFF', '#93A8FF'],
+                colors: ['#465FFF'],
                 chart: {
                     fontFamily: 'system-ui, -apple-system, sans-serif',
                     height: 310,
@@ -1494,7 +1507,7 @@
                 },
                 stroke: {
                     curve: 'smooth',
-                    width: [2, 2]
+                    width: [2]
                 },
                 markers: {
                     size: 0
@@ -1578,7 +1591,7 @@
                 // Create and render new chart
                 expirationChartInstance = new ApexCharts(chartElement, options);
                 expirationChartInstance.render();
-                console.log('✅ Filtered expiration chart rendered successfully with 2 series (Relationships & Facilities)');
+                console.log('✅ Filtered expiration chart rendered successfully with Facilities series');
             } catch (error) {
                 console.error('❌ Error rendering filtered expiration chart:', error);
                 console.error('Error details:', error.message, error.stack);
@@ -2079,9 +2092,15 @@
             return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
         }
 
-        // Create expiration timeline chart (Area chart for Relationships and Facilities)
+        // Create expiration timeline chart (Area chart for Facilities only)
         function createExpirationChart() {
             console.log('📊 Creating expiration chart with', portfolioData.length, 'records');
+            
+            // Update title to "Facilities Expiring in the Next 3 Months" (no filter applied)
+            const titleElement = document.getElementById('expirationChartTitle');
+            if (titleElement) {
+                titleElement.textContent = 'Facilities Expiring in the Next 3 Months';
+            }
             
             const expirationData = aggregateExpirationData(portfolioData);
             
@@ -2089,13 +2108,13 @@
             
             // Handle empty data
             if (!expirationData || expirationData.allMonths.length === 0) {
-                console.warn('⚠️ No expiration data found for the next 6 months');
+                console.warn('⚠️ No expiration data found for the next 3 months');
                 document.getElementById('totalExpiring').textContent = '0';
                 
                 // Show empty chart message
                 const chartElement = document.querySelector("#expirationChart");
                 if (chartElement) {
-                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No data expiring in the next 6 months</div>';
+                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No data expiring in the next 3 months</div>';
                 }
                 return;
             }
@@ -2103,38 +2122,28 @@
             const allMonths = expirationData.allMonths;
             console.log('Months with data:', allMonths);
             
-            const relationshipSeries = expirationData.relationships.map(d => d.count);
             const facilitySeries = expirationData.facilities.map(d => d.count);
             
-            console.log('Relationship series:', relationshipSeries);
             console.log('Facility series:', facilitySeries);
             
-            // Calculate total expiring (unique relationships + unique facilities)
-            const totalRelationships = relationshipSeries.reduce((a, b) => a + b, 0);
-            const totalFacilities = facilitySeries.reduce((a, b) => a + b, 0);
-            const totalExpiring = totalRelationships + totalFacilities;
-            console.log('Total relationships expiring:', totalRelationships);
-            console.log('Total facilities expiring:', totalFacilities);
-            console.log('Total expiring:', totalExpiring);
+            // Calculate total expiring facilities
+            const totalExpiring = facilitySeries.reduce((a, b) => a + b, 0);
+            console.log('Total facilities expiring:', totalExpiring);
             document.getElementById('totalExpiring').textContent = totalExpiring.toLocaleString();
             
             const options = {
                 series: [
-                    {
-                        name: 'Relationships',
-                        data: relationshipSeries
-                    },
                     {
                         name: 'Facilities',
                         data: facilitySeries
                     }
                 ],
                 legend: {
-                    show: true,
+                    show: false,
                     position: 'top',
                     horizontalAlign: 'left'
                 },
-                colors: ['#465FFF', '#93A8FF'],
+                colors: ['#465FFF'],
                 chart: {
                     fontFamily: 'system-ui, -apple-system, sans-serif',
                     height: 310,
@@ -2152,7 +2161,7 @@
                 },
                 stroke: {
                     curve: 'smooth',
-                    width: [2, 2]
+                    width: [2]
                 },
                 markers: {
                     size: 0
@@ -2236,7 +2245,7 @@
                 // Create and render new chart
                 expirationChartInstance = new ApexCharts(chartElement, options);
                 expirationChartInstance.render();
-                console.log('✅ Expiration chart rendered successfully with 2 series (Relationships & Facilities)');
+                console.log('✅ Expiration chart rendered successfully with Facilities series');
             } catch (error) {
                 console.error('❌ Error rendering expiration chart:', error);
                 console.error('Error details:', error.message, error.stack);
@@ -2656,24 +2665,22 @@
             return null;
         }
 
-        // Aggregate expiration data for the next 6 months (counts unique Relationships and Facilities)
+        // Aggregate expiration data for the next 3 months (counts unique Facilities only)
         function aggregateExpirationData(data) {
-            console.log(`📊 Aggregating expiration data for ${data.length} rows (next 6 months only)`);
+            console.log(`📊 Aggregating expiration data for ${data.length} rows (next 3 months only)`);
             
-            // Calculate date range: today to 6 months from now
+            // Calculate date range: today to 3 months from now
             const today = new Date();
             today.setHours(0, 0, 0, 0); // Start of today
-            const sixMonthsLater = new Date(today);
-            sixMonthsLater.setMonth(sixMonthsLater.getMonth() + 6);
+            const threeMonthsLater = new Date(today);
+            threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
             
-            console.log(`  Date range: ${today.toLocaleDateString()} to ${sixMonthsLater.toLocaleDateString()}`);
+            console.log(`  Date range: ${today.toLocaleDateString()} to ${threeMonthsLater.toLocaleDateString()}`);
             
-            // Group by month-year with Sets to track unique IDs
-            const relationshipsByMonth = {}; // { 'YYYY-MM': Set<Relationship_ID> }
+            // Group by month-year with Sets to track unique Facility IDs
             const facilitiesByMonth = {};    // { 'YYYY-MM': Set<Facility_ID> }
             
             let validMaturityDates = 0;
-            let validCADates = 0;
             let filteredCount = 0;
             
             data.forEach((row, index) => {
@@ -2681,7 +2688,7 @@
                 const maturityDate = row.Maturity_Date;
                 if (maturityDate) {
                     const dateObj = parseDate(maturityDate);
-                    if (dateObj && dateObj >= today && dateObj <= sixMonthsLater) {
+                    if (dateObj && dateObj >= today && dateObj <= threeMonthsLater) {
                         validMaturityDates++;
                         filteredCount++;
                         
@@ -2697,63 +2704,27 @@
                             facilitiesByMonth[monthYear].add(row.Facility_ID);
                         }
                         
-                        // Track unique Relationship IDs
-                        if (row.Relationship_ID || row.Relationship_Name) {
-                            if (!relationshipsByMonth[monthYear]) {
-                                relationshipsByMonth[monthYear] = new Set();
-                            }
-                            relationshipsByMonth[monthYear].add(row.Relationship_ID || row.Relationship_Name);
-                        }
-                        
                         // Log first few for debugging
                         if (index < 3) {
-                            console.log(`  Row ${index}: Maturity=${maturityDate} → ${monthYear}, Facility=${row.Facility_ID}, Relationship=${row.Relationship_ID}`);
-                        }
-                    }
-                }
-                
-                // Check CA_Expiration_Date for CAs (also count as relationships)
-                const caDate = row.CA_Expiration_Date;
-                if (caDate) {
-                    const dateObj = parseDate(caDate);
-                    if (dateObj && dateObj >= today && dateObj <= sixMonthsLater) {
-                        validCADates++;
-                        
-                        const year = dateObj.getFullYear();
-                        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-                        const monthYear = `${year}-${month}`;
-                        
-                        // Track unique Relationship IDs for CA expirations
-                        if (row.Relationship_ID || row.Relationship_Name) {
-                            if (!relationshipsByMonth[monthYear]) {
-                                relationshipsByMonth[monthYear] = new Set();
-                            }
-                            relationshipsByMonth[monthYear].add(row.Relationship_ID || row.Relationship_Name);
+                            console.log(`  Row ${index}: Maturity=${maturityDate} → ${monthYear}, Facility=${row.Facility_ID}`);
                         }
                     }
                 }
             });
             
             console.log(`  Valid maturity dates in range: ${validMaturityDates}`);
-            console.log(`  Valid CA dates in range: ${validCADates}`);
-            console.log(`  Unique months: ${Object.keys(relationshipsByMonth).length}`);
+            console.log(`  Unique months: ${Object.keys(facilitiesByMonth).length}`);
             
             // Get all unique months and sort
-            const allMonths = [...new Set([...Object.keys(relationshipsByMonth), ...Object.keys(facilitiesByMonth)])].sort();
+            const allMonths = Object.keys(facilitiesByMonth).sort();
             
             // Convert Sets to counts
-            const relationshipData = allMonths.map(month => ({
-                month,
-                count: relationshipsByMonth[month] ? relationshipsByMonth[month].size : 0
-            }));
-            
             const facilityData = allMonths.map(month => ({
                 month,
                 count: facilitiesByMonth[month] ? facilitiesByMonth[month].size : 0
             }));
             
             return {
-                relationships: relationshipData,
                 facilities: facilityData,
                 allMonths
             };

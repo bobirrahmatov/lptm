@@ -516,6 +516,7 @@
         let expirationChartInstance = null;
         let searchDebounceTimer = null;
         let relationshipChartInstance = null;
+        let mapInstance = null;  // Store map instance for updates
         let activeFilters = {};
         let selectedMetricType = 'facilityAmount'; // Default to Facility Amount
         let selectedRegionalLevel = 'facility'; // Default to Facility Level (Facility ID count), can be 'relationship' for Relationship ID count
@@ -1515,14 +1516,22 @@
             }
             
             try {
+                // Destroy previous instance
                 if (expirationChartInstance) {
                     expirationChartInstance.destroy();
+                    expirationChartInstance = null;
                 }
+                
+                // Clear any previous content to avoid ApexCharts errors
+                chartElement.innerHTML = '';
+                
+                // Create and render new chart
                 expirationChartInstance = new ApexCharts(chartElement, options);
                 expirationChartInstance.render();
-                console.log('Filtered expiration chart rendered successfully');
+                console.log('✅ Filtered expiration chart rendered successfully');
             } catch (error) {
-                console.error('Error rendering filtered expiration chart:', error);
+                console.error('❌ Error rendering filtered expiration chart:', error);
+                console.error('Error details:', error.message, error.stack);
             }
         }
 
@@ -1615,12 +1624,22 @@
                     }
                 });
                 
-                // Clear existing map content but keep the element
+                // Destroy existing map instance if it exists
+                if (mapInstance) {
+                    try {
+                        mapInstance.destroy();
+                        mapInstance = null;
+                    } catch (e) {
+                        console.warn('⚠️  Error destroying filtered map:', e);
+                    }
+                }
+                
+                // Clear existing map DOM
                 mapElement.innerHTML = '';
                 
                 // Small delay to ensure DOM is ready
                 setTimeout(() => {
-                    const map = new jsVectorMap({
+                    mapInstance = new jsVectorMap({
                         selector: '#mapOne',
                         map: 'world',
                         zoomButtons: false,
@@ -1647,6 +1666,7 @@
                     }
                 }
             });
+                    console.log('✅ Filtered map initialized successfully with', markers.length, 'markers');
                 }, 50); // Small delay to ensure DOM is ready
             } catch (error) {
                 console.error('Error initializing filtered map:', error);
@@ -1826,14 +1846,22 @@
             }
             
             try {
+                // Destroy previous instance
                 if (relationshipChartInstance) {
                     relationshipChartInstance.destroy();
+                    relationshipChartInstance = null;
                 }
+                
+                // Clear any previous content to avoid ApexCharts errors
+                chartElement.innerHTML = '';
+                
+                // Create and render new chart
                 relationshipChartInstance = new ApexCharts(chartElement, options);
                 relationshipChartInstance.render();
-                console.log('Filtered relationship chart rendered successfully with', relationships.length, 'relationships');
+                console.log('✅ Filtered relationship chart rendered successfully with', relationships.length, 'relationships');
             } catch (error) {
-                console.error('Error creating filtered relationship chart:', error);
+                console.error('❌ Error creating filtered relationship chart:', error);
+                console.error('Error details:', error.message, error.stack);
             }
         }
 
@@ -2139,14 +2167,22 @@
             }
             
             try {
+                // Destroy previous instance
                 if (expirationChartInstance) {
                     expirationChartInstance.destroy();
+                    expirationChartInstance = null;
                 }
+                
+                // Clear any previous content to avoid ApexCharts errors
+                chartElement.innerHTML = '';
+                
+                // Create and render new chart
                 expirationChartInstance = new ApexCharts(chartElement, options);
                 expirationChartInstance.render();
-                console.log('Expiration chart rendered successfully');
+                console.log('✅ Expiration chart rendered successfully');
             } catch (error) {
-                console.error('Error rendering expiration chart:', error);
+                console.error('❌ Error rendering expiration chart:', error);
+                console.error('Error details:', error.message, error.stack);
             }
         }
 
@@ -2305,12 +2341,22 @@
                     }
                 });
                 
-                // Clear existing map content but keep the element
+                // Destroy existing map instance if it exists
+                if (mapInstance) {
+                    try {
+                        mapInstance.destroy();
+                        mapInstance = null;
+                    } catch (e) {
+                        console.warn('⚠️  Error destroying map:', e);
+                    }
+                }
+                
+                // Clear existing map DOM
                 mapElement.innerHTML = '';
                 
                 // Small delay to ensure DOM is ready
                 setTimeout(() => {
-                    const map = new jsVectorMap({
+                    mapInstance = new jsVectorMap({
                         selector: '#mapOne',
                         map: 'world',
                         zoomButtons: false,
@@ -2337,6 +2383,7 @@
                     }
                 }
             });
+                    console.log('✅ Map initialized successfully with', markers.length, 'markers');
                 }, 50); // Small delay to ensure DOM is ready
             } catch (error) {
                 console.error('Error initializing map:', error);
@@ -2575,14 +2622,22 @@
             }
             
             try {
+                // Destroy previous instance
                 if (relationshipChartInstance) {
                     relationshipChartInstance.destroy();
+                    relationshipChartInstance = null;
                 }
+                
+                // Clear any previous content to avoid ApexCharts errors
+                chartElement.innerHTML = '';
+                
+                // Create and render new chart
                 relationshipChartInstance = new ApexCharts(chartElement, options);
                 relationshipChartInstance.render();
-                console.log('Relationship chart rendered successfully with', relationships.length, 'relationships');
+                console.log('✅ Relationship chart rendered successfully with', relationships.length, 'relationships');
             } catch (error) {
-                console.error('Error creating relationship chart:', error);
+                console.error('❌ Error creating relationship chart:', error);
+                console.error('Error details:', error.message, error.stack);
             }
         }
 

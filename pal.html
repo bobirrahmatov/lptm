@@ -744,12 +744,24 @@
                 reader.onload = function(e) {
                     try {
                         const data = new Uint8Array(e.target.result);
-                        const workbook = XLSX.read(data, { type: 'array' });
+                        
+                        // Important: cellDates: true converts Excel date serial numbers to JS Dates
+                        const workbook = XLSX.read(data, { 
+                            type: 'array',
+                            cellDates: true,  // Convert Excel dates to JavaScript dates
+                            cellNF: false,
+                            cellText: false
+                        });
+                        
                         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                         
                         console.log('Excel Sheet Name:', workbook.SheetNames[0]);
                         
-                        const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                        // Convert sheet to JSON with date formatting
+                        const jsonData = XLSX.utils.sheet_to_json(firstSheet, {
+                            raw: false,  // Don't use raw values (converts dates to strings)
+                            dateNF: 'yyyy-mm-dd'  // Date format
+                        });
                         
                         console.log(`Total rows in Excel: ${jsonData.length}`);
                         
@@ -761,6 +773,9 @@
                         // Log sample data structure for debugging
                         if (filteredData.length > 0) {
                             console.log('Sample record fields:', Object.keys(filteredData[0]));
+                            console.log('Sample Maturity_Date:', filteredData[0].Maturity_Date, typeof filteredData[0].Maturity_Date);
+                            console.log('Sample CA_Expiration_Date:', filteredData[0].CA_Expiration_Date, typeof filteredData[0].CA_Expiration_Date);
+                            console.log('Sample Report_Date:', filteredData[0].Report_Date, typeof filteredData[0].Report_Date);
                         }
                         
                         resolve(filteredData);
@@ -2139,10 +2154,19 @@
         function parseDate(dateStr) {
             if (!dateStr) return null;
             
+            // If it's already a Date object (from Excel parsing), return it
+            if (dateStr instanceof Date) {
+                return !isNaN(dateStr.getTime()) ? dateStr : null;
+            }
+            
+            // Convert to string for parsing
+            const str = String(dateStr).trim();
+            if (!str) return null;
+            
             try {
                 // Handle YYYY-MM-DD format (most common in CSV)
-                if (dateStr.includes('-')) {
-                    const parts = dateStr.split('-');
+                if (str.includes('-')) {
+                    const parts = str.split('-');
                     if (parts.length === 3) {
                         // Check if it's YYYY-MM-DD
                         if (parts[0].length === 4) {
@@ -2158,8 +2182,8 @@
                 }
                 
                 // Handle DD/MM/YYYY format
-                if (dateStr.includes('/')) {
-                    const parts = dateStr.split('/');
+                if (str.includes('/')) {
+                    const parts = str.split('/');
                     if (parts.length === 3) {
                         const day = parseInt(parts[0]);
                         const month = parseInt(parts[1]) - 1; // JavaScript months are 0-indexed
@@ -2172,14 +2196,14 @@
                 }
                 
                 // Try standard date parsing as fallback
-                const date = new Date(dateStr);
+                const date = new Date(str);
                 if (!isNaN(date.getTime())) {
                     return date;
                 }
             } catch (e) {
                 // Only log occasionally to avoid console spam
                 if (Math.random() < 0.01) {
-                    console.warn('Invalid date:', dateStr);
+                    console.warn('Invalid date:', str);
                 }
             }
             return null;

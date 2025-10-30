@@ -1423,11 +1423,18 @@
         function createExpirationChartFromFiltered() {
             console.log('📊 Creating filtered expiration chart with', filteredData.length, 'records');
             
-            // Update title dynamically based on active filters
+            // Update title dynamically based on active filters and search
             const titleElement = document.getElementById('expirationChartTitle');
             if (titleElement) {
                 // Build filter description
                 const filterParts = [];
+                
+                // Check for search term
+                const searchTerm = document.getElementById('searchInput').value;
+                if (searchTerm && searchTerm.trim() !== '') {
+                    filterParts.push(`Search: "${searchTerm.trim()}"`);
+                }
+                
                 if (activeFilters.Region && activeFilters.Region.length > 0) {
                     filterParts.push(activeFilters.Region.join(', '));
                 }
@@ -3165,6 +3172,14 @@
                 
                 if (searchTerm === '') {
                     filteredData = [...portfolioData];
+                    
+                    // No search term, show all data - update charts to show full data
+                    requestAnimationFrame(() => {
+                        createExpirationChart();
+                        createFacilityTrendChart();
+                        createRegionalChart();
+                        createRelationshipChart();
+                    });
                 } else {
                     // Optimized search
                     filteredData = [];
@@ -3179,6 +3194,15 @@
                         }
                         if (found) filteredData.push(row);
                     }
+                    
+                    // Search term is active, update charts with filtered data
+                    requestAnimationFrame(() => {
+                        calculateMetricsFromFiltered();
+                        createExpirationChartFromFiltered();
+                        createFacilityTrendChartFromFiltered();
+                        createRegionalChartFromFiltered();
+                        createRelationshipChartFromFiltered();
+                    });
                 }
                 
                 const elapsed = (performance.now() - startTime).toFixed(0);

@@ -1215,20 +1215,20 @@
 
         // Calculate metrics from filtered data
         function calculateMetricsFromFiltered() {
-            // Total Facility Amount
+            // Total Facility Amount (sum of Fac_Amount)
             const totalFacAmount = filteredData.reduce((sum, row) => {
                 return sum + (parseFloat(row.Fac_Amount) || 0);
             }, 0);
             
-            // Total OSUC from filtered data
+            // Total OSUC (sum of Direct_OS)
             const totalOSUC = filteredData.reduce((sum, row) => {
-                return sum + (parseFloat(row.Total_Comm_Exposure) || 0);
+                return sum + (parseFloat(row.Direct_OS) || 0);
             }, 0);
             
             // Total Number of Relationships
             const uniqueRelationships = new Set(
                 filteredData
-                    .map(row => row.Relationship_ID || row.Relationship_Name)
+                    .map(row => row.Relationship_Name || row.Relationship_ID)
                     .filter(Boolean)
             ).size;
             
@@ -1384,10 +1384,10 @@
                 .slice(0, 5);
             
             const regionInfo = {
-                'NAM': { name: 'North America', color: 'bg-blue-500' },
-                'EMEA': { name: 'Europe & Middle East', color: 'bg-green-500' },
-                'APAC': { name: 'Asia Pacific', color: 'bg-orange-500' },
-                'LATAM': { name: 'Latin America', color: 'bg-purple-500' },
+                'NAM': { name: 'United States', color: 'bg-blue-500' },
+                'EMEA': { name: 'Luxembourg', color: 'bg-green-500' },
+                'APAC': { name: 'Malaysia', color: 'bg-orange-500' },
+                'LATAM': { name: 'Brazil', color: 'bg-purple-500' },
                 'MEA': { name: 'Middle East & Africa', color: 'bg-red-500' }
             };
             
@@ -1440,11 +1440,11 @@
                 }
                 
                 const regionCoords = {
-                    'NAM': [37.0902, -95.7129],
-                    'EMEA': [51.5074, -0.1278],
-                    'APAC': [35.6762, 139.6503],
-                    'LATAM': [-23.5505, -46.6333],
-                    'MEA': [25.2048, 55.2708]
+                    'NAM': [37.0902, -95.7129], // United States
+                    'EMEA': [49.6116, 6.1319], // Luxembourg
+                    'APAC': [3.1390, 101.6869], // Malaysia (Kuala Lumpur)
+                    'LATAM': [-23.5505, -46.6333], // Brazil (São Paulo)
+                    'MEA': [25.2048, 55.2708] // Middle East (Dubai)
                 };
                 
                 const regionCounts = getRegionCountsFromFiltered();
@@ -1614,6 +1614,14 @@
                         }
                     }
                 },
+                yaxis: {
+                    labels: {
+                        style: {
+                            fontSize: '11px'
+                        },
+                        maxWidth: 200
+                    }
+                },
                 dataLabels: {
                     enabled: false
                 },
@@ -1641,7 +1649,7 @@
                 }
                 relationshipChartInstance = new ApexCharts(chartElement, options);
                 relationshipChartInstance.render();
-                console.log('Filtered relationship chart rendered successfully');
+                console.log('Filtered relationship chart rendered successfully with', relationships.length, 'relationships');
             } catch (error) {
                 console.error('Error creating filtered relationship chart:', error);
             }
@@ -1675,20 +1683,20 @@
 
         // Calculate top metrics
         function calculateMetrics() {
-            // Total Facility Amount
+            // Total Facility Amount (sum of Fac_Amount)
             const totalFacAmount = portfolioData.reduce((sum, row) => {
                 return sum + (parseFloat(row.Fac_Amount) || 0);
             }, 0);
             
-            // Total OSUC (Outstanding + Unused Committed = Total_Comm_Exposure)
+            // Total OSUC (sum of Direct_OS)
             const totalOSUC = portfolioData.reduce((sum, row) => {
-                return sum + (parseFloat(row.Total_Comm_Exposure) || 0);
+                return sum + (parseFloat(row.Direct_OS) || 0);
             }, 0);
             
             // Total Number of Relationships
             const uniqueRelationships = new Set(
                 portfolioData
-                    .map(row => row.Relationship_ID || row.Relationship_Name)
+                    .map(row => row.Relationship_Name || row.Relationship_ID)
                     .filter(Boolean)
             ).size;
             
@@ -1945,10 +1953,10 @@
                 
                 // Get region coordinates for markers
                 const regionCoords = {
-                    'NAM': [37.0902, -95.7129], // North America (USA)
-                    'EMEA': [51.5074, -0.1278], // Europe (London)
-                    'APAC': [35.6762, 139.6503], // Asia Pacific (Tokyo)
-                    'LATAM': [-23.5505, -46.6333], // Latin America (São Paulo)
+                    'NAM': [37.0902, -95.7129], // United States
+                    'EMEA': [49.6116, 6.1319], // Luxembourg
+                    'APAC': [3.1390, 101.6869], // Malaysia (Kuala Lumpur)
+                    'LATAM': [-23.5505, -46.6333], // Brazil (São Paulo)
                     'MEA': [25.2048, 55.2708] // Middle East (Dubai)
                 };
                 
@@ -2074,10 +2082,10 @@
             
             // Region flag/icon mapping
             const regionInfo = {
-                'NAM': { name: 'North America', color: 'bg-blue-500' },
-                'EMEA': { name: 'Europe & Middle East', color: 'bg-green-500' },
-                'APAC': { name: 'Asia Pacific', color: 'bg-orange-500' },
-                'LATAM': { name: 'Latin America', color: 'bg-purple-500' },
+                'NAM': { name: 'United States', color: 'bg-blue-500' },
+                'EMEA': { name: 'Luxembourg', color: 'bg-green-500' },
+                'APAC': { name: 'Malaysia', color: 'bg-orange-500' },
+                'LATAM': { name: 'Brazil', color: 'bg-purple-500' },
                 'MEA': { name: 'Middle East & Africa', color: 'bg-red-500' }
             };
             
@@ -2183,6 +2191,14 @@
                         }
                     }
                 },
+                yaxis: {
+                    labels: {
+                        style: {
+                            fontSize: '11px'
+                        },
+                        maxWidth: 200
+                    }
+                },
                 dataLabels: {
                     enabled: false
                 },
@@ -2210,7 +2226,7 @@
                 }
                 relationshipChartInstance = new ApexCharts(chartElement, options);
                 relationshipChartInstance.render();
-                console.log('Relationship chart rendered successfully');
+                console.log('Relationship chart rendered successfully with', relationships.length, 'relationships');
             } catch (error) {
                 console.error('Error creating relationship chart:', error);
             }

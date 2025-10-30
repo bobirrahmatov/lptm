@@ -1,632 +1,616 @@
+Attribute VB_Name = "AggregatePortfolioData"
+' =========================================
+' Portfolio Analytics Data Aggregator
+' =========================================
+' This VBA script aggregates large portfolio data into a lightweight JSON format
+' optimized for the portfolioAnalytics.html dashboard
+'
+' INSTRUCTIONS:
+' 1. Open your Excel file with the portfolio data
+' 2. Press ALT+F11 to open VBA Editor
+' 3. Insert > Module
+' 4. Paste this code
+' 5. Update the constants below to match your data
+' 6. Run the "AggregateAndExportToJSON" macro
+' 7. Upload the generated JSON file to Confluence as an attachment
+
 Option Explicit
 
-' ==========================================
-' Portfolio Analytics Data Aggregator
-' ==========================================
-' This VBA script processes Excel data and creates an optimized JSON file
-' with aggregated data, pre-calculated metrics, and proper date formatting
-' 
-' Instructions:
-' 1. Open your Excel file with the raw data
-' 2. Press Alt+F11 to open VBA Editor
-' 3. Insert > Module, then paste this code
-' 4. Update the CONFIG section below with your settings
-' 5. Run the "ExportPortfolioDataToJSON" macro
-' ==========================================
+' ===== CONFIGURATION =====
+' Update these constants to match your Excel sheet and column names
+Const SOURCE_SHEET_NAME As String = "Sheet1" ' Your sheet name
+Const OUTPUT_FILE_NAME As String = "portfolioData.json" ' Output filename
+Const MAX_DETAIL_RECORDS As Long = 1000 ' Max records to include in detail table (for performance)
 
-' ==========================================
-' CONFIGURATION - Update these values
-' ==========================================
-Const DATA_SHEET_NAME As String = "Sheet1"        ' Name of your data sheet
-Const START_ROW As Integer = 2                     ' First row of data (after headers)
-Const OUTPUT_FOLDER As String = ""                 ' Leave empty to save in same folder as workbook
-Const OUTPUT_FILENAME As String = "portfolioData.json"
-Const MAX_DETAIL_RECORDS As Long = 5000           ' Limit detail records for performance
-' ==========================================
+' Column mappings - Update these to match your actual column headers
+Const COL_REPORT_DATE As String = "Report_Date"
+Const COL_REGION As String = "Region"
+Const COL_FACILITY_ID As String = "Facility_ID"
+Const COL_RELATIONSHIP_NAME As String = "Relationship_Name"
+Const COL_RELATIONSHIP_ID As String = "Relationship_ID"
+Const COL_PRODUCT_PROGRAM As String = "Product_Program"
+Const COL_FAC_AMOUNT As String = "Fac_Amount"
+Const COL_DIRECT_OS As String = "Direct_OS"
+Const COL_MATURITY_DATE As String = "Maturity_Date"
+Const COL_CA_EXPIRATION_DATE As String = "CA_Expiration_Date"
+Const COL_CAID As String = "CAID"
+Const COL_FACILITY_TYPE As String = "Facility_Type"
+Const COL_MANAGEMENT_STATUS As String = "Management_Status"
+Const COL_COMMITMENT As String = "Committed/Uncommitted"
+Const COL_CONTROL_UNIT As String = "Control_Unit"
+Const COL_TEAM_LEAD As String = "Underwriting_Team_Lead"
+Const COL_UNDERWRITER As String = "Lead_Underwriter"
 
-' Main export function
-Sub ExportPortfolioDataToJSON()
-    On Error GoTo ErrorHandler
-    
+' ===== MAIN SUBROUTINE =====
+Sub AggregateAndExportToJSON()
     Dim startTime As Double
     startTime = Timer
     
     Application.ScreenUpdating = False
     Application.Calculation = xlCalculationManual
     
-    Debug.Print "=========================================="
-    Debug.Print "Portfolio Data Aggregator Started"
-    Debug.Print "=========================================="
+    On Error GoTo ErrorHandler
     
-    ' Get the data sheet
+    Debug.Print "========================================="
+    Debug.Print "Portfolio Data Aggregation Started"
+    Debug.Print "========================================="
+    
+    ' Get source data
     Dim ws As Worksheet
-    Set ws = ThisWorkbook.Sheets(DATA_SHEET_NAME)
+    Set ws = ThisWorkbook.Sheets(SOURCE_SHEET_NAME)
     
-    ' Find last row and last column
     Dim lastRow As Long
-    Dim lastCol As Long
     lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
-    lastCol = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
     
-    Debug.Print "Found " & (lastRow - START_ROW + 1) & " records"
+    Debug.Print "Total rows found: " & (lastRow - 1)
     
-    ' Read headers
-    Dim headers() As String
-    ReDim headers(1 To lastCol)
-    Dim colMap As Object
-    Set colMap = CreateObject("Scripting.Dictionary")
+    ' Get column indices
+    Dim headers As Range
+    Set headers = ws.Rows(1)
     
-    Dim i As Long
-    For i = 1 To lastCol
-        headers(i) = Trim(ws.Cells(1, i).Value)
-        colMap(headers(i)) = i
-    Next i
+    ' Build aggregated data structure
+    Dim jsonData As String
+    jsonData = "{"
     
-    ' Validate required columns
-    If Not ValidateColumns(colMap) Then
-        MsgBox "Missing required columns. Please check the data.", vbCritical
-        Exit Sub
-    End If
+    ' 1. Calculate Summary Metrics
+    Debug.Print "Calculating summary metrics..."
+    jsonData = jsonData & """metrics"": " & GetMetrics(ws, lastRow, headers) & ","
     
-    ' Read and process data
-    Dim rawData() As Variant
-    rawData = ws.Range(ws.Cells(START_ROW, 1), ws.Cells(lastRow, lastCol)).Value
+    ' 2. Aggregate Monthly Expiration Data
+    Debug.Print "Aggregating monthly expirations..."
+    jsonData = jsonData & """monthlyExpirations"": " & GetMonthlyExpirations(ws, lastRow, headers) & ","
     
-    Debug.Print "Processing data..."
+    ' 3. Aggregate Regional Distribution
+    Debug.Print "Aggregating regional distribution..."
+    jsonData = jsonData & """regionalDistribution"": " & GetRegionalDistribution(ws, lastRow, headers) & ","
     
-    ' Create aggregated data structures
-    Dim metrics As Object
-    Set metrics = CalculateMetrics(rawData, colMap)
+    ' 4. Get Top Relationships
+    Debug.Print "Calculating top relationships..."
+    jsonData = jsonData & """topRelationships"": " & GetTopRelationships(ws, lastRow, headers, 50) & ","
     
-    Dim chartData As Object
-    Set chartData = AggregateChartData(rawData, colMap)
+    ' 5. Get Filter Options
+    Debug.Print "Extracting filter options..."
+    jsonData = jsonData & """filterOptions"": " & GetFilterOptions(ws, lastRow, headers) & ","
     
-    Dim filterOptions As Object
-    Set filterOptions = ExtractFilterOptions(rawData, colMap)
+    ' 6. Get Sample Detail Records (most recent)
+    Debug.Print "Extracting sample detail records..."
+    jsonData = jsonData & """detailRecords"": " & GetDetailRecords(ws, lastRow, headers, MAX_DETAIL_RECORDS)
     
-    ' Limit detail records for performance
-    Dim detailRecords As Long
-    detailRecords = Application.Min(lastRow - START_ROW + 1, MAX_DETAIL_RECORDS)
-    
-    Debug.Print "Creating JSON with " & detailRecords & " detail records..."
-    
-    ' Build JSON
-    Dim json As String
-    json = BuildJSON(rawData, colMap, metrics, chartData, filterOptions, detailRecords, headers)
+    jsonData = jsonData & "}"
     
     ' Save to file
-    Dim outputPath As String
-    If OUTPUT_FOLDER = "" Then
-        outputPath = ThisWorkbook.Path & "\" & OUTPUT_FILENAME
-    Else
-        outputPath = OUTPUT_FOLDER & "\" & OUTPUT_FILENAME
-    End If
+    Dim filePath As String
+    filePath = ThisWorkbook.Path & "\" & OUTPUT_FILE_NAME
     
-    SaveTextToFile json, outputPath
+    Dim fso As Object
+    Set fso = CreateObject("Scripting.FileSystemObject")
     
-    Dim elapsedTime As Double
-    elapsedTime = Timer - startTime
+    Dim fileStream As Object
+    Set fileStream = fso.CreateTextFile(filePath, True, False)
+    fileStream.Write jsonData
+    fileStream.Close
     
     Application.ScreenUpdating = True
     Application.Calculation = xlCalculationAutomatic
     
-    Debug.Print "=========================================="
-    Debug.Print "Export completed in " & Format(elapsedTime, "0.00") & " seconds"
-    Debug.Print "File saved to: " & outputPath
-    Debug.Print "=========================================="
+    Dim elapsed As Double
+    elapsed = Timer - startTime
     
-    MsgBox "Data exported successfully!" & vbCrLf & vbCrLf & _
-           "File: " & outputPath & vbCrLf & _
-           "Records: " & detailRecords & vbCrLf & _
-           "Time: " & Format(elapsedTime, "0.00") & "s", vbInformation, "Export Complete"
+    Debug.Print "========================================="
+    Debug.Print "SUCCESS! File saved to:"
+    Debug.Print filePath
+    Debug.Print "Time elapsed: " & Format(elapsed, "0.00") & " seconds"
+    Debug.Print "========================================="
+    
+    MsgBox "Data aggregation complete!" & vbCrLf & vbCrLf & _
+           "File saved to:" & vbCrLf & filePath & vbCrLf & vbCrLf & _
+           "Time: " & Format(elapsed, "0.00") & " seconds" & vbCrLf & vbCrLf & _
+           "Next steps:" & vbCrLf & _
+           "1. Upload " & OUTPUT_FILE_NAME & " to your Confluence page" & vbCrLf & _
+           "2. Update CONFLUENCE_FILE_NAME in portfolioAnalytics.html", _
+           vbInformation, "Export Complete"
     
     Exit Sub
     
 ErrorHandler:
     Application.ScreenUpdating = True
     Application.Calculation = xlCalculationAutomatic
-    MsgBox "Error: " & Err.Description, vbCritical
-    Debug.Print "Error: " & Err.Description
+    MsgBox "Error: " & Err.Description, vbCritical, "Error"
+    Debug.Print "ERROR: " & Err.Description
 End Sub
 
-' Validate required columns exist
-Function ValidateColumns(colMap As Object) As Boolean
-    Dim requiredCols As Variant
-    requiredCols = Array("Region", "Facility_ID", "Relationship_Name", _
-                        "Product_Program", "Fac_Amount", "Direct_OS", _
-                        "Maturity_Date", "CA_Expiration_Date")
-    
-    Dim col As Variant
-    For Each col In requiredCols
-        If Not colMap.Exists(col) Then
-            Debug.Print "Missing required column: " & col
-            ValidateColumns = False
-            Exit Function
-        End If
-    Next col
-    
-    ValidateColumns = True
+' ===== HELPER FUNCTIONS =====
+
+' Get column index by header name
+Function GetColIndex(headers As Range, colName As String) As Long
+    On Error Resume Next
+    GetColIndex = Application.WorksheetFunction.Match(colName, headers, 0)
+    If Err.Number <> 0 Then
+        Debug.Print "Warning: Column '" & colName & "' not found"
+        GetColIndex = 0
+    End If
+    On Error GoTo 0
 End Function
 
-' Calculate all metrics
-Function CalculateMetrics(data As Variant, colMap As Object) As Object
-    Dim metrics As Object
-    Set metrics = CreateObject("Scripting.Dictionary")
+' Calculate summary metrics
+Function GetMetrics(ws As Worksheet, lastRow As Long, headers As Range) As String
+    Dim colFacAmount As Long, colDirectOS As Long, colRelName As Long
+    Dim colFacID As Long, colCAID As Long
     
-    Dim totalFacAmount As Double
-    Dim totalOSUC As Double
-    Dim relationships As Object
-    Dim facilities As Object
-    Dim cas As Object
+    colFacAmount = GetColIndex(headers, COL_FAC_AMOUNT)
+    colDirectOS = GetColIndex(headers, COL_DIRECT_OS)
+    colRelName = GetColIndex(headers, COL_RELATIONSHIP_NAME)
+    colFacID = GetColIndex(headers, COL_FACILITY_ID)
+    colCAID = GetColIndex(headers, COL_CAID)
     
-    Set relationships = CreateObject("Scripting.Dictionary")
-    Set facilities = CreateObject("Scripting.Dictionary")
-    Set cas = CreateObject("Scripting.Dictionary")
+    Dim totalFacAmount As Double, totalDirectOS As Double
+    Dim uniqueRels As Object, uniqueFacs As Object, uniqueCAs As Object
+    Set uniqueRels = CreateObject("Scripting.Dictionary")
+    Set uniqueFacs = CreateObject("Scripting.Dictionary")
+    Set uniqueCAs = CreateObject("Scripting.Dictionary")
     
     Dim i As Long
-    For i = 1 To UBound(data, 1)
+    For i = 2 To lastRow
         ' Sum amounts
-        totalFacAmount = totalFacAmount + GetNumericValue(data(i, colMap("Fac_Amount")))
-        totalOSUC = totalOSUC + GetNumericValue(data(i, colMap("Total_Comm_Exposure")))
+        If colFacAmount > 0 Then totalFacAmount = totalFacAmount + Val(ws.Cells(i, colFacAmount).Value)
+        If colDirectOS > 0 Then totalDirectOS = totalDirectOS + Val(ws.Cells(i, colDirectOS).Value)
         
         ' Count uniques
-        Dim relName As String
-        relName = GetStringValue(data(i, colMap("Relationship_Name")))
-        If relName <> "" And Not relationships.Exists(relName) Then
-            relationships(relName) = 1
+        If colRelName > 0 And ws.Cells(i, colRelName).Value <> "" Then
+            uniqueRels(ws.Cells(i, colRelName).Value) = 1
         End If
-        
-        Dim facID As String
-        facID = GetStringValue(data(i, colMap("Facility_ID")))
-        If facID <> "" And Not facilities.Exists(facID) Then
-            facilities(facID) = 1
+        If colFacID > 0 And ws.Cells(i, colFacID).Value <> "" Then
+            uniqueFacs(ws.Cells(i, colFacID).Value) = 1
         End If
-        
-        Dim caID As String
-        caID = GetStringValue(data(i, colMap("CAID")))
-        If caID <> "" And Not cas.Exists(caID) Then
-            cas(caID) = 1
+        If colCAID > 0 And ws.Cells(i, colCAID).Value <> "" Then
+            uniqueCAs(ws.Cells(i, colCAID).Value) = 1
         End If
     Next i
     
-    metrics("totalRelationships") = relationships.Count
-    metrics("totalFacilities") = facilities.Count
-    metrics("totalCAs") = cas.Count
-    metrics("totalFacAmount") = totalFacAmount
-    metrics("totalOSUC") = totalOSUC
-    
-    Debug.Print "Metrics: " & relationships.Count & " relationships, " & _
-                facilities.Count & " facilities, " & cas.Count & " CAs"
-    
-    Set CalculateMetrics = metrics
+    GetMetrics = "{" & _
+        """totalRecords"": " & (lastRow - 1) & "," & _
+        """totalFacilityAmount"": " & totalFacAmount & "," & _
+        """totalDirectOS"": " & totalDirectOS & "," & _
+        """uniqueRelationships"": " & uniqueRels.Count & "," & _
+        """uniqueFacilities"": " & uniqueFacs.Count & "," & _
+        """uniqueCAs"": " & uniqueCAs.Count & _
+        "}"
 End Function
 
-' Aggregate data for charts
-Function AggregateChartData(data As Variant, colMap As Object) As Object
-    Dim chartData As Object
-    Set chartData = CreateObject("Scripting.Dictionary")
+' Aggregate monthly expirations
+Function GetMonthlyExpirations(ws As Worksheet, lastRow As Long, headers As Range) As String
+    Dim colMaturity As Long, colCAExp As Long
+    colMaturity = GetColIndex(headers, COL_MATURITY_DATE)
+    colCAExp = GetColIndex(headers, COL_CA_EXPIRATION_DATE)
     
-    ' Expiration timeline by month
-    Dim expirationByMonth As Object
-    Set expirationByMonth = CreateObject("Scripting.Dictionary")
+    Dim facilityMonths As Object, caMonths As Object
+    Set facilityMonths = CreateObject("Scripting.Dictionary")
+    Set caMonths = CreateObject("Scripting.Dictionary")
     
-    ' CA expiration by month
-    Dim caExpirationByMonth As Object
-    Set caExpirationByMonth = CreateObject("Scripting.Dictionary")
+    Dim i As Long, monthKey As String, dateVal As Date
     
-    ' Regional distribution
-    Dim regionCounts As Object
-    Set regionCounts = CreateObject("Scripting.Dictionary")
-    
-    ' Top relationships by amount
-    Dim relationshipAmounts As Object
-    Set relationshipAmounts = CreateObject("Scripting.Dictionary")
-    
-    ' Top relationships by Direct OS
-    Dim relationshipDirectOS As Object
-    Set relationshipDirectOS = CreateObject("Scripting.Dictionary")
-    
-    Dim i As Long
-    Dim dateVal As Date
-    Dim monthKey As String
-    Dim region As String
-    Dim relName As String
-    Dim amount As Double
-    
-    For i = 1 To UBound(data, 1)
-        ' Maturity Date aggregation
-        dateVal = GetDateValue(data(i, colMap("Maturity_Date")))
-        If dateVal > 0 Then
-            monthKey = Format(dateVal, "yyyy-mm")
-            If expirationByMonth.Exists(monthKey) Then
-                expirationByMonth(monthKey) = expirationByMonth(monthKey) + 1
-            Else
-                expirationByMonth(monthKey) = 1
-            End If
-        End If
-        
-        ' CA Expiration aggregation
-        dateVal = GetDateValue(data(i, colMap("CA_Expiration_Date")))
-        If dateVal > 0 Then
-            monthKey = Format(dateVal, "yyyy-mm")
-            If caExpirationByMonth.Exists(monthKey) Then
-                caExpirationByMonth(monthKey) = caExpirationByMonth(monthKey) + 1
-            Else
-                caExpirationByMonth(monthKey) = 1
-            End If
-        End If
-        
-        ' Regional distribution (count facilities expiring in next 90 days)
-        dateVal = GetDateValue(data(i, colMap("Maturity_Date")))
-        If dateVal > 0 And dateVal <= Date + 90 And dateVal >= Date Then
-            region = GetStringValue(data(i, colMap("Region")))
-            If region <> "" Then
-                If regionCounts.Exists(region) Then
-                    regionCounts(region) = regionCounts(region) + 1
+    ' Count facility maturities by month
+    If colMaturity > 0 Then
+        For i = 2 To lastRow
+            If IsDate(ws.Cells(i, colMaturity).Value) Then
+                dateVal = CDate(ws.Cells(i, colMaturity).Value)
+                monthKey = Format(dateVal, "yyyy-mm")
+                If facilityMonths.Exists(monthKey) Then
+                    facilityMonths(monthKey) = facilityMonths(monthKey) + 1
                 Else
-                    regionCounts(region) = 1
+                    facilityMonths(monthKey) = 1
+                End If
+            End If
+        Next i
+    End If
+    
+    ' Count CA expirations by month
+    If colCAExp > 0 Then
+        For i = 2 To lastRow
+            If IsDate(ws.Cells(i, colCAExp).Value) Then
+                dateVal = CDate(ws.Cells(i, colCAExp).Value)
+                monthKey = Format(dateVal, "yyyy-mm")
+                If caMonths.Exists(monthKey) Then
+                    caMonths(monthKey) = caMonths(monthKey) + 1
+                Else
+                    caMonths(monthKey) = 1
+                End If
+            End If
+        Next i
+    End If
+    
+    ' Build JSON
+    Dim json As String
+    json = "{""facilities"": {"
+    
+    Dim keys() As Variant, j As Long
+    If facilityMonths.Count > 0 Then
+        keys = facilityMonths.Keys
+        For j = 0 To UBound(keys)
+            If j > 0 Then json = json & ","
+            json = json & """" & keys(j) & """: " & facilityMonths(keys(j))
+        Next j
+    End If
+    
+    json = json & "}, ""cas"": {"
+    
+    If caMonths.Count > 0 Then
+        keys = caMonths.Keys
+        For j = 0 To UBound(keys)
+            If j > 0 Then json = json & ","
+            json = json & """" & keys(j) & """: " & caMonths(keys(j))
+        Next j
+    End If
+    
+    json = json & "}}"
+    
+    GetMonthlyExpirations = json
+End Function
+
+' Aggregate regional distribution
+Function GetRegionalDistribution(ws As Worksheet, lastRow As Long, headers As Range) As String
+    Dim colRegion As Long, colFacID As Long, colCAID As Long
+    Dim colMaturity As Long, colCAExp As Long
+    
+    colRegion = GetColIndex(headers, COL_REGION)
+    colFacID = GetColIndex(headers, COL_FACILITY_ID)
+    colCAID = GetColIndex(headers, COL_CAID)
+    colMaturity = GetColIndex(headers, COL_MATURITY_DATE)
+    colCAExp = GetColIndex(headers, COL_CA_EXPIRATION_DATE)
+    
+    ' Track facilities and CAs expiring in next 90 days by region
+    Dim regionFacilities As Object, regionCAs As Object
+    Set regionFacilities = CreateObject("Scripting.Dictionary")
+    Set regionCAs = CreateObject("Scripting.Dictionary")
+    
+    Dim today As Date, threeMonthsLater As Date
+    today = Date
+    threeMonthsLater = DateAdd("d", 90, today)
+    
+    Dim i As Long, region As String, dateVal As Date
+    
+    ' Count facilities by region (expiring soon)
+    If colRegion > 0 And colMaturity > 0 And colFacID > 0 Then
+        For i = 2 To lastRow
+            If IsDate(ws.Cells(i, colMaturity).Value) Then
+                dateVal = CDate(ws.Cells(i, colMaturity).Value)
+                If dateVal >= today And dateVal <= threeMonthsLater Then
+                    region = Trim(ws.Cells(i, colRegion).Value)
+                    If region <> "" Then
+                        If Not regionFacilities.Exists(region) Then
+                            Set regionFacilities(region) = CreateObject("Scripting.Dictionary")
+                        End If
+                        regionFacilities(region)(ws.Cells(i, colFacID).Value) = 1
+                    End If
+                End If
+            End If
+        Next i
+    End If
+    
+    ' Count CAs by region (expiring soon)
+    If colRegion > 0 And colCAExp > 0 And colCAID > 0 Then
+        For i = 2 To lastRow
+            If IsDate(ws.Cells(i, colCAExp).Value) Then
+                dateVal = CDate(ws.Cells(i, colCAExp).Value)
+                If dateVal >= today And dateVal <= threeMonthsLater Then
+                    region = Trim(ws.Cells(i, colRegion).Value)
+                    If region <> "" Then
+                        If Not regionCAs.Exists(region) Then
+                            Set regionCAs(region) = CreateObject("Scripting.Dictionary")
+                        End If
+                        regionCAs(region)(ws.Cells(i, colCAID).Value) = 1
+                    End If
+                End If
+            End If
+        Next i
+    End If
+    
+    ' Build JSON
+    Dim json As String
+    json = "{""facilityLevel"": {"
+    
+    Dim keys() As Variant, j As Long
+    If regionFacilities.Count > 0 Then
+        keys = regionFacilities.Keys
+        For j = 0 To UBound(keys)
+            If j > 0 Then json = json & ","
+            json = json & """" & keys(j) & """: " & regionFacilities(keys(j)).Count
+        Next j
+    End If
+    
+    json = json & "}, ""caLevel"": {"
+    
+    If regionCAs.Count > 0 Then
+        keys = regionCAs.Keys
+        For j = 0 To UBound(keys)
+            If j > 0 Then json = json & ","
+            json = json & """" & keys(j) & """: " & regionCAs(keys(j)).Count
+        Next j
+    End If
+    
+    json = json & "}}"
+    
+    GetRegionalDistribution = json
+End Function
+
+' Get top relationships by amount
+Function GetTopRelationships(ws As Worksheet, lastRow As Long, headers As Range, topN As Long) As String
+    Dim colRelName As Long, colFacAmount As Long, colDirectOS As Long
+    
+    colRelName = GetColIndex(headers, COL_RELATIONSHIP_NAME)
+    colFacAmount = GetColIndex(headers, COL_FAC_AMOUNT)
+    colDirectOS = GetColIndex(headers, COL_DIRECT_OS)
+    
+    Dim relFacAmounts As Object, relDirectOS As Object
+    Set relFacAmounts = CreateObject("Scripting.Dictionary")
+    Set relDirectOS = CreateObject("Scripting.Dictionary")
+    
+    Dim i As Long, relName As String
+    
+    ' Aggregate by relationship
+    For i = 2 To lastRow
+        If colRelName > 0 Then
+            relName = Trim(ws.Cells(i, colRelName).Value)
+            If relName <> "" Then
+                ' Facility Amount
+                If colFacAmount > 0 Then
+                    If relFacAmounts.Exists(relName) Then
+                        relFacAmounts(relName) = relFacAmounts(relName) + Val(ws.Cells(i, colFacAmount).Value)
+                    Else
+                        relFacAmounts(relName) = Val(ws.Cells(i, colFacAmount).Value)
+                    End If
+                End If
+                
+                ' Direct OS
+                If colDirectOS > 0 Then
+                    If relDirectOS.Exists(relName) Then
+                        relDirectOS(relName) = relDirectOS(relName) + Val(ws.Cells(i, colDirectOS).Value)
+                    Else
+                        relDirectOS(relName) = Val(ws.Cells(i, colDirectOS).Value)
+                    End If
                 End If
             End If
         End If
-        
-        ' Relationship amounts
-        relName = GetStringValue(data(i, colMap("Relationship_Name")))
-        If relName <> "" Then
-            amount = GetNumericValue(data(i, colMap("Fac_Amount")))
-            If relationshipAmounts.Exists(relName) Then
-                relationshipAmounts(relName) = relationshipAmounts(relName) + amount
-            Else
-                relationshipAmounts(relName) = amount
-            End If
-            
-            amount = GetNumericValue(data(i, colMap("Direct_OS")))
-            If relationshipDirectOS.Exists(relName) Then
-                relationshipDirectOS(relName) = relationshipDirectOS(relName) + amount
-            Else
-                relationshipDirectOS(relName) = amount
-            End If
-        End If
     Next i
     
-    ' Convert to arrays and sort
-    Set chartData("expirationByMonth") = SortDictionaryByKey(expirationByMonth)
-    Set chartData("caExpirationByMonth") = SortDictionaryByKey(caExpirationByMonth)
-    Set chartData("regionCounts") = regionCounts
-    Set chartData("topRelationshipsByAmount") = GetTopN(relationshipAmounts, 20)
-    Set chartData("topRelationshipsByDirectOS") = GetTopN(relationshipDirectOS, 20)
+    ' Sort and get top N (simple bubble sort for small N)
+    Dim sortedFac() As Variant, sortedDOS() As Variant
+    sortedFac = GetTopNFromDict(relFacAmounts, topN)
+    sortedDOS = GetTopNFromDict(relDirectOS, topN)
     
-    Debug.Print "Chart data aggregated: " & expirationByMonth.Count & " months, " & _
-                regionCounts.Count & " regions, " & relationshipAmounts.Count & " relationships"
-    
-    Set AggregateChartData = chartData
-End Function
-
-' Extract unique filter options
-Function ExtractFilterOptions(data As Variant, colMap As Object) As Object
-    Dim filterOptions As Object
-    Set filterOptions = CreateObject("Scripting.Dictionary")
-    
-    Dim regions As Object
-    Dim products As Object
-    Dim facilityTypes As Object
-    Dim commitments As Object
-    Dim managementStatus As Object
-    Dim teamLeads As Object
-    Dim underwriters As Object
-    
-    Set regions = CreateObject("Scripting.Dictionary")
-    Set products = CreateObject("Scripting.Dictionary")
-    Set facilityTypes = CreateObject("Scripting.Dictionary")
-    Set commitments = CreateObject("Scripting.Dictionary")
-    Set managementStatus = CreateObject("Scripting.Dictionary")
-    Set teamLeads = CreateObject("Scripting.Dictionary")
-    Set underwriters = CreateObject("Scripting.Dictionary")
-    
-    Dim i As Long
-    Dim val As String
-    
-    For i = 1 To UBound(data, 1)
-        ' Regions
-        val = GetStringValue(data(i, colMap("Region")))
-        If val <> "" And Not regions.Exists(val) Then regions(val) = 1
-        
-        ' Products
-        val = GetStringValue(data(i, colMap("Product_Program")))
-        If val <> "" And Not products.Exists(val) Then products(val) = 1
-        
-        ' Facility Types
-        If colMap.Exists("Facility_Type") Then
-            val = GetStringValue(data(i, colMap("Facility_Type")))
-            If val <> "" And Not facilityTypes.Exists(val) Then facilityTypes(val) = 1
-        End If
-        
-        ' Commitments
-        If colMap.Exists("Committed/Uncommitted") Then
-            val = GetStringValue(data(i, colMap("Committed/Uncommitted")))
-            If val <> "" And Not commitments.Exists(val) Then commitments(val) = 1
-        End If
-        
-        ' Management Status
-        If colMap.Exists("Management_Status") Then
-            val = GetStringValue(data(i, colMap("Management_Status")))
-            If val <> "" And Not managementStatus.Exists(val) Then managementStatus(val) = 1
-        End If
-        
-        ' Team Leads
-        If colMap.Exists("Underwriting_Team_Lead") Then
-            val = GetStringValue(data(i, colMap("Underwriting_Team_Lead")))
-            If val <> "" And Not teamLeads.Exists(val) Then teamLeads(val) = 1
-        End If
-        
-        ' Underwriters
-        If colMap.Exists("Lead_Underwriter") Then
-            val = GetStringValue(data(i, colMap("Lead_Underwriter")))
-            If val <> "" And Not underwriters.Exists(val) Then underwriters(val) = 1
-        End If
-    Next i
-    
-    Set filterOptions("regions") = DictKeysToSortedArray(regions)
-    Set filterOptions("products") = DictKeysToSortedArray(products)
-    Set filterOptions("facilityTypes") = DictKeysToSortedArray(facilityTypes)
-    Set filterOptions("commitments") = DictKeysToSortedArray(commitments)
-    Set filterOptions("managementStatus") = DictKeysToSortedArray(managementStatus)
-    Set filterOptions("teamLeads") = DictKeysToSortedArray(teamLeads)
-    Set filterOptions("underwriters") = DictKeysToSortedArray(underwriters)
-    
-    Debug.Print "Filter options extracted"
-    
-    Set ExtractFilterOptions = filterOptions
-End Function
-
-' Build complete JSON structure
-Function BuildJSON(data As Variant, colMap As Object, metrics As Object, _
-                   chartData As Object, filterOptions As Object, _
-                   maxRecords As Long, headers As Variant) As String
-    
+    ' Build JSON
     Dim json As String
-    json = "{" & vbCrLf
+    json = "{""byFacilityAmount"": ["
     
-    ' Metadata
-    json = json & "  ""metadata"": {" & vbCrLf
-    json = json & "    ""generatedAt"": """ & Format(Now, "yyyy-mm-dd hh:nn:ss") & """," & vbCrLf
-    json = json & "    ""totalRecords"": " & UBound(data, 1) & "," & vbCrLf
-    json = json & "    ""detailRecords"": " & maxRecords & "," & vbCrLf
-    json = json & "    ""version"": ""1.0""" & vbCrLf
-    json = json & "  }," & vbCrLf
+    Dim j As Long
+    If Not IsEmpty(sortedFac) Then
+        For j = 0 To UBound(sortedFac, 1)
+            If j > 0 Then json = json & ","
+            json = json & "{""name"": """ & EscapeJSON(sortedFac(j, 0)) & """, ""amount"": " & sortedFac(j, 1) & "}"
+        Next j
+    End If
     
-    ' Metrics
-    json = json & "  ""metrics"": {" & vbCrLf
-    json = json & "    ""totalRelationships"": " & metrics("totalRelationships") & "," & vbCrLf
-    json = json & "    ""totalFacilities"": " & metrics("totalFacilities") & "," & vbCrLf
-    json = json & "    ""totalCAs"": " & metrics("totalCAs") & "," & vbCrLf
-    json = json & "    ""totalFacAmount"": " & FormatNumber(metrics("totalFacAmount"), 2, vbFalse, vbFalse, vbFalse) & "," & vbCrLf
-    json = json & "    ""totalOSUC"": " & FormatNumber(metrics("totalOSUC"), 2, vbFalse, vbFalse, vbFalse) & vbCrLf
-    json = json & "  }," & vbCrLf
+    json = json & "], ""byDirectOS"": ["
     
-    ' Chart data
-    json = json & "  ""chartData"": {" & vbCrLf
-    json = json & "    ""expirationByMonth"": " & DictToJSONObject(chartData("expirationByMonth")) & "," & vbCrLf
-    json = json & "    ""caExpirationByMonth"": " & DictToJSONObject(chartData("caExpirationByMonth")) & "," & vbCrLf
-    json = json & "    ""regionCounts"": " & DictToJSONObject(chartData("regionCounts")) & "," & vbCrLf
-    json = json & "    ""topRelationshipsByAmount"": " & DictToJSONObject(chartData("topRelationshipsByAmount")) & "," & vbCrLf
-    json = json & "    ""topRelationshipsByDirectOS"": " & DictToJSONObject(chartData("topRelationshipsByDirectOS")) & vbCrLf
-    json = json & "  }," & vbCrLf
+    If Not IsEmpty(sortedDOS) Then
+        For j = 0 To UBound(sortedDOS, 1)
+            If j > 0 Then json = json & ","
+            json = json & "{""name"": """ & EscapeJSON(sortedDOS(j, 0)) & """, ""amount"": " & sortedDOS(j, 1) & "}"
+        Next j
+    End If
     
-    ' Filter options
-    json = json & "  ""filterOptions"": {" & vbCrLf
-    json = json & "    ""regions"": " & ArrayToJSONArray(filterOptions("regions")) & "," & vbCrLf
-    json = json & "    ""products"": " & ArrayToJSONArray(filterOptions("products")) & "," & vbCrLf
-    json = json & "    ""facilityTypes"": " & ArrayToJSONArray(filterOptions("facilityTypes")) & "," & vbCrLf
-    json = json & "    ""commitments"": " & ArrayToJSONArray(filterOptions("commitments")) & "," & vbCrLf
-    json = json & "    ""managementStatus"": " & ArrayToJSONArray(filterOptions("managementStatus")) & "," & vbCrLf
-    json = json & "    ""teamLeads"": " & ArrayToJSONArray(filterOptions("teamLeads")) & "," & vbCrLf
-    json = json & "    ""underwriters"": " & ArrayToJSONArray(filterOptions("underwriters")) & vbCrLf
-    json = json & "  }," & vbCrLf
+    json = json & "]}"
     
-    ' Detail records (limited for performance)
-    json = json & "  ""detailData"": [" & vbCrLf
+    GetTopRelationships = json
+End Function
+
+' Get top N from dictionary
+Function GetTopNFromDict(dict As Object, topN As Long) As Variant
+    If dict.Count = 0 Then
+        GetTopNFromDict = Empty
+        Exit Function
+    End If
     
-    Dim recordCount As Long
-    recordCount = Application.Min(UBound(data, 1), maxRecords)
+    Dim keys() As Variant, items() As Variant
+    keys = dict.Keys
+    items = dict.Items
     
-    For i = 1 To recordCount
-        json = json & "    {"
+    Dim n As Long
+    n = Application.Min(dict.Count, topN)
+    
+    ' Simple selection sort for top N
+    Dim i As Long, j As Long, maxIdx As Long, tempKey As Variant, tempVal As Variant
+    For i = 0 To n - 1
+        maxIdx = i
+        For j = i + 1 To dict.Count - 1
+            If items(j) > items(maxIdx) Then maxIdx = j
+        Next j
         
-        ' Add each column
-        Dim j As Long
-        For j = 1 To UBound(headers)
-            Dim colName As String
-            colName = headers(j)
+        If maxIdx <> i Then
+            tempKey = keys(i): keys(i) = keys(maxIdx): keys(maxIdx) = tempKey
+            tempVal = items(i): items(i) = items(maxIdx): items(maxIdx) = tempVal
+        End If
+    Next i
+    
+    ' Return top N
+    Dim result() As Variant
+    ReDim result(0 To n - 1, 0 To 1)
+    For i = 0 To n - 1
+        result(i, 0) = keys(i)
+        result(i, 1) = items(i)
+    Next i
+    
+    GetTopNFromDict = result
+End Function
+
+' Get filter options
+Function GetFilterOptions(ws As Worksheet, lastRow As Long, headers As Range) As String
+    Dim uniqueRegions As Object, uniqueProducts As Object, uniqueUnits As Object
+    Dim uniqueFacTypes As Object, uniqueCommitment As Object, uniqueMgmt As Object
+    Dim uniqueTeamLeads As Object, uniqueUnderwriters As Object
+    
+    Set uniqueRegions = CreateObject("Scripting.Dictionary")
+    Set uniqueProducts = CreateObject("Scripting.Dictionary")
+    Set uniqueUnits = CreateObject("Scripting.Dictionary")
+    Set uniqueFacTypes = CreateObject("Scripting.Dictionary")
+    Set uniqueCommitment = CreateObject("Scripting.Dictionary")
+    Set uniqueMgmt = CreateObject("Scripting.Dictionary")
+    Set uniqueTeamLeads = CreateObject("Scripting.Dictionary")
+    Set uniqueUnderwriters = CreateObject("Scripting.Dictionary")
+    
+    Dim colRegion As Long, colProduct As Long, colUnit As Long, colFacType As Long
+    Dim colCommitment As Long, colMgmt As Long, colTeamLead As Long, colUnderwriter As Long
+    
+    colRegion = GetColIndex(headers, COL_REGION)
+    colProduct = GetColIndex(headers, COL_PRODUCT_PROGRAM)
+    colUnit = GetColIndex(headers, COL_CONTROL_UNIT)
+    colFacType = GetColIndex(headers, COL_FACILITY_TYPE)
+    colCommitment = GetColIndex(headers, COL_COMMITMENT)
+    colMgmt = GetColIndex(headers, COL_MANAGEMENT_STATUS)
+    colTeamLead = GetColIndex(headers, COL_TEAM_LEAD)
+    colUnderwriter = GetColIndex(headers, COL_UNDERWRITER)
+    
+    Dim i As Long, val As String
+    
+    For i = 2 To lastRow
+        If colRegion > 0 Then
+            val = Trim(ws.Cells(i, colRegion).Value)
+            If val <> "" Then uniqueRegions(val) = 1
+        End If
+        If colProduct > 0 Then
+            val = Trim(ws.Cells(i, colProduct).Value)
+            If val <> "" Then uniqueProducts(val) = 1
+        End If
+        If colUnit > 0 Then
+            val = Trim(ws.Cells(i, colUnit).Value)
+            If val <> "" Then uniqueUnits(val) = 1
+        End If
+        If colFacType > 0 Then
+            val = Trim(ws.Cells(i, colFacType).Value)
+            If val <> "" Then uniqueFacTypes(val) = 1
+        End If
+        If colCommitment > 0 Then
+            val = Trim(ws.Cells(i, colCommitment).Value)
+            If val <> "" Then uniqueCommitment(val) = 1
+        End If
+        If colMgmt > 0 Then
+            val = Trim(ws.Cells(i, colMgmt).Value)
+            If val <> "" Then uniqueMgmt(val) = 1
+        End If
+        If colTeamLead > 0 Then
+            val = Trim(ws.Cells(i, colTeamLead).Value)
+            If val <> "" Then uniqueTeamLeads(val) = 1
+        End If
+        If colUnderwriter > 0 Then
+            val = Trim(ws.Cells(i, colUnderwriter).Value)
+            If val <> "" Then uniqueUnderwriters(val) = 1
+        End If
+    Next i
+    
+    ' Build JSON
+    Dim json As String
+    json = "{"
+    json = json & """regions"": " & DictToJSONArray(uniqueRegions) & ","
+    json = json & """productPrograms"": " & DictToJSONArray(uniqueProducts) & ","
+    json = json & """controlUnits"": " & DictToJSONArray(uniqueUnits) & ","
+    json = json & """facilityTypes"": " & DictToJSONArray(uniqueFacTypes) & ","
+    json = json & """commitmentStatus"": " & DictToJSONArray(uniqueCommitment) & ","
+    json = json & """managementStatus"": " & DictToJSONArray(uniqueMgmt) & ","
+    json = json & """teamLeads"": " & DictToJSONArray(uniqueTeamLeads) & ","
+    json = json & """underwriters"": " & DictToJSONArray(uniqueUnderwriters)
+    json = json & "}"
+    
+    GetFilterOptions = json
+End Function
+
+' Get sample detail records (most recent)
+Function GetDetailRecords(ws As Worksheet, lastRow As Long, headers As Range, maxRecords As Long) As String
+    Dim json As String
+    json = "["
+    
+    ' Determine columns to include
+    Dim headerCount As Long
+    headerCount = ws.Cells(1, ws.Columns.Count).End(xlToLeft).Column
+    
+    ' Get last N records (or all if less than maxRecords)
+    Dim startRow As Long
+    startRow = Application.Max(2, lastRow - maxRecords + 1)
+    
+    Dim i As Long, j As Long, firstRecord As Boolean
+    firstRecord = True
+    
+    For i = startRow To lastRow
+        If Not firstRecord Then json = json & ","
+        firstRecord = False
+        
+        json = json & "{"
+        
+        Dim firstCol As Boolean
+        firstCol = True
+        
+        For j = 1 To headerCount
+            Dim headerName As String
+            headerName = Trim(ws.Cells(1, j).Value)
             
-            json = json & """" & colName & """: "
-            
-            ' Format value based on column type
-            If InStr(colName, "Date") > 0 Then
-                json = json & """" & FormatDateToISO(GetDateValue(data(i, j))) & """"
-            ElseIf IsNumeric(data(i, j)) And colName <> "Facility_ID" And colName <> "CAID" Then
-                json = json & FormatNumber(GetNumericValue(data(i, j)), 2, vbFalse, vbFalse, vbFalse)
-            Else
-                json = json & """" & EscapeJSON(GetStringValue(data(i, j))) & """"
+            If headerName <> "" Then
+                If Not firstCol Then json = json & ","
+                firstCol = False
+                
+                Dim cellVal As String
+                cellVal = ws.Cells(i, j).Value
+                
+                ' Format dates
+                If IsDate(cellVal) Then
+                    cellVal = Format(CDate(cellVal), "dd/mm/yyyy")
+                End If
+                
+                json = json & """" & EscapeJSON(headerName) & """: """ & EscapeJSON(CStr(cellVal)) & """"
             End If
-            
-            If j < UBound(headers) Then json = json & ", "
         Next j
         
         json = json & "}"
-        If i < recordCount Then json = json & ","
-        json = json & vbCrLf
-        
-        ' Progress indicator
-        If i Mod 500 = 0 Then
-            Debug.Print "Processed " & i & " of " & recordCount & " records..."
-        End If
     Next i
     
-    json = json & "  ]" & vbCrLf
-    json = json & "}"
+    json = json & "]"
     
-    BuildJSON = json
+    GetDetailRecords = json
 End Function
 
-' ==========================================
-' HELPER FUNCTIONS
-' ==========================================
-
-Function GetStringValue(val As Variant) As String
-    If IsEmpty(val) Or IsNull(val) Then
-        GetStringValue = ""
-    Else
-        GetStringValue = Trim(CStr(val))
-    End If
-End Function
-
-Function GetNumericValue(val As Variant) As Double
-    On Error Resume Next
-    GetNumericValue = CDbl(val)
-    If Err.Number <> 0 Then GetNumericValue = 0
-    On Error GoTo 0
-End Function
-
-Function GetDateValue(val As Variant) As Date
-    On Error Resume Next
-    If IsDate(val) Then
-        GetDateValue = CDate(val)
-    Else
-        GetDateValue = 0
-    End If
-    On Error GoTo 0
-End Function
-
-Function FormatDateToISO(dateVal As Date) As String
-    If dateVal = 0 Then
-        FormatDateToISO = ""
-    Else
-        FormatDateToISO = Format(dateVal, "yyyy-mm-dd")
-    End If
-End Function
-
-Function EscapeJSON(text As String) As String
-    Dim result As String
-    result = text
-    result = Replace(result, "\", "\\")
-    result = Replace(result, """", "\""")
-    result = Replace(result, vbCr, "\r")
-    result = Replace(result, vbLf, "\n")
-    result = Replace(result, vbTab, "\t")
-    EscapeJSON = result
-End Function
-
-Function DictKeysToSortedArray(dict As Object) As Variant
+' Helper: Convert dictionary keys to JSON array
+Function DictToJSONArray(dict As Object) As String
     If dict.Count = 0 Then
-        DictKeysToSortedArray = Array()
+        DictToJSONArray = "[]"
         Exit Function
     End If
     
-    Dim arr() As String
-    ReDim arr(0 To dict.Count - 1)
+    Dim json As String
+    json = "["
     
-    Dim i As Long
-    Dim key As Variant
-    i = 0
-    For Each key In dict.Keys
-        arr(i) = CStr(key)
-        i = i + 1
-    Next key
+    Dim keys() As Variant, i As Long
+    keys = dict.Keys
     
-    ' Simple bubble sort
-    Dim j As Long
-    Dim temp As String
-    For i = 0 To UBound(arr) - 1
-        For j = i + 1 To UBound(arr)
-            If arr(i) > arr(j) Then
-                temp = arr(i)
-                arr(i) = arr(j)
-                arr(j) = temp
-            End If
-        Next j
-    Next i
-    
-    DictKeysToSortedArray = arr
-End Function
-
-Function ArrayToJSONArray(arr As Variant) As String
-    If Not IsArray(arr) Then
-        ArrayToJSONArray = "[]"
-        Exit Function
-    End If
-    
-    If UBound(arr) < LBound(arr) Then
-        ArrayToJSONArray = "[]"
-        Exit Function
-    End If
-    
-    Dim result As String
-    result = "["
-    
-    Dim i As Long
-    For i = LBound(arr) To UBound(arr)
-        result = result & """" & EscapeJSON(CStr(arr(i))) & """"
-        If i < UBound(arr) Then result = result & ", "
-    Next i
-    
-    result = result & "]"
-    ArrayToJSONArray = result
-End Function
-
-Function DictToJSONObject(dict As Object) As String
-    If dict.Count = 0 Then
-        DictToJSONObject = "{}"
-        Exit Function
-    End If
-    
-    Dim result As String
-    result = "{"
-    
-    Dim key As Variant
-    Dim first As Boolean
-    first = True
-    
-    For Each key In dict.Keys
-        If Not first Then result = result & ", "
-        result = result & """" & EscapeJSON(CStr(key)) & """: "
-        
-        If IsNumeric(dict(key)) Then
-            result = result & FormatNumber(dict(key), 2, vbFalse, vbFalse, vbFalse)
-        Else
-            result = result & """" & EscapeJSON(CStr(dict(key))) & """"
-        End If
-        
-        first = False
-    Next key
-    
-    result = result & "}"
-    DictToJSONObject = result
-End Function
-
-Function SortDictionaryByKey(dict As Object) As Object
-    Dim sorted As Object
-    Set sorted = CreateObject("Scripting.Dictionary")
-    
-    If dict.Count = 0 Then
-        Set SortDictionaryByKey = sorted
-        Exit Function
-    End If
-    
-    ' Get keys and sort
-    Dim keys() As String
-    ReDim keys(0 To dict.Count - 1)
-    
-    Dim i As Long
-    Dim key As Variant
-    i = 0
-    For Each key In dict.Keys
-        keys(i) = CStr(key)
-        i = i + 1
-    Next key
-    
-    ' Bubble sort
-    Dim j As Long
-    Dim temp As String
+    ' Sort keys alphabetically
+    Dim j As Long, temp As Variant
     For i = 0 To UBound(keys) - 1
         For j = i + 1 To UBound(keys)
             If keys(i) > keys(j) Then
@@ -637,79 +621,24 @@ Function SortDictionaryByKey(dict As Object) As Object
         Next j
     Next i
     
-    ' Add to sorted dictionary
     For i = 0 To UBound(keys)
-        sorted(keys(i)) = dict(keys(i))
+        If i > 0 Then json = json & ","
+        json = json & """" & EscapeJSON(CStr(keys(i))) & """"
     Next i
     
-    Set SortDictionaryByKey = sorted
+    json = json & "]"
+    DictToJSONArray = json
 End Function
 
-Function GetTopN(dict As Object, n As Long) As Object
-    Dim topN As Object
-    Set topN = CreateObject("Scripting.Dictionary")
-    
-    If dict.Count = 0 Then
-        Set GetTopN = topN
-        Exit Function
-    End If
-    
-    ' Convert to arrays
-    Dim keys() As String
-    Dim values() As Double
-    ReDim keys(0 To dict.Count - 1)
-    ReDim values(0 To dict.Count - 1)
-    
-    Dim i As Long
-    Dim key As Variant
-    i = 0
-    For Each key In dict.Keys
-        keys(i) = CStr(key)
-        values(i) = dict(key)
-        i = i + 1
-    Next key
-    
-    ' Sort by value (descending)
-    Dim j As Long
-    Dim tempKey As String
-    Dim tempVal As Double
-    
-    For i = 0 To UBound(values) - 1
-        For j = i + 1 To UBound(values)
-            If values(i) < values(j) Then
-                tempVal = values(i)
-                values(i) = values(j)
-                values(j) = tempVal
-                
-                tempKey = keys(i)
-                keys(i) = keys(j)
-                keys(j) = tempKey
-            End If
-        Next j
-    Next i
-    
-    ' Take top N
-    Dim limit As Long
-    limit = Application.Min(n, dict.Count)
-    
-    For i = 0 To limit - 1
-        topN(keys(i)) = values(i)
-    Next i
-    
-    Set GetTopN = topN
+' Helper: Escape special characters for JSON
+Function EscapeJSON(text As String) As String
+    Dim result As String
+    result = text
+    result = Replace(result, "\", "\\")
+    result = Replace(result, """", "\""")
+    result = Replace(result, vbCr, "\r")
+    result = Replace(result, vbLf, "\n")
+    result = Replace(result, vbTab, "\t")
+    EscapeJSON = result
 End Function
-
-Sub SaveTextToFile(text As String, filePath As String)
-    Dim fso As Object
-    Dim file As Object
-    
-    Set fso = CreateObject("Scripting.FileSystemObject")
-    Set file = fso.CreateTextFile(filePath, True, False)
-    
-    file.Write text
-    file.Close
-    
-    Set file = Nothing
-    Set fso = Nothing
-End Sub
 

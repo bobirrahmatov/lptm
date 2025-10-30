@@ -1427,6 +1427,18 @@
         // Initialize map from filtered data
         function initializeMapFromFiltered() {
             try {
+                const mapElement = document.getElementById('mapOne');
+                if (!mapElement) {
+                    console.warn('Map element #mapOne not found, skipping filtered map initialization');
+                    return;
+                }
+                
+                // Check if jsVectorMap is available
+                if (typeof jsVectorMap === 'undefined') {
+                    console.warn('jsVectorMap library not loaded, skipping filtered map initialization');
+                    return;
+                }
+                
                 const regionCoords = {
                     'NAM': [37.0902, -95.7129],
                     'EMEA': [51.5074, -0.1278],
@@ -1449,31 +1461,28 @@
                     }
                 });
                 
-                const mapElement = document.getElementById('mapOne');
-                if (!mapElement) {
-                    console.error('Map element #mapOne not found');
-                    return;
-                }
-                
+                // Clear existing map content but keep the element
                 mapElement.innerHTML = '';
                 
-                const map = new jsVectorMap({
-                    selector: '#mapOne',
-                    map: 'world',
-                    zoomButtons: false,
-                    regionStyle: {
-                        initial: {
-                            fill: '#D9D9D9'
+                // Small delay to ensure DOM is ready
+                setTimeout(() => {
+                    const map = new jsVectorMap({
+                        selector: '#mapOne',
+                        map: 'world',
+                        zoomButtons: false,
+                        regionStyle: {
+                            initial: {
+                                fill: '#D9D9D9'
+                            },
+                            hover: {
+                                fillOpacity: 1,
+                                fill: '#465fff'
+                            }
                         },
-                        hover: {
-                            fillOpacity: 1,
-                            fill: '#465fff'
-                        }
-                    },
-                    markers: markers,
-                    markerStyle: {
-                        initial: {
-                            strokeWidth: 1,
+                        markers: markers,
+                        markerStyle: {
+                            initial: {
+                                strokeWidth: 1,
                         fill: '#465fff',
                         fillOpacity: 1,
                         r: 4
@@ -1484,6 +1493,7 @@
                     }
                 }
             });
+                }, 50); // Small delay to ensure DOM is ready
             } catch (error) {
                 console.error('Error initializing filtered map:', error);
                 // Map is optional, continue without it
@@ -1921,6 +1931,18 @@
         // Initialize world map
         function initializeMap() {
             try {
+                const mapElement = document.getElementById('mapOne');
+                if (!mapElement) {
+                    console.warn('Map element #mapOne not found, skipping map initialization');
+                    return;
+                }
+                
+                // Check if jsVectorMap is available
+                if (typeof jsVectorMap === 'undefined') {
+                    console.warn('jsVectorMap library not loaded, skipping map initialization');
+                    return;
+                }
+                
                 // Get region coordinates for markers
                 const regionCoords = {
                     'NAM': [37.0902, -95.7129], // North America (USA)
@@ -1944,34 +1966,30 @@
                     }
                 });
                 
-                const mapElement = document.getElementById('mapOne');
-                if (!mapElement) {
-                    console.error('Map element #mapOne not found');
-                    return;
-                }
-                
-                // Clear existing map
+                // Clear existing map content but keep the element
                 mapElement.innerHTML = '';
                 
-                const map = new jsVectorMap({
-                    selector: '#mapOne',
-                    map: 'world',
-                    zoomButtons: false,
-                    regionStyle: {
-                        initial: {
-                            fill: '#D9D9D9'
+                // Small delay to ensure DOM is ready
+                setTimeout(() => {
+                    const map = new jsVectorMap({
+                        selector: '#mapOne',
+                        map: 'world',
+                        zoomButtons: false,
+                        regionStyle: {
+                            initial: {
+                                fill: '#D9D9D9'
+                            },
+                            hover: {
+                                fillOpacity: 1,
+                                fill: '#465fff'
+                            }
                         },
-                        hover: {
-                            fillOpacity: 1,
-                            fill: '#465fff'
-                        }
-                    },
-                    markers: markers,
-                    markerStyle: {
-                        initial: {
-                            strokeWidth: 1,
-                            fill: '#465fff',
-                            fillOpacity: 1,
+                        markers: markers,
+                        markerStyle: {
+                            initial: {
+                                strokeWidth: 1,
+                                fill: '#465fff',
+                                fillOpacity: 1,
                         r: 4
                     },
                     hover: {
@@ -1980,6 +1998,7 @@
                     }
                 }
             });
+                }, 50); // Small delay to ensure DOM is ready
             } catch (error) {
                 console.error('Error initializing map:', error);
                 // Map is optional, continue without it

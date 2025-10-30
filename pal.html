@@ -77,9 +77,9 @@
                             class="px-3 py-2 font-medium transition-colors rounded-md text-sm shadow-sm text-gray-900 bg-white">
                             Facility Level
                         </button>
-                        <button id="btnGlobalCALevel" onclick="selectGlobalLevel('ca')" 
+                        <button id="btnGlobalRelationshipLevel" onclick="selectGlobalLevel('relationship')" 
                             class="px-3 py-2 font-medium transition-colors rounded-md text-sm text-gray-500 hover:text-gray-900">
-                            CA Level
+                            Relationship Level
                         </button>
                     </div>
                     
@@ -254,8 +254,8 @@
             </div>
         </div>
 
-        <!-- Top 5 Metric Cards -->
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 md:gap-6 mb-6">
+        <!-- Top 4 Metric Cards -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 md:gap-6 mb-6">
             <!-- Card 1: Total # of Relationships -->
             <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
                 <div class="mb-6 flex items-center gap-3">
@@ -294,26 +294,7 @@
                 </div>
             </div>
 
-            <!-- Card 3: Total # of CAs -->
-            <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
-                <div class="mb-6 flex items-center gap-3">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100">
-                        <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-medium text-gray-500">Total # of CAs</h3>
-                    </div>
-                </div>
-                <div class="flex items-end justify-between">
-                    <div>
-                        <h4 class="text-2xl font-bold text-gray-800" id="totalCAs">0</h4>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card 4: Total $ of OSUC -->
+            <!-- Card 3: Total $ of OSUC -->
             <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
                 <div class="mb-6 flex items-center gap-3">
                     <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100">
@@ -332,7 +313,7 @@
                 </div>
             </div>
 
-            <!-- Card 5: Total $ of Facility Amount -->
+            <!-- Card 4: Total $ of Facility Amount -->
             <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
                 <div class="mb-6 flex items-center gap-3">
                     <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100">
@@ -354,13 +335,13 @@
 
         <!-- Charts Section -->
         <div class="grid grid-cols-12 gap-4 md:gap-6 mb-6">
-            <!-- Area Chart: Facility IDs/CAIDs by Expiration Date -->
+            <!-- Area Chart: Facilities by Expiration Date -->
             <div class="col-span-12 xl:col-span-8">
                 <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 sm:pt-6">
                     <div class="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-800">Facilities & CAIDs Expiration Timeline</h3>
-                            <p class="mt-1 text-gray-500 text-sm">Monthly expiration count by type</p>
+                            <h3 class="text-lg font-semibold text-gray-800">Facilities Expiration Timeline</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Monthly facility maturity count</p>
                         </div>
                         <div class="flex flex-row-reverse items-center justify-end gap-0.5 sm:flex-col sm:items-start">
                             <div class="flex flex-row-reverse items-center gap-3 sm:flex-row sm:gap-2">
@@ -369,17 +350,13 @@
                                     Total
                                 </span>
                             </div>
-                            <span class="text-gray-500 text-xs">Combined Count</span>
+                            <span class="text-gray-500 text-xs">Facilities Maturing</span>
                         </div>
                     </div>
                     <div class="flex items-center gap-5 mb-5">
                         <div class="flex items-center gap-1.5">
                             <div class="h-2.5 w-2.5 rounded-full" style="background-color: #465FFF;"></div>
                             <p class="text-sm text-gray-500">Facilities</p>
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                            <div class="h-2.5 w-2.5 rounded-full" style="background-color: #9CB9FF;"></div>
-                            <p class="text-sm text-gray-500">CAIDs</p>
                         </div>
                     </div>
                     <div class="max-w-full overflow-x-auto custom-scrollbar">
@@ -535,13 +512,13 @@
         let portfolioData = [];
         let filteredData = [];
         let currentPage = 1;
-        let rowsPerPage = 50; // Increased for better performance (fewer renders)
+        let rowsPerPage = 20; // Show 20 rows per page, load more on pagination
         let expirationChartInstance = null;
         let searchDebounceTimer = null;
         let relationshipChartInstance = null;
         let activeFilters = {};
         let selectedMetricType = 'facilityAmount'; // Default to Facility Amount
-        let selectedRegionalLevel = 'facility'; // Default to Facility Level (Facility ID count)
+        let selectedRegionalLevel = 'facility'; // Default to Facility Level (Facility ID count), can be 'relationship' for Relationship ID count
         
         // Performance optimization: Cache for expensive calculations
         let metricsCache = {
@@ -1336,7 +1313,6 @@
             let totalOSUC = 0;
             const relationships = new Set();
             const facilities = new Set();
-            const cas = new Set();
             
             // Single pass through filtered data
             for (let i = 0; i < filteredData.length; i++) {
@@ -1349,12 +1325,10 @@
                 if (rel) relationships.add(rel);
                 
                 if (row.Facility_ID) facilities.add(row.Facility_ID);
-                if (row.CAID) cas.add(row.CAID);
             }
             
             document.getElementById('totalRelationships').textContent = relationships.size.toLocaleString();
             document.getElementById('totalFacilities').textContent = facilities.size.toLocaleString();
-            document.getElementById('totalCAs').textContent = cas.size.toLocaleString();
             document.getElementById('totalOSUC').textContent = formatCurrency(totalOSUC);
             document.getElementById('totalFacAmount').textContent = formatCurrency(totalFacAmount);
             
@@ -1364,21 +1338,15 @@
         // Create expiration chart from filtered data
         function createExpirationChartFromFiltered() {
             const facilityData = aggregateByMonthYear(filteredData, 'Maturity_Date');
-            const caidData = aggregateByMonthYear(filteredData.filter(r => r.CA_Expiration_Date), 'CA_Expiration_Date');
             
-            const allMonths = [...new Set([...facilityData.map(d => d.month), ...caidData.map(d => d.month)])].sort();
+            const allMonths = facilityData.map(d => d.month).sort();
             
             const facilitySeries = allMonths.map(month => {
                 const item = facilityData.find(d => d.month === month);
                 return item ? item.count : 0;
             });
             
-            const caidSeries = allMonths.map(month => {
-                const item = caidData.find(d => d.month === month);
-                return item ? item.count : 0;
-            });
-            
-            const totalExpiring = facilitySeries.reduce((a, b) => a + b, 0) + caidSeries.reduce((a, b) => a + b, 0);
+            const totalExpiring = facilitySeries.reduce((a, b) => a + b, 0);
             document.getElementById('totalExpiring').textContent = totalExpiring.toLocaleString();
             
             const options = {
@@ -1386,10 +1354,6 @@
                     {
                         name: 'Facilities',
                         data: facilitySeries
-                    },
-                    {
-                        name: 'CAIDs',
-                        data: caidSeries
                     }
                 ],
                 legend: {
@@ -1397,7 +1361,7 @@
                     position: 'top',
                     horizontalAlign: 'left'
                 },
-                colors: ['#465FFF', '#9CB9FF'],
+                colors: ['#465FFF'],
                 chart: {
                     fontFamily: 'system-ui, -apple-system, sans-serif',
                     height: 310,
@@ -1415,7 +1379,7 @@
                 },
                 stroke: {
                     curve: 'smooth',
-                    width: [2, 2]
+                    width: [2]
                 },
                 markers: {
                     size: 0
@@ -1502,7 +1466,7 @@
             const regionList = document.getElementById('regionList');
             regionList.innerHTML = '';
             
-            const countLabel = selectedRegionalLevel === 'facility' ? 'Facilities' : 'CAIDs';
+            const countLabel = selectedRegionalLevel === 'facility' ? 'Facilities' : 'Relationships';
             
             sortedRegions.forEach(([region, count]) => {
                 const percentage = totalCount > 0 ? ((count / totalCount) * 100).toFixed(0) : 0;
@@ -1637,26 +1601,26 @@
                     regionCounts[region] = regionFacilities[region].size;
                 });
             } else {
-                // Count unique CAIDs
-                const regionCAIDs = {};
+                // Count unique Relationship IDs
+                const regionRelationships = {};
                 filteredData.forEach(row => {
-                    const caExpDate = parseDate(row.CA_Expiration_Date);
-                    if (caExpDate && caExpDate <= threeMonthsLater && caExpDate >= today) {
+                    const maturityDate = parseDate(row.Maturity_Date);
+                    if (maturityDate && maturityDate <= threeMonthsLater && maturityDate >= today) {
                         const region = row.Region || 'Unknown';
-                        const caid = row.CAID;
+                        const relationshipId = row.Relationship_ID || row.Relationship_Name;
                         
-                        if (!regionCAIDs[region]) {
-                            regionCAIDs[region] = new Set();
+                        if (!regionRelationships[region]) {
+                            regionRelationships[region] = new Set();
                         }
-                        if (caid) {
-                            regionCAIDs[region].add(caid);
+                        if (relationshipId) {
+                            regionRelationships[region].add(relationshipId);
                         }
                     }
                 });
                 
                 // Convert Set sizes to counts
-                Object.keys(regionCAIDs).forEach(region => {
-                    regionCounts[region] = regionCAIDs[region].size;
+                Object.keys(regionRelationships).forEach(region => {
+                    regionCounts[region] = regionRelationships[region].size;
                 });
             }
             
@@ -1761,28 +1725,26 @@
             }
         }
 
-        // Select global level (affects all charts)
+        // Select global level (affects regional distribution chart)
         function selectGlobalLevel(level) {
             selectedRegionalLevel = level;
             
             // Update button styles
             const btnGlobalFacilityLevel = document.getElementById('btnGlobalFacilityLevel');
-            const btnGlobalCALevel = document.getElementById('btnGlobalCALevel');
+            const btnGlobalRelationshipLevel = document.getElementById('btnGlobalRelationshipLevel');
             
             if (level === 'facility') {
                 btnGlobalFacilityLevel.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm shadow-sm text-gray-900 bg-white';
-                btnGlobalCALevel.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm text-gray-500 hover:text-gray-900';
+                btnGlobalRelationshipLevel.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm text-gray-500 hover:text-gray-900';
             } else {
                 btnGlobalFacilityLevel.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm text-gray-500 hover:text-gray-900';
-                btnGlobalCALevel.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm shadow-sm text-gray-900 bg-white';
+                btnGlobalRelationshipLevel.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm shadow-sm text-gray-900 bg-white';
             }
             
-            // Update ALL charts based on the global level
+            // Update regional distribution chart based on the global level
             if (Object.keys(activeFilters).length > 0) {
-                createExpirationChartFromFiltered();
                 createRegionalChartFromFiltered();
             } else {
-                createExpirationChart();
                 createRegionalChart();
             }
         }
@@ -1794,7 +1756,6 @@
                 const cached = metricsCache.full;
                 document.getElementById('totalRelationships').textContent = cached.relationships.toLocaleString();
                 document.getElementById('totalFacilities').textContent = cached.facilities.toLocaleString();
-                document.getElementById('totalCAs').textContent = cached.cas.toLocaleString();
                 document.getElementById('totalOSUC').textContent = formatCurrency(cached.osuc);
                 document.getElementById('totalFacAmount').textContent = formatCurrency(cached.facAmount);
                 return;
@@ -1806,7 +1767,6 @@
             let totalOSUC = 0;
             const relationships = new Set();
             const facilities = new Set();
-            const cas = new Set();
             
             // Single pass through data (much faster than multiple passes)
             for (let i = 0; i < portfolioData.length; i++) {
@@ -1819,13 +1779,11 @@
                 if (rel) relationships.add(rel);
                 
                 if (row.Facility_ID) facilities.add(row.Facility_ID);
-                if (row.CAID) cas.add(row.CAID);
             }
             
             const metrics = {
                 relationships: relationships.size,
                 facilities: facilities.size,
-                cas: cas.size,
                 osuc: totalOSUC,
                 facAmount: totalFacAmount
             };
@@ -1835,7 +1793,6 @@
             
             document.getElementById('totalRelationships').textContent = metrics.relationships.toLocaleString();
             document.getElementById('totalFacilities').textContent = metrics.facilities.toLocaleString();
-            document.getElementById('totalCAs').textContent = metrics.cas.toLocaleString();
             document.getElementById('totalOSUC').textContent = formatCurrency(metrics.osuc);
             document.getElementById('totalFacAmount').textContent = formatCurrency(metrics.facAmount);
             
@@ -1860,26 +1817,19 @@
             return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
         }
 
-        // Create expiration timeline chart (Area chart with both series)
+        // Create expiration timeline chart (Area chart for facilities)
         function createExpirationChart() {
             const facilityData = aggregateByMonthYear(portfolioData, 'Maturity_Date');
-            const caidData = aggregateByMonthYear(portfolioData.filter(r => r.CA_Expiration_Date), 'CA_Expiration_Date');
             
-            // Merge both datasets to have consistent months
-            const allMonths = [...new Set([...facilityData.map(d => d.month), ...caidData.map(d => d.month)])].sort();
+            const allMonths = facilityData.map(d => d.month).sort();
             
             const facilitySeries = allMonths.map(month => {
                 const item = facilityData.find(d => d.month === month);
                 return item ? item.count : 0;
             });
             
-            const caidSeries = allMonths.map(month => {
-                const item = caidData.find(d => d.month === month);
-                return item ? item.count : 0;
-            });
-            
             // Calculate total expiring
-            const totalExpiring = facilitySeries.reduce((a, b) => a + b, 0) + caidSeries.reduce((a, b) => a + b, 0);
+            const totalExpiring = facilitySeries.reduce((a, b) => a + b, 0);
             document.getElementById('totalExpiring').textContent = totalExpiring.toLocaleString();
             
             const options = {
@@ -1887,10 +1837,6 @@
                     {
                         name: 'Facilities',
                         data: facilitySeries
-                    },
-                    {
-                        name: 'CAIDs',
-                        data: caidSeries
                     }
                 ],
                 legend: {
@@ -1898,7 +1844,7 @@
                     position: 'top',
                     horizontalAlign: 'left'
                 },
-                colors: ['#465FFF', '#9CB9FF'],
+                colors: ['#465FFF'],
                 chart: {
                     fontFamily: 'system-ui, -apple-system, sans-serif',
                     height: 310,
@@ -1916,7 +1862,7 @@
                 },
                 stroke: {
                     curve: 'smooth',
-                    width: [2, 2]
+                    width: [2]
                 },
                 markers: {
                     size: 0
@@ -2126,7 +2072,7 @@
             }
         }
         
-        // Get region counts for facilities/CAIDs expiring soon
+        // Get region counts for facilities or relationships expiring soon
         function getRegionCounts() {
             const regionCounts = {};
             const today = new Date();
@@ -2155,26 +2101,26 @@
                     regionCounts[region] = regionFacilities[region].size;
                 });
             } else {
-                // Count unique CAIDs
-                const regionCAIDs = {};
+                // Count unique Relationship IDs
+                const regionRelationships = {};
                 portfolioData.forEach(row => {
-                    const caExpDate = parseDate(row.CA_Expiration_Date);
-                    if (caExpDate && caExpDate <= threeMonthsLater && caExpDate >= today) {
+                    const maturityDate = parseDate(row.Maturity_Date);
+                    if (maturityDate && maturityDate <= threeMonthsLater && maturityDate >= today) {
                         const region = row.Region || 'Unknown';
-                        const caid = row.CAID;
+                        const relationshipId = row.Relationship_ID || row.Relationship_Name;
                         
-                        if (!regionCAIDs[region]) {
-                            regionCAIDs[region] = new Set();
+                        if (!regionRelationships[region]) {
+                            regionRelationships[region] = new Set();
                         }
-                        if (caid) {
-                            regionCAIDs[region].add(caid);
+                        if (relationshipId) {
+                            regionRelationships[region].add(relationshipId);
                         }
                     }
                 });
                 
                 // Convert Set sizes to counts
-                Object.keys(regionCAIDs).forEach(region => {
-                    regionCounts[region] = regionCAIDs[region].size;
+                Object.keys(regionRelationships).forEach(region => {
+                    regionCounts[region] = regionRelationships[region].size;
                 });
             }
             
@@ -2205,7 +2151,7 @@
             const regionList = document.getElementById('regionList');
             regionList.innerHTML = '';
             
-            const countLabel = selectedRegionalLevel === 'facility' ? 'Facilities' : 'CAIDs';
+            const countLabel = selectedRegionalLevel === 'facility' ? 'Facilities' : 'Relationships';
             
             sortedRegions.forEach(([region, count]) => {
                 const percentage = totalCount > 0 ? ((count / totalCount) * 100).toFixed(0) : 0;

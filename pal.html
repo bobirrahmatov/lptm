@@ -1039,7 +1039,8 @@
                 
                 // CA Maturity filter (date range)
                 if (filters.caMaturity) {
-                    const caDate = new Date(row.CA_Expiration_Date);
+                    const caDate = parseDate(row.CA_Expiration_Date);
+                    if (!caDate) return false;
                     const today = new Date();
                     const futureDate = new Date(today.getTime() + parseInt(filters.caMaturity) * 24 * 60 * 60 * 1000);
                     if (caDate < today || caDate > futureDate) return false;
@@ -1047,7 +1048,8 @@
                 
                 // Facility Maturity filter (date range)
                 if (filters.facilityMaturity) {
-                    const maturityDate = new Date(row.Maturity_Date);
+                    const maturityDate = parseDate(row.Maturity_Date);
+                    if (!maturityDate) return false;
                     const today = new Date();
                     const futureDate = new Date(today.getTime() + parseInt(filters.facilityMaturity) * 24 * 60 * 60 * 1000);
                     if (maturityDate < today || maturityDate > futureDate) return false;
@@ -1498,8 +1500,8 @@
                 // Count unique Facility IDs
                 const regionFacilities = {};
                 filteredData.forEach(row => {
-                    const maturityDate = new Date(row.Maturity_Date);
-                    if (maturityDate <= threeMonthsLater && maturityDate >= today) {
+                    const maturityDate = parseDate(row.Maturity_Date);
+                    if (maturityDate && maturityDate <= threeMonthsLater && maturityDate >= today) {
                         const region = row.Region || 'Unknown';
                         const facilityId = row.Facility_ID;
                         
@@ -1520,8 +1522,8 @@
                 // Count unique CAIDs
                 const regionCAIDs = {};
                 filteredData.forEach(row => {
-                    const caExpDate = new Date(row.CA_Expiration_Date);
-                    if (caExpDate <= threeMonthsLater && caExpDate >= today) {
+                    const caExpDate = parseDate(row.CA_Expiration_Date);
+                    if (caExpDate && caExpDate <= threeMonthsLater && caExpDate >= today) {
                         const region = row.Region || 'Unknown';
                         const caid = row.CAID;
                         
@@ -1553,15 +1555,22 @@
             const seriesName = selectedMetricType === 'facilityAmount' ? 'Total Facility Amount' : 'Total Direct OS';
             
             const relationshipTotals = {};
-            filteredData.forEach(row => {
-                const relId = row.Relationship_Name || row.Relationship_ID || 'Unknown';
+            filteredData.forEach((row, index) => {
+                // Try multiple possible field names for relationship
+                const relId = row.Relationship_Name || row.Relationship_ID || row.relationship_name || 
+                             row.relationship_id || row['Relationship Name'] || row['Relationship ID'] || 'Unknown';
                 const amount = parseFloat(row[fieldName]) || 0;
-                relationshipTotals[relId] = (relationshipTotals[relId] || 0) + amount;
+                
+                if (amount > 0) {
+                    relationshipTotals[relId] = (relationshipTotals[relId] || 0) + amount;
+                }
             });
             
             console.log('Filtered relationships found:', Object.keys(relationshipTotals).length);
+            console.log('Filtered relationship totals sample:', Object.entries(relationshipTotals).slice(0, 5));
             
             const sorted = Object.entries(relationshipTotals)
+                .filter(([name, amount]) => name !== 'Unknown' && amount > 0)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, topN);
             
@@ -1715,7 +1724,8 @@
         // Format date
         function formatDate(dateString) {
             if (!dateString) return 'N/A';
-            const date = new Date(dateString);
+            const date = parseDate(dateString);
+            if (!date) return 'N/A';
             return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
         }
 
@@ -1840,24 +1850,49 @@
             expirationChartInstance.render();
         }
 
+        // Parse date in dd/mm/yyyy format
+        function parseDate(dateStr) {
+            if (!dateStr) return null;
+            
+            try {
+                // Handle dd/mm/yyyy format
+                if (dateStr.includes('/')) {
+                    const parts = dateStr.split('/');
+                    if (parts.length === 3) {
+                        const day = parseInt(parts[0]);
+                        const month = parseInt(parts[1]) - 1; // JavaScript months are 0-indexed
+                        const year = parseInt(parts[2]);
+                        const date = new Date(year, month, day);
+                        if (!isNaN(date.getTime())) {
+                            return date;
+                        }
+                    }
+                }
+                
+                // Try standard date parsing as fallback
+                const date = new Date(dateStr);
+                if (!isNaN(date.getTime())) {
+                    return date;
+                }
+            } catch (e) {
+                console.warn('Invalid date:', dateStr);
+            }
+            return null;
+        }
+
         // Aggregate data by month and year
         function aggregateByMonthYear(data, dateField) {
             const grouped = {};
             data.forEach(row => {
                 const dateValue = row[dateField];
                 if (dateValue) {
-                    try {
-                        // Parse date to ensure it's valid
-                        const dateObj = new Date(dateValue);
-                        if (!isNaN(dateObj.getTime())) {
-                            // Format as YYYY-MM
-                            const year = dateObj.getFullYear();
-                            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-                            const monthYear = `${year}-${month}`;
-                            grouped[monthYear] = (grouped[monthYear] || 0) + 1;
-                        }
-                    } catch (e) {
-                        console.warn('Invalid date:', dateValue);
+                    const dateObj = parseDate(dateValue);
+                    if (dateObj) {
+                        // Format as YYYY-MM
+                        const year = dateObj.getFullYear();
+                        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const monthYear = `${year}-${month}`;
+                        grouped[monthYear] = (grouped[monthYear] || 0) + 1;
                     }
                 }
             });
@@ -1961,8 +1996,8 @@
                 // Count unique Facility IDs
                 const regionFacilities = {};
                 portfolioData.forEach(row => {
-                    const maturityDate = new Date(row.Maturity_Date);
-                    if (maturityDate <= threeMonthsLater && maturityDate >= today) {
+                    const maturityDate = parseDate(row.Maturity_Date);
+                    if (maturityDate && maturityDate <= threeMonthsLater && maturityDate >= today) {
                         const region = row.Region || 'Unknown';
                         const facilityId = row.Facility_ID;
                         
@@ -1983,8 +2018,8 @@
                 // Count unique CAIDs
                 const regionCAIDs = {};
                 portfolioData.forEach(row => {
-                    const caExpDate = new Date(row.CA_Expiration_Date);
-                    if (caExpDate <= threeMonthsLater && caExpDate >= today) {
+                    const caExpDate = parseDate(row.CA_Expiration_Date);
+                    if (caExpDate && caExpDate <= threeMonthsLater && caExpDate >= today) {
                         const region = row.Region || 'Unknown';
                         const caid = row.CAID;
                         
@@ -2065,20 +2100,37 @@
             const topN = parseInt(document.getElementById('topNFilter').value);
             console.log('Creating relationship chart with topN:', topN, 'metric:', selectedMetricType);
             
+            // Log sample data to see field names
+            if (portfolioData.length > 0) {
+                console.log('Sample row keys:', Object.keys(portfolioData[0]));
+                console.log('Sample row data:', portfolioData[0]);
+            }
+            
             // Determine which field to aggregate based on selected metric
             const fieldName = selectedMetricType === 'facilityAmount' ? 'Fac_Amount' : 'Direct_OS';
             const seriesName = selectedMetricType === 'facilityAmount' ? 'Total Facility Amount' : 'Total Direct OS';
             
             const relationshipTotals = {};
-            portfolioData.forEach(row => {
-                const relId = row.Relationship_Name || row.Relationship_ID || 'Unknown';
+            portfolioData.forEach((row, index) => {
+                // Try multiple possible field names for relationship
+                const relId = row.Relationship_Name || row.Relationship_ID || row.relationship_name || 
+                             row.relationship_id || row['Relationship Name'] || row['Relationship ID'] || 'Unknown';
                 const amount = parseFloat(row[fieldName]) || 0;
-                relationshipTotals[relId] = (relationshipTotals[relId] || 0) + amount;
+                
+                if (index < 3) {
+                    console.log(`Row ${index} - Relationship:`, relId, 'Amount:', amount);
+                }
+                
+                if (amount > 0) {
+                    relationshipTotals[relId] = (relationshipTotals[relId] || 0) + amount;
+                }
             });
             
             console.log('Total relationships found:', Object.keys(relationshipTotals).length);
+            console.log('Relationship totals sample:', Object.entries(relationshipTotals).slice(0, 5));
             
             const sorted = Object.entries(relationshipTotals)
+                .filter(([name, amount]) => name !== 'Unknown' && amount > 0)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, topN);
             

@@ -1349,8 +1349,8 @@
             for (let i = 0; i < filteredData.length; i++) {
                 const row = filteredData[i];
                 
-                totalFacAmount += parseFloat(row.Fac_Amount) || 0;
-                totalOSUC += parseFloat(row.Direct_OS) || 0;
+                totalFacAmount += parseNumber(row.Fac_Amount);
+                totalOSUC += parseNumber(row.Direct_OS);
                 
                 const rel = row.Relationship_Name || row.Relationship_ID;
                 if (rel) relationships.add(rel);
@@ -1630,13 +1630,17 @@
 
         // Get region counts from filtered data
         function getRegionCountsFromFiltered() {
+            console.log('📍 getRegionCountsFromFiltered called, level:', selectedRegionalLevel);
             const regionCounts = {};
             const today = new Date();
             const threeMonthsLater = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000);
             
             if (selectedRegionalLevel === 'facility') {
                 // Count unique Facility IDs
+                console.log('Counting filtered Facility IDs by region (expiring in next 90 days)');
                 const regionFacilities = {};
+                let totalExpiring = 0;
+                
                 filteredData.forEach(row => {
                     const maturityDate = parseDate(row.Maturity_Date);
                     if (maturityDate && maturityDate <= threeMonthsLater && maturityDate >= today) {
@@ -1648,6 +1652,7 @@
                         }
                         if (facilityId) {
                             regionFacilities[region].add(facilityId);
+                            totalExpiring++;
                         }
                     }
                 });
@@ -1656,9 +1661,14 @@
                 Object.keys(regionFacilities).forEach(region => {
                     regionCounts[region] = regionFacilities[region].size;
                 });
+                
+                console.log(`Found ${totalExpiring} filtered expiring facilities across ${Object.keys(regionCounts).length} regions:`, regionCounts);
             } else {
                 // Count unique Relationship IDs
+                console.log('Counting filtered Relationship IDs by region (with facilities expiring in next 90 days)');
                 const regionRelationships = {};
+                let totalExpiring = 0;
+                
                 filteredData.forEach(row => {
                     const maturityDate = parseDate(row.Maturity_Date);
                     if (maturityDate && maturityDate <= threeMonthsLater && maturityDate >= today) {
@@ -1670,6 +1680,7 @@
                         }
                         if (relationshipId) {
                             regionRelationships[region].add(relationshipId);
+                            totalExpiring++;
                         }
                     }
                 });
@@ -1678,6 +1689,8 @@
                 Object.keys(regionRelationships).forEach(region => {
                     regionCounts[region] = regionRelationships[region].size;
                 });
+                
+                console.log(`Found ${totalExpiring} filtered expiring relationships across ${Object.keys(regionCounts).length} regions:`, regionCounts);
             }
             
             return regionCounts;
@@ -1700,7 +1713,7 @@
             for (let i = 0; i < filteredData.length; i++) {
                 const row = filteredData[i];
                 const relId = row.Relationship_Name || row.Relationship_ID;
-                const amount = parseFloat(row[fieldName]) || 0;
+                const amount = parseNumber(row[fieldName]);
                 
                 if (relId && amount > 0) {
                     relationshipTotals.set(relId, (relationshipTotals.get(relId) || 0) + amount);
@@ -1800,26 +1813,41 @@
 
         // Select global level (affects regional distribution chart)
         function selectGlobalLevel(level) {
+            console.log('🔄 Level toggle clicked:', level);
+            console.log('Previous level:', selectedRegionalLevel);
+            
             selectedRegionalLevel = level;
+            console.log('New level set to:', selectedRegionalLevel);
             
             // Update button styles
             const btnGlobalFacilityLevel = document.getElementById('btnGlobalFacilityLevel');
             const btnGlobalRelationshipLevel = document.getElementById('btnGlobalRelationshipLevel');
             
+            if (!btnGlobalFacilityLevel || !btnGlobalRelationshipLevel) {
+                console.error('❌ Toggle buttons not found in DOM!');
+                return;
+            }
+            
             if (level === 'facility') {
                 btnGlobalFacilityLevel.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm shadow-sm text-gray-900 bg-white';
                 btnGlobalRelationshipLevel.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm text-gray-500 hover:text-gray-900';
+                console.log('✓ Switched to Facility Level (counting unique Facility IDs)');
             } else {
                 btnGlobalFacilityLevel.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm text-gray-500 hover:text-gray-900';
                 btnGlobalRelationshipLevel.className = 'px-3 py-2 font-medium transition-colors rounded-md text-sm shadow-sm text-gray-900 bg-white';
+                console.log('✓ Switched to Relationship Level (counting unique Relationship IDs)');
             }
             
             // Update regional distribution chart based on the global level
+            console.log('📊 Updating regional chart...');
             if (Object.keys(activeFilters).length > 0) {
+                console.log('Using filtered data');
                 createRegionalChartFromFiltered();
             } else {
+                console.log('Using all data');
                 createRegionalChart();
             }
+            console.log('✅ Regional chart update complete');
         }
 
         // Calculate top metrics (OPTIMIZED with caching)
@@ -1845,8 +1873,8 @@
             for (let i = 0; i < portfolioData.length; i++) {
                 const row = portfolioData[i];
                 
-                totalFacAmount += parseFloat(row.Fac_Amount) || 0;
-                totalOSUC += parseFloat(row.Direct_OS) || 0;
+                totalFacAmount += parseNumber(row.Fac_Amount);
+                totalOSUC += parseNumber(row.Direct_OS);
                 
                 const rel = row.Relationship_Name || row.Relationship_ID;
                 if (rel) relationships.add(rel);
@@ -1872,6 +1900,38 @@
             console.log(`Metrics calculated in ${(performance.now() - startTime).toFixed(2)}ms:`, metrics);
         }
 
+        // Parse number that might be formatted (e.g., "5.5M", "1.2K", "1,000,000")
+        function parseNumber(value) {
+            if (!value) return 0;
+            
+            // If already a number, return it
+            if (typeof value === 'number') return value;
+            
+            // Convert to string and clean
+            let str = String(value).trim().toUpperCase();
+            
+            // Remove currency symbols and commas
+            str = str.replace(/[$,]/g, '');
+            
+            // Handle K (thousands)
+            if (str.endsWith('K')) {
+                return parseFloat(str.replace('K', '')) * 1000;
+            }
+            
+            // Handle M (millions)
+            if (str.endsWith('M')) {
+                return parseFloat(str.replace('M', '')) * 1000000;
+            }
+            
+            // Handle B (billions)
+            if (str.endsWith('B')) {
+                return parseFloat(str.replace('B', '')) * 1000000000;
+            }
+            
+            // Regular number
+            return parseFloat(str) || 0;
+        }
+        
         // Format currency
         function formatCurrency(value) {
             return new Intl.NumberFormat('en-US', {
@@ -2172,13 +2232,17 @@
         
         // Get region counts for facilities or relationships expiring soon
         function getRegionCounts() {
+            console.log('📍 getRegionCounts called, level:', selectedRegionalLevel);
             const regionCounts = {};
             const today = new Date();
             const threeMonthsLater = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000);
             
             if (selectedRegionalLevel === 'facility') {
                 // Count unique Facility IDs
+                console.log('Counting Facility IDs by region (expiring in next 90 days)');
                 const regionFacilities = {};
+                let totalExpiring = 0;
+                
                 portfolioData.forEach(row => {
                     const maturityDate = parseDate(row.Maturity_Date);
                     if (maturityDate && maturityDate <= threeMonthsLater && maturityDate >= today) {
@@ -2190,6 +2254,7 @@
                         }
                         if (facilityId) {
                             regionFacilities[region].add(facilityId);
+                            totalExpiring++;
                         }
                     }
                 });
@@ -2198,9 +2263,14 @@
                 Object.keys(regionFacilities).forEach(region => {
                     regionCounts[region] = regionFacilities[region].size;
                 });
+                
+                console.log(`Found ${totalExpiring} expiring facilities across ${Object.keys(regionCounts).length} regions:`, regionCounts);
             } else {
                 // Count unique Relationship IDs
+                console.log('Counting Relationship IDs by region (with facilities expiring in next 90 days)');
                 const regionRelationships = {};
+                let totalExpiring = 0;
+                
                 portfolioData.forEach(row => {
                     const maturityDate = parseDate(row.Maturity_Date);
                     if (maturityDate && maturityDate <= threeMonthsLater && maturityDate >= today) {
@@ -2212,6 +2282,7 @@
                         }
                         if (relationshipId) {
                             regionRelationships[region].add(relationshipId);
+                            totalExpiring++;
                         }
                     }
                 });
@@ -2220,6 +2291,8 @@
                 Object.keys(regionRelationships).forEach(region => {
                     regionCounts[region] = regionRelationships[region].size;
                 });
+                
+                console.log(`Found ${totalExpiring} expiring relationships across ${Object.keys(regionCounts).length} regions:`, regionCounts);
             }
             
             return regionCounts;
@@ -2296,7 +2369,7 @@
             for (let i = 0; i < portfolioData.length; i++) {
                 const row = portfolioData[i];
                 const relId = row.Relationship_Name || row.Relationship_ID;
-                const amount = parseFloat(row[fieldName]) || 0;
+                const amount = parseNumber(row[fieldName]);
                 
                 // Debug first few rows
                 if (i < 3) {
@@ -2490,8 +2563,8 @@
                         <td class="p-4 text-sm font-medium text-gray-800 whitespace-nowrap">${row.Facility_ID || 'N/A'}</td>
                         <td class="p-4 text-sm text-gray-700">${row.Relationship_Name || 'N/A'}</td>
                         <td class="p-4 text-sm text-gray-700">${row.Product_Program || 'N/A'}</td>
-                        <td class="p-4 text-sm font-medium text-gray-800 whitespace-nowrap">${formatCurrency(parseFloat(row.Fac_Amount) || 0)}</td>
-                        <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatCurrency(parseFloat(row.Direct_OS) || 0)}</td>
+                        <td class="p-4 text-sm font-medium text-gray-800 whitespace-nowrap">${formatCurrency(parseNumber(row.Fac_Amount))}</td>
+                        <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatCurrency(parseNumber(row.Direct_OS))}</td>
                         <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatDate(row.Maturity_Date)}</td>
                         <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatDate(row.CA_Expiration_Date)}</td>
                     `;

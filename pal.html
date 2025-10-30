@@ -3,330 +3,822 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LPTM Data Analytics - Empowering Lending Through Data-Driven Intelligence</title>
+    <title>Portfolio Analytics Lending</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- PapaParse for CSV parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- jsVectorMap for world map -->
+    <link rel="stylesheet" href="https://unpkg.com/jsvectormap@1.5.3/dist/css/jsvectormap.min.css">
+    <script src="https://unpkg.com/jsvectormap@1.5.3/dist/js/jsvectormap.min.js"></script>
+    <script src="https://unpkg.com/jsvectormap@1.5.3/dist/maps/world.js"></script>
+    <style>
+        /* Custom scrollbar styles */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
 </head>
-<body class="bg-gray-50 text-gray-900 p-4">
-<div class="min-h-screen rounded-2xl border border-gray-200 bg-white px-5 py-7">
-<main class="overflow-hidden">
-      <!-- Hero section -->
-      <div class="relative isolate overflow-hidden bg-white">
-        <div class="mx-auto max-w-7xl px-6 pt-10 pb-24 sm:pb-32 lg:flex lg:px-8 lg:py-40">
-          <div class="mx-auto max-w-2xl shrink-0 lg:mx-0 lg:pt-8">
-            <div class="mt-24 sm:mt-32 lg:mt-16">
-              <a href="#" class="inline-flex space-x-6">
-                <span class="rounded-full bg-blue-50 px-3 py-1 text-sm/6 font-semibold text-blue-600 ring-1 ring-blue-600/20 ring-inset">Data-Driven Intelligence</span>
-                <span class="inline-flex items-center space-x-2 text-sm/6 font-medium text-gray-600">
-                  <span>Powered by Tableau & Dataiku</span>
-                  <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5 text-gray-400">
-                    <path d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" fill-rule="evenodd" />
-                  </svg>
-                </span>
-              </a>
-            </div>
-            <h1 class="mt-10 text-5xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-7xl">LPTM Data Analytics</h1>
-            <p class="mt-8 text-lg font-medium text-pretty text-gray-500 sm:text-xl/8">Transforming raw data into actionable insights through OneWealth, RCP, Tableau, and Dataiku — delivering transparency, control, and operational excellence across the lending lifecycle.</p>
-            <div class="mt-10 flex items-center gap-x-6">
-              <a href="#resources" class="rounded-md bg-blue-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-blue-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">Access Resources</a>
-              <a href="#capabilities" class="text-sm/6 font-semibold text-gray-900">Learn more <span aria-hidden="true">→</span></a>
-            </div>
-          </div>
-          <div class="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:mt-0 lg:mr-0 lg:ml-10 lg:max-w-none lg:flex-none xl:ml-32">
-            <div class="max-w-3xl flex-none sm:max-w-5xl lg:max-w-none">
-              <div class="rounded-xl bg-gray-900/5 p-2 ring-1 ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4">
-                <svg class="w-full h-auto" viewBox="0 0 1000 600" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect width="1000" height="600" rx="12" fill="#F9FAFB"/>
-                  <!-- Main Dashboard Card -->
-                  <rect x="30" y="30" width="940" height="80" rx="8" fill="white"/>
-                  <rect x="50" y="50" width="150" height="40" rx="6" fill="#3B82F6"/>
-                  <text x="70" y="77" font-family="system-ui" font-size="16" font-weight="600" fill="white">Dashboard</text>
-                  <rect x="220" y="50" width="120" height="40" rx="6" fill="#E5E7EB"/>
-                  <rect x="360" y="50" width="120" height="40" rx="6" fill="#E5E7EB"/>
-                  
-                  <!-- Left Analytics Panel -->
-                  <rect x="30" y="130" width="460" height="440" rx="8" fill="white"/>
-                  <text x="50" y="165" font-family="system-ui" font-size="22" font-weight="700" fill="#111827">Analytics Dashboard</text>
-                  
-                  <!-- Chart Line -->
-                  <path d="M50 200 L120 340 L190 260 L260 320 L300 220 L370 280 L440 240 L470 200" stroke="#3B82F6" stroke-width="4" fill="none"/>
-                  <path d="M50 340 L120 340 L190 260 L260 320 L300 220 L370 280 L440 240 L470 200 L470 540 L50 540 Z" fill="url(#gradient)" opacity="0.2"/>
-                  
-                  <!-- Grid Lines -->
-                  <line x1="50" y1="250" x2="470" y2="250" stroke="#E5E7EB" stroke-width="1"/>
-                  <line x1="50" y1="340" x2="470" y2="340" stroke="#E5E7EB" stroke-width="1"/>
-                  <line x1="50" y1="430" x2="470" y2="430" stroke="#E5E7EB" stroke-width="1"/>
-                  
-                  <!-- Right Metrics Panel -->
-                  <rect x="510" y="130" width="460" height="200" rx="8" fill="white"/>
-                  <text x="530" y="165" font-family="system-ui" font-size="22" font-weight="700" fill="#111827">Key Metrics</text>
-                  
-                  <!-- Metric Cards -->
-                  <rect x="530" y="190" width="200" height="120" rx="8" fill="#EFF6FF"/>
-                  <text x="550" y="220" font-family="system-ui" font-size="16" fill="#6B7280">Transparency</text>
-                  <text x="550" y="270" font-family="system-ui" font-size="48" font-weight="800" fill="#3B82F6">100%</text>
-                  
-                  <rect x="750" y="190" width="200" height="120" rx="8" fill="#F0FDF4"/>
-                  <text x="770" y="220" font-family="system-ui" font-size="16" fill="#6B7280">Data Quality</text>
-                  <text x="770" y="270" font-family="system-ui" font-size="48" font-weight="800" fill="#10B981">99.9%</text>
-                  
-                  <!-- Data Sources Panel -->
-                  <rect x="510" y="350" width="460" height="220" rx="8" fill="white"/>
-                  <text x="530" y="385" font-family="system-ui" font-size="22" font-weight="700" fill="#111827">Data Sources</text>
-                  
-                  <!-- Source Bubbles -->
-                  <circle cx="600" cy="470" r="50" fill="#EFF6FF"/>
-                  <text x="575" y="480" font-family="system-ui" font-size="16" font-weight="700" fill="#3B82F6">OW</text>
-                  
-                  <circle cx="740" cy="470" r="50" fill="#F0FDF4"/>
-                  <text x="712" y="480" font-family="system-ui" font-size="16" font-weight="700" fill="#10B981">RCP</text>
-                  
-                  <circle cx="880" cy="470" r="50" fill="#FEF3C7"/>
-                  <text x="858" y="480" font-family="system-ui" font-size="16" font-weight="700" fill="#F59E0B">API</text>
-                  
-                  <defs>
-                    <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stop-color="#3B82F6"/>
-                      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0"/>
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </div>
-            </div>
-          </div>
+<body class="bg-gray-50">
+    <div class="p-4 md:p-6">
+        <!-- Page Header -->
+        <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-6">
+            <h1 class="text-3xl font-bold text-gray-800">Portfolio Analytics Lending</h1>
+            <p class="mt-2 text-gray-600">Comprehensive lending portfolio analysis and metrics</p>
         </div>
-      </div>
-  
-      <!-- Logo cloud -->
-      <div class="mx-auto mt-8 max-w-7xl px-6 sm:mt-16 lg:px-8">
-        <h2 class="text-center text-lg/8 font-semibold text-gray-900">Powered by industry-leading platforms</h2>
-        <div class="mx-auto mt-10 grid max-w-lg grid-cols-4 items-center gap-x-8 gap-y-10 sm:max-w-xl sm:grid-cols-6 sm:gap-x-10 lg:mx-0 lg:max-w-none lg:grid-cols-7">
-          <!-- Tableau Logo -->
-          <svg class="col-span-2 max-h-12 w-full object-contain lg:col-span-1" viewBox="0 -2.5 256 256" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid">
-            <g>
-              <polygon fill="#7099A6" points="123.929417 11.5932444 123.929417 23.2338083 103.108897 23.2338083 103.108897 30.8049067 123.929417 30.8049067 123.929417 53.9913956 132.068348 53.9913956 132.068348 30.8049067 153.409382 30.8049067 153.409382 23.2338083 132.068348 23.2338083 132.068348 0 123.929417 0"></polygon>
-              <polygon fill="#EB912C" points="55.8841702 41.1205283 55.8841702 58.0135416 24.369473 58.0135416 24.369473 68.6130794 55.8841702 68.6130794 55.8841702 102.919619 67.5720533 102.919619 67.5720533 68.6130794 99.5599441 68.6130794 99.5599441 58.0135416 67.5720533 58.0135416 67.5720533 24.2275149 55.8841702 24.2275149"></polygon>
-              <polygon fill="#59879B" points="187.952518 41.1205283 187.952518 58.0135416 156.437821 58.0135416 156.437821 69.1335924 187.952518 69.1335924 187.952518 102.919619 200.113595 102.919619 200.113595 69.1335924 231.628292 69.1335924 231.628292 58.0135416 200.113595 58.0135416 200.113595 24.2275149 187.952518 24.2275149"></polygon>
-              <polygon fill="#E8762C" points="120.900978 98.6608762 120.900978 117.588622 85.8373283 117.588622 85.8373283 131.689793 120.900978 131.689793 120.900978 169.545285 135.096787 169.545285 135.096787 131.689793 170.160437 131.689793 170.160437 117.588622 135.096787 117.588622 135.096787 79.7331302 120.900978 79.7331302"></polygon>
-              <polygon fill="#5B6591" points="224.009874 108.219388 224.009874 120.096549 202.668841 120.096549 202.668841 129.70238 224.009874 129.70238 224.009874 153.409382 234.656731 153.409382 234.656731 129.70238 255.997765 129.70238 255.997765 120.096549 234.656731 120.096549 234.656731 96.3895467 224.009874 96.3895467"></polygon>
-            </g>
-          </svg>
 
-          <!-- Snowflake Logo -->
-          <svg class="col-span-2 max-h-12 w-full object-contain lg:col-span-1" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-            <path d="M60.5 30.5h-6.9l4.2-4.2c.6-.6.6-1.5 0-2.1s-1.5-.6-2.1 0l-6.3 6.3h-4.7l2.5-2.5c.6-.6.6-1.5 0-2.1s-1.5-.6-2.1 0l-4.6 4.6h-4.8l9-9h8.9c.8 0 1.5-.7 1.5-1.5s-.7-1.5-1.5-1.5h-5.9l5.5-5.5c.6-.6.6-1.5 0-2.1s-1.5-.6-2.1 0l-5.5 5.5v-5.9C45.5 9.6 44.9 9 44 9s-1.5.7-1.5 1.5v8.9l-9 9v-4.8l4.6-4.6c.6-.6.6-1.5 0-2.1s-1.5-.6-2.1 0l-2.5 2.5v-4.7l6.3-6.3c.6-.6.6-1.5 0-2.1s-1.5-.6-2.1 0l-4.2 4.2v-7c0-.8-.7-1.5-1.5-1.5s-1.5.7-1.5 1.5v6.9l-4.2-4.2c-.6-.6-1.5-.6-2.1 0s-.6 1.5 0 2.1l6.3 6.3v4.7L28 16.8c-.6-.6-1.5-.6-2.1 0s-.6 1.5 0 2.1l4.6 4.6v4.8l-9-9v-8.9c0-.8-.7-1.4-1.5-1.4s-1.5.7-1.5 1.5v5.9L13 10.9c-.6-.6-1.5-.6-2.1 0s-.6 1.5 0 2.1l5.5 5.5h-5.9c-.9 0-1.5.6-1.5 1.5s.7 1.5 1.5 1.5h8.9l9 9h-4.8L19 25.9c-.6-.6-1.5-.6-2.1 0s-.6 1.5 0 2.1l2.5 2.5h-4.7l-6.3-6.3c-.6-.6-1.5-.6-2.1 0s-.6 1.5 0 2.1l4.2 4.2h-7c-.8 0-1.5.7-1.5 1.5s.7 1.5 1.5 1.5h6.9l-4.2 4.2c-.6.6-.6 1.5 0 2.1c.3.3.7.4 1.1.4s.8-.1 1.1-.4l6.3-6.3h4.7L16.8 36c-.6.6-.6 1.5 0 2.1c.3.3.7.4 1.1.4s.8-.1 1.1-.4l4.6-4.6h4.8l-9 9h-8.9c-.9 0-1.5.7-1.5 1.5s.7 1.5 1.5 1.5h5.9L10.9 51c-.6.6-.6 1.5 0 2.1c.3.3.7.4 1.1.4s.8-.1 1.1-.4l5.5-5.5v5.9c0 .8.7 1.5 1.5 1.5s1.5-.7 1.5-1.5v-8.9l9-9v4.8L25.9 45c-.6.6-.6 1.5 0 2.1c.3.3.7.4 1.1.4s.8-.1 1.1-.4l2.5-2.5v4.7l-6.3 6.3c-.6.6-.6 1.5 0 2.1c.3.3.7.4 1.1.4s.8-.1 1.1-.4l4.2-4.2v6.9c0 .8.7 1.5 1.5 1.5s1.5-.7 1.5-1.5v-6.9l4.2 4.2c.3.3.7.4 1.1.4s.8-.1 1.1-.4c.6-.6.6-1.5 0-2.1l-6.3-6.3v-4.7l2.5 2.5c.3.3.7.4 1.1.4s.8-.1 1.1-.4c.6-.6.6-1.5 0-2.1l-4.6-4.6v-4.8l9 9v8.9c0 .8.7 1.5 1.5 1.5s1.5-.7 1.5-1.5v-5.9l5.5 5.5c.3.3.7.4 1.1.4s.8-.1 1.1-.4c.6-.6.6-1.5 0-2.1l-5.5-5.5H54c.8 0 1.5-.7 1.5-1.5s-.7-1.5-1.5-1.5h-8.9l-9-9h4.8l4.6 4.6c.3.3.7.4 1.1.4s.8-.1 1.1-.4c.6-.6.6-1.5 0-2.1l-2.5-2.5h4.7l6.3 6.3c.3.3.7.4 1.1.4s.8-.1 1.1-.4c.6-.6.6-1.5 0-2.1l-4.2-4.2h6.9c.8 0 1.5-.7 1.5-1.5s-1.3-1.5-2.1-1.5" fill="#75d6ff"></path>
-          </svg>
-
-          <!-- Dataiku Logo -->
-          <svg class="col-span-2 max-h-12 w-full object-contain lg:col-span-1" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 0a12 12 0 1 0 12 12A12 12 0 0 0 12 0zm6.527 15.34H12.5v-0.934h6.026zm-0.739 -8.73s-0.412 0.543 -0.193 1.995c0.41 2.724 -1.02 5.15 -3.56 5.15h-1.87s-1.835 -0.092 -2.933 1.01c-3.263 3.269 -4.04 4.116 -4.274 4.233 -0.15 0.08 -0.188 -0.093 -0.188 -0.093l9.644 -11.891c-0.203 -2.145 2.34 -2.715 3.278 -1.13l0.884 -0.248zm-1.599 -0.614a0.476 0.476 0 1 0 0.47 0.474 0.476 0.476 0 0 0 -0.47 -0.474z" fill="#2AB1AC"></path>
-          </svg>
-
-          <!-- Google Cloud Logo -->
-          <svg class="col-span-2 max-h-12 w-full object-contain sm:col-start-2 lg:col-span-1" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8.9,16c0,0.6,0.1,1.2,0.2,1.8L11,16l-1.8-1.8C9,14.8,8.9,15.4,8.9,16z" fill="none"/>
-            <path d="M16,23.1c-3.3,0-6-2.2-6.8-5.2l-6.7,6.7C5.3,29,10.3,32,16,32c3.1,0,6-0.9,8.5-2.5l-6.7-6.7 C17.2,23,16.6,23.1,16,23.1z" fill="#34A853"/>
-            <path d="M32,13.8c-0.1-0.5-0.5-0.8-1-0.8H16c-0.6,0-1,0.4-1,1v5c0,0.6,0.4,1,1,1h5.3c-0.9,1.4-2.2,2.3-3.5,2.8 l6.7,6.7C29,26.7,32,21.7,32,16c0-0.3,0-0.5,0-0.7C32.1,14.9,32.1,14.4,32,13.8z" fill="#4285F4"/>
-            <path d="M8.9,16c0-0.6,0.1-1.2,0.2-1.8L2.5,7.5C0.9,10,0,12.9,0,16s0.9,6,2.5,8.5l6.7-6.7C9,17.2,8.9,16.6,8.9,16z" fill="#FBBC05"/>
-            <path d="M28.5,6c-1.1-1.4-2.5-2.6-4-3.6C22,0.9,19.1,0,16,0C10.3,0,5.3,3,2.5,7.5l6.7,6.7c0.8-3,3.6-5.2,6.8-5.2 c0.6,0,1.2,0.1,1.8,0.3c0.9,0.3,1.7,0.8,2.6,1.5c0.3,0.3,0.7,0.3,1.1,0.1l6.7-3.3c0.3-0.1,0.5-0.4,0.5-0.7 C28.8,6.6,28.7,6.3,28.5,6z" fill="#EA4335"/>
-          </svg>
-
-          <!-- AWS Logo -->
-          <svg class="col-span-2 col-start-2 max-h-12 w-full object-contain sm:col-start-auto lg:col-span-1" viewBox="0 -30 150 150" xmlns="http://www.w3.org/2000/svg">
-            <path d="M122.714 62.703c5.28-.643 16.924-2.027 18.997.643 2.072 2.621-2.319 13.649-4.293 18.544-.592 1.484.691 2.077 2.023.94 8.684-7.319 10.954-22.6 9.178-24.825-1.777-2.175-17.023-4.055-26.3 2.473-1.431 1.038-1.184 2.423.395 2.225z" fill="#F90"/>
-            <path d="M74.852 89.456c20.28 0 43.865-6.38 60.099-18.396 2.664-1.978.345-4.994-2.369-3.758-18.207 7.714-37.993 11.473-56.003 11.473-26.694 0-52.5-7.368-73.42-19.533-1.827-1.088-3.208.791-1.679 2.176 19.343 17.505 44.951 28.038 73.372 28.038z" fill="#F90"/>
-            <path d="M42.632 32.835c0 1.83.197 3.313.542 4.401a26.505 26.505 0 001.58 3.56c.246.396.345.792.345 1.138 0 .495-.296.99-.938 1.484l-3.108 2.077c-.444.296-.889.445-1.283.445-.494 0-.987-.248-1.48-.693a15.29 15.29 0 01-1.777-2.324 38.28 38.28 0 01-1.53-2.918c-3.848 4.55-8.684 6.825-14.506 6.825-4.145 0-7.45-1.187-9.868-3.56-2.418-2.374-3.652-5.54-3.652-9.495 0-4.204 1.48-7.616 4.49-10.187 3.01-2.572 7.007-3.857 12.09-3.857 1.677 0 3.404.148 5.23.395 1.825.248 3.7.643 5.674 1.088v-3.61c0-3.758-.79-6.379-2.32-7.912-1.578-1.533-4.243-2.274-8.042-2.274-1.727 0-3.503.197-5.329.642a39.247 39.247 0 00-5.329 1.682 14.14 14.14 0 01-1.727.643c-.345.098-.592.148-.79.148-.69 0-1.036-.494-1.036-1.533V6.577c0-.791.1-1.385.346-1.73.246-.347.69-.693 1.381-1.04 1.727-.89 3.8-1.631 6.217-2.225C20.23.94 22.797.642 25.51.642c5.872 0 10.164 1.336 12.927 4.006 2.714 2.67 4.096 6.726 4.096 12.165v16.022h.099z" fill="#252F3E"/>
-          </svg>
-
-          <!-- IBM Logo -->
-          <svg class="col-span-2 max-h-12 w-full object-contain lg:col-span-1" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-            <rect width="512" height="512" rx="15%" fill="#fff"/>
-            <path fill="none" stroke="#1f70c1" stroke-width="12" d="M54 332h404M54 311h404m-224-22h202m-359 0h124M77 267h359M77 246h359m-202-22h202m-359 0h124M54 202h404M54 180h404"/>
-            <path fill="#fff" d="M111 215h56v81h-56zm33-42v166h-11V173zm197 0l28 76 26-76zm-6 72v94h67v-94l-33 93zm-105-71c34 0 62 49 17 82 44 32 18 82-17 82v3h49v-36l22-10v-77l-22-10v-36h-49z"/>
-          </svg>
-
-          <!-- Citi Logo -->
-          <svg class="col-span-2 max-h-12 w-full object-contain lg:col-span-1" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg" fill="none">
-            <g style="stroke-width:.262431">
-              <path d="M20.569 21.281v15.052m9.568-19.599v17.04a2.683 2.683 0 0 0 2.84 2.84h.852m-6.532-15.052h5.964m-18.253 12.22a5.497 5.497 0 0 1-4.828 2.84v0a5.697 5.697 0 0 1-5.68-5.68v-3.691a5.697 5.697 0 0 1 5.68-5.68v0a5.497 5.497 0 0 1 4.828 2.84m25.734-2.953V36.51" style="fill:none;stroke:#0078D4;stroke-width:3.14918;stroke-linecap:round;stroke-linejoin:round" transform="matrix(3.79642 0 0 3.82467 4.886 4.208)"/>
-              <path d="M17.758 17.414c1.632-1.632 5.838-6.036 12.867-6.036 7.03 0 11.252 4.413 12.875 6.036" style="fill:none;stroke:#0078D4;stroke-width:3.14918;stroke-linecap:round;stroke-linejoin:round" transform="matrix(3.79642 0 0 3.82467 4.886 4.208)"/>
-            </g>
-          </svg>
-        </div>
-      </div>
-  
-      <!-- Feature section -->
-      <div id="capabilities" class="mx-auto mt-32 max-w-7xl px-6 sm:mt-56 lg:px-8">
-        <div class="mx-auto max-w-2xl lg:text-center">
-          <h2 class="text-base/7 font-semibold text-blue-600">Core Capabilities</h2>
-          <p class="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl lg:text-balance">Everything you need for data-driven excellence</p>
-          <p class="mt-6 text-lg/8 text-gray-600">Delivering operational excellence through robust data governance, advanced analytics, seamless integration, and comprehensive reporting.</p>
-        </div>
-        <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
-          <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
-            <div class="flex flex-col">
-              <dt class="text-base/7 font-semibold text-gray-900">
-                <div class="mb-6 flex size-10 items-center justify-center rounded-lg bg-blue-600">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 text-white">
-                    <path d="M11.7 2.805a.75.75 0 0 1 .6 0A60.65 60.65 0 0 1 22.83 8.72a.75.75 0 0 1-.231 1.337 49.948 49.948 0 0 0-9.902 3.912l-.003.002c-.114.06-.227.119-.34.18a.75.75 0 0 1-.707 0A50.88 50.88 0 0 0 7.5 12.173v-.224c0-.131.067-.248.172-.311a54.615 54.615 0 0 1 4.653-2.52.75.75 0 0 0-.65-1.352 56.123 56.123 0 0 0-4.78 2.589 1.858 1.858 0 0 0-.859 1.228 49.803 49.803 0 0 0-4.634-1.527.75.75 0 0 1-.231-1.337A60.653 60.653 0 0 1 11.7 2.805Z" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M13.06 15.473a48.45 48.45 0 0 1 7.666-3.282c.134 1.414.22 2.843.255 4.284a.75.75 0 0 1-.46.711 47.87 47.87 0 0 0-8.105 4.342.75.75 0 0 1-.832 0 47.87 47.87 0 0 0-8.104-4.342.75.75 0 0 1-.461-.71c.035-1.442.121-2.87.255-4.286.921.304 1.83.634 2.726.99v1.27a1.5 1.5 0 0 0-.14 2.508c-.09.38-.222.753-.397 1.11.452.213.901.434 1.346.66a6.727 6.727 0 0 0 .551-1.607 1.5 1.5 0 0 0 .14-2.67v-.645a48.549 48.549 0 0 1 3.44 1.667 2.25 2.25 0 0 0 2.12 0Z" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
+        <!-- Top 4 Metric Cards -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 xl:grid-cols-4 mb-6">
+            <!-- Card 1: Total Facility Amount -->
+            <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
+                <div class="mb-6 flex items-center gap-3">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100">
+                        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-500">Total Facility Amount</h3>
+                    </div>
                 </div>
-                Data Governance & Quality
-              </dt>
-              <dd class="mt-1 flex flex-auto flex-col text-base/7 text-gray-600">
-                <p class="flex-auto">Implements governance across OneWealth and RCP data flows to maintain consistency and accuracy. Establishes ownership through the Last Traceable Point framework.</p>
-                <p class="mt-6">
-                  <a href="#" class="text-sm/6 font-semibold text-blue-600 hover:text-blue-500">Learn more <span aria-hidden="true">→</span></a>
-                </p>
-              </dd>
-            </div>
-            <div class="flex flex-col">
-              <dt class="text-base/7 font-semibold text-gray-900">
-                <div class="mb-6 flex size-10 items-center justify-center rounded-lg bg-blue-600">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 text-white">
-                    <path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
+                <div class="flex items-end justify-between">
+                    <div>
+                        <h4 class="text-2xl font-bold text-gray-800" id="totalFacAmount">$0.00</h4>
+                    </div>
                 </div>
-                Analytics & Visualization
-              </dt>
-              <dd class="mt-1 flex flex-auto flex-col text-base/7 text-gray-600">
-                <p class="flex-auto">Utilizes Tableau dashboards for real-time insights and Dataiku for advanced analytics and predictive modeling — enabling faster, data-backed decisions.</p>
-                <p class="mt-6">
-                  <a href="#" class="text-sm/6 font-semibold text-blue-600 hover:text-blue-500">Learn more <span aria-hidden="true">→</span></a>
-                </p>
-              </dd>
             </div>
-            <div class="flex flex-col">
-              <dt class="text-base/7 font-semibold text-gray-900">
-                <div class="mb-6 flex size-10 items-center justify-center rounded-lg bg-blue-600">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 text-white">
-                    <path d="M11.644 1.59a.75.75 0 0 1 .712 0l9.75 5.25a.75.75 0 0 1 0 1.32l-9.75 5.25a.75.75 0 0 1-.712 0l-9.75-5.25a.75.75 0 0 1 0-1.32l9.75-5.25Z" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="m3.265 10.602 7.668 4.129a2.25 2.25 0 0 0 2.134 0l7.668-4.13 1.37.739a.75.75 0 0 1 0 1.32l-9.75 5.25a.75.75 0 0 1-.71 0l-9.75-5.25a.75.75 0 0 1 0-1.32l1.37-.738Z" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="m10.933 19.231-7.668-4.13-1.37.739a.75.75 0 0 0 0 1.32l9.75 5.25c.221.12.489.12.71 0l9.75-5.25a.75.75 0 0 0 0-1.32l-1.37-.738-7.668 4.13a2.25 2.25 0 0 1-2.134-.001Z" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
+
+            <!-- Card 2: Total Direct OS -->
+            <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
+                <div class="mb-6 flex items-center gap-3">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
+                        <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-500">Total Direct OS</h3>
+                    </div>
                 </div>
-                Data Integration & Automation
-              </dt>
-              <dd class="mt-1 flex flex-auto flex-col text-base/7 text-gray-600">
-                <p class="flex-auto">Connects OneWealth and RCP data into a unified analytical layer. Automates recurring reporting tasks to minimize manual intervention and error risk.</p>
-                <p class="mt-6">
-                  <a href="#" class="text-sm/6 font-semibold text-blue-600 hover:text-blue-500">Learn more <span aria-hidden="true">→</span></a>
-                </p>
-              </dd>
+                <div class="flex items-end justify-between">
+                    <div>
+                        <h4 class="text-2xl font-bold text-gray-800" id="totalDirectOS">$0.00</h4>
+                    </div>
+                </div>
             </div>
-          </dl>
+
+            <!-- Card 3: Total Number of Facilities -->
+            <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
+                <div class="mb-6 flex items-center gap-3">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100">
+                        <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-500">Total Facilities</h3>
+                    </div>
+                </div>
+                <div class="flex items-end justify-between">
+                    <div>
+                        <h4 class="text-2xl font-bold text-gray-800" id="totalFacilities">0</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4: Total Number of CAIDs -->
+            <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
+                <div class="mb-6 flex items-center gap-3">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100">
+                        <svg class="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-500">Total CAIDs</h3>
+                    </div>
+                </div>
+                <div class="flex items-end justify-between">
+                    <div>
+                        <h4 class="text-2xl font-bold text-gray-800" id="totalCAIDs">0</h4>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-  
-      <!-- Feature section -->
-      <div class="mt-32 sm:mt-56">
-        <div class="mx-auto max-w-7xl px-6 lg:px-8">
-          <div class="mx-auto max-w-2xl sm:text-center">
-            <h2 class="text-base/7 font-semibold text-blue-600">Purpose & Innovation</h2>
-            <p class="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl sm:text-balance">Driving decisions through trusted data</p>
-            <p class="mt-6 text-lg/8 text-gray-600">Data Analytics is a foundational pillar of LPTM — designed to ensure that decisions, oversight, and client experiences are powered by trusted and timely data.</p>
-          </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-12 gap-4 md:gap-6 mb-6">
+            <!-- Area Chart: Facility IDs/CAIDs by Expiration Date -->
+            <div class="col-span-12 xl:col-span-8">
+                <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 sm:pt-6">
+                    <div class="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">Facilities & CAIDs Expiration Timeline</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Monthly expiration count by type</p>
+                        </div>
+                        <div class="flex flex-row-reverse items-center justify-end gap-0.5 sm:flex-col sm:items-start">
+                            <div class="flex flex-row-reverse items-center gap-3 sm:flex-row sm:gap-2">
+                                <h4 class="text-2xl font-bold text-gray-800" id="totalExpiring">0</h4>
+                                <span class="flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-600">
+                                    Total
+                                </span>
+                            </div>
+                            <span class="text-gray-500 text-xs">Combined Count</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-5 mb-5">
+                        <div class="flex items-center gap-1.5">
+                            <div class="h-2.5 w-2.5 rounded-full" style="background-color: #465FFF;"></div>
+                            <p class="text-sm text-gray-500">Facilities</p>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <div class="h-2.5 w-2.5 rounded-full" style="background-color: #9CB9FF;"></div>
+                            <p class="text-sm text-gray-500">CAIDs</p>
+                        </div>
+                    </div>
+                    <div class="max-w-full overflow-x-auto custom-scrollbar">
+                        <div id="expirationChart" class="apexcharts-tooltip-active -ml-4 min-w-[1000px] pl-2 xl:min-w-full"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Regional Distribution with Map -->
+            <div class="col-span-12 xl:col-span-4">
+                <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6">
+                    <div class="flex justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">Regional Distribution</h3>
+                            <p class="mt-1 text-sm text-gray-500">Facilities expiring soon by region</p>
+                        </div>
+                    </div>
+                    <div class="border-gray-200 my-6 overflow-hidden rounded-2xl border bg-gray-50 px-4 py-6 sm:px-6">
+                        <div id="mapOne" class="mapOne map-btn -mx-4 -my-6 h-[212px] w-full"></div>
+                    </div>
+                    <div class="space-y-5" id="regionList">
+                        <!-- Regional statistics will be populated here -->
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="mx-auto mt-16 max-w-7xl px-6 sm:mt-20 md:mt-24 lg:px-8">
-          <dl class="mx-auto grid max-w-2xl grid-cols-1 gap-x-6 gap-y-10 text-base/7 text-gray-600 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3 lg:gap-x-8 lg:gap-y-16">
-            <div class="relative pl-9">
-              <dt class="inline font-semibold text-gray-900">
-                <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="absolute top-1 left-1 size-5 text-blue-600">
-                  <path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
-                  <path d="M.664 10.59a1.651 1.651 0 0 1 0-1.186A10.004 10.004 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41Z" clip-rule="evenodd" fill-rule="evenodd" />
-                </svg>
-                Unified Data View.
-              </dt>
-              <dd class="inline">Create a single, consistent view of lending activities across systems and regions.</dd>
+
+        <!-- Bar Chart: Top Relationships by Total Facility Amount -->
+        <div class="mb-6">
+            <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 sm:pt-5">
+                <div class="flex flex-col gap-5 mb-6 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">Top Relationships by Facility Amount</h3>
+                        <p class="mt-1 text-gray-500 text-sm">Total facility amount by relationship</p>
+                    </div>
+                    <div>
+                        <select id="topNFilter" onchange="updateBarChart()" 
+                            class="h-11 rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800">
+                            <option value="5">Top 5</option>
+                            <option value="10" selected>Top 10</option>
+                            <option value="15">Top 15</option>
+                            <option value="20">Top 20</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="max-w-full overflow-x-auto custom-scrollbar">
+                    <div id="relationshipChart" class="min-w-[900px] xl:min-w-full"></div>
+                </div>
             </div>
-            <div class="relative pl-9">
-              <dt class="inline font-semibold text-gray-900">
-                <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="absolute top-1 left-1 size-5 text-blue-600">
-                  <path d="M10 1a6 6 0 0 0-3.815 10.631C7.237 12.5 8 13.443 8 14.456v.644a.75.75 0 0 0 .572.729 6.016 6.016 0 0 0 2.856 0A.75.75 0 0 0 12 15.1v-.644c0-1.013.762-1.957 1.815-2.825A6 6 0 0 0 10 1ZM8.863 17.414a.75.75 0 0 0-.226 1.483 9.066 9.066 0 0 0 2.726 0 .75.75 0 0 0-.226-1.483 7.553 7.553 0 0 1-2.274 0Z" clip-rule="evenodd" fill-rule="evenodd" />
-                </svg>
-                Proactive Analytics.
-              </dt>
-              <dd class="inline">Leverage analytics tools to identify trends, risks, and opportunities proactively.</dd>
-            </div>
-            <div class="relative pl-9">
-              <dt class="inline font-semibold text-gray-900">
-                <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="absolute top-1 left-1 size-5 text-blue-600">
-                  <path d="M15.98 1.804a1 1 0 0 0-1.96 0l-.24 1.192a1 1 0 0 1-.784.785l-1.192.238a1 1 0 0 0 0 1.962l1.192.238a1 1 0 0 1 .785.785l.238 1.192a1 1 0 0 0 1.962 0l.238-1.192a1 1 0 0 1 .785-.785l1.192-.238a1 1 0 0 0 0-1.962l-1.192-.238a1 1 0 0 1-.785-.785l-.238-1.192ZM6.949 5.684a1 1 0 0 0-1.898 0l-.683 2.051a1 1 0 0 1-.633.633l-2.051.683a1 1 0 0 0 0 1.898l2.051.684a1 1 0 0 1 .633.632l.683 2.051a1 1 0 0 0 1.898 0l.683-2.051a1 1 0 0 1 .633-.633l2.051-.683a1 1 0 0 0 0-1.898l-2.051-.683a1 1 0 0 1-.633-.633L6.95 5.684ZM13.949 13.684a1 1 0 0 0-1.898 0l-.184.551a1 1 0 0 1-.632.633l-.551.183a1 1 0 0 0 0 1.898l.551.183a1 1 0 0 1 .633.633l.183.551a1 1 0 0 0 1.898 0l.184-.551a1 1 0 0 1 .632-.633l.551-.183a1 1 0 0 0 0-1.898l-.551-.184a1 1 0 0 1-.633-.632l-.183-.551Z" clip-rule="evenodd" fill-rule="evenodd" />
-                </svg>
-                Innovation Culture.
-              </dt>
-              <dd class="inline">Foster continuous improvement through technology adoption and machine learning.</dd>
-            </div>
-            <div class="relative pl-9">
-              <dt class="inline font-semibold text-gray-900">
-                <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="absolute top-1 left-1 size-5 text-blue-600">
-                  <path d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clip-rule="evenodd" fill-rule="evenodd" />
-                </svg>
-                Data Governance.
-              </dt>
-              <dd class="inline">Enable data-driven governance and control with robust compliance frameworks.</dd>
-            </div>
-            <div class="relative pl-9">
-              <dt class="inline font-semibold text-gray-900">
-                <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="absolute top-1 left-1 size-5 text-blue-600">
-                  <path d="M15.312 11.424a5.5 5.5 0 0 1-9.201 2.466l-.312-.311h2.433a.75.75 0 0 0 0-1.5H3.989a.75.75 0 0 0-.75.75v4.242a.75.75 0 0 0 1.5 0v-2.43l.31.31a7 7 0 0 0 11.712-3.138.75.75 0 0 0-1.449-.39Zm1.23-3.723a.75.75 0 0 0 .219-.53V2.929a.75.75 0 0 0-1.5 0V5.36l-.31-.31A7 7 0 0 0 3.239 8.188a.75.75 0 1 0 1.448.389A5.5 5.5 0 0 1 13.89 6.11l.311.31h-2.432a.75.75 0 0 0 0 1.5h4.243a.75.75 0 0 0 .53-.219Z" clip-rule="evenodd" fill-rule="evenodd" />
-                </svg>
-                Real-Time Insights.
-              </dt>
-              <dd class="inline">Access real-time analytics dashboards for immediate visibility into operations.</dd>
-            </div>
-            <div class="relative pl-9">
-              <dt class="inline font-semibold text-gray-900">
-                <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="absolute top-1 left-1 size-5 text-blue-600">
-                  <path d="M7.84 1.804A1 1 0 0 1 8.82 1h2.36a1 1 0 0 1 .98.804l.331 1.652a6.993 6.993 0 0 1 1.929 1.115l1.598-.54a1 1 0 0 1 1.186.447l1.18 2.044a1 1 0 0 1-.205 1.251l-1.267 1.113a7.047 7.047 0 0 1 0 2.228l1.267 1.113a1 1 0 0 1 .206 1.25l-1.18 2.045a1 1 0 0 1-1.187.447l-1.598-.54a6.993 6.993 0 0 1-1.929 1.115l-.33 1.652a1 1 0 0 1-.98.804H8.82a1 1 0 0 1-.98-.804l-.331-1.652a6.993 6.993 0 0 1-1.929-1.115l-1.598.54a1 1 0 0 1-1.186-.447l-1.18-2.044a1 1 0 0 1 .205-1.251l1.267-1.114a7.05 7.05 0 0 1 0-2.227L1.821 7.773a1 1 0 0 1-.206-1.25l1.18-2.045a1 1 0 0 1 1.187-.447l1.598.54A6.992 6.992 0 0 1 7.51 3.456l.33-1.652ZM10 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" clip-rule="evenodd" fill-rule="evenodd" />
-                </svg>
-                Automated Reporting.
-              </dt>
-              <dd class="inline">Automate recurring tasks and streamline analysis with intelligent workflows.</dd>
-            </div>
-          </dl>
         </div>
-      </div>
-  
-      <!-- Stats -->
-      <div class="mx-auto mt-32 max-w-7xl px-6 sm:mt-56 lg:px-8">
-        <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl">
-          <h2 class="text-base/8 font-semibold text-blue-600">Impact & Benefits</h2>
-          <p class="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl">Measurable results across the organization</p>
-          <p class="mt-6 text-lg/8 text-gray-700">Delivering transparency, accuracy, efficiency, insight, and innovation through data-driven excellence.</p>
+
+        <!-- Data Table -->
+        <div class="overflow-hidden rounded-xl border border-gray-200 bg-white">
+            <div class="flex flex-col gap-4 border-b border-gray-200 px-4 py-4 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
+                <div class="flex-shrink-0">
+                    <h3 class="text-lg font-semibold text-gray-800">Portfolio Details</h3>
+                    <p class="text-sm text-gray-500">Detailed lending portfolio data</p>
+                </div>
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-center">
+                    <!-- Search -->
+                    <div class="relative">
+                        <input type="text" id="searchInput" placeholder="Search..." 
+                            class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pl-10 text-sm text-gray-800 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none sm:w-64">
+                        <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2">
+                            <svg class="fill-gray-500" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M3.04199 9.37381C3.04199 5.87712 5.87735 3.04218 9.37533 3.04218C12.8733 3.04218 15.7087 5.87712 15.7087 9.37381C15.7087 12.8705 12.8733 15.7055 9.37533 15.7055C5.87735 15.7055 3.04199 12.8705 3.04199 9.37381ZM9.37533 1.54218C5.04926 1.54218 1.54199 5.04835 1.54199 9.37381C1.54199 13.6993 5.04926 17.2055 9.37533 17.2055C11.2676 17.2055 13.0032 16.5346 14.3572 15.4178L17.1773 18.2381C17.4702 18.531 17.945 18.5311 18.2379 18.2382C18.5308 17.9453 18.5309 17.4704 18.238 17.1775L15.4182 14.3575C16.5367 13.0035 17.2087 11.2671 17.2087 9.37381C17.2087 5.04835 13.7014 1.54218 9.37533 1.54218Z" fill=""></path>
+                            </svg>
+                        </span>
+                    </div>
+                    <!-- Export Button -->
+                    <button onclick="exportToCSV()" 
+                        class="flex h-11 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Export
+                    </button>
+                </div>
+            </div>
+            <div class="custom-scrollbar overflow-x-auto">
+                <table class="w-full table-auto" id="portfolioTable">
+                    <thead>
+                        <tr class="border-b border-gray-200 bg-gray-50">
+                            <th class="p-4 text-left text-xs font-medium text-gray-500 whitespace-nowrap">Report Date</th>
+                            <th class="p-4 text-left text-xs font-medium text-gray-500 whitespace-nowrap">Region</th>
+                            <th class="p-4 text-left text-xs font-medium text-gray-500 whitespace-nowrap">Facility ID</th>
+                            <th class="p-4 text-left text-xs font-medium text-gray-500 whitespace-nowrap">Relationship Name</th>
+                            <th class="p-4 text-left text-xs font-medium text-gray-500 whitespace-nowrap">Product Program</th>
+                            <th class="p-4 text-left text-xs font-medium text-gray-500 whitespace-nowrap">Facility Amount</th>
+                            <th class="p-4 text-left text-xs font-medium text-gray-500 whitespace-nowrap">Direct OS</th>
+                            <th class="p-4 text-left text-xs font-medium text-gray-500 whitespace-nowrap">Maturity Date</th>
+                            <th class="p-4 text-left text-xs font-medium text-gray-500 whitespace-nowrap">CA Expiration</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-gray-200">
+                        <!-- Table rows will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex w-full flex-col items-center justify-between border-t border-gray-200 px-5 py-4 sm:flex-row">
+                <div class="pb-3 sm:pb-0">
+                    <span class="block text-sm font-medium text-gray-500">
+                        Showing <span class="text-gray-800" id="startRow">0</span> to 
+                        <span class="text-gray-800" id="endRow">0</span> of 
+                        <span class="text-gray-800" id="totalRows">0</span>
+                    </span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="previousPage()" id="prevBtn"
+                        class="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+                        Previous
+                    </button>
+                    <span class="text-sm font-medium text-gray-700">
+                        Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
+                    </span>
+                    <button onclick="nextPage()" id="nextBtn"
+                        class="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+                        Next
+                    </button>
+                </div>
+            </div>
         </div>
-        <dl class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-10 text-gray-900 sm:mt-20 sm:grid-cols-2 sm:gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-4">
-          <div class="flex flex-col gap-y-3 border-l border-gray-900/15 pl-6">
-            <dt class="text-sm/6">Data Transparency</dt>
-            <dd class="order-first text-3xl font-semibold tracking-tight">100%</dd>
-          </div>
-          <div class="flex flex-col gap-y-3 border-l border-gray-900/15 pl-6">
-            <dt class="text-sm/6">Data Quality</dt>
-            <dd class="order-first text-3xl font-semibold tracking-tight">99.9%</dd>
-          </div>
-          <div class="flex flex-col gap-y-3 border-l border-gray-900/15 pl-6">
-            <dt class="text-sm/6">Reporting Automation</dt>
-            <dd class="order-first text-3xl font-semibold tracking-tight">Real-Time</dd>
-          </div>
-          <div class="flex flex-col gap-y-3 border-l border-gray-900/15 pl-6">
-            <dt class="text-sm/6">System Integration</dt>
-            <dd class="order-first text-3xl font-semibold tracking-tight">Unified</dd>
-          </div>
-        </dl>
-      </div>
-  
-      <!-- CTA section -->
-      <div id="resources" class="relative isolate mt-32 px-6 py-32 sm:mt-56 sm:py-40 lg:px-8">
-        <div class="mx-auto max-w-2xl text-center">
-          <h2 class="text-4xl font-semibold tracking-tight text-balance text-gray-900 sm:text-5xl">Access Resources & Support</h2>
-          <p class="mx-auto mt-6 max-w-xl text-lg/8 text-pretty text-gray-600">For access to data tools, analytics support, or data quality inquiries, please submit a ticket via the LPTM Tech & Ops Request Form and select "Data & Reporting" as the related function.</p>
-          <div class="mt-10 flex items-center justify-center gap-x-6">
-            <a href="#" class="rounded-md bg-blue-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-blue-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">Submit Request</a>
-            <a href="#" class="text-sm/6 font-semibold text-gray-900">View Documentation <span aria-hidden="true">→</span></a>
-          </div>
-        </div>
-      </div>
-    </main>
-  </div>
+    </div>
+
+    <script>
+        // Global variables
+        let portfolioData = [];
+        let filteredData = [];
+        let currentPage = 1;
+        let rowsPerPage = 20;
+        let expirationChartInstance = null;
+        let relationshipChartInstance = null;
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load data from CSV file
+            loadDataFromCSV();
+            
+            // Setup search functionality
+            document.getElementById('searchInput').addEventListener('input', function() {
+                filterData();
+            });
+        });
+
+        // Load data from CSV file
+        function loadDataFromCSV() {
+            // Check if file input exists or use sample data
+            Papa.parse('palDashboard.csv', {
+                download: true,
+                header: true,
+                complete: function(results) {
+                    portfolioData = results.data.filter(row => row.Facility_ID); // Filter out empty rows
+                    initializeDashboard();
+                },
+                error: function(error) {
+                    console.warn('CSV file not found, using sample data');
+                    loadSampleData();
+                }
+            });
+        }
+
+        // Load sample data if CSV is not available
+        function loadSampleData() {
+            portfolioData = [
+                {
+                    Report_Date: '2024-01-15',
+                    Region: 'NAM',
+                    Facility_ID: 'FAC001',
+                    Parent_Facility_ID: 'PFAC001',
+                    Product_Program: 'Commercial Lending',
+                    Management_Status: 'Active',
+                    Facility_Type: 'Term Loan',
+                    'Committed/Uncommitted': 'Committed',
+                    Risk_Category: 'Low',
+                    Relationship_ID: 'REL001',
+                    Relationship_Name: 'ABC Corporation',
+                    CAID: 'CAID001',
+                    Lead_Underwriter: 'John Smith',
+                    Underwriting_Team_Lead: 'Jane Doe',
+                    Control_Unit: 'CU-001',
+                    Fac_Amount: '5000000',
+                    Total_Reported_Fac_Amount: '5000000',
+                    Direct_OS: '3000000',
+                    Contingent_OS: '500000',
+                    PSE_OS: '0',
+                    Unused_Committed: '1500000',
+                    Total_Comm_Exposure: '5000000',
+                    Maturity_Date: '2025-12-31',
+                    Prodict_Underwriter: 'John Smith',
+                    CA_Expiration_Date: '2025-06-30'
+                },
+                // Add more sample data as needed
+            ];
+            initializeDashboard();
+        }
+
+        // Initialize dashboard with data
+        function initializeDashboard() {
+            calculateMetrics();
+            createExpirationChart();
+            createRegionalChart();
+            createRelationshipChart();
+            filterData();
+        }
+
+        // Calculate top metrics
+        function calculateMetrics() {
+            const totalFacAmount = portfolioData.reduce((sum, row) => {
+                return sum + (parseFloat(row.Fac_Amount) || 0);
+            }, 0);
+            
+            const totalDirectOS = portfolioData.reduce((sum, row) => {
+                return sum + (parseFloat(row.Direct_OS) || 0);
+            }, 0);
+            
+            const uniqueFacilities = new Set(portfolioData.map(row => row.Facility_ID)).size;
+            const uniqueCAIDs = new Set(portfolioData.filter(row => row.CAID).map(row => row.CAID)).size;
+            
+            document.getElementById('totalFacAmount').textContent = formatCurrency(totalFacAmount);
+            document.getElementById('totalDirectOS').textContent = formatCurrency(totalDirectOS);
+            document.getElementById('totalFacilities').textContent = uniqueFacilities.toLocaleString();
+            document.getElementById('totalCAIDs').textContent = uniqueCAIDs.toLocaleString();
+        }
+
+        // Format currency
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value);
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        // Create expiration timeline chart (Area chart with both series)
+        function createExpirationChart() {
+            const facilityData = aggregateByMonthYear(portfolioData, 'Maturity_Date');
+            const caidData = aggregateByMonthYear(portfolioData.filter(r => r.CA_Expiration_Date), 'CA_Expiration_Date');
+            
+            // Merge both datasets to have consistent months
+            const allMonths = [...new Set([...facilityData.map(d => d.month), ...caidData.map(d => d.month)])].sort();
+            
+            const facilitySeries = allMonths.map(month => {
+                const item = facilityData.find(d => d.month === month);
+                return item ? item.count : 0;
+            });
+            
+            const caidSeries = allMonths.map(month => {
+                const item = caidData.find(d => d.month === month);
+                return item ? item.count : 0;
+            });
+            
+            // Calculate total expiring
+            const totalExpiring = facilitySeries.reduce((a, b) => a + b, 0) + caidSeries.reduce((a, b) => a + b, 0);
+            document.getElementById('totalExpiring').textContent = totalExpiring.toLocaleString();
+            
+            const options = {
+                series: [
+                    {
+                        name: 'Facilities',
+                        data: facilitySeries
+                    },
+                    {
+                        name: 'CAIDs',
+                        data: caidSeries
+                    }
+                ],
+                legend: {
+                    show: false,
+                    position: 'top',
+                    horizontalAlign: 'left'
+                },
+                colors: ['#465FFF', '#9CB9FF'],
+                chart: {
+                    fontFamily: 'system-ui, -apple-system, sans-serif',
+                    height: 310,
+                    type: 'area',
+                    toolbar: {
+                        show: false
+                    }
+                },
+                fill: {
+                    gradient: {
+                        enabled: true,
+                        opacityFrom: 0.55,
+                        opacityTo: 0
+                    }
+                },
+                stroke: {
+                    curve: 'smooth',
+                    width: [2, 2]
+                },
+                markers: {
+                    size: 0
+                },
+                labels: {
+                    show: false,
+                    position: 'top'
+                },
+                grid: {
+                    xaxis: {
+                        lines: {
+                            show: false
+                        }
+                    },
+                    yaxis: {
+                        lines: {
+                            show: true
+                        }
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                tooltip: {
+                    x: {
+                        formatter: function(value, { dataPointIndex }) {
+                            const monthStr = allMonths[dataPointIndex];
+                            if (monthStr) {
+                                const date = new Date(monthStr + '-01');
+                                return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                            }
+                            return value;
+                        }
+                    }
+                },
+                xaxis: {
+                    type: 'category',
+                    categories: allMonths.map(m => {
+                        const date = new Date(m + '-01');
+                        return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                    }),
+                    axisBorder: {
+                        show: false
+                    },
+                    axisTicks: {
+                        show: false
+                    }
+                },
+                yaxis: {
+                    title: {
+                        style: {
+                            fontSize: '0px'
+                        }
+                    }
+                }
+            };
+
+            if (expirationChartInstance) {
+                expirationChartInstance.destroy();
+            }
+            expirationChartInstance = new ApexCharts(document.querySelector("#expirationChart"), options);
+            expirationChartInstance.render();
+        }
+
+        // Aggregate data by month and year
+        function aggregateByMonthYear(data, dateField) {
+            const grouped = {};
+            data.forEach(row => {
+                const date = row[dateField];
+                if (date) {
+                    const monthYear = date.substring(0, 7); // YYYY-MM
+                    grouped[monthYear] = (grouped[monthYear] || 0) + 1;
+                }
+            });
+            
+            return Object.entries(grouped)
+                .map(([month, count]) => ({ month, count }))
+                .sort((a, b) => a.month.localeCompare(b.month));
+        }
+
+        // Aggregate data by date
+        function aggregateByDate(data, dateField) {
+            const grouped = {};
+            data.forEach(row => {
+                const date = row[dateField];
+                if (date) {
+                    const monthYear = date.substring(0, 7); // YYYY-MM
+                    grouped[monthYear] = (grouped[monthYear] || 0) + 1;
+                }
+            });
+            
+            return Object.entries(grouped)
+                .map(([date, count]) => ({ date: date + '-01', count }))
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
+        }
+
+        // Initialize world map
+        function initializeMap() {
+            // Get region coordinates for markers
+            const regionCoords = {
+                'NAM': [37.0902, -95.7129], // North America (USA)
+                'EMEA': [51.5074, -0.1278], // Europe (London)
+                'APAC': [35.6762, 139.6503], // Asia Pacific (Tokyo)
+                'LATAM': [-23.5505, -46.6333], // Latin America (São Paulo)
+                'MEA': [25.2048, 55.2708] // Middle East (Dubai)
+            };
+            
+            const regionCounts = getRegionCounts();
+            const markers = [];
+            
+            Object.keys(regionCounts).forEach(region => {
+                if (regionCoords[region]) {
+                    markers.push({
+                        name: region,
+                        coords: regionCoords[region]
+                    });
+                }
+            });
+            
+            const map = new jsVectorMap({
+                selector: '#mapOne',
+                map: 'world',
+                zoomButtons: false,
+                regionStyle: {
+                    initial: {
+                        fill: '#D9D9D9'
+                    },
+                    hover: {
+                        fillOpacity: 1,
+                        fill: '#465fff'
+                    }
+                },
+                markers: markers,
+                markerStyle: {
+                    initial: {
+                        strokeWidth: 1,
+                        fill: '#465fff',
+                        fillOpacity: 1,
+                        r: 4
+                    },
+                    hover: {
+                        fill: '#465fff',
+                        fillOpacity: 1
+                    }
+                }
+            });
+        }
+        
+        // Get region counts for facilities expiring soon
+        function getRegionCounts() {
+            const regionCounts = {};
+            const today = new Date();
+            const threeMonthsLater = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000);
+            
+            portfolioData.forEach(row => {
+                const maturityDate = new Date(row.Maturity_Date);
+                if (maturityDate <= threeMonthsLater && maturityDate >= today) {
+                    const region = row.Region || 'Unknown';
+                    regionCounts[region] = (regionCounts[region] || 0) + 1;
+                }
+            });
+            
+            return regionCounts;
+        }
+        
+        // Create regional distribution chart with map and list
+        function createRegionalChart() {
+            initializeMap();
+            
+            const regionCounts = getRegionCounts();
+            const totalCount = Object.values(regionCounts).reduce((a, b) => a + b, 0);
+            
+            // Sort regions by count (descending)
+            const sortedRegions = Object.entries(regionCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5); // Top 5 regions
+            
+            // Region flag/icon mapping
+            const regionInfo = {
+                'NAM': { name: 'North America', color: 'bg-blue-500' },
+                'EMEA': { name: 'Europe & Middle East', color: 'bg-green-500' },
+                'APAC': { name: 'Asia Pacific', color: 'bg-orange-500' },
+                'LATAM': { name: 'Latin America', color: 'bg-purple-500' },
+                'MEA': { name: 'Middle East & Africa', color: 'bg-red-500' }
+            };
+            
+            const regionList = document.getElementById('regionList');
+            regionList.innerHTML = '';
+            
+            sortedRegions.forEach(([region, count]) => {
+                const percentage = ((count / totalCount) * 100).toFixed(0);
+                const info = regionInfo[region] || { name: region, color: 'bg-gray-500' };
+                
+                const regionItem = document.createElement('div');
+                regionItem.className = 'flex items-center justify-between';
+                regionItem.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 flex items-center justify-center rounded-full ${info.color} text-white font-semibold text-xs">
+                            ${region}
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">${info.name}</p>
+                            <span class="block text-xs text-gray-500">${count} Facilities</span>
+                        </div>
+                    </div>
+                    <div class="flex w-full max-w-[140px] items-center gap-3">
+                        <div class="relative block h-2 w-full max-w-[100px] rounded-sm bg-gray-200">
+                            <div class="absolute left-0 top-0 flex h-full items-center justify-center rounded-sm bg-blue-500 text-xs font-medium text-white"
+                                style="width: ${percentage}%"></div>
+                        </div>
+                        <p class="text-sm font-medium text-gray-800">${percentage}%</p>
+                    </div>
+                `;
+                regionList.appendChild(regionItem);
+            });
+        }
+
+        // Create relationship bar chart
+        function createRelationshipChart() {
+            const topN = parseInt(document.getElementById('topNFilter').value);
+            
+            const relationshipTotals = {};
+            portfolioData.forEach(row => {
+                const relId = row.Relationship_Name || row.Relationship_ID || 'Unknown';
+                const amount = parseFloat(row.Fac_Amount) || 0;
+                relationshipTotals[relId] = (relationshipTotals[relId] || 0) + amount;
+            });
+            
+            const sorted = Object.entries(relationshipTotals)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, topN);
+            
+            const relationships = sorted.map(item => item[0]);
+            const amounts = sorted.map(item => item[1]);
+            
+            const options = {
+                series: [{
+                    name: 'Total Facility Amount',
+                    data: amounts
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 400,
+                    toolbar: { show: true }
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: true,
+                        borderRadius: 4
+                    }
+                },
+                colors: ['#3B82F6'],
+                xaxis: {
+                    categories: relationships,
+                    labels: {
+                        formatter: function(val) {
+                            return formatCurrency(val);
+                        }
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                grid: {
+                    borderColor: '#E5E7EB'
+                }
+            };
+
+            if (relationshipChartInstance) {
+                relationshipChartInstance.destroy();
+            }
+            relationshipChartInstance = new ApexCharts(document.querySelector("#relationshipChart"), options);
+            relationshipChartInstance.render();
+        }
+
+        // Update bar chart
+        function updateBarChart() {
+            createRelationshipChart();
+        }
+
+        // Filter data based on search
+        function filterData() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            if (searchTerm === '') {
+                filteredData = [...portfolioData];
+            } else {
+                filteredData = portfolioData.filter(row => {
+                    return Object.values(row).some(value => 
+                        String(value).toLowerCase().includes(searchTerm)
+                    );
+                });
+            }
+            
+            currentPage = 1;
+            renderTable();
+        }
+
+        // Render table
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            const startIdx = (currentPage - 1) * rowsPerPage;
+            const endIdx = startIdx + rowsPerPage;
+            const pageData = filteredData.slice(startIdx, endIdx);
+            
+            tbody.innerHTML = '';
+            
+            pageData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50';
+                tr.innerHTML = `
+                    <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatDate(row.Report_Date)}</td>
+                    <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${row.Region || 'N/A'}</td>
+                    <td class="p-4 text-sm font-medium text-gray-800 whitespace-nowrap">${row.Facility_ID || 'N/A'}</td>
+                    <td class="p-4 text-sm text-gray-700">${row.Relationship_Name || 'N/A'}</td>
+                    <td class="p-4 text-sm text-gray-700">${row.Product_Program || 'N/A'}</td>
+                    <td class="p-4 text-sm font-medium text-gray-800 whitespace-nowrap">${formatCurrency(parseFloat(row.Fac_Amount) || 0)}</td>
+                    <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatCurrency(parseFloat(row.Direct_OS) || 0)}</td>
+                    <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatDate(row.Maturity_Date)}</td>
+                    <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatDate(row.CA_Expiration_Date)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            updatePagination();
+        }
+
+        // Update pagination
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            const startRow = (currentPage - 1) * rowsPerPage + 1;
+            const endRow = Math.min(currentPage * rowsPerPage, filteredData.length);
+            
+            document.getElementById('startRow').textContent = filteredData.length > 0 ? startRow : 0;
+            document.getElementById('endRow').textContent = endRow;
+            document.getElementById('totalRows').textContent = filteredData.length;
+            document.getElementById('currentPage').textContent = currentPage;
+            document.getElementById('totalPages').textContent = totalPages;
+            
+            document.getElementById('prevBtn').disabled = currentPage === 1;
+            document.getElementById('nextBtn').disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        // Pagination functions
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+            }
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTable();
+            }
+        }
+
+        // Export to CSV
+        function exportToCSV() {
+            const csv = Papa.unparse(filteredData);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'portfolio_analytics_' + new Date().toISOString().split('T')[0] + '.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
 </body>
 </html>
+

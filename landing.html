@@ -24,21 +24,22 @@
         
         /* Custom scrollbar for results */
         #lptm-search-results::-webkit-scrollbar {
-            width: 8px;
+            width: 10px;
         }
         
         #lptm-search-results::-webkit-scrollbar-track {
-            background: #f1f1f1;
+            background: transparent;
             border-radius: 10px;
         }
         
         #lptm-search-results::-webkit-scrollbar-thumb {
-            background: #888;
+            background: #d1d5db;
             border-radius: 10px;
+            border: 2px solid white;
         }
         
-        #lptm-search-results        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
+        #lptm-search-results::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
         }
 
         /* Smooth rotating text animation */
@@ -85,12 +86,12 @@
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900" style="padding: 1rem;">
-<div style="height: calc(100vh - 2rem);" class="rounded-2xl border border-gray-200 px-5 py-7 relative bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]">
+<div style="min-height: calc(100vh - 2rem);" class="rounded-2xl border border-gray-200 px-5 py-7 relative bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]">
     <!-- Subtle Gradient Overlay -->
-    <div class="absolute inset-0 bg-[radial-gradient(circle_500px_at_50%_200px,rgba(96,165,250,0.15),transparent)] pointer-events-none" style="overflow: hidden;"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(circle_500px_at_50%_200px,rgba(96,165,250,0.15),transparent)] pointer-events-none" style="border-radius: 1rem;"></div>
     
-    <main class="relative z-10 h-full" style="overflow-y: auto;">
-        <section class="h-full flex items-center justify-center">
+    <main class="relative z-10">
+        <section class="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12">
             <div class="mx-auto px-6 max-w-4xl w-full">
                 <!-- LPTM Hub Title -->
                 <div class="text-center mb-12">
@@ -104,26 +105,14 @@
                 </div>
                 
                 <!-- Search Section -->
-                <div class="relative" style="z-index: 1000;">
-                    <div class="bg-white border-2 border-gray-300 rounded-full flex items-center h-16 px-6 shadow-md hover:shadow-lg transition-all duration-300 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100">
+                <div id="lptm-search-container" class="relative" style="z-index: 1000;">
+                    <div id="lptm-search-box" class="bg-white border-2 border-gray-300 rounded-full flex items-center h-16 px-6 shadow-md hover:shadow-lg transition-all duration-300 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 512 512" class="text-gray-400 mr-3 flex-shrink-0">
                             <path d="M497.913 497.913c-18.782 18.782-49.225 18.782-68.008 0l-84.862-84.863c-34.889 22.382-76.13 35.717-120.659 35.717C100.469 448.767 0 348.312 0 224.383S100.469 0 224.384 0c123.931 0 224.384 100.452 224.384 224.383 0 44.514-13.352 85.771-35.718 120.676l84.863 84.863c18.782 18.782 18.782 49.209 0 67.991zM224.384 64.109c-88.511 0-160.274 71.747-160.274 160.273s71.764 160.274 160.274 160.274c88.525 0 160.273-71.748 160.273-160.274S312.909 64.109 224.384 64.109z" fill="currentColor"></path>
                         </svg>
                         <input type="text" placeholder="Search documentation, processes, and resources..." class="w-full outline-none text-base" id="lptm-search-input" autocomplete="off">
                         <div id="lptm-search-loading" class="hidden ml-3 flex-shrink-0">
                             <div class="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-500"></div>
-                        </div>
-                    </div>
-
-                    <!-- Search Results Container -->
-                    <div id="lptm-search-results" class="absolute w-full mt-3 bg-white rounded-2xl border-2 border-gray-200 shadow-2xl hidden max-h-[500px] overflow-y-auto" style="z-index: 10000;">
-                        <div id="lptm-results-list" class="p-3"></div>
-                        <div id="lptm-no-results" class="hidden p-8 text-center text-gray-500">
-                            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <p class="!text-lg font-semibold">No results found</p>
-                            <p class="!text-sm mt-2">Try different keywords or check your spelling</p>
                         </div>
                     </div>
                 </div>
@@ -191,9 +180,23 @@
     </main>
 </div>
 
+<!-- Search Results Container - Outside main container to prevent clipping -->
+<div id="lptm-search-results" class="fixed bg-white rounded-2xl border-2 border-gray-200 shadow-2xl hidden max-h-[60vh] overflow-y-auto" style="z-index: 10000;">
+    <div id="lptm-results-list" class="p-3"></div>
+    <div id="lptm-no-results" class="hidden p-8 text-center text-gray-500">
+        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p class="!text-lg font-semibold">No results found</p>
+        <p class="!text-sm mt-2">Try different keywords or check your spelling</p>
+    </div>
+</div>
+
 <script>
     // LPTM Search Functionality
     const lptmSearchInput = document.getElementById('lptm-search-input');
+    const lptmSearchBox = document.getElementById('lptm-search-box');
+    const lptmSearchContainer = document.getElementById('lptm-search-container');
     const lptmSearchResults = document.getElementById('lptm-search-results');
     const lptmResultsList = document.getElementById('lptm-results-list');
     const lptmNoResults = document.getElementById('lptm-no-results');
@@ -201,6 +204,20 @@
     
     let lptmSearchTimeout;
     let lptmCurrentAbortController;
+
+    // Function to position search results dropdown
+    function positionSearchResults() {
+        if (!lptmSearchBox || !lptmSearchResults) return;
+        
+        const rect = lptmSearchBox.getBoundingClientRect();
+        lptmSearchResults.style.top = `${rect.bottom + 12}px`;
+        lptmSearchResults.style.left = `${rect.left}px`;
+        lptmSearchResults.style.width = `${rect.width}px`;
+    }
+
+    // Reposition on scroll and resize
+    window.addEventListener('scroll', positionSearchResults);
+    window.addEventListener('resize', positionSearchResults);
 
     // Configure 6 different Confluence spaces
     const CONFLUENCE_SPACES = [
@@ -454,11 +471,13 @@
     }
 
     function showLptmResults() {
+        positionSearchResults();
         lptmNoResults.classList.add('hidden');
         lptmSearchResults.classList.remove('hidden');
     }
 
     function showLptmNoResults() {
+        positionSearchResults();
         lptmNoResults.classList.remove('hidden');
         lptmSearchResults.classList.remove('hidden');
     }
@@ -470,7 +489,7 @@
 
     // Hide results when clicking outside
     document.addEventListener('click', function (event) {
-        if (lptmSearchInput && !lptmSearchInput.contains(event.target) && 
+        if (lptmSearchBox && !lptmSearchBox.contains(event.target) && 
             lptmSearchResults && !lptmSearchResults.contains(event.target)) {
             hideLptmResults();
         }

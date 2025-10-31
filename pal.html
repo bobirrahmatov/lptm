@@ -1811,7 +1811,7 @@
             const regionList = document.getElementById('regionList');
             regionList.innerHTML = '';
             
-            const countLabel = selectedRegionalLevel === 'facility' ? 'Facilities' : 'Relationships';
+            const countLabel = 'Facilities';
             
             sortedRegions.forEach(([region, count]) => {
                 const percentage = totalCount > 0 ? ((count / totalCount) * 100).toFixed(0) : 0;
@@ -1930,68 +1930,38 @@
 
         // Get region counts from filtered data
         function getRegionCountsFromFiltered() {
-            console.log('📍 getRegionCountsFromFiltered called, level:', selectedRegionalLevel);
+            console.log('📍 getRegionCountsFromFiltered called');
             const regionCounts = {};
             const today = new Date();
             const threeMonthsLater = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000);
             
-            if (selectedRegionalLevel === 'facility') {
-                // Count unique Facility IDs
-                console.log('Counting filtered Facility IDs by region (expiring in next 90 days)');
-                const regionFacilities = {};
-                let totalExpiring = 0;
-                
-                filteredData.forEach(row => {
-                    const maturityDate = parseDate(row.Maturity_Date);
-                    if (maturityDate && maturityDate <= threeMonthsLater && maturityDate >= today) {
-                        const region = row.Region || 'Unknown';
-                        const facilityId = row.Facility_ID;
-                        
-                        if (!regionFacilities[region]) {
-                            regionFacilities[region] = new Set();
-                        }
-                        if (facilityId) {
-                            regionFacilities[region].add(facilityId);
-                            totalExpiring++;
-                        }
+            // Count unique Facility IDs
+            console.log('Counting filtered Facility IDs by region (expiring in next 90 days)');
+            const regionFacilities = {};
+            let totalExpiring = 0;
+            
+            filteredData.forEach(row => {
+                const maturityDate = parseDate(row.Maturity_Date);
+                if (maturityDate && maturityDate <= threeMonthsLater && maturityDate >= today) {
+                    const region = row.Region || 'Unknown';
+                    const facilityId = row.Facility_ID;
+                    
+                    if (!regionFacilities[region]) {
+                        regionFacilities[region] = new Set();
                     }
-                });
-                
-                // Convert Set sizes to counts
-                Object.keys(regionFacilities).forEach(region => {
-                    regionCounts[region] = regionFacilities[region].size;
-                });
-                
-                console.log(`Found ${totalExpiring} filtered expiring facilities across ${Object.keys(regionCounts).length} regions:`, regionCounts);
-            } else {
-                // Count unique Relationship IDs
-                console.log('Counting filtered Relationship IDs by region (with facilities expiring in next 90 days)');
-                const regionRelationships = {};
-                let totalExpiring = 0;
-                
-                filteredData.forEach(row => {
-                    const maturityDate = parseDate(row.Maturity_Date);
-                    if (maturityDate && maturityDate <= threeMonthsLater && maturityDate >= today) {
-                        const region = row.Region || 'Unknown';
-                        const relationshipId = row.Relationship_ID || row.Relationship_Name;
-                        
-                        if (!regionRelationships[region]) {
-                            regionRelationships[region] = new Set();
-                        }
-                        if (relationshipId) {
-                            regionRelationships[region].add(relationshipId);
-                            totalExpiring++;
-                        }
+                    if (facilityId) {
+                        regionFacilities[region].add(facilityId);
+                        totalExpiring++;
                     }
-                });
-                
-                // Convert Set sizes to counts
-                Object.keys(regionRelationships).forEach(region => {
-                    regionCounts[region] = regionRelationships[region].size;
-                });
-                
-                console.log(`Found ${totalExpiring} filtered expiring relationships across ${Object.keys(regionCounts).length} regions:`, regionCounts);
-            }
+                }
+            });
+            
+            // Convert Set sizes to counts
+            Object.keys(regionFacilities).forEach(region => {
+                regionCounts[region] = regionFacilities[region].size;
+            });
+            
+            console.log(`Found ${totalExpiring} filtered expiring facilities across ${Object.keys(regionCounts).length} regions:`, regionCounts);
             
             return regionCounts;
         }
@@ -3292,70 +3262,40 @@
             }
         }
         
-        // Get region counts for facilities or relationships expiring soon
+        // Get region counts for facilities expiring soon
         function getRegionCounts() {
-            console.log('📍 getRegionCounts called, level:', selectedRegionalLevel);
+            console.log('📍 getRegionCounts called');
             const regionCounts = {};
             const today = new Date();
             const threeMonthsLater = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000);
             
-            if (selectedRegionalLevel === 'facility') {
-                // Count unique Facility IDs
-                console.log('Counting Facility IDs by region (expiring in next 90 days)');
-                const regionFacilities = {};
-                let totalExpiring = 0;
-                
-                portfolioData.forEach(row => {
-                    const maturityDate = parseDate(row.Maturity_Date);
-                    if (maturityDate && maturityDate <= threeMonthsLater && maturityDate >= today) {
-                        const region = row.Region || 'Unknown';
-                        const facilityId = row.Facility_ID;
-                        
-                        if (!regionFacilities[region]) {
-                            regionFacilities[region] = new Set();
-                        }
-                        if (facilityId) {
-                            regionFacilities[region].add(facilityId);
-                            totalExpiring++;
-                        }
+            // Count unique Facility IDs
+            console.log('Counting Facility IDs by region (expiring in next 90 days)');
+            const regionFacilities = {};
+            let totalExpiring = 0;
+            
+            portfolioData.forEach(row => {
+                const maturityDate = parseDate(row.Maturity_Date);
+                if (maturityDate && maturityDate <= threeMonthsLater && maturityDate >= today) {
+                    const region = row.Region || 'Unknown';
+                    const facilityId = row.Facility_ID;
+                    
+                    if (!regionFacilities[region]) {
+                        regionFacilities[region] = new Set();
                     }
-                });
-                
-                // Convert Set sizes to counts
-                Object.keys(regionFacilities).forEach(region => {
-                    regionCounts[region] = regionFacilities[region].size;
-                });
-                
-                console.log(`Found ${totalExpiring} expiring facilities across ${Object.keys(regionCounts).length} regions:`, regionCounts);
-            } else {
-                // Count unique Relationship IDs
-                console.log('Counting Relationship IDs by region (with facilities expiring in next 90 days)');
-                const regionRelationships = {};
-                let totalExpiring = 0;
-                
-                portfolioData.forEach(row => {
-                    const maturityDate = parseDate(row.Maturity_Date);
-                    if (maturityDate && maturityDate <= threeMonthsLater && maturityDate >= today) {
-                        const region = row.Region || 'Unknown';
-                        const relationshipId = row.Relationship_ID || row.Relationship_Name;
-                        
-                        if (!regionRelationships[region]) {
-                            regionRelationships[region] = new Set();
-                        }
-                        if (relationshipId) {
-                            regionRelationships[region].add(relationshipId);
-                            totalExpiring++;
-                        }
+                    if (facilityId) {
+                        regionFacilities[region].add(facilityId);
+                        totalExpiring++;
                     }
-                });
-                
-                // Convert Set sizes to counts
-                Object.keys(regionRelationships).forEach(region => {
-                    regionCounts[region] = regionRelationships[region].size;
-                });
-                
-                console.log(`Found ${totalExpiring} expiring relationships across ${Object.keys(regionCounts).length} regions:`, regionCounts);
-            }
+                }
+            });
+            
+            // Convert Set sizes to counts
+            Object.keys(regionFacilities).forEach(region => {
+                regionCounts[region] = regionFacilities[region].size;
+            });
+            
+            console.log(`Found ${totalExpiring} expiring facilities across ${Object.keys(regionCounts).length} regions:`, regionCounts);
             
             return regionCounts;
         }
@@ -3384,7 +3324,7 @@
             const regionList = document.getElementById('regionList');
             regionList.innerHTML = '';
             
-            const countLabel = selectedRegionalLevel === 'facility' ? 'Facilities' : 'Relationships';
+            const countLabel = 'Facilities';
             
             sortedRegions.forEach(([region, count]) => {
                 const percentage = totalCount > 0 ? ((count / totalCount) * 100).toFixed(0) : 0;

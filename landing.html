@@ -92,9 +92,9 @@
     
     <main class="relative z-10">
         <section class="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12">
-            <div class="mx-auto px-6 max-w-4xl w-full">
+            <div class="w-full max-w-4xl flex flex-col items-center space-y-6 sm:space-y-8 px-4">
                 <!-- LPTM Hub Title -->
-                <div class="text-center mb-12">
+                <div class="text-center">
                     <h1 class="!text-5xl md:!text-6xl font-bold text-gray-900 mb-6">
                         <span>LPTM </span>
                         <span class="flip-container bg-blue-600 text-white px-4 py-1 rounded-lg">
@@ -105,22 +105,22 @@
                 </div>
                 
                 <!-- Search Section -->
-                <div id="lptm-search-container" class="relative" style="z-index: 1000;">
-                    <div id="lptm-search-box" class="bg-white border-2 border-gray-300 rounded-full flex items-center h-16 px-6 shadow-md hover:shadow-lg transition-all duration-300 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 512 512" class="text-gray-400 mr-3 flex-shrink-0">
+                <div id="lptm-search-container" class="w-full max-w-xl sm:max-w-2xl relative">
+                    <div id="lptm-search-box" class="bg-white border border-gray-300 rounded-2xl flex items-center h-11 sm:h-12 md:h-14 px-3 sm:px-4 shadow-sm hover:shadow-md transition-shadow duration-300 focus-within:border-blue-500 focus-within:border-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 512 512" class="text-gray-400 mr-2 flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5">
                             <path d="M497.913 497.913c-18.782 18.782-49.225 18.782-68.008 0l-84.862-84.863c-34.889 22.382-76.13 35.717-120.659 35.717C100.469 448.767 0 348.312 0 224.383S100.469 0 224.384 0c123.931 0 224.384 100.452 224.384 224.383 0 44.514-13.352 85.771-35.718 120.676l84.863 84.863c18.782 18.782 18.782 49.209 0 67.991zM224.384 64.109c-88.511 0-160.274 71.747-160.274 160.273s71.764 160.274 160.274 160.274c88.525 0 160.273-71.748 160.273-160.274S312.909 64.109 224.384 64.109z" fill="currentColor"></path>
                         </svg>
-                        <input type="text" placeholder="Search documentation, processes, and resources..." class="w-full outline-none text-base" id="lptm-search-input" autocomplete="off">
-                        <div id="lptm-search-loading" class="hidden ml-3 flex-shrink-0">
-                            <div class="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-500"></div>
+                        <input type="text" placeholder="Search Confluence..." class="w-full outline-none text-sm sm:text-base md:text-lg" id="lptm-search-input" autocomplete="off">
+                        <div id="lptm-search-loading" class="hidden ml-2 flex-shrink-0">
+                            <div class="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-2 border-gray-300 border-t-blue-500"></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Suggestion Buttons -->
-                <div class="mt-8 text-center">
+                <div class="w-full text-center">
                     <p class="text-sm text-gray-600 mb-5">Quick suggestions to get started:</p>
-                    <div class="flex flex-col gap-3">
+                    <div class="flex flex-col items-center gap-3">
                         <!-- Top Row -->
                         <div class="flex items-center justify-center gap-3">
                             <a href="learning.html" class="suggestion-link inline-flex items-center gap-2 h-11 px-5 py-2.5 bg-white hover:bg-blue-50 text-gray-700 hover:text-blue-700 rounded-lg text-sm font-medium transition-all cursor-pointer border-2 border-gray-200 hover:border-blue-500 shadow-sm hover:shadow-md no-underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
@@ -181,14 +181,10 @@
 </div>
 
 <!-- Search Results Container - Outside main container to prevent clipping -->
-<div id="lptm-search-results" class="fixed bg-white rounded-2xl border-2 border-gray-200 shadow-2xl hidden max-h-[60vh] overflow-y-auto" style="z-index: 10000;">
-    <div id="lptm-results-list" class="p-3"></div>
-    <div id="lptm-no-results" class="hidden p-8 text-center text-gray-500">
-        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <p class="!text-lg font-semibold">No results found</p>
-        <p class="!text-sm mt-2">Try different keywords or check your spelling</p>
+<div id="lptm-search-results" class="fixed bg-white rounded-lg border border-gray-200 shadow-lg hidden max-h-80 overflow-y-auto" style="z-index: 10000;">
+    <div id="lptm-results-list" class="p-2"></div>
+    <div id="lptm-no-results" class="hidden p-4 text-center text-gray-500">
+        No results found
     </div>
 </div>
 
@@ -347,40 +343,10 @@
             return;
         }
 
-        // Group results by space
-        const groupedResults = {};
+        // Display all results in a simple list
         results.forEach(result => {
-            const spaceName = result.spaceConfig.name;
-            if (!groupedResults[spaceName]) {
-                groupedResults[spaceName] = [];
-            }
-            groupedResults[spaceName].push(result);
-        });
-
-        // Display results grouped by space
-        Object.keys(groupedResults).forEach(spaceName => {
-            const spaceResults = groupedResults[spaceName];
-            const spaceConfig = spaceResults[0].spaceConfig;
-            
-            // Space header
-            const spaceHeader = document.createElement('div');
-            spaceHeader.className = `px-4 py-3 bg-${spaceConfig.color}-50 border-l-4 border-${spaceConfig.color}-500 font-semibold text-${spaceConfig.color}-700 !text-sm mb-2`;
-            spaceHeader.innerHTML = `
-                <div class="flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
-                        <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
-                    </svg>
-                    ${spaceName} <span class="ml-auto bg-${spaceConfig.color}-100 text-${spaceConfig.color}-800 px-2 py-0.5 rounded-full !text-xs">${spaceResults.length}</span>
-                </div>
-            `;
-            lptmResultsList.appendChild(spaceHeader);
-
-            // Results for this space
-            spaceResults.forEach(result => {
-                const resultElement = createLptmResultElement(result, query);
-                lptmResultsList.appendChild(resultElement);
-            });
+            const resultElement = createLptmResultElement(result, query);
+            lptmResultsList.appendChild(resultElement);
         });
 
         showLptmResults();
@@ -388,7 +354,7 @@
 
     function createLptmResultElement(result, query) {
         const div = document.createElement('div');
-        div.className = 'p-5 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-all duration-200 hover:shadow-sm';
+        div.className = 'p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0';
         
         const pageUrl = result._links && result._links.webui ? `${CONFLUENCE_BASE_URL}${result._links.webui}` : '';
         
@@ -396,48 +362,29 @@
         let excerpt = '';
         if (result.body && result.body.view && result.body.view.value) {
             const cleanText = stripHtmlTags(result.body.view.value);
-            excerpt = cleanText.length > 200 ? cleanText.substring(0, 200) + '...' : cleanText;
+            excerpt = cleanText.length > 120 ? cleanText.substring(0, 120) + '...' : cleanText;
         } else {
-            excerpt = 'Click to view the full page content';
+            excerpt = `${result.title} - Content available, click to view`;
         }
 
         const highlightedTitle = highlightLptmSearchTerms(result.title, query);
         const highlightedExcerpt = highlightLptmSearchTerms(excerpt, query);
-        const color = result.spaceConfig.color;
-
-        // Only show URL if it exists
-        const urlSection = pageUrl ? `
-            <span class="text-gray-400">•</span>
-            <span class="text-gray-500 truncate hover:text-gray-700">${pageUrl}</span>
-        ` : '';
 
         div.innerHTML = `
-            <div class="flex items-start gap-4">
-                <div class="flex-shrink-0 mt-1">
-                    <div class="w-10 h-10 rounded-lg bg-${color}-100 flex items-center justify-center">
-                        <svg class="w-5 h-5 text-${color}-600" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
-                            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
+            <div class="flex items-start">
+                <div class="flex-shrink-0 mr-3 mt-1">
+                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
                 </div>
                 <div class="flex-grow min-w-0">
-                    <h3 class="text-${color}-700 hover:text-${color}-800 font-semibold !text-lg mb-2 leading-tight">${highlightedTitle}</h3>
-                    <p class="text-gray-700 !text-sm mb-3 leading-relaxed">${highlightedExcerpt}</p>
-                    <div class="flex items-center gap-3 !text-xs">
-                        <span class="inline-flex items-center gap-1 text-${color}-600 font-medium">
-                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clip-rule="evenodd"></path>
-                            </svg>
-                            ${result.spaceConfig.name}
-                        </span>
-                        ${urlSection}
+                    <h3 class="text-blue-600 hover:underline font-medium text-sm mb-1 leading-tight">${highlightedTitle}</h3>
+                    <p class="text-gray-600 text-xs mb-1 leading-relaxed">${highlightedExcerpt}</p>
+                    <div class="flex items-center text-xs text-gray-500">
+                        <span class="text-green-700">${pageUrl}</span>
+                        <span class="mx-2">•</span>
+                        <span>${result.spaceConfig ? result.spaceConfig.name : 'Confluence'}</span>
                     </div>
-                </div>
-                <div class="flex-shrink-0">
-                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
                 </div>
             </div>
         `;
@@ -453,9 +400,8 @@
 
     function highlightLptmSearchTerms(text, query) {
         if (!query || !text) return text;
-        const terms = query.split(' ').filter(term => term.length > 0);
-        const regex = new RegExp(`(${terms.join('|')})`, 'gi');
-        return text.replace(regex, '<mark class="bg-yellow-200 font-semibold px-0.5 rounded">$1</mark>');
+        const regex = new RegExp(`(${query.split(' ').join('|')})`, 'gi');
+        return text.replace(regex, '<mark class="bg-yellow-200 px-1">$1</mark>');
     }
 
     function showMockLptmResults(query) {

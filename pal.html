@@ -81,6 +81,7 @@
         </div>
     </div>
 
+
     <div class="p-4 md:p-6">
         <!-- Page Header -->
         <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-5">
@@ -589,38 +590,13 @@
 
         <!-- Charts Section -->
         <div class="grid grid-cols-12 gap-4 md:gap-6 mb-6">
-            <!-- Bar Chart: Maturity Statistics -->
-            <div class="col-span-12 xl:col-span-4">
-                <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 sm:pt-6 h-full flex flex-col">
-                    <div class="flex items-center justify-between gap-5 mb-6">
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-800" id="expirationChartTitle">Maturity Statistics</h3>
-                            <p class="mt-1 text-sm text-gray-500">Total number of facilities by maturity status</p>
-                        </div>
-                            </div>
-                    <div class="flex items-center gap-5 mb-5">
-                        <div class="flex items-center gap-1.5">
-                            <div class="h-2.5 w-2.5 rounded-full" style="background-color: #C2D6FF;"></div>
-                            <p class="text-sm text-gray-500">Expired</p>
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                            <div class="h-2.5 w-2.5 rounded-full" style="background-color: #465FFF;"></div>
-                            <p class="text-sm text-gray-500">Expiring</p>
-                        </div>
-                    </div>
-                    <div class="flex-1 overflow-hidden">
-                        <div id="expirationChart" class="h-[256px] w-full"></div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Area Chart: CAs Past Due & Coming Due -->
             <div class="col-span-12 xl:col-span-4">
                 <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 sm:pt-6 h-full flex flex-col">
                     <div class="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800">CAs Past Due & Coming Due</h3>
-                            <p class="mt-1 text-gray-500 text-sm">Next 3 months CA maturity tracking</p>
+                            <p class="mt-1 text-gray-500 text-sm">CA expiration tracking</p>
                         </div>
                         <div class="flex flex-row-reverse items-center justify-end gap-0.5 sm:flex-col sm:items-start">
                             <div class="flex flex-row-reverse items-center gap-3 sm:flex-row sm:gap-2">
@@ -631,6 +607,49 @@
                     </div>
                     <div class="max-w-full overflow-x-auto custom-scrollbar">
                         <div id="facilityTrendChart" class="apexcharts-tooltip-active -ml-4 min-w-[1000px] pl-2 xl:min-w-full"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Maturity Statistics Boxes -->
+            <div class="col-span-12 xl:col-span-4">
+                <div class="grid grid-cols-2 gap-4 h-full">
+                    <!-- Expired Facilities Box -->
+                    <div class="rounded-2xl border border-gray-200 bg-gradient-to-br from-blue-50 to-white p-6 flex flex-col justify-between">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="p-3 rounded-xl bg-blue-100">
+                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-600 mb-2">Expired Facilities</h3>
+                            <div class="flex items-baseline gap-2">
+                                <h4 class="text-3xl font-bold text-gray-900" id="expiredCount">0</h4>
+                                <span class="text-sm text-gray-500">facilities</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Past maturity date</p>
+                        </div>
+                    </div>
+
+                    <!-- Expiring Facilities Box -->
+                    <div class="rounded-2xl border border-gray-200 bg-gradient-to-br from-indigo-50 to-white p-6 flex flex-col justify-between">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="p-3 rounded-xl bg-indigo-100">
+                                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-600 mb-2">Expiring Soon</h3>
+                            <div class="flex items-baseline gap-2">
+                                <h4 class="text-3xl font-bold text-gray-900" id="expiringCount">0</h4>
+                                <span class="text-sm text-gray-500">facilities</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Next 12 months</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1128,7 +1147,8 @@
             const colors = {
                 success: { bg: 'bg-green-100', text: 'text-green-600', border: 'border-green-200' },
                 error: { bg: 'bg-red-100', text: 'text-red-600', border: 'border-red-200' },
-                warning: { bg: 'bg-yellow-100', text: 'text-yellow-600', border: 'border-yellow-200' }
+                warning: { bg: 'bg-yellow-100', text: 'text-yellow-600', border: 'border-yellow-200' },
+                info: { bg: 'bg-blue-100', text: 'text-blue-600', border: 'border-blue-200' }
             };
             
             const color = colors[type] || colors.success;
@@ -1172,19 +1192,23 @@
                     Relationship_ID: 'REL001',
                     Relationship_Name: 'ABC Corporation',
                     CAID: 'CAID001',
+                    CA_Expiration_Date: '2025-03-15',
                     Lead_Underwriter: 'John Smith',
                     Underwriting_Team_Lead: 'Jane Doe',
                     Control_Unit: 'CU-001',
                     Fac_Amount: '5000000',
                     Total_Reported_Fac_Amount: '5000000',
                     Direct_OS: '3000000',
-                    Contingent_OS: '500000',
+                    Contingeng_OS: '500000',
                     PSE_OS: '0',
                     Unused_Committed: '1500000',
                     Total_Comm_Exposure: '5000000',
                     Maturity_Date: '2025-12-31',
                     Prodict_Underwriter: 'John Smith',
-                    CA_Expiration_Date: '2025-06-30'
+                    CA_Maturity_Date: '2025-06-30',
+                    PSE_non_PSE: 'non-PSE',
+                    Credit_Classification: 'Investment Grade',
+                    Facility_First_Approval_Date: '2024-01-10'
                 },
                 // Add more sample data as needed
             ];
@@ -1696,134 +1720,36 @@
 
         // Create expiration chart from filtered data
         function createExpirationChartFromFiltered() {
-            console.log('📊 Creating filtered maturity statistics chart with', filteredData.length, 'records');
+            console.log('📊 Updating filtered maturity statistics boxes with', filteredData.length, 'records');
             
             const expirationData = aggregateExpirationData(filteredData);
             
             console.log('Filtered aggregated maturity data:', expirationData);
             
-            // Handle empty data
-            if (!expirationData || expirationData.allMonths.length === 0) {
-                console.warn('⚠️ No filtered maturity data found');
-                
-                // Show empty chart message
-                const chartElement = document.querySelector("#expirationChart");
-                if (chartElement) {
-                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No maturity data available</div>';
-                }
-                return;
+            // Calculate totals
+            let totalExpired = 0;
+            let totalExpiring = 0;
+            
+            if (expirationData && expirationData.allMonths.length > 0) {
+                totalExpired = expirationData.expired.reduce((a, b) => a + b, 0);
+                totalExpiring = expirationData.expiring.reduce((a, b) => a + b, 0);
             }
             
-            const allMonths = expirationData.allMonths;
-            const expiredSeries = expirationData.expired;
-            const expiringSeries = expirationData.expiring;
+            console.log('Filtered Total Expired:', totalExpired);
+            console.log('Filtered Total Expiring:', totalExpiring);
             
-            console.log('Expired series:', expiredSeries);
-            console.log('Expiring series:', expiringSeries);
+            // Update the boxes
+            const expiredElement = document.getElementById('expiredCount');
+            const expiringElement = document.getElementById('expiringCount');
             
-            const options = {
-                chart: {
-                    type: 'bar',
-                    height: 256,
-                    toolbar: { show: false },
-                    fontFamily: 'Outfit, sans-serif',
-                },
-                plotOptions: {
-                    bar: {
-                        horizontal: false,
-                        columnWidth: '50%',
-                        endingShape: 'rounded',
-                        borderRadius: 4,
-                        borderRadiusApplication: 'end',
-                    },
-                },
-                dataLabels: {
-                    enabled: false,
-                },
-                stroke: {
-                    show: true,
-                    width: 4,
-                    colors: ['transparent'],
-                },
-                colors: ['#C2D6FF', '#465FFF'], // Light blue for Expired, Dark blue for Expiring
-                series: [
-                    {
-                        name: 'Expired',
-                        data: expiredSeries
-                    },
-                    {
-                        name: 'Expiring',
-                        data: expiringSeries
-                    }
-                ],
-                xaxis: {
-                    categories: allMonths.map(m => {
-                        const date = new Date(m + '-01');
-                        return date.toLocaleDateString('en-US', { month: 'short' });
-                    }),
-                    axisTicks: {
-                    show: false,
-                    },
-                    axisBorder: {
-                        show: false,
-                    },
-                },
-                yaxis: {
-                labels: {
-                        style: {
-                            fontSize: '12px',
-                            colors: '#344054',
-                },
-                    },
-                },
-                fill: {
-                    opacity: 1,
-                },
-                tooltip: {
-                    y: {
-                        formatter: (val) => `${val} facilities`,
-                    },
-                },
-                legend: {
-                    show: false,
-                },
-                grid: {
-                    borderColor: '#F2F4F7',
-                    strokeDashArray: 0,
-                },
-            };
-
-            // Get the chart element and verify it exists
-            const chartElement = document.querySelector("#expirationChart");
-            if (!chartElement) {
-                console.error('Filtered expiration chart element #expirationChart not found in DOM');
-                return;
+            if (expiredElement) {
+                expiredElement.textContent = totalExpired.toLocaleString();
+            }
+            if (expiringElement) {
+                expiringElement.textContent = totalExpiring.toLocaleString();
             }
             
-            // Verify ApexCharts is loaded
-            if (typeof ApexCharts === 'undefined') {
-                console.error('ApexCharts library not loaded');
-                return;
-            }
-            
-            try {
-                // Destroy previous instance
-            if (expirationChartInstance) {
-                expirationChartInstance.destroy();
-                    expirationChartInstance = null;
-                }
-                
-                // Clear any previous content to avoid ApexCharts errors
-                chartElement.innerHTML = '';
-                
-                // Create and render new chart
-                expirationChartInstance = new ApexCharts(chartElement, options);
-            expirationChartInstance.render();
-                console.log('✅ Filtered expiration chart rendered successfully with Facilities series');
-            } catch (error) {
-                console.error('❌ Error rendering filtered expiration chart:', error);
-                console.error('Error details:', error.message, error.stack);
-            }
+            console.log('✅ Filtered maturity statistics boxes updated successfully');
         }
 
         // Create regional chart from filtered data
@@ -2574,135 +2500,36 @@
 
         // Create expiration timeline chart (Area chart for Facilities only)
         function createExpirationChart() {
-            console.log('📊 Creating maturity statistics chart with', portfolioData.length, 'records');
+            console.log('📊 Updating maturity statistics boxes with', portfolioData.length, 'records');
             
             const expirationData = aggregateExpirationData(portfolioData);
             
             console.log('Aggregated maturity data:', expirationData);
             
-            // Handle empty data
-            if (!expirationData || expirationData.allMonths.length === 0) {
-                console.warn('⚠️ No maturity data found');
-                
-                // Show empty chart message
-                const chartElement = document.querySelector("#expirationChart");
-                if (chartElement) {
-                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No maturity data available</div>';
-                }
-                return;
+            // Calculate totals
+            let totalExpired = 0;
+            let totalExpiring = 0;
+            
+            if (expirationData && expirationData.allMonths.length > 0) {
+                totalExpired = expirationData.expired.reduce((a, b) => a + b, 0);
+                totalExpiring = expirationData.expiring.reduce((a, b) => a + b, 0);
             }
             
-            const allMonths = expirationData.allMonths;
-            const expiredSeries = expirationData.expired;
-            const expiringSeries = expirationData.expiring;
+            console.log('Total Expired:', totalExpired);
+            console.log('Total Expiring:', totalExpiring);
             
-            console.log('Months with data:', allMonths);
-            console.log('Expired series:', expiredSeries);
-            console.log('Expiring series:', expiringSeries);
+            // Update the boxes
+            const expiredElement = document.getElementById('expiredCount');
+            const expiringElement = document.getElementById('expiringCount');
             
-            const options = {
-                chart: {
-                    type: 'bar',
-                    height: 256,
-                    toolbar: { show: false },
-                    fontFamily: 'Outfit, sans-serif',
-                },
-                plotOptions: {
-                    bar: {
-                        horizontal: false,
-                        columnWidth: '50%',
-                        endingShape: 'rounded',
-                        borderRadius: 4,
-                        borderRadiusApplication: 'end',
-                    },
-                },
-                dataLabels: {
-                    enabled: false,
-                },
-                stroke: {
-                    show: true,
-                    width: 4,
-                    colors: ['transparent'],
-                },
-                colors: ['#C2D6FF', '#465FFF'], // Light blue for Expired, Dark blue for Expiring
-                series: [
-                    {
-                        name: 'Expired',
-                        data: expiredSeries
-                    },
-                    {
-                        name: 'Expiring',
-                        data: expiringSeries
-                    }
-                ],
-                xaxis: {
-                    categories: allMonths.map(m => {
-                        const date = new Date(m + '-01');
-                        return date.toLocaleDateString('en-US', { month: 'short' });
-                    }),
-                    axisTicks: {
-                        show: false,
-                    },
-                    axisBorder: {
-                        show: false,
-                    },
-                },
-                yaxis: {
-                    labels: {
-                        style: {
-                            fontSize: '12px',
-                            colors: '#344054',
-                        },
-                    },
-                },
-                fill: {
-                    opacity: 1,
-                },
-                tooltip: {
-                    y: {
-                        formatter: (val) => `${val} facilities`,
-                    },
-                },
-                legend: {
-                    show: false,
-                },
-                grid: {
-                    borderColor: '#F2F4F7',
-                    strokeDashArray: 0,
-                },
-            };
-
-            // Get the chart element and verify it exists
-            const chartElement = document.querySelector("#expirationChart");
-            if (!chartElement) {
-                console.error('Expiration chart element #expirationChart not found in DOM');
-                return;
+            if (expiredElement) {
+                expiredElement.textContent = totalExpired.toLocaleString();
+            }
+            if (expiringElement) {
+                expiringElement.textContent = totalExpiring.toLocaleString();
             }
             
-            // Verify ApexCharts is loaded
-            if (typeof ApexCharts === 'undefined') {
-                console.error('ApexCharts library not loaded');
-                return;
-            }
-            
-            try {
-                // Destroy previous instance
-            if (expirationChartInstance) {
-                expirationChartInstance.destroy();
-                    expirationChartInstance = null;
-                }
-                
-                // Clear any previous content to avoid ApexCharts errors
-                chartElement.innerHTML = '';
-                
-                // Create and render new chart
-                expirationChartInstance = new ApexCharts(chartElement, options);
-            expirationChartInstance.render();
-                console.log('✅ Expiration chart rendered successfully with Facilities series');
-            } catch (error) {
-                console.error('❌ Error rendering expiration chart:', error);
-                console.error('Error details:', error.message, error.stack);
-            }
+            console.log('✅ Maturity statistics boxes updated successfully');
         }
 
         // Create CA past due & coming due area chart (next 3 months)
@@ -2712,19 +2539,19 @@
             // Calculate date range: next 3 months
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            const threeMonthsFuture = new Date(today);
-            threeMonthsFuture.setMonth(threeMonthsFuture.getMonth() + 3);
+            const monthsFuture = new Date(today);
+            monthsFuture.setMonth(monthsFuture.getMonth() + 3);
             
             // Group by month-year and categorize as past due or coming due
             const monthlyData = {}; // { 'YYYY-MM': { pastDue: Set, comingDue: Set } }
             
             portfolioData.forEach(row => {
-                const caMaturityDate = row.CA_Maturity_Date;
-                const caId = row.CA_ID;
+                const caExpirationDate = row.CA_Expiration_Date;
+                const caid = row.CAID;
                 
-                if (caMaturityDate && caId) {
-                    const dateObj = parseDate(caMaturityDate);
-                    if (dateObj && dateObj <= threeMonthsFuture) {
+                if (caExpirationDate && caid) {
+                    const dateObj = parseDate(caExpirationDate);
+                    if (dateObj && dateObj <= monthsFuture) {
                         const year = dateObj.getFullYear();
                         const month = String(dateObj.getMonth() + 1).padStart(2, '0');
                         const monthYear = `${year}-${month}`;
@@ -2738,9 +2565,9 @@
                         
                         // Categorize based on whether date is past or future
                         if (dateObj < today) {
-                            monthlyData[monthYear].pastDue.add(caId);
+                            monthlyData[monthYear].pastDue.add(caid);
                         } else {
-                            monthlyData[monthYear].comingDue.add(caId);
+                            monthlyData[monthYear].comingDue.add(caid);
                         }
                     }
                 }
@@ -2748,12 +2575,12 @@
             
             // Get all months sorted (up to next 3 months)
             const allMonths = Object.keys(monthlyData).sort();
-            console.log('Months with CA maturity data:', allMonths);
+            console.log('Months with CA expiration data (3 months):', allMonths);
             
             // Prepare data
             const categories = allMonths.map(m => {
                 const date = new Date(m + '-01');
-                return date.toLocaleDateString('en-US', { month: 'short' });
+                return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
             });
             
             const pastDueData = allMonths.map(month => monthlyData[month].pastDue.size);
@@ -2770,7 +2597,7 @@
             if (allMonths.length === 0) {
                 const chartElement = document.querySelector("#facilityTrendChart");
                 if (chartElement) {
-                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No CA maturity data available for the next 3 months</div>';
+                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No CA expiration data available for the next 3 months</div>';
                 }
                 document.getElementById('caTrendTotal').textContent = '0';
                 return;
@@ -2898,19 +2725,19 @@
             // Calculate date range: next 3 months
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            const threeMonthsFuture = new Date(today);
-            threeMonthsFuture.setMonth(threeMonthsFuture.getMonth() + 3);
+            const monthsFuture = new Date(today);
+            monthsFuture.setMonth(monthsFuture.getMonth() + 3);
             
             // Group by month-year and categorize as past due or coming due
             const monthlyData = {}; // { 'YYYY-MM': { pastDue: Set, comingDue: Set } }
             
             filteredData.forEach(row => {
-                const caMaturityDate = row.CA_Maturity_Date;
-                const caId = row.CA_ID;
+                const caExpirationDate = row.CA_Expiration_Date;
+                const caid = row.CAID;
                 
-                if (caMaturityDate && caId) {
-                    const dateObj = parseDate(caMaturityDate);
-                    if (dateObj && dateObj <= threeMonthsFuture) {
+                if (caExpirationDate && caid) {
+                    const dateObj = parseDate(caExpirationDate);
+                    if (dateObj && dateObj <= monthsFuture) {
                         const year = dateObj.getFullYear();
                         const month = String(dateObj.getMonth() + 1).padStart(2, '0');
                         const monthYear = `${year}-${month}`;
@@ -2924,22 +2751,22 @@
                         
                         // Categorize based on whether date is past or future
                         if (dateObj < today) {
-                            monthlyData[monthYear].pastDue.add(caId);
+                            monthlyData[monthYear].pastDue.add(caid);
                         } else {
-                            monthlyData[monthYear].comingDue.add(caId);
+                            monthlyData[monthYear].comingDue.add(caid);
                         }
                     }
                 }
             });
             
-            // Get all months sorted (up to next 3 months)
+            // Get all months sorted
             const allMonths = Object.keys(monthlyData).sort();
             
             // Handle empty data
             if (allMonths.length === 0) {
                 const chartElement = document.querySelector("#facilityTrendChart");
                 if (chartElement) {
-                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No filtered CA maturity data available for the next 3 months</div>';
+                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No filtered CA expiration data available for the next 3 months</div>';
                 }
                 document.getElementById('caTrendTotal').textContent = '0';
                 return;
@@ -2947,7 +2774,7 @@
             
             const categories = allMonths.map(m => {
                 const date = new Date(m + '-01');
-                return date.toLocaleDateString('en-US', { month: 'short' });
+                return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
             });
             
             const pastDueData = allMonths.map(month => monthlyData[month].pastDue.size);
@@ -2976,7 +2803,7 @@
                 colors: ["#465FFF", "#9CB9FF"],
                 chart: {
                     fontFamily: "Outfit, sans-serif",
-                    height: 310,
+                    height: '100%',
                     type: "area",
                     toolbar: {
                         show: false

@@ -592,64 +592,28 @@
         <div class="grid grid-cols-12 gap-4 md:gap-6 mb-6">
             <!-- Bar Chart: CAs Past Due & Coming Due -->
             <div class="col-span-12 xl:col-span-4">
-                <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 sm:pt-6 h-full flex flex-col">
-                    <div class="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
+                <div class="rounded-2xl border border-gray-200 bg-white p-6 h-full flex flex-col">
+                    <div class="mb-6 flex justify-between">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800">CAs Past Due & Coming Due</h3>
-                            <p class="mt-1 text-gray-500 text-sm">Next 3 months starting from current month</p>
-                        </div>
-                        <div class="flex flex-row-reverse items-center justify-end gap-0.5 sm:flex-col sm:items-start">
-                            <div class="flex flex-row-reverse items-center gap-3 sm:flex-row sm:gap-2">
-                                <h4 class="text-2xl font-bold text-gray-800" id="caTrendTotal">0</h4>
-                            </div>
-                            <span class="text-gray-500 text-xs">Total CAs</span>
                         </div>
                     </div>
-                    <div class="max-w-full overflow-x-auto custom-scrollbar">
-                        <div id="facilityTrendChart" class="apexcharts-tooltip-active -ml-4 min-w-[1000px] pl-2 xl:min-w-full"></div>
+                    <div>
+                        <div id="facilityTrendChart" class="-ml-5"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Maturity Statistics Boxes -->
+            <!-- Bar Chart: Facilities Expired & Expiring -->
             <div class="col-span-12 xl:col-span-4">
-                <div class="grid grid-cols-2 gap-4 h-full">
-                    <!-- Expired Facilities Box -->
-                    <div class="rounded-2xl border border-gray-200 bg-gradient-to-br from-blue-50 to-white p-6 flex flex-col justify-between">
-                        <div class="flex items-start justify-between mb-4">
-                            <div class="p-3 rounded-xl bg-blue-100">
-                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                        </div>
+                <div class="rounded-2xl border border-gray-200 bg-white p-6 h-full flex flex-col">
+                    <div class="mb-6 flex justify-between">
                         <div>
-                            <h3 class="text-sm font-medium text-gray-600 mb-2">Expired Facilities</h3>
-                            <div class="flex items-baseline gap-2">
-                                <h4 class="text-3xl font-bold text-gray-900" id="expiredCount">0</h4>
-                                <span class="text-sm text-gray-500">facilities</span>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-2">Past maturity date</p>
+                            <h3 class="text-lg font-semibold text-gray-800">Facilities Expired & Expiring</h3>
                         </div>
                     </div>
-
-                    <!-- Expiring Facilities Box -->
-                    <div class="rounded-2xl border border-gray-200 bg-gradient-to-br from-indigo-50 to-white p-6 flex flex-col justify-between">
-                        <div class="flex items-start justify-between mb-4">
-                            <div class="p-3 rounded-xl bg-indigo-100">
-                                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-600 mb-2">Expiring Soon</h3>
-                            <div class="flex items-baseline gap-2">
-                                <h4 class="text-3xl font-bold text-gray-900" id="expiringCount">0</h4>
-                                <span class="text-sm text-gray-500">facilities</span>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-2">Next 12 months</p>
-                        </div>
+                    <div>
+                        <div id="facilityMaturityChart" class="-ml-5"></div>
                     </div>
                 </div>
             </div>
@@ -815,6 +779,7 @@
         let relationshipChartInstance = null;
         let mapInstance = null;  // Store map instance for updates
         let facilityTrendChartInstance = null;  // Store facility trend chart instance
+        let facilityMaturityChartInstance = null;  // Store facility maturity chart instance
         let creditClassificationChartInstance = null;  // Store credit classification chart instance
         let activeFilters = {};
         let selectedMetricType = 'facilityAmount'; // Default to Facility Amount
@@ -1720,36 +1685,176 @@
 
         // Create expiration chart from filtered data
         function createExpirationChartFromFiltered() {
-            console.log('📊 Updating filtered maturity statistics boxes with', filteredData.length, 'records');
+            console.log('📊 Creating filtered facilities expired & expiring bar chart');
             
-            const expirationData = aggregateExpirationData(filteredData);
+            // Get the current reporting month from the data
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
             
-            console.log('Filtered aggregated maturity data:', expirationData);
-            
-            // Calculate totals
-            let totalExpired = 0;
-            let totalExpiring = 0;
-            
-            if (expirationData && expirationData.allMonths.length > 0) {
-                totalExpired = expirationData.expired.reduce((a, b) => a + b, 0);
-                totalExpiring = expirationData.expiring.reduce((a, b) => a + b, 0);
+            // Generate next 3 months starting from current month
+            const next3Months = [];
+            for (let i = 0; i < 3; i++) {
+                const date = new Date(today);
+                date.setMonth(date.getMonth() + i);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                next3Months.push(`${year}-${month}`);
             }
             
-            console.log('Filtered Total Expired:', totalExpired);
-            console.log('Filtered Total Expiring:', totalExpiring);
+            // Group by month-year and categorize as expired or expiring
+            const monthlyData = {};
             
-            // Update the boxes
-            const expiredElement = document.getElementById('expiredCount');
-            const expiringElement = document.getElementById('expiringCount');
+            // Initialize all 3 months
+            next3Months.forEach(monthYear => {
+                monthlyData[monthYear] = {
+                    expired: [],
+                    expiring: []
+                };
+            });
             
-            if (expiredElement) {
-                expiredElement.textContent = totalExpired.toLocaleString();
+            filteredData.forEach(row => {
+                const maturityDate = row.Maturity_Date;
+                const facilityId = row.Facility_ID;
+                
+                if (maturityDate && facilityId) {
+                    const dateObj = parseDate(maturityDate);
+                    if (dateObj) {
+                        const year = dateObj.getFullYear();
+                        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const monthYear = `${year}-${month}`;
+                        
+                        // Only include if it's in our next 3 months
+                        if (next3Months.includes(monthYear)) {
+                            // Categorize based on whether date is past or future
+                            if (dateObj < today) {
+                                monthlyData[monthYear].expired.push(facilityId);
+                            } else {
+                                monthlyData[monthYear].expiring.push(facilityId);
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Prepare data for the next 3 months
+            const categories = next3Months.map(m => {
+                const date = new Date(m + '-01');
+                return date.toLocaleDateString('en-US', { month: 'short' });
+            });
+            
+            const expiredData = next3Months.map(month => monthlyData[month].expired.length);
+            const expiringData = next3Months.map(month => monthlyData[month].expiring.length);
+            
+            const options = {
+                series: [
+                    {
+                        name: "Expired",
+                        data: expiredData
+                    },
+                    {
+                        name: "Expiring",
+                        data: expiringData
+                    }
+                ],
+                colors: ["#7592ff", "#465fff"],
+                chart: {
+                    fontFamily: "Outfit, sans-serif",
+                    type: "bar",
+                    stacked: true,
+                    height: 315,
+                    toolbar: {
+                        show: false
+                    },
+                    zoom: {
+                        enabled: false
+                    }
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: false,
+                        columnWidth: "25%",
+                        borderRadius: 10,
+                        borderRadiusApplication: "end",
+                        borderRadiusWhenStacked: "last"
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                xaxis: {
+                    categories: categories,
+                    axisBorder: {
+                        show: false
+                    },
+                    axisTicks: {
+                        show: false
+                    }
+                },
+                legend: {
+                    show: true,
+                    position: "top",
+                    horizontalAlign: "left",
+                    markers: {
+                        size: 5,
+                        shape: "circle",
+                        radius: 999,
+                        strokeWidth: 0
+                    },
+                    itemMargin: {
+                        horizontal: 10,
+                        vertical: 0
+                    }
+                },
+                yaxis: {
+                    title: false
+                },
+                grid: {
+                    yaxis: {
+                        lines: {
+                            show: true
+                        }
+                    }
+                },
+                fill: {
+                    opacity: 1
+                },
+                tooltip: {
+                    x: {
+                        show: false
+                    },
+                    y: {
+                        formatter: function(val) {
+                            return val + ' facilities';
+                        }
+                    }
+                }
+            };
+
+            const chartElement = document.querySelector("#facilityMaturityChart");
+            if (!chartElement) {
+                console.error('Facility maturity chart element not found');
+                return;
             }
-            if (expiringElement) {
-                expiringElement.textContent = totalExpiring.toLocaleString();
+            
+            if (typeof ApexCharts === 'undefined') {
+                console.error('ApexCharts library not loaded');
+                return;
             }
             
-            console.log('✅ Filtered maturity statistics boxes updated successfully');
+            try {
+                if (facilityMaturityChartInstance) {
+                    facilityMaturityChartInstance.destroy();
+                    facilityMaturityChartInstance = null;
+                }
+                
+                chartElement.innerHTML = '';
+                
+                facilityMaturityChartInstance = new ApexCharts(chartElement, options);
+                facilityMaturityChartInstance.render();
+                console.log('✅ Filtered facility maturity chart rendered successfully');
+            } catch (error) {
+                console.error('❌ Error rendering filtered facility maturity chart:', error);
+            }
         }
 
         // Create regional chart from filtered data
@@ -2500,36 +2605,187 @@
 
         // Create expiration timeline chart (Area chart for Facilities only)
         function createExpirationChart() {
-            console.log('📊 Updating maturity statistics boxes with', portfolioData.length, 'records');
+            console.log('📊 Creating facilities expired & expiring bar chart');
             
-            const expirationData = aggregateExpirationData(portfolioData);
+            // Get the current reporting month from the data
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
             
-            console.log('Aggregated maturity data:', expirationData);
-            
-            // Calculate totals
-            let totalExpired = 0;
-            let totalExpiring = 0;
-            
-            if (expirationData && expirationData.allMonths.length > 0) {
-                totalExpired = expirationData.expired.reduce((a, b) => a + b, 0);
-                totalExpiring = expirationData.expiring.reduce((a, b) => a + b, 0);
+            // Generate next 3 months starting from current month
+            const next3Months = [];
+            for (let i = 0; i < 3; i++) {
+                const date = new Date(today);
+                date.setMonth(date.getMonth() + i);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                next3Months.push(`${year}-${month}`);
             }
             
-            console.log('Total Expired:', totalExpired);
-            console.log('Total Expiring:', totalExpiring);
+            console.log('Next 3 months starting from current:', next3Months);
             
-            // Update the boxes
-            const expiredElement = document.getElementById('expiredCount');
-            const expiringElement = document.getElementById('expiringCount');
+            // Group by month-year and categorize as expired or expiring
+            const monthlyData = {};
             
-            if (expiredElement) {
-                expiredElement.textContent = totalExpired.toLocaleString();
+            // Initialize all 3 months
+            next3Months.forEach(monthYear => {
+                monthlyData[monthYear] = {
+                    expired: [],
+                    expiring: []
+                };
+            });
+            
+            portfolioData.forEach(row => {
+                const maturityDate = row.Maturity_Date;
+                const facilityId = row.Facility_ID;
+                
+                if (maturityDate && facilityId) {
+                    const dateObj = parseDate(maturityDate);
+                    if (dateObj) {
+                        const year = dateObj.getFullYear();
+                        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const monthYear = `${year}-${month}`;
+                        
+                        // Only include if it's in our next 3 months
+                        if (next3Months.includes(monthYear)) {
+                            // Categorize based on whether date is past or future
+                            if (dateObj < today) {
+                                monthlyData[monthYear].expired.push(facilityId);
+                            } else {
+                                monthlyData[monthYear].expiring.push(facilityId);
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Prepare data for the next 3 months
+            const categories = next3Months.map(m => {
+                const date = new Date(m + '-01');
+                return date.toLocaleDateString('en-US', { month: 'short' });
+            });
+            
+            const expiredData = next3Months.map(month => monthlyData[month].expired.length);
+            const expiringData = next3Months.map(month => monthlyData[month].expiring.length);
+            
+            console.log('Expired:', expiredData);
+            console.log('Expiring:', expiringData);
+            
+            const options = {
+                series: [
+                    {
+                        name: "Expired",
+                        data: expiredData
+                    },
+                    {
+                        name: "Expiring",
+                        data: expiringData
+                    }
+                ],
+                colors: ["#7592ff", "#465fff"],
+                chart: {
+                    fontFamily: "Outfit, sans-serif",
+                    type: "bar",
+                    stacked: true,
+                    height: 315,
+                    toolbar: {
+                        show: false
+                    },
+                    zoom: {
+                        enabled: false
+                    }
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: false,
+                        columnWidth: "25%",
+                        borderRadius: 10,
+                        borderRadiusApplication: "end",
+                        borderRadiusWhenStacked: "last"
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                xaxis: {
+                    categories: categories,
+                    axisBorder: {
+                        show: false
+                    },
+                    axisTicks: {
+                        show: false
+                    }
+                },
+                legend: {
+                    show: true,
+                    position: "top",
+                    horizontalAlign: "left",
+                    markers: {
+                        size: 5,
+                        shape: "circle",
+                        radius: 999,
+                        strokeWidth: 0
+                    },
+                    itemMargin: {
+                        horizontal: 10,
+                        vertical: 0
+                    }
+                },
+                yaxis: {
+                    title: false
+                },
+                grid: {
+                    yaxis: {
+                        lines: {
+                            show: true
+                        }
+                    }
+                },
+                fill: {
+                    opacity: 1
+                },
+                tooltip: {
+                    x: {
+                        show: false
+                    },
+                    y: {
+                        formatter: function(val) {
+                            return val + ' facilities';
+                        }
+                    }
+                }
+            };
+
+            // Get the chart element and verify it exists
+            const chartElement = document.querySelector("#facilityMaturityChart");
+            if (!chartElement) {
+                console.error('Facility maturity chart element #facilityMaturityChart not found in DOM');
+                return;
             }
-            if (expiringElement) {
-                expiringElement.textContent = totalExpiring.toLocaleString();
+            
+            // Check if ApexCharts is loaded
+            if (typeof ApexCharts === 'undefined') {
+                console.error('ApexCharts library not loaded yet. Retrying...');
+                setTimeout(createExpirationChart, 500);
+                return;
             }
             
-            console.log('✅ Maturity statistics boxes updated successfully');
+            try {
+                // Destroy existing chart if it exists
+                if (facilityMaturityChartInstance) {
+                    facilityMaturityChartInstance.destroy();
+                    facilityMaturityChartInstance = null;
+                }
+                
+                // Clear the element
+                chartElement.innerHTML = '';
+                
+                // Create and render new chart
+                facilityMaturityChartInstance = new ApexCharts(chartElement, options);
+                facilityMaturityChartInstance.render();
+                console.log('✅ Facility maturity chart rendered successfully');
+            } catch (error) {
+                console.error('❌ Error rendering facility maturity chart:', error);
+            }
         }
 
         // Create CA past due & coming due bar chart (next 3 months starting from current month)
@@ -2596,10 +2852,6 @@
             const pastDueData = next3Months.map(month => monthlyData[month].pastDue.size);
             const comingDueData = next3Months.map(month => monthlyData[month].comingDue.size);
             
-            // Calculate total CAs
-            const totalCAs = pastDueData.reduce((a, b) => a + b, 0) + comingDueData.reduce((a, b) => a + b, 0);
-            document.getElementById('caTrendTotal').textContent = totalCAs.toLocaleString();
-            
             console.log('Past Due:', pastDueData);
             console.log('Coming Due:', comingDueData);
             
@@ -2614,30 +2866,30 @@
                         data: comingDueData
                     }
                 ],
-                colors: ["#9CB9FF", "#465fff"],
+                colors: ["#7592ff", "#465fff"],
                 chart: {
                     fontFamily: "Outfit, sans-serif",
                     type: "bar",
-                    height: 310,
+                    stacked: true,
+                    height: 315,
                     toolbar: {
                         show: false
+                    },
+                    zoom: {
+                        enabled: false
                     }
                 },
                 plotOptions: {
                     bar: {
                         horizontal: false,
-                        columnWidth: "55%",
-                        borderRadius: 5,
-                        borderRadiusApplication: "end"
+                        columnWidth: "25%",
+                        borderRadius: 10,
+                        borderRadiusApplication: "end",
+                        borderRadiusWhenStacked: "last"
                     }
                 },
                 dataLabels: {
                     enabled: false
-                },
-                stroke: {
-                    show: true,
-                    width: 4,
-                    colors: ["transparent"]
                 },
                 xaxis: {
                     categories: categories,
@@ -2652,9 +2904,15 @@
                     show: true,
                     position: "top",
                     horizontalAlign: "left",
-                    fontFamily: "Outfit",
                     markers: {
-                        radius: 99
+                        size: 5,
+                        shape: "circle",
+                        radius: 999,
+                        strokeWidth: 0
+                    },
+                    itemMargin: {
+                        horizontal: 10,
+                        vertical: 0
                     }
                 },
                 yaxis: {
@@ -2776,10 +3034,6 @@
             const pastDueData = next3Months.map(month => monthlyData[month].pastDue.size);
             const comingDueData = next3Months.map(month => monthlyData[month].comingDue.size);
             
-            // Calculate total CAs
-            const totalCAs = pastDueData.reduce((a, b) => a + b, 0) + comingDueData.reduce((a, b) => a + b, 0);
-            document.getElementById('caTrendTotal').textContent = totalCAs.toLocaleString();
-            
             const options = {
                 series: [
                     {
@@ -2791,30 +3045,30 @@
                         data: comingDueData
                     }
                 ],
-                colors: ["#9CB9FF", "#465fff"],
+                colors: ["#7592ff", "#465fff"],
                 chart: {
                     fontFamily: "Outfit, sans-serif",
                     type: "bar",
-                    height: '100%',
+                    stacked: true,
+                    height: 315,
                     toolbar: {
                         show: false
+                    },
+                    zoom: {
+                        enabled: false
                     }
                 },
                 plotOptions: {
                     bar: {
                         horizontal: false,
-                        columnWidth: "55%",
-                        borderRadius: 5,
-                        borderRadiusApplication: "end"
+                        columnWidth: "25%",
+                        borderRadius: 10,
+                        borderRadiusApplication: "end",
+                        borderRadiusWhenStacked: "last"
                     }
                 },
                 dataLabels: {
                     enabled: false
-                },
-                stroke: {
-                    show: true,
-                    width: 4,
-                    colors: ["transparent"]
                 },
                 xaxis: {
                     categories: categories,
@@ -2829,9 +3083,15 @@
                     show: true,
                     position: "top",
                     horizontalAlign: "left",
-                    fontFamily: "Outfit",
                     markers: {
-                        radius: 99
+                        size: 5,
+                        shape: "circle",
+                        radius: 999,
+                        strokeWidth: 0
+                    },
+                    itemMargin: {
+                        horizontal: 10,
+                        vertical: 0
                     }
                 },
                 yaxis: {
@@ -4019,3 +4279,4 @@
     </script>
 </body>
 </html>
+

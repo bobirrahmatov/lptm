@@ -84,29 +84,99 @@
     <div class="p-4 md:p-6">
         <!-- Page Header -->
         <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-5">
-            <!-- Top Row: Search and Report Date -->
+            <!-- First Row: Search Bar, Action Buttons, and Last Updated -->
             <div class="flex items-center justify-between gap-4 mb-5">
-                <!-- Search Input -->
-                <div class="flex-1 max-w-2xl">
-                        <div class="relative">
-                            <span class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2">
-                                <svg class="fill-gray-500" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M3.04199 9.37381C3.04199 5.87712 5.87735 3.04218 9.37533 3.04218C12.8733 3.04218 15.7087 5.87712 15.7087 9.37381C15.7087 12.8705 12.8733 15.7055 9.37533 15.7055C5.87735 15.7055 3.04199 12.8705 3.04199 9.37381ZM9.37533 1.54218C5.04926 1.54218 1.54199 5.04835 1.54199 9.37381C1.54199 13.6993 5.04926 17.2055 9.37533 17.2055C11.2676 17.2055 13.0032 16.5346 14.3572 15.4178L17.1773 18.2381C17.4702 18.531 17.945 18.5311 18.2379 18.2382C18.5308 17.9453 18.5309 17.4704 18.238 17.1775L15.4182 14.3575C16.5367 13.0035 17.2087 11.2671 17.2087 9.37381C17.2087 5.04835 13.7014 1.54218 9.37533 1.54218Z" fill=""></path>
-                                </svg>
-                            </span>
-                        <input type="text" id="searchInput" placeholder="Search facilities, relationships, or any data..." 
-                            class="h-11 w-full rounded-lg border border-gray-300 bg-white py-3 pr-4 pl-12 text-sm text-gray-800 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none shadow-sm">
+                <!-- Left: Search Input -->
+                <div class="relative flex-1 max-w-2xl">
+                    <span class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2">
+                        <svg class="fill-gray-500" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M3.04199 9.37381C3.04199 5.87712 5.87735 3.04218 9.37533 3.04218C12.8733 3.04218 15.7087 5.87712 15.7087 9.37381C15.7087 12.8705 12.8733 15.7055 9.37533 15.7055C5.87735 15.7055 3.04199 12.8705 3.04199 9.37381ZM9.37533 1.54218C5.04926 1.54218 1.54199 5.04835 1.54199 9.37381C1.54199 13.6993 5.04926 17.2055 9.37533 17.2055C11.2676 17.2055 13.0032 16.5346 14.3572 15.4178L17.1773 18.2381C17.4702 18.531 17.945 18.5311 18.2379 18.2382C18.5308 17.9453 18.5309 17.4704 18.238 17.1775L15.4182 14.3575C16.5367 13.0035 17.2087 11.2671 17.2087 9.37381C17.2087 5.04835 13.7014 1.54218 9.37533 1.54218Z" fill=""></path>
+                        </svg>
+                    </span>
+                    <input type="text" id="searchInput" placeholder="Search facilities, relationships, or any data..." 
+                        class="h-11 w-full rounded-lg border border-gray-300 bg-white py-3 pr-4 pl-12 text-sm text-gray-800 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none shadow-sm">
+                </div>
+                
+                <!-- Middle: Action Buttons -->
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleFilterPopover()" id="filterButton"
+                        class="relative flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                        </svg>
+                        <span>More</span>
+                        <span id="filterCount" class="hidden absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold text-white"></span>
+                    </button>
+
+                    <button onclick="resetAllFilters()" 
+                        class="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        <span>Reset</span>
+                    </button>
+
+                    <!-- Export Dropdown -->
+                    <div x-data="{ exportOpen: false }" class="relative">
+                        <button @click="exportOpen = !exportOpen" @click.away="exportOpen = false"
+                            class="flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 px-3 py-2 text-xs font-medium text-white transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span>Export</span>
+                            <svg class="w-3 h-3 transition-transform" :class="exportOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        
+                        <!-- Dropdown Menu -->
+                        <div x-show="exportOpen" 
+                            x-transition:enter="transition ease-out duration-100"
+                            x-transition:enter-start="opacity-0 scale-95"
+                            x-transition:enter-end="opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-75"
+                            x-transition:leave-start="opacity-100 scale-100"
+                            x-transition:leave-end="opacity-0 scale-95"
+                            class="absolute right-0 mt-2 w-44 rounded-lg border border-gray-200 bg-white shadow-xl z-10"
+                            style="display: none;">
+                            <div class="py-1">
+                                <button onclick="exportToExcel()" class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <span class="font-medium">Excel (.xlsx)</span>
+                                </button>
+                                <button onclick="exportToPDF()" class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span class="font-medium">PDF (.pdf)</span>
+                                </button>
+                                <button onclick="exportToPPT()" class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <span class="font-medium">PowerPoint (.pptx)</span>
+                                </button>
+                                <button onclick="exportToPNG()" class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span class="font-medium">Image (.png)</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
+                </div>
                     
-                <!-- Report Date - Subtle -->
-                <div class="text-right">
+                <!-- Right: Last Updated -->
+                <div class="text-right shrink-0">
                     <p class="text-xs text-gray-400 font-medium">Last Updated</p>
                     <p class="text-sm font-semibold text-gray-600" id="reportDate">--</p>
                 </div>
             </div>
             
-            <!-- Filters and Actions Row -->
+            <!-- Second Row: All Filter Tabs -->
             <div class="flex flex-wrap items-center gap-4">
                 <!-- Region Tabs -->
                 <div class="flex items-center gap-2">
@@ -184,92 +254,25 @@
                 <div class="flex items-center gap-2">
                     <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Amount:</span>
                     <div class="inline-flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
+                        <button id="btnAmountDirect" onclick="selectAmountTypeFilter('direct')" 
+                            class="min-w-[65px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white">
+                            Direct
+                        </button>
+                        <button id="btnAmountContingent" onclick="selectAmountTypeFilter('contingent')" 
+                            class="min-w-[80px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
+                            Contingent
+                        </button>
+                        <button id="btnAmountPSE" onclick="selectAmountTypeFilter('pse')" 
+                            class="min-w-[50px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
+                            PSE
+                        </button>
                         <button id="btnAmountOSUC" onclick="selectAmountTypeFilter('osuc')" 
-                            class="min-w-[60px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white">
+                            class="min-w-[60px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
                             OSUC
                         </button>
-                        <button id="btnAmountFacility" onclick="selectAmountTypeFilter('facility')" 
-                            class="min-w-[60px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
-                            Facility
-                        </button>
                     </div>
                 </div>
 
-                <!-- Spacer to push buttons to right -->
-                <div class="flex-1"></div>
-
-                <!-- Action Buttons -->
-                <div class="flex items-center gap-2">
-                    <button onclick="toggleFilterPopover()" id="filterButton"
-                        class="relative flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-                        </svg>
-                        <span>More</span>
-                        <span id="filterCount" class="hidden absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold text-white"></span>
-                    </button>
-                    
-                    <button onclick="resetAllFilters()" 
-                        class="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                        </svg>
-                        <span>Reset</span>
-                    </button>
-
-                    <!-- Export Dropdown -->
-                    <div x-data="{ exportOpen: false }" class="relative">
-                        <button @click="exportOpen = !exportOpen" @click.away="exportOpen = false"
-                            class="flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 px-3 py-2 text-xs font-medium text-white transition-colors">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            <span>Export</span>
-                            <svg class="w-3 h-3 transition-transform" :class="exportOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                        
-                        <!-- Dropdown Menu -->
-                        <div x-show="exportOpen" 
-                            x-transition:enter="transition ease-out duration-100"
-                            x-transition:enter-start="opacity-0 scale-95"
-                            x-transition:enter-end="opacity-100 scale-100"
-                            x-transition:leave="transition ease-in duration-75"
-                            x-transition:leave-start="opacity-100 scale-100"
-                            x-transition:leave-end="opacity-0 scale-95"
-                            class="absolute right-0 mt-2 w-44 rounded-lg border border-gray-200 bg-white shadow-xl z-10"
-                            style="display: none;">
-                            <div class="py-1">
-                                <button onclick="exportToExcel()" class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                    </svg>
-                                    <span class="font-medium">Excel (.xlsx)</span>
-                                </button>
-                                <button onclick="exportToPDF()" class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                                    </svg>
-                                    <span class="font-medium">PDF (.pdf)</span>
-                                </button>
-                                <button onclick="exportToPPT()" class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                    </svg>
-                                    <span class="font-medium">PowerPoint (.pptx)</span>
-                                </button>
-                                <button onclick="exportToPNG()" class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg>
-                                    <span class="font-medium">Image (.png)</span>
-                    </button>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
             </div>
 
             <!-- Active Filters Badges -->
@@ -496,39 +499,39 @@
             </div>
         </div>
 
-        <!-- Top 4 Metric Cards -->
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 md:gap-6 mb-6">
-            <!-- Card 1: Total # of Relationships -->
+        <!-- Top 5 Metric Cards -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 md:gap-6 mb-6">
+            <!-- Card 1: Total $ of Facility Amount -->
             <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
                 <div class="mb-6 flex items-center gap-3">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100">
-                        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100">
+                        <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-medium text-gray-500">Total # of Relationships</h3>
+                        <h3 class="text-sm font-medium text-gray-500">Total $ of Facility Amount</h3>
                     </div>
                 </div>
                 <div class="flex items-center justify-center">
-                    <h4 class="text-2xl font-bold text-gray-800" id="totalRelationships">0</h4>
+                    <h4 class="text-2xl font-bold text-gray-800" id="totalFacAmount">$0.00</h4>
                 </div>
             </div>
 
-            <!-- Card 2: Total # of Facilities -->
+            <!-- Card 2: Total Outstanding -->
             <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
                 <div class="mb-6 flex items-center gap-3">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
-                        <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100">
+                        <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-medium text-gray-500">Total # of Facilities</h3>
+                        <h3 class="text-sm font-medium text-gray-500">Total Outstanding</h3>
                     </div>
                 </div>
                 <div class="flex items-center justify-center">
-                    <h4 class="text-2xl font-bold text-gray-800" id="totalFacilities">0</h4>
+                    <h4 class="text-2xl font-bold text-gray-800" id="totalOutstanding">$0.00</h4>
                 </div>
             </div>
 
@@ -545,24 +548,41 @@
                     </div>
                 </div>
                 <div class="flex items-center justify-center">
-                    <h4 class="text-2xl font-bold text-gray-800" id="totalOSUC">$0.00</h4>
+                        <h4 class="text-2xl font-bold text-gray-800" id="totalOSUC">$0.00</h4>
                 </div>
             </div>
 
-            <!-- Card 4: Total $ of Facility Amount -->
+            <!-- Card 4: Total # of Facilities -->
             <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
                 <div class="mb-6 flex items-center gap-3">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100">
-                        <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
+                        <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-medium text-gray-500">Total $ of Facility Amount</h3>
+                        <h3 class="text-sm font-medium text-gray-500">Total # of Facilities</h3>
                     </div>
                 </div>
                 <div class="flex items-center justify-center">
-                    <h4 class="text-2xl font-bold text-gray-800" id="totalFacAmount">$0.00</h4>
+                    <h4 class="text-2xl font-bold text-gray-800" id="totalFacilities">0</h4>
+                </div>
+            </div>
+
+            <!-- Card 5: Total # of Relationships -->
+            <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
+                <div class="mb-6 flex items-center gap-3">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100">
+                        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-500">Total # of Relationships</h3>
+                    </div>
+                </div>
+                <div class="flex items-center justify-center">
+                    <h4 class="text-2xl font-bold text-gray-800" id="totalRelationships">0</h4>
                 </div>
             </div>
         </div>
@@ -577,7 +597,7 @@
                             <h3 class="text-lg font-semibold text-gray-800" id="expirationChartTitle">Maturity Statistics</h3>
                             <p class="mt-1 text-sm text-gray-500">Total number of facilities by maturity status</p>
                         </div>
-                    </div>
+                            </div>
                     <div class="flex items-center gap-5 mb-5">
                         <div class="flex items-center gap-1.5">
                             <div class="h-2.5 w-2.5 rounded-full" style="background-color: #C2D6FF;"></div>
@@ -594,21 +614,23 @@
                 </div>
             </div>
 
-            <!-- Bar Chart: Facility Amount Trend -->
+            <!-- Area Chart: CAs Past Due & Coming Due -->
             <div class="col-span-12 xl:col-span-4">
                 <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 sm:pt-6 h-full flex flex-col">
-                    <div class="mb-6">
-                        <h3 class="text-lg font-semibold text-gray-800">Facility Amount Trend</h3>
-                        <p class="mt-1 text-gray-500 text-sm">Total facility amount over time</p>
-                    </div>
-                    <div class="flex items-center gap-5 mb-5">
-                        <div class="flex items-center gap-1.5">
-                            <div class="h-2.5 w-2.5 rounded-full" style="background-color: #465FFF;"></div>
-                            <p class="text-sm text-gray-500">Facility Amount</p>
+                    <div class="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">CAs Past Due & Coming Due</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Next 3 months CA maturity tracking</p>
+                        </div>
+                        <div class="flex flex-row-reverse items-center justify-end gap-0.5 sm:flex-col sm:items-start">
+                            <div class="flex flex-row-reverse items-center gap-3 sm:flex-row sm:gap-2">
+                                <h4 class="text-2xl font-bold text-gray-800" id="caTrendTotal">0</h4>
+                            </div>
+                            <span class="text-gray-500 text-xs">Total CAs</span>
                         </div>
                     </div>
-                    <div class="flex-1 overflow-hidden">
-                        <div id="facilityTrendChart" class="h-[310px] w-full"></div>
+                    <div class="max-w-full overflow-x-auto custom-scrollbar">
+                        <div id="facilityTrendChart" class="apexcharts-tooltip-active -ml-4 min-w-[1000px] pl-2 xl:min-w-full"></div>
                     </div>
                 </div>
             </div>
@@ -634,18 +656,18 @@
 
         <!-- Bar Chart and Donut Chart Side by Side -->
         <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
-            <!-- Bar Chart: Top Relationships by Total Facility Amount / Direct OS -->
+        <!-- Bar Chart: Top Relationships by Total Facility Amount / Direct OS -->
             <div class="col-span-12 xl:col-span-8">
                 <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 sm:pt-5 h-full flex flex-col">
-                    <div class="flex flex-col gap-5 mb-6 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
+                <div class="flex flex-col gap-5 mb-6 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
                             <h3 class="text-lg font-semibold text-gray-800" id="topRelationshipsTitle">Top Relationships by Direct OS</h3>
                             <p class="mt-1 text-gray-500 text-sm">Ranked by total exposure</p>
-                        </div>
+                    </div>
                         <div class="flex items-center">
                             <!-- Top N Selector with TailAdmin Styling -->
                             <div x-data="{ isOptionSelected: true }" class="relative z-20 bg-transparent">
-                                <select id="topNFilter" onchange="updateBarChart()" 
+                        <select id="topNFilter" onchange="updateBarChart()" 
                                     class="shadow-theme-xs focus:border-blue-300 focus:ring-blue-500/10 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pr-11 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden"
                                     :class="isOptionSelected && 'text-gray-800'"
                                     @change="isOptionSelected = true">
@@ -653,14 +675,14 @@
                                     <option value="10" selected class="text-gray-700">Top 10</option>
                                     <option value="15" class="text-gray-700">Top 15</option>
                                     <option value="20" class="text-gray-700">Top 20</option>
-                                </select>
+                        </select>
                                 <span class="pointer-events-none absolute top-1/2 right-4 z-30 -translate-y-1/2 text-gray-500">
                                     <svg class="stroke-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396" stroke="" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
                                 </span>
-                            </div>
-                        </div>
+                    </div>
+                </div>
                     </div>
                     <div class="flex-1 w-full overflow-hidden">
                         <div id="relationshipChart" class="-ml-5 pl-2 h-full"></div>
@@ -668,12 +690,12 @@
                 </div>
             </div>
 
-            <!-- Donut Chart: Credit Classification Breakdown -->
+            <!-- Donut Chart: New Facilities by Region -->
             <div class="col-span-12 xl:col-span-4">
                 <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 h-full flex flex-col">
                     <div class="flex items-center justify-between mb-5">
                         <h3 class="text-lg font-semibold text-gray-800">
-                            Credit Classification
+                            New Facilities by Region
                         </h3>
                     </div>
                     <div class="flex flex-col items-center justify-center gap-8 xl:flex-row flex-1">
@@ -777,13 +799,12 @@
         let creditClassificationChartInstance = null;  // Store credit classification chart instance
         let activeFilters = {};
         let selectedMetricType = 'facilityAmount'; // Default to Facility Amount
-        let selectedTrendLevel = 'facility'; // Default to Facility Level for trend chart
         
         // Smart Filter States
         let selectedRegion = 'all'; // all, APAC, EMEA, LATAM, NAM
         let includePSE = true; // true = include PSE, false = exclude PSE
         let selectedStatus = 'all'; // all, CM, DM
-        let selectedAmountType = 'osuc'; // osuc, facility (for metrics)
+        let selectedAmountType = 'direct'; // direct, contingent, pse, osuc (for metrics)
         
         // Performance optimization: Cache for expensive calculations
         let metricsCache = {
@@ -1642,6 +1663,7 @@
             
             let totalFacAmount = 0;
             let totalOSUC = 0;
+            let totalOutstanding = 0;
             const relationships = new Set();
             const facilities = new Set();
             
@@ -1651,6 +1673,11 @@
                 
                 totalFacAmount += parseNumber(row.Fac_Amount);
                 totalOSUC += parseNumber(row.Direct_OS);
+                
+                // Calculate Total Outstanding: Direct_OS + Contingeng_OS + PSE_OS
+                totalOutstanding += parseNumber(row.Direct_OS) + 
+                                   parseNumber(row.Contingeng_OS) + 
+                                   parseNumber(row.PSE_OS);
                 
                 const rel = row.Relationship_Name || row.Relationship_ID;
                 if (rel) relationships.add(rel);
@@ -1662,6 +1689,7 @@
             document.getElementById('totalFacilities').textContent = facilities.size.toLocaleString();
             document.getElementById('totalOSUC').textContent = formatCurrency(totalOSUC);
             document.getElementById('totalFacAmount').textContent = formatCurrency(totalFacAmount);
+            document.getElementById('totalOutstanding').textContent = formatCurrency(totalOutstanding);
             
             console.log(`Filtered metrics calculated in ${(performance.now() - startTime).toFixed(2)}ms`);
         }
@@ -1734,18 +1762,18 @@
                         return date.toLocaleDateString('en-US', { month: 'short' });
                     }),
                     axisTicks: {
-                        show: false,
+                    show: false,
                     },
                     axisBorder: {
                         show: false,
                     },
                 },
                 yaxis: {
-                    labels: {
+                labels: {
                         style: {
                             fontSize: '12px',
                             colors: '#344054',
-                        },
+                },
                     },
                 },
                 fill: {
@@ -1981,8 +2009,28 @@
             const topN = parseInt(document.getElementById('topNFilter').value);
             
             // Use amount type based on filter selection
-            const fieldName = selectedAmountType === 'osuc' ? 'Direct_OS' : 'Fac_Amount';
-            const seriesName = selectedAmountType === 'osuc' ? 'Direct OS' : 'Facility Amount';
+            let fieldName, seriesName;
+            switch(selectedAmountType) {
+                case 'direct':
+                    fieldName = 'Direct_OS';
+                    seriesName = 'Direct OS';
+                    break;
+                case 'contingent':
+                    fieldName = 'Contingeng_OS';
+                    seriesName = 'Contingent OS';
+                    break;
+                case 'pse':
+                    fieldName = 'PSE_OS';
+                    seriesName = 'PSE OS';
+                    break;
+                case 'osuc':
+                    fieldName = 'Direct_OS';
+                    seriesName = 'OSUC';
+                    break;
+                default:
+                    fieldName = 'Direct_OS';
+                    seriesName = 'Direct OS';
+            }
             
             console.log('Creating filtered relationship chart, field:', fieldName, 'dataLength:', filteredData.length);
             
@@ -2191,20 +2239,27 @@
             applyFilters();
         }
         
-        // Select Amount Type Filter (OSUC/Facility)
+        // Select Amount Type Filter (Direct/Contingent/PSE/OSUC)
         function selectAmountTypeFilter(type) {
             selectedAmountType = type;
             
-            // Update button styles with min-width
-            const types = { 'OSUC': 'osuc', 'Facility': 'facility' };
+            // Update button styles
+            const types = { 
+                'Direct': { id: 'direct', minWidth: '65px' }, 
+                'Contingent': { id: 'contingent', minWidth: '80px' }, 
+                'PSE': { id: 'pse', minWidth: '50px' }, 
+                'OSUC': { id: 'osuc', minWidth: '60px' }
+            };
+            
             Object.keys(types).forEach(t => {
                 const btnId = `btnAmount${t}`;
                 const btn = document.getElementById(btnId);
                 if (btn) {
-                    if (types[t] === type) {
-                        btn.className = 'min-w-[60px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white';
+                    const minWidth = types[t].minWidth;
+                    if (types[t].id === type) {
+                        btn.className = `min-w-[${minWidth}] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white`;
                     } else {
-                        btn.className = 'min-w-[60px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900';
+                        btn.className = `min-w-[${minWidth}] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900`;
                     }
                 }
             });
@@ -2212,10 +2267,14 @@
             // Update Top Relationships chart title
             const titleElement = document.getElementById('topRelationshipsTitle');
             if (titleElement) {
-                if (type === 'osuc') {
+                if (type === 'direct') {
                     titleElement.textContent = 'Top Relationships by Direct OS';
-                } else {
-                    titleElement.textContent = 'Top Relationships by Facility Amount';
+                } else if (type === 'contingent') {
+                    titleElement.textContent = 'Top Relationships by Contingent OS';
+                } else if (type === 'pse') {
+                    titleElement.textContent = 'Top Relationships by PSE OS';
+                } else if (type === 'osuc') {
+                    titleElement.textContent = 'Top Relationships by OSUC';
                 }
             }
             
@@ -2238,7 +2297,7 @@
             selectedRegion = 'all';
             includePSE = true;
             selectedStatus = 'all';
-            selectedAmountType = 'osuc';
+            selectedAmountType = 'direct';
             
             // Reset region buttons
             selectRegionFilter('all');
@@ -2247,7 +2306,7 @@
             selectStatusFilter('all');
             
             // Reset amount type buttons
-            selectAmountTypeFilter('osuc');
+            selectAmountTypeFilter('direct');
             
             // Reset PSE toggle
             const pseToggle = document.getElementById('pseToggle');
@@ -2388,6 +2447,7 @@
                 document.getElementById('totalFacilities').textContent = cached.facilities.toLocaleString();
                 document.getElementById('totalOSUC').textContent = formatCurrency(cached.osuc);
                 document.getElementById('totalFacAmount').textContent = formatCurrency(cached.facAmount);
+                document.getElementById('totalOutstanding').textContent = formatCurrency(cached.outstanding);
                 return;
             }
             
@@ -2395,6 +2455,7 @@
             
             let totalFacAmount = 0;
             let totalOSUC = 0;
+            let totalOutstanding = 0;
             const relationships = new Set();
             const facilities = new Set();
             
@@ -2404,6 +2465,11 @@
                 
                 totalFacAmount += parseNumber(row.Fac_Amount);
                 totalOSUC += parseNumber(row.Direct_OS);
+                
+                // Calculate Total Outstanding: Direct_OS + Contingeng_OS + PSE_OS
+                totalOutstanding += parseNumber(row.Direct_OS) + 
+                                   parseNumber(row.Contingeng_OS) + 
+                                   parseNumber(row.PSE_OS);
                 
                 const rel = row.Relationship_Name || row.Relationship_ID;
                 if (rel) relationships.add(rel);
@@ -2415,7 +2481,8 @@
                 relationships: relationships.size,
                 facilities: facilities.size,
                 osuc: totalOSUC,
-                facAmount: totalFacAmount
+                facAmount: totalFacAmount,
+                outstanding: totalOutstanding
             };
             
             // Cache the results
@@ -2425,6 +2492,7 @@
             document.getElementById('totalFacilities').textContent = metrics.facilities.toLocaleString();
             document.getElementById('totalOSUC').textContent = formatCurrency(metrics.osuc);
             document.getElementById('totalFacAmount').textContent = formatCurrency(metrics.facAmount);
+            document.getElementById('totalOutstanding').textContent = formatCurrency(metrics.outstanding);
             
             console.log(`Metrics calculated in ${(performance.now() - startTime).toFixed(2)}ms:`, metrics);
         }
@@ -2637,148 +2705,121 @@
             }
         }
 
-        // Select trend level (facility or relationship)
-        function selectTrendLevel(level) {
-            console.log('🔄 Trend level toggle clicked:', level);
-            selectedTrendLevel = level;
-            
-            // Update button styles
-            const btnFacility = document.getElementById('btnTrendFacilityLevel');
-            const btnRelationship = document.getElementById('btnTrendRelationshipLevel');
-            
-            if (level === 'facility') {
-                btnFacility.className = 'px-3 py-2 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white';
-                btnRelationship.className = 'px-3 py-2 font-medium transition-colors rounded-md text-xs text-gray-500 hover:text-gray-900';
-            } else {
-                btnFacility.className = 'px-3 py-2 font-medium transition-colors rounded-md text-xs text-gray-500 hover:text-gray-900';
-                btnRelationship.className = 'px-3 py-2 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white';
-            }
-            
-            // Update the chart
-            if (Object.keys(activeFilters).length > 0) {
-                createFacilityTrendChartFromFiltered();
-            } else {
-                createFacilityTrendChart();
-            }
-        }
-
-        // Create facility amount trend bar chart
+        // Create CA past due & coming due area chart (next 3 months)
         function createFacilityTrendChart() {
-            console.log('📊 Creating facility trend chart, level:', selectedTrendLevel);
+            console.log('📊 Creating CAs past due & coming due chart');
             
-            // Calculate date range: last 12 months
+            // Calculate date range: next 3 months
             const today = new Date();
-            const twelveMonthsAgo = new Date(today);
-            twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+            today.setHours(0, 0, 0, 0);
+            const threeMonthsFuture = new Date(today);
+            threeMonthsFuture.setMonth(threeMonthsFuture.getMonth() + 3);
             
-            // Group by month-year and aggregate Facility Amount
-            const monthlyData = {}; // { 'YYYY-MM': { facilities: Set, relationships: Set, amount: 0 } }
+            // Group by month-year and categorize as past due or coming due
+            const monthlyData = {}; // { 'YYYY-MM': { pastDue: Set, comingDue: Set } }
             
             portfolioData.forEach(row => {
-                const reportDate = row.Report_Date;
-                if (reportDate) {
-                    const dateObj = parseDate(reportDate);
-                    if (dateObj && dateObj >= twelveMonthsAgo && dateObj <= today) {
+                const caMaturityDate = row.CA_Maturity_Date;
+                const caId = row.CA_ID;
+                
+                if (caMaturityDate && caId) {
+                    const dateObj = parseDate(caMaturityDate);
+                    if (dateObj && dateObj <= threeMonthsFuture) {
                         const year = dateObj.getFullYear();
                         const month = String(dateObj.getMonth() + 1).padStart(2, '0');
                         const monthYear = `${year}-${month}`;
                         
                         if (!monthlyData[monthYear]) {
                             monthlyData[monthYear] = {
-                                facilities: new Set(),
-                                relationships: new Set(),
-                                amount: 0
+                                pastDue: new Set(),
+                                comingDue: new Set()
                             };
                         }
                         
-                        // Track unique IDs
-                        if (row.Facility_ID) {
-                            monthlyData[monthYear].facilities.add(row.Facility_ID);
-                        }
-                        if (row.Relationship_ID || row.Relationship_Name) {
-                            monthlyData[monthYear].relationships.add(row.Relationship_ID || row.Relationship_Name);
-                        }
-                        
-                        // Sum facility amount
-                        const amount = parseNumber(row.Fac_Amount);
-                        if (amount > 0) {
-                            monthlyData[monthYear].amount += amount;
+                        // Categorize based on whether date is past or future
+                        if (dateObj < today) {
+                            monthlyData[monthYear].pastDue.add(caId);
+                        } else {
+                            monthlyData[monthYear].comingDue.add(caId);
                         }
                     }
                 }
             });
             
-            // Get all months sorted
+            // Get all months sorted (up to next 3 months)
             const allMonths = Object.keys(monthlyData).sort();
-            console.log('Months with data:', allMonths);
+            console.log('Months with CA maturity data:', allMonths);
             
-            // Determine which count to use based on selected level
+            // Prepare data
             const categories = allMonths.map(m => {
                 const date = new Date(m + '-01');
-                return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                return date.toLocaleDateString('en-US', { month: 'short' });
             });
             
-            const amounts = allMonths.map(month => {
-                return monthlyData[month].amount;
-            });
+            const pastDueData = allMonths.map(month => monthlyData[month].pastDue.size);
+            const comingDueData = allMonths.map(month => monthlyData[month].comingDue.size);
             
-            console.log('Monthly amounts:', amounts);
+            // Calculate total CAs
+            const totalCAs = pastDueData.reduce((a, b) => a + b, 0) + comingDueData.reduce((a, b) => a + b, 0);
+            document.getElementById('caTrendTotal').textContent = totalCAs.toLocaleString();
+            
+            console.log('Past Due:', pastDueData);
+            console.log('Coming Due:', comingDueData);
             
             // Handle empty data
             if (allMonths.length === 0) {
                 const chartElement = document.querySelector("#facilityTrendChart");
                 if (chartElement) {
-                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No data available for the last 12 months</div>';
+                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No CA maturity data available for the next 3 months</div>';
                 }
+                document.getElementById('caTrendTotal').textContent = '0';
                 return;
             }
             
             const options = {
-                series: [{
-                    name: 'Facility Amount',
-                    data: amounts
-                }],
+                series: [
+                    {
+                        name: "Past Due",
+                        data: pastDueData
+                    },
+                    {
+                        name: "Coming Due",
+                        data: comingDueData
+                    }
+                ],
+                legend: {
+                    show: false,
+                    position: "top",
+                    horizontalAlign: "left"
+                },
+                colors: ["#465FFF", "#9CB9FF"],
                 chart: {
-                    type: 'bar',
+                    fontFamily: "Outfit, sans-serif",
                     height: 310,
-                    fontFamily: 'system-ui, -apple-system, sans-serif',
+                    type: "area",
                     toolbar: {
                         show: false
                     }
                 },
-                plotOptions: {
-                    bar: {
-                        borderRadius: 4,
-                        columnWidth: '60%'
+                fill: {
+                    gradient: {
+                        enabled: true,
+                        opacityFrom: 0.55,
+                        opacityTo: 0
                     }
                 },
-                colors: ['#465FFF'],
-                dataLabels: {
-                    enabled: false
+                stroke: {
+                    curve: "smooth",
+                    width: ["2", "2"]
                 },
-                xaxis: {
-                    categories: categories,
-                    axisBorder: {
-                        show: false
-                    },
-                    axisTicks: {
-                        show: false
-                    },
-                    labels: {
-                        style: {
-                            fontSize: '11px'
-                        }
-                    }
+                markers: {
+                    size: 0
                 },
-                yaxis: {
-                    labels: {
-                        formatter: function(val) {
-                            return formatCurrency(val);
-                        }
-                    }
+                labels: {
+                    show: false,
+                    position: "top"
                 },
                 grid: {
-                    borderColor: '#E5E7EB',
                     xaxis: {
                         lines: {
                             show: false
@@ -2790,10 +2831,29 @@
                         }
                     }
                 },
+                dataLabels: {
+                    enabled: false
+                },
                 tooltip: {
-                    y: {
-                        formatter: function(val) {
-                            return formatCurrency(val);
+                    x: {
+                        format: "MMM yyyy"
+                    }
+                },
+                xaxis: {
+                    type: "category",
+                    categories: categories,
+                    axisBorder: {
+                        show: false
+                    },
+                    axisTicks: {
+                        show: false
+                    },
+                    tooltip: false
+                },
+                yaxis: {
+                    title: {
+                        style: {
+                            fontSize: "0px"
                         }
                     }
                 }
@@ -2831,119 +2891,116 @@
             }
         }
 
-        // Create facility trend chart from filtered data
+        // Create CA past due & coming due area chart from filtered data (next 3 months)
         function createFacilityTrendChartFromFiltered() {
-            console.log('📊 Creating filtered facility trend chart, level:', selectedTrendLevel);
+            console.log('📊 Creating filtered CAs past due & coming due chart');
             
-            // Calculate date range: last 12 months
+            // Calculate date range: next 3 months
             const today = new Date();
-            const twelveMonthsAgo = new Date(today);
-            twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+            today.setHours(0, 0, 0, 0);
+            const threeMonthsFuture = new Date(today);
+            threeMonthsFuture.setMonth(threeMonthsFuture.getMonth() + 3);
             
-            // Group by month-year and aggregate Facility Amount
-            const monthlyData = {}; // { 'YYYY-MM': { facilities: Set, relationships: Set, amount: 0 } }
+            // Group by month-year and categorize as past due or coming due
+            const monthlyData = {}; // { 'YYYY-MM': { pastDue: Set, comingDue: Set } }
             
             filteredData.forEach(row => {
-                const reportDate = row.Report_Date;
-                if (reportDate) {
-                    const dateObj = parseDate(reportDate);
-                    if (dateObj && dateObj >= twelveMonthsAgo && dateObj <= today) {
+                const caMaturityDate = row.CA_Maturity_Date;
+                const caId = row.CA_ID;
+                
+                if (caMaturityDate && caId) {
+                    const dateObj = parseDate(caMaturityDate);
+                    if (dateObj && dateObj <= threeMonthsFuture) {
                         const year = dateObj.getFullYear();
                         const month = String(dateObj.getMonth() + 1).padStart(2, '0');
                         const monthYear = `${year}-${month}`;
                         
                         if (!monthlyData[monthYear]) {
                             monthlyData[monthYear] = {
-                                facilities: new Set(),
-                                relationships: new Set(),
-                                amount: 0
+                                pastDue: new Set(),
+                                comingDue: new Set()
                             };
                         }
                         
-                        // Track unique IDs
-                        if (row.Facility_ID) {
-                            monthlyData[monthYear].facilities.add(row.Facility_ID);
-                        }
-                        if (row.Relationship_ID || row.Relationship_Name) {
-                            monthlyData[monthYear].relationships.add(row.Relationship_ID || row.Relationship_Name);
-                        }
-                        
-                        // Sum facility amount
-                        const amount = parseNumber(row.Fac_Amount);
-                        if (amount > 0) {
-                            monthlyData[monthYear].amount += amount;
+                        // Categorize based on whether date is past or future
+                        if (dateObj < today) {
+                            monthlyData[monthYear].pastDue.add(caId);
+                        } else {
+                            monthlyData[monthYear].comingDue.add(caId);
                         }
                     }
                 }
             });
             
-            // Get all months sorted
+            // Get all months sorted (up to next 3 months)
             const allMonths = Object.keys(monthlyData).sort();
             
             // Handle empty data
             if (allMonths.length === 0) {
                 const chartElement = document.querySelector("#facilityTrendChart");
                 if (chartElement) {
-                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No filtered data available for the last 12 months</div>';
+                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No filtered CA maturity data available for the next 3 months</div>';
                 }
+                document.getElementById('caTrendTotal').textContent = '0';
                 return;
             }
             
             const categories = allMonths.map(m => {
                 const date = new Date(m + '-01');
-                return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                return date.toLocaleDateString('en-US', { month: 'short' });
             });
             
-            const amounts = allMonths.map(month => {
-                return monthlyData[month].amount;
-            });
+            const pastDueData = allMonths.map(month => monthlyData[month].pastDue.size);
+            const comingDueData = allMonths.map(month => monthlyData[month].comingDue.size);
+            
+            // Calculate total CAs
+            const totalCAs = pastDueData.reduce((a, b) => a + b, 0) + comingDueData.reduce((a, b) => a + b, 0);
+            document.getElementById('caTrendTotal').textContent = totalCAs.toLocaleString();
             
             const options = {
-                series: [{
-                    name: 'Facility Amount',
-                    data: amounts
-                }],
+                series: [
+                    {
+                        name: "Past Due",
+                        data: pastDueData
+                    },
+                    {
+                        name: "Coming Due",
+                        data: comingDueData
+                    }
+                ],
+                legend: {
+                    show: false,
+                    position: "top",
+                    horizontalAlign: "left"
+                },
+                colors: ["#465FFF", "#9CB9FF"],
                 chart: {
-                    type: 'bar',
+                    fontFamily: "Outfit, sans-serif",
                     height: 310,
-                    fontFamily: 'system-ui, -apple-system, sans-serif',
+                    type: "area",
                     toolbar: {
                         show: false
                     }
                 },
-                plotOptions: {
-                    bar: {
-                        borderRadius: 4,
-                        columnWidth: '60%'
+                fill: {
+                    gradient: {
+                        enabled: true,
+                        opacityFrom: 0.55,
+                        opacityTo: 0
                     }
                 },
-                colors: ['#465FFF'],
-                dataLabels: {
-                    enabled: false
+                stroke: {
+                    curve: "smooth",
+                    width: ["2", "2"]
                 },
-                xaxis: {
-                    categories: categories,
-                    axisBorder: {
-                        show: false
-                    },
-                    axisTicks: {
-                        show: false
-                    },
-                    labels: {
-                        style: {
-                            fontSize: '11px'
-                        }
-                    }
+                markers: {
+                    size: 0
                 },
-                yaxis: {
-                    labels: {
-                        formatter: function(val) {
-                            return formatCurrency(val);
-                        }
-                    }
+                labels: {
+                    show: false,
+                    position: "top"
                 },
                 grid: {
-                    borderColor: '#E5E7EB',
                     xaxis: {
                         lines: {
                             show: false
@@ -2955,10 +3012,29 @@
                         }
                     }
                 },
+                dataLabels: {
+                    enabled: false
+                },
                 tooltip: {
-                    y: {
-                        formatter: function(val) {
-                            return formatCurrency(val);
+                    x: {
+                        format: "MMM yyyy"
+                    }
+                },
+                xaxis: {
+                    type: "category",
+                    categories: categories,
+                    axisBorder: {
+                        show: false
+                    },
+                    axisTicks: {
+                        show: false
+                    },
+                    tooltip: false
+                },
+                yaxis: {
+                    title: {
+                        style: {
+                            fontSize: "0px"
                         }
                     }
                 }
@@ -3365,8 +3441,28 @@
             const topN = parseInt(document.getElementById('topNFilter').value);
             
             // Use amount type based on filter selection
-            const fieldName = selectedAmountType === 'osuc' ? 'Direct_OS' : 'Fac_Amount';
-            const seriesName = selectedAmountType === 'osuc' ? 'Direct OS' : 'Facility Amount';
+            let fieldName, seriesName;
+            switch(selectedAmountType) {
+                case 'direct':
+                    fieldName = 'Direct_OS';
+                    seriesName = 'Direct OS';
+                    break;
+                case 'contingent':
+                    fieldName = 'Contingeng_OS';
+                    seriesName = 'Contingent OS';
+                    break;
+                case 'pse':
+                    fieldName = 'PSE_OS';
+                    seriesName = 'PSE OS';
+                    break;
+                case 'osuc':
+                    fieldName = 'Direct_OS';
+                    seriesName = 'OSUC';
+                    break;
+                default:
+                    fieldName = 'Direct_OS';
+                    seriesName = 'Direct OS';
+            }
             
             console.log('Creating relationship chart, field:', fieldName, 'dataLength:', portfolioData.length);
             
@@ -3532,53 +3628,87 @@
             }
         }
 
-        // Create Credit Classification Donut Chart from all data
+        // Create New Facilities by Region Donut Chart from all data
         function createCreditClassificationChart() {
             const startTime = performance.now();
             
-            console.log('Creating credit classification chart, dataLength:', portfolioData.length);
+            console.log('Creating new facilities by region chart, dataLength:', portfolioData.length);
             
-            // Aggregate data by credit classification
-            // Use Credit_Classification column from data
-            const classificationField = 'Credit_Classification';
-            
-            // Track unique facilities per classification
-            const classificationFacilities = new Map();
-            const classificationAmounts = new Map();
-            
+            // Find the most recent Report_Date to determine "last month"
+            let mostRecentReportDate = null;
             for (let i = 0; i < portfolioData.length; i++) {
-                const row = portfolioData[i];
-                const classification = row[classificationField] || 'Unclassified';
-                const amount = parseNumber(row.Fac_Amount) || 0;
-                const facilityId = row.Facility_ID;
-                
-                // Track unique facilities
-                if (!classificationFacilities.has(classification)) {
-                    classificationFacilities.set(classification, new Set());
+                const reportDate = parseDate(portfolioData[i].Report_Date);
+                if (reportDate && (!mostRecentReportDate || reportDate > mostRecentReportDate)) {
+                    mostRecentReportDate = reportDate;
                 }
-                if (facilityId) {
-                    classificationFacilities.get(classification).add(facilityId);
-                }
-                
-                classificationAmounts.set(classification, (classificationAmounts.get(classification) || 0) + amount);
             }
             
-            console.log('Classification facility counts:', classificationFacilities);
-            
-            // Convert to arrays for ApexCharts
-            const labels = Array.from(classificationAmounts.keys());
-            const series = Array.from(classificationAmounts.values());
-            const counts = Array.from(classificationFacilities.values()).map(set => set.size);
-            
-            // Handle empty data
-            if (labels.length === 0) {
-                console.warn('No credit classification data available');
+            if (!mostRecentReportDate) {
+                console.warn('No valid Report_Date found');
                 return;
             }
             
-            // Calculate percentages and totals
-            const totalAmount = series.reduce((a, b) => a + b, 0);
-            const totalFacilities = counts.reduce((a, b) => a + b, 0);
+            // Calculate date one month before the most recent report date
+            const oneMonthBefore = new Date(mostRecentReportDate);
+            oneMonthBefore.setMonth(oneMonthBefore.getMonth() - 1);
+            
+            console.log('Most recent report date:', mostRecentReportDate);
+            console.log('One month before:', oneMonthBefore);
+            
+            // Track new facilities per region
+            const regionNewFacilities = new Map();
+            const regionTotalFacilities = new Map();
+            
+            for (let i = 0; i < portfolioData.length; i++) {
+                const row = portfolioData[i];
+                const region = row.Region || 'Unknown';
+                const facilityId = row.Facility_ID;
+                const firstApprovalDate = parseDate(row.Facility_First_Approval_Date);
+                
+                if (!facilityId) continue;
+                
+                // Initialize region tracking
+                if (!regionNewFacilities.has(region)) {
+                    regionNewFacilities.set(region, new Set());
+                    regionTotalFacilities.set(region, new Set());
+                }
+                
+                regionTotalFacilities.get(region).add(facilityId);
+                
+                // Check if facility is "new" (approved within last month of reporting)
+                if (firstApprovalDate && firstApprovalDate >= oneMonthBefore && firstApprovalDate <= mostRecentReportDate) {
+                    regionNewFacilities.get(region).add(facilityId);
+                }
+            }
+            
+            console.log('Region new facilities:', regionNewFacilities);
+            
+            // Convert to arrays for ApexCharts (only showing new facilities)
+            const labels = [];
+            const series = [];
+            const counts = [];
+            
+            for (const [region, newFacilitiesSet] of regionNewFacilities.entries()) {
+                const newCount = newFacilitiesSet.size;
+                if (newCount > 0) {  // Only include regions with new facilities
+                    labels.push(region);
+                    series.push(newCount);
+                    counts.push(newCount);
+                }
+            }
+            
+            // Handle empty data
+            if (labels.length === 0) {
+                console.warn('No new facilities data available');
+                const chartElement = document.querySelector("#creditClassificationChart");
+                if (chartElement) {
+                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No new facilities in the last month</div>';
+                }
+                return;
+            }
+            
+            // Calculate total new facilities
+            const totalNewFacilities = counts.reduce((a, b) => a + b, 0);
             
             // Define colors matching the TailAdmin style
             const colors = ['#3641f5', '#7592ff', '#dde9ff', '#ff6b6b', '#ffd93d', '#6bcf7f', '#c084fc'];
@@ -3617,15 +3747,15 @@
                                     offsetY: 10,
                                     color: '#667085',
                                     fontSize: '14px',
-                                    formatter: (val) => formatCurrency(val),
+                                    formatter: (val) => val.toLocaleString(),
                                 },
                                 total: {
                                     show: true,
-                                    label: 'Total',
+                                    label: 'Total New',
                                     color: '#000000',
                                     fontSize: '20px',
                                     fontWeight: 'bold',
-                                    formatter: () => formatCurrency(totalAmount),
+                                    formatter: () => totalNewFacilities.toLocaleString(),
                                 },
                             },
                         },
@@ -3638,7 +3768,7 @@
                     enabled: true,
                     y: {
                         formatter: function(val) {
-                            return formatCurrency(val);
+                            return val.toLocaleString() + ' new facilities';
                         }
                     }
                 },
@@ -3695,59 +3825,94 @@
                 creditClassificationChartInstance.render();
                 
                 // Update legend
-                updateCreditClassificationLegend(labels, series, counts, totalAmount, colors);
+                updateCreditClassificationLegend(labels, series, counts, totalNewFacilities, colors);
                 
-                console.log('✅ Credit classification chart rendered successfully');
+                console.log('✅ New facilities by region chart rendered successfully');
             } catch (error) {
                 console.error('❌ Error creating credit classification chart:', error);
             }
         }
 
-        // Create Credit Classification Donut Chart from filtered data
+        // Create New Facilities by Region Donut Chart from filtered data
         function createCreditClassificationChartFromFiltered() {
             const startTime = performance.now();
             
-            console.log('Creating credit classification chart from filtered data, dataLength:', filteredData.length);
+            console.log('Creating filtered new facilities by region chart, dataLength:', filteredData.length);
             
-            // Aggregate data by credit classification
-            // Use Credit_Classification column from data
-            const classificationField = 'Credit_Classification';
-            
-            // Track unique facilities per classification
-            const classificationFacilities = new Map();
-            const classificationAmounts = new Map();
-            
+            // Find the most recent Report_Date to determine "last month"
+            let mostRecentReportDate = null;
             for (let i = 0; i < filteredData.length; i++) {
-                const row = filteredData[i];
-                const classification = row[classificationField] || 'Unclassified';
-                const amount = parseNumber(row.Fac_Amount) || 0;
-                const facilityId = row.Facility_ID;
-                
-                // Track unique facilities
-                if (!classificationFacilities.has(classification)) {
-                    classificationFacilities.set(classification, new Set());
+                const reportDate = parseDate(filteredData[i].Report_Date);
+                if (reportDate && (!mostRecentReportDate || reportDate > mostRecentReportDate)) {
+                    mostRecentReportDate = reportDate;
                 }
-                if (facilityId) {
-                    classificationFacilities.get(classification).add(facilityId);
-                }
-                
-                classificationAmounts.set(classification, (classificationAmounts.get(classification) || 0) + amount);
             }
             
-            // Convert to arrays for ApexCharts
-            const labels = Array.from(classificationAmounts.keys());
-            const series = Array.from(classificationAmounts.values());
-            const counts = Array.from(classificationFacilities.values()).map(set => set.size);
-            
-            // Handle empty data
-            if (labels.length === 0) {
-                console.warn('No credit classification data available in filtered dataset');
+            if (!mostRecentReportDate) {
+                console.warn('No valid Report_Date found in filtered data');
+                const chartElement = document.querySelector("#creditClassificationChart");
+                if (chartElement) {
+                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No report date available</div>';
+                }
                 return;
             }
             
-            // Calculate totals
-            const totalAmount = series.reduce((a, b) => a + b, 0);
-            const totalFacilities = counts.reduce((a, b) => a + b, 0);
+            // Calculate date one month before the most recent report date
+            const oneMonthBefore = new Date(mostRecentReportDate);
+            oneMonthBefore.setMonth(oneMonthBefore.getMonth() - 1);
+            
+            // Track new facilities per region
+            const regionNewFacilities = new Map();
+            const regionTotalFacilities = new Map();
+            
+            for (let i = 0; i < filteredData.length; i++) {
+                const row = filteredData[i];
+                const region = row.Region || 'Unknown';
+                const facilityId = row.Facility_ID;
+                const firstApprovalDate = parseDate(row.Facility_First_Approval_Date);
+                
+                if (!facilityId) continue;
+                
+                // Initialize region tracking
+                if (!regionNewFacilities.has(region)) {
+                    regionNewFacilities.set(region, new Set());
+                    regionTotalFacilities.set(region, new Set());
+                }
+                
+                regionTotalFacilities.get(region).add(facilityId);
+                
+                // Check if facility is "new" (approved within last month of reporting)
+                if (firstApprovalDate && firstApprovalDate >= oneMonthBefore && firstApprovalDate <= mostRecentReportDate) {
+                    regionNewFacilities.get(region).add(facilityId);
+                }
+            }
+            
+            // Convert to arrays for ApexCharts (only showing new facilities)
+            const labels = [];
+            const series = [];
+            const counts = [];
+            
+            for (const [region, newFacilitiesSet] of regionNewFacilities.entries()) {
+                const newCount = newFacilitiesSet.size;
+                if (newCount > 0) {  // Only include regions with new facilities
+                    labels.push(region);
+                    series.push(newCount);
+                    counts.push(newCount);
+                }
+            }
+            
+            // Handle empty data
+            if (labels.length === 0) {
+                console.warn('No new facilities data available in filtered dataset');
+                const chartElement = document.querySelector("#creditClassificationChart");
+                if (chartElement) {
+                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No new facilities in the last month</div>';
+                }
+                return;
+            }
+            
+            // Calculate total new facilities
+            const totalNewFacilities = counts.reduce((a, b) => a + b, 0);
             
             // Define colors
             const colors = ['#3641f5', '#7592ff', '#dde9ff', '#ff6b6b', '#ffd93d', '#6bcf7f', '#c084fc'];
@@ -3786,15 +3951,15 @@
                                     offsetY: 10,
                                     color: '#667085',
                                     fontSize: '14px',
-                                    formatter: (val) => formatCurrency(val),
+                                    formatter: (val) => val.toLocaleString(),
                                 },
                                 total: {
                                     show: true,
-                                    label: 'Total',
+                                    label: 'Total New',
                                     color: '#000000',
                                     fontSize: '20px',
                                     fontWeight: 'bold',
-                                    formatter: () => formatCurrency(totalAmount),
+                                    formatter: () => totalNewFacilities.toLocaleString(),
                                 },
                             },
                         },
@@ -3807,7 +3972,7 @@
                     enabled: true,
                     y: {
                         formatter: function(val) {
-                            return formatCurrency(val);
+                            return val.toLocaleString() + ' new facilities';
                         }
                     }
                 },
@@ -3859,9 +4024,9 @@
                 creditClassificationChartInstance.render();
                 
                 // Update legend
-                updateCreditClassificationLegend(labels, series, counts, totalAmount, colors);
+                updateCreditClassificationLegend(labels, series, counts, totalNewFacilities, colors);
                 
-                console.log('✅ Credit classification chart (filtered) rendered successfully');
+                console.log('✅ New facilities by region chart (filtered) rendered successfully');
             } catch (error) {
                 console.error('❌ Error creating credit classification chart (filtered):', error);
             }

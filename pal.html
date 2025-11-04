@@ -500,7 +500,7 @@
             </div>
         </div>
 
-        <!-- Top 5 Metric Cards -->
+        <!-- Top Metric Cards -->
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 md:gap-6 mb-6">
             <!-- Card 1: Total $ of Facility Amount -->
             <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
@@ -590,20 +590,36 @@
 
         <!-- Charts Section -->
         <div class="grid grid-cols-12 gap-4 md:gap-6 mb-6">
-            <!-- Regional Distribution with Map -->
+            <!-- Bar Chart: CAs Coming Due & Facilities Expiring -->
             <div class="col-span-12 xl:col-span-4">
-                <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 h-full flex flex-col">
-                    <div class="flex justify-between">
+                <div class="rounded-2xl border border-gray-200 bg-white p-6 h-full flex flex-col">
+                    <div class="mb-6 flex justify-between items-start">
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-800">Regional Distribution</h3>
-                            <p class="mt-1 text-sm text-gray-500">Expiring soon by region</p>
+                            <h3 class="text-lg font-semibold text-gray-800">CAs & Facilities Expiring</h3>
+                        </div>
+                        <div class="flex flex-col gap-2 text-right">
+                            <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-1.5">
+                                    <svg class="h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span class="text-xs font-medium text-gray-500">Facilities Expired:</span>
+                                </div>
+                                <span class="text-sm font-bold text-gray-800" id="facilitiesExpiredCount">0</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-1.5">
+                                    <svg class="h-4 w-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <span class="text-xs font-medium text-gray-500">CAs Expired:</span>
+                                </div>
+                                <span class="text-sm font-bold text-gray-800" id="casExpiredCount">0</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="border-gray-200 my-6 overflow-hidden rounded-2xl border bg-gray-50 px-4 py-6 sm:px-6">
-                        <div id="mapOne" class="mapOne map-btn -mx-4 -my-6 h-[212px] w-full"></div>
-                    </div>
-                    <div class="space-y-5" id="regionList">
-                        <!-- Regional statistics will be populated here -->
+                    <div>
+                        <div id="facilityTrendChart" class="-ml-5"></div>
                     </div>
                 </div>
             </div>
@@ -611,10 +627,22 @@
             <!-- Donut Chart: New Facilities by Region -->
             <div class="col-span-12 xl:col-span-4">
                 <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 h-full flex flex-col">
-                    <div class="flex items-center justify-between mb-5">
-                        <h3 class="text-lg font-semibold text-gray-800">
-                            New Facilities by Region
-                        </h3>
+                    <div class="flex flex-col gap-3 mb-5 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">
+                                New Facilities by Region
+                            </h3>
+                        </div>
+                        <div class="inline-flex w-fit items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
+                            <button id="currentMonthBtn" onclick="filterNewFacilitiesByPeriod('current')" 
+                                class="px-2 py-1 font-medium transition-colors rounded text-xs shadow-xs text-gray-900 bg-white hover:text-gray-900">
+                                Current
+                            </button>
+                            <button id="previousMonthBtn" onclick="filterNewFacilitiesByPeriod('previous')" 
+                                class="px-2 py-1 font-medium transition-colors rounded text-xs text-gray-500 hover:text-gray-900">
+                                Previous
+                            </button>
+                        </div>
                     </div>
                     <div class="flex flex-col items-center justify-center gap-8 xl:flex-row flex-1">
                         <div id="creditClassificationChart" class="chartDarkStyle"></div>
@@ -625,16 +653,30 @@
                 </div>
             </div>
 
-            <!-- Bar Chart: CAs Coming Due & Facilities Expiring -->
+            <!-- Regional Distribution with Map -->
             <div class="col-span-12 xl:col-span-4">
-                <div class="rounded-2xl border border-gray-200 bg-white p-6 h-full flex flex-col">
-                    <div class="mb-6 flex justify-between">
+                <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 h-full flex flex-col">
+                    <div class="flex flex-col gap-3 mb-3 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-800">CAs Coming Due & Facilities Expiring</h3>
+                            <h3 class="text-lg font-semibold text-gray-800">Regional Distribution</h3>
+                            <p class="mt-1 text-sm text-gray-500" id="regionalDistSubtitle">Expiring soon by region</p>
+                        </div>
+                        <div class="inline-flex w-fit items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
+                            <button id="facilitiesRegionBtn" onclick="filterRegionalDistribution('facilities')" 
+                                class="px-2 py-1 font-medium transition-colors rounded text-xs shadow-xs text-gray-900 bg-white hover:text-gray-900">
+                                Facilities
+                            </button>
+                            <button id="casRegionBtn" onclick="filterRegionalDistribution('cas')" 
+                                class="px-2 py-1 font-medium transition-colors rounded text-xs text-gray-500 hover:text-gray-900">
+                                CAs
+                            </button>
                         </div>
                     </div>
-                    <div>
-                        <div id="facilityTrendChart" class="-ml-5"></div>
+                    <div class="border-gray-200 my-6 overflow-hidden rounded-2xl border bg-gray-50 px-4 py-6 sm:px-6">
+                        <div id="mapOne" class="mapOne map-btn -mx-4 -my-6 h-[212px] w-full"></div>
+                    </div>
+                    <div class="space-y-5" id="regionList">
+                        <!-- Regional statistics will be populated here -->
                     </div>
                 </div>
             </div>
@@ -775,6 +817,8 @@
         let includePSE = true; // true = include PSE, false = exclude PSE
         let selectedStatus = 'all'; // all, CM, DM
         let selectedAmountType = 'direct'; // direct, contingent, pse, osuc (for metrics)
+        let selectedPeriod = 'current'; // current, previous (for New Facilities by Region chart)
+        let selectedRegionalType = 'facilities'; // facilities, cas (for Regional Distribution chart)
         
         // Performance optimization: Cache for expensive calculations
         let metricsCache = {
@@ -1664,6 +1708,42 @@
             document.getElementById('totalOutstanding').textContent = formatCurrency(totalOutstanding);
             
             console.log(`Filtered metrics calculated in ${(performance.now() - startTime).toFixed(2)}ms`);
+            
+            // Calculate expired metrics from filtered data
+            calculateExpiredMetricsFromFiltered();
+        }
+
+        // Calculate Facilities Expired and CAs Expired metrics from filtered data
+        function calculateExpiredMetricsFromFiltered() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Count expired facilities and CAs
+            const expiredFacilities = new Set();
+            const expiredCAs = new Set();
+            
+            for (let i = 0; i < filteredData.length; i++) {
+                const row = filteredData[i];
+                
+                // Check Facilities Expired
+                const maturityDate = parseDate(row.Maturity_Date);
+                if (maturityDate && maturityDate < today && row.Facility_ID) {
+                    expiredFacilities.add(row.Facility_ID);
+                }
+                
+                // Check CAs Expired
+                const caExpirationDate = parseDate(row.CA_Expiration_Date);
+                if (caExpirationDate && caExpirationDate < today && row.CAID) {
+                    expiredCAs.add(row.CAID);
+                }
+            }
+            
+            const facilitiesExpiredCount = expiredFacilities.size;
+            const casExpiredCount = expiredCAs.size;
+            
+            // Update DOM
+            document.getElementById('facilitiesExpiredCount').textContent = facilitiesExpiredCount.toLocaleString();
+            document.getElementById('casExpiredCount').textContent = casExpiredCount.toLocaleString();
         }
 
         // Create expiration chart from filtered data
@@ -1839,6 +1919,34 @@
             }
         }
 
+        // Filter Regional Distribution by type (Facilities or CAs)
+        function filterRegionalDistribution(type) {
+            selectedRegionalType = type;
+            
+            // Update button styles
+            const facilitiesBtn = document.getElementById('facilitiesRegionBtn');
+            const casBtn = document.getElementById('casRegionBtn');
+            
+            if (type === 'facilities') {
+                facilitiesBtn.className = 'px-2 py-1 font-medium transition-colors rounded text-xs shadow-xs text-gray-900 bg-white hover:text-gray-900';
+                casBtn.className = 'px-2 py-1 font-medium transition-colors rounded text-xs text-gray-500 hover:text-gray-900';
+            } else {
+                facilitiesBtn.className = 'px-2 py-1 font-medium transition-colors rounded text-xs text-gray-500 hover:text-gray-900';
+                casBtn.className = 'px-2 py-1 font-medium transition-colors rounded text-xs shadow-xs text-gray-900 bg-white hover:text-gray-900';
+            }
+            
+            // Update subtitle
+            const subtitle = document.getElementById('regionalDistSubtitle');
+            subtitle.textContent = type === 'facilities' ? 'Facilities expiring next month' : 'CAs expiring next month';
+            
+            // Recreate chart with new type
+            if (Object.keys(activeFilters).length > 0 || filteredData.length > 0 && filteredData.length < portfolioData.length) {
+                createRegionalChartFromFiltered();
+            } else {
+                createRegionalChart();
+            }
+        }
+
         // Create regional chart from filtered data
         function createRegionalChartFromFiltered() {
             initializeMapFromFiltered();
@@ -1846,36 +1954,41 @@
             const regionCounts = getRegionCountsFromFiltered();
             const totalCount = Object.values(regionCounts).reduce((a, b) => a + b, 0);
             
-            const sortedRegions = Object.entries(regionCounts)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 5);
-            
+            // Define all regions
             const regionInfo = {
-                'NAM': { code: 'NAM', name: 'United States', color: 'bg-blue-500' },
-                'EMEA': { code: 'EMEA', name: 'Luxembourg', color: 'bg-green-500' },
-                'APAC': { code: 'APAC', name: 'Malaysia', color: 'bg-orange-500' },
-                'LATAM': { code: 'LATAM', name: 'Brazil', color: 'bg-purple-500' },
-                'MEA': { code: 'MEA', name: 'Middle East & Africa', color: 'bg-red-500' }
+                'NAM': { code: 'NAM', name: 'North America', color: 'bg-blue-500' },
+                'EMEA': { code: 'EMEA', name: 'Europe, Middle East & Africa', color: 'bg-green-500' },
+                'APAC': { code: 'APAC', name: 'Asia Pacific', color: 'bg-orange-500' },
+                'LATAM': { code: 'LATAM', name: 'Latin America', color: 'bg-purple-500' }
             };
+            
+            // Ensure all regions are represented, even with 0 count
+            const allRegions = Object.keys(regionInfo).map(region => ({
+                region: region,
+                count: regionCounts[region] || 0
+            }));
+            
+            // Sort by count descending
+            allRegions.sort((a, b) => b.count - a.count);
             
             const regionList = document.getElementById('regionList');
             regionList.innerHTML = '';
             
-            const countLabel = 'Facilities';
+            const countLabel = selectedRegionalType === 'facilities' ? 'Facilities' : 'CAs';
             
-            sortedRegions.forEach(([region, count]) => {
+            allRegions.forEach(({ region, count }) => {
                 const percentage = totalCount > 0 ? ((count / totalCount) * 100).toFixed(0) : 0;
-                const info = regionInfo[region] || { code: region, name: region, color: 'bg-gray-500' };
+                const info = regionInfo[region];
                 
                 const regionItem = document.createElement('div');
                 regionItem.className = 'flex items-center justify-between';
                 regionItem.innerHTML = `
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 flex items-center justify-center rounded-full ${info.color} text-white font-semibold text-xs">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-full ${info.color} text-white font-semibold text-sm">
                             ${info.code}
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-800">${info.code}</p>
+                            <p class="text-sm font-semibold text-gray-800">${region}</p>
                             <span class="block text-xs text-gray-500">${count} ${countLabel}</span>
                         </div>
                     </div>
@@ -1985,38 +2098,65 @@
 
         // Get region counts from filtered data
         function getRegionCountsFromFiltered() {
-            console.log('📍 getRegionCountsFromFiltered called');
+            console.log('📍 getRegionCountsFromFiltered called for', selectedRegionalType);
             const regionCounts = {};
             const today = new Date();
-            const threeMonthsLater = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000);
+            today.setHours(0, 0, 0, 0);
             
-                // Count unique Facility IDs
-            console.log('Counting filtered Facility IDs by region (expiring in next 90 days)');
-                const regionFacilities = {};
+            // Calculate next month range (first month from the chart)
+            const nextMonth = new Date(today);
+            nextMonth.setMonth(nextMonth.getMonth() + 1);
+            nextMonth.setDate(0); // Last day of next month
+            
+            const regionItems = {};
             let totalExpiring = 0;
             
+            if (selectedRegionalType === 'facilities') {
+                // Count unique Facility IDs expiring in next month
+                console.log('Counting filtered Facility IDs by region (expiring next month)');
+                
                 filteredData.forEach(row => {
                     const maturityDate = parseDate(row.Maturity_Date);
-                    if (maturityDate && maturityDate <= threeMonthsLater && maturityDate >= today) {
+                    if (maturityDate && maturityDate >= today && maturityDate <= nextMonth) {
                         const region = row.Region || 'Unknown';
                         const facilityId = row.Facility_ID;
                         
-                        if (!regionFacilities[region]) {
-                            regionFacilities[region] = new Set();
+                        if (!regionItems[region]) {
+                            regionItems[region] = new Set();
                         }
                         if (facilityId) {
-                            regionFacilities[region].add(facilityId);
-                        totalExpiring++;
+                            regionItems[region].add(facilityId);
+                            totalExpiring++;
                         }
                     }
                 });
+            } else {
+                // Count unique CA IDs expiring in next month
+                console.log('Counting filtered CA IDs by region (expiring next month)');
                 
-                // Convert Set sizes to counts
-                Object.keys(regionFacilities).forEach(region => {
-                    regionCounts[region] = regionFacilities[region].size;
+                filteredData.forEach(row => {
+                    const caExpirationDate = parseDate(row.CA_Expiration_Date);
+                    if (caExpirationDate && caExpirationDate >= today && caExpirationDate <= nextMonth) {
+                        const region = row.Region || 'Unknown';
+                        const caid = row.CAID;
+                        
+                        if (!regionItems[region]) {
+                            regionItems[region] = new Set();
+                        }
+                        if (caid) {
+                            regionItems[region].add(caid);
+                            totalExpiring++;
+                        }
+                    }
                 });
+            }
             
-            console.log(`Found ${totalExpiring} filtered expiring facilities across ${Object.keys(regionCounts).length} regions:`, regionCounts);
+            // Convert Set sizes to counts
+            Object.keys(regionItems).forEach(region => {
+                regionCounts[region] = regionItems[region].size;
+            });
+            
+            console.log(`Found ${totalExpiring} filtered expiring ${selectedRegionalType} across ${Object.keys(regionCounts).length} regions:`, regionCounts);
             
             return regionCounts;
         }
@@ -2513,6 +2653,47 @@
             document.getElementById('totalOutstanding').textContent = formatCurrency(metrics.outstanding);
             
             console.log(`Metrics calculated in ${(performance.now() - startTime).toFixed(2)}ms:`, metrics);
+            
+            // Calculate expired metrics
+            calculateExpiredMetrics();
+        }
+
+        // Calculate Facilities Expired and CAs Expired metrics
+        function calculateExpiredMetrics() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Count expired facilities and CAs
+            const expiredFacilities = new Set();
+            const expiredCAs = new Set();
+            
+            for (let i = 0; i < portfolioData.length; i++) {
+                const row = portfolioData[i];
+                
+                // Check Facilities Expired
+                const maturityDate = parseDate(row.Maturity_Date);
+                if (maturityDate && maturityDate < today && row.Facility_ID) {
+                    expiredFacilities.add(row.Facility_ID);
+                }
+                
+                // Check CAs Expired
+                const caExpirationDate = parseDate(row.CA_Expiration_Date);
+                if (caExpirationDate && caExpirationDate < today && row.CAID) {
+                    expiredCAs.add(row.CAID);
+                }
+            }
+            
+            const facilitiesExpiredCount = expiredFacilities.size;
+            const casExpiredCount = expiredCAs.size;
+            
+            // Update DOM
+            document.getElementById('facilitiesExpiredCount').textContent = facilitiesExpiredCount.toLocaleString();
+            document.getElementById('casExpiredCount').textContent = casExpiredCount.toLocaleString();
+            
+            console.log('Expired Metrics:', {
+                facilitiesExpired: facilitiesExpiredCount,
+                casExpired: casExpiredCount
+            });
         }
 
         // Parse number that might be formatted (e.g., "5.5M", "1.2K", "1,000,000")
@@ -3445,40 +3626,67 @@
             }
         }
         
-        // Get region counts for facilities expiring soon
+        // Get region counts for facilities or CAs expiring soon
         function getRegionCounts() {
-            console.log('📍 getRegionCounts called');
+            console.log('📍 getRegionCounts called for', selectedRegionalType);
             const regionCounts = {};
             const today = new Date();
-            const threeMonthsLater = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000);
+            today.setHours(0, 0, 0, 0);
             
-                // Count unique Facility IDs
-            console.log('Counting Facility IDs by region (expiring in next 90 days)');
-                const regionFacilities = {};
+            // Calculate next month range (first month from the chart)
+            const nextMonth = new Date(today);
+            nextMonth.setMonth(nextMonth.getMonth() + 1);
+            nextMonth.setDate(0); // Last day of next month
+            
+            const regionItems = {};
             let totalExpiring = 0;
             
+            if (selectedRegionalType === 'facilities') {
+                // Count unique Facility IDs expiring in next month
+                console.log('Counting Facility IDs by region (expiring next month)');
+                
                 portfolioData.forEach(row => {
                     const maturityDate = parseDate(row.Maturity_Date);
-                    if (maturityDate && maturityDate <= threeMonthsLater && maturityDate >= today) {
+                    if (maturityDate && maturityDate >= today && maturityDate <= nextMonth) {
                         const region = row.Region || 'Unknown';
                         const facilityId = row.Facility_ID;
                         
-                        if (!regionFacilities[region]) {
-                            regionFacilities[region] = new Set();
+                        if (!regionItems[region]) {
+                            regionItems[region] = new Set();
                         }
                         if (facilityId) {
-                            regionFacilities[region].add(facilityId);
-                        totalExpiring++;
+                            regionItems[region].add(facilityId);
+                            totalExpiring++;
                         }
                     }
                 });
+            } else {
+                // Count unique CA IDs expiring in next month
+                console.log('Counting CA IDs by region (expiring next month)');
                 
-                // Convert Set sizes to counts
-                Object.keys(regionFacilities).forEach(region => {
-                    regionCounts[region] = regionFacilities[region].size;
+                portfolioData.forEach(row => {
+                    const caExpirationDate = parseDate(row.CA_Expiration_Date);
+                    if (caExpirationDate && caExpirationDate >= today && caExpirationDate <= nextMonth) {
+                        const region = row.Region || 'Unknown';
+                        const caid = row.CAID;
+                        
+                        if (!regionItems[region]) {
+                            regionItems[region] = new Set();
+                        }
+                        if (caid) {
+                            regionItems[region].add(caid);
+                            totalExpiring++;
+                        }
+                    }
                 });
+            }
             
-            console.log(`Found ${totalExpiring} expiring facilities across ${Object.keys(regionCounts).length} regions:`, regionCounts);
+            // Convert Set sizes to counts
+            Object.keys(regionItems).forEach(region => {
+                regionCounts[region] = regionItems[region].size;
+            });
+            
+            console.log(`Found ${totalExpiring} expiring ${selectedRegionalType} across ${Object.keys(regionCounts).length} regions:`, regionCounts);
             
             return regionCounts;
         }
@@ -3490,38 +3698,41 @@
             const regionCounts = getRegionCounts();
             const totalCount = Object.values(regionCounts).reduce((a, b) => a + b, 0);
             
-            // Sort regions by count (descending)
-            const sortedRegions = Object.entries(regionCounts)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 5); // Top 5 regions
-            
-            // Region flag/icon mapping
+            // Define all regions
             const regionInfo = {
-                'NAM': { code: 'NAM', name: 'United States', color: 'bg-blue-500' },
-                'EMEA': { code: 'EMEA', name: 'Luxembourg', color: 'bg-green-500' },
-                'APAC': { code: 'APAC', name: 'Malaysia', color: 'bg-orange-500' },
-                'LATAM': { code: 'LATAM', name: 'Brazil', color: 'bg-purple-500' },
-                'MEA': { code: 'MEA', name: 'Middle East & Africa', color: 'bg-red-500' }
+                'NAM': { code: 'NAM', name: 'North America', color: 'bg-blue-500' },
+                'EMEA': { code: 'EMEA', name: 'Europe, Middle East & Africa', color: 'bg-green-500' },
+                'APAC': { code: 'APAC', name: 'Asia Pacific', color: 'bg-orange-500' },
+                'LATAM': { code: 'LATAM', name: 'Latin America', color: 'bg-purple-500' }
             };
+            
+            // Ensure all regions are represented, even with 0 count
+            const allRegions = Object.keys(regionInfo).map(region => ({
+                region: region,
+                count: regionCounts[region] || 0
+            }));
+            
+            // Sort by count descending
+            allRegions.sort((a, b) => b.count - a.count);
             
             const regionList = document.getElementById('regionList');
             regionList.innerHTML = '';
             
-            const countLabel = 'Facilities';
+            const countLabel = selectedRegionalType === 'facilities' ? 'Facilities' : 'CAs';
             
-            sortedRegions.forEach(([region, count]) => {
+            allRegions.forEach(({ region, count }) => {
                 const percentage = totalCount > 0 ? ((count / totalCount) * 100).toFixed(0) : 0;
-                const info = regionInfo[region] || { code: region, name: region, color: 'bg-gray-500' };
+                const info = regionInfo[region];
                 
                 const regionItem = document.createElement('div');
                 regionItem.className = 'flex items-center justify-between';
                 regionItem.innerHTML = `
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 flex items-center justify-center rounded-full ${info.color} text-white font-semibold text-xs">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-full ${info.color} text-white font-semibold text-sm">
                             ${info.code}
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-800">${info.code}</p>
+                            <p class="text-sm font-semibold text-gray-800">${region}</p>
                             <span class="block text-xs text-gray-500">${count} ${countLabel}</span>
                         </div>
                     </div>
@@ -3730,6 +3941,30 @@
             }
         }
 
+        // Filter New Facilities by Period (Current Month or Previous Month)
+        function filterNewFacilitiesByPeriod(period) {
+            selectedPeriod = period;
+            
+            // Update button styles to match TailAdmin toggle design
+            const currentBtn = document.getElementById('currentMonthBtn');
+            const previousBtn = document.getElementById('previousMonthBtn');
+            
+            if (period === 'current') {
+                currentBtn.className = 'px-2 py-1 font-medium transition-colors rounded text-xs shadow-xs text-gray-900 bg-white hover:text-gray-900';
+                previousBtn.className = 'px-2 py-1 font-medium transition-colors rounded text-xs text-gray-500 hover:text-gray-900';
+            } else {
+                currentBtn.className = 'px-2 py-1 font-medium transition-colors rounded text-xs text-gray-500 hover:text-gray-900';
+                previousBtn.className = 'px-2 py-1 font-medium transition-colors rounded text-xs shadow-xs text-gray-900 bg-white hover:text-gray-900';
+            }
+            
+            // Recreate chart with new period
+            if (Object.keys(activeFilters).length > 0 || filteredData.length > 0 && filteredData.length < portfolioData.length) {
+                createCreditClassificationChartFromFiltered();
+            } else {
+                createCreditClassificationChart();
+            }
+        }
+
         // Create New Facilities by Region Donut Chart from all data
         function createCreditClassificationChart() {
             const startTime = performance.now();
@@ -3750,12 +3985,23 @@
                 return;
             }
             
-            // Calculate date one month before the most recent report date
-            const oneMonthBefore = new Date(mostRecentReportDate);
-            oneMonthBefore.setMonth(oneMonthBefore.getMonth() - 1);
+            // Calculate date ranges based on selected period
+            let targetStartDate, targetEndDate;
+            if (selectedPeriod === 'current') {
+                // Current month: use the most recent report date's month
+                targetStartDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth(), 1);
+                targetEndDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth() + 1, 0);
+            } else {
+                // Previous month: one month before the most recent report date
+                targetStartDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth() - 1, 1);
+                targetEndDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth(), 0);
+            }
+            
+            const oneMonthBefore = targetStartDate;
             
             console.log('Most recent report date:', mostRecentReportDate);
-            console.log('One month before:', oneMonthBefore);
+            console.log('Target date range:', targetStartDate, 'to', targetEndDate);
+            console.log('Selected period:', selectedPeriod);
             
             // Track new facilities per region
             const regionNewFacilities = new Map();
@@ -3777,8 +4023,8 @@
                 
                 regionTotalFacilities.get(region).add(facilityId);
                 
-                // Check if facility is "new" (approved within last month of reporting)
-                if (firstApprovalDate && firstApprovalDate >= oneMonthBefore && firstApprovalDate <= mostRecentReportDate) {
+                // Check if facility is "new" (approved within the selected period)
+                if (firstApprovalDate && firstApprovalDate >= targetStartDate && firstApprovalDate <= targetEndDate) {
                     regionNewFacilities.get(region).add(facilityId);
                 }
             }
@@ -3959,9 +4205,17 @@
                 return;
             }
             
-            // Calculate date one month before the most recent report date
-            const oneMonthBefore = new Date(mostRecentReportDate);
-            oneMonthBefore.setMonth(oneMonthBefore.getMonth() - 1);
+            // Calculate date ranges based on selected period
+            let targetStartDate, targetEndDate;
+            if (selectedPeriod === 'current') {
+                // Current month: use the most recent report date's month
+                targetStartDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth(), 1);
+                targetEndDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth() + 1, 0);
+            } else {
+                // Previous month: one month before the most recent report date
+                targetStartDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth() - 1, 1);
+                targetEndDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth(), 0);
+            }
             
             // Track new facilities per region
             const regionNewFacilities = new Map();
@@ -3983,8 +4237,8 @@
                 
                 regionTotalFacilities.get(region).add(facilityId);
                 
-                // Check if facility is "new" (approved within last month of reporting)
-                if (firstApprovalDate && firstApprovalDate >= oneMonthBefore && firstApprovalDate <= mostRecentReportDate) {
+                // Check if facility is "new" (approved within the selected period)
+                if (firstApprovalDate && firstApprovalDate >= targetStartDate && firstApprovalDate <= targetEndDate) {
                     regionNewFacilities.get(region).add(facilityId);
                 }
             }
@@ -4300,4 +4554,6 @@
     </script>
 </body>
 </html>
+
+
 

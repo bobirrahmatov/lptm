@@ -590,34 +590,6 @@
 
         <!-- Charts Section -->
         <div class="grid grid-cols-12 gap-4 md:gap-6 mb-6">
-            <!-- Bar Chart: CAs Past Due & Coming Due -->
-            <div class="col-span-12 xl:col-span-4">
-                <div class="rounded-2xl border border-gray-200 bg-white p-6 h-full flex flex-col">
-                    <div class="mb-6 flex justify-between">
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-800">CAs Past Due & Coming Due</h3>
-                        </div>
-                    </div>
-                    <div>
-                        <div id="facilityTrendChart" class="-ml-5"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Bar Chart: Facilities Expired & Expiring -->
-            <div class="col-span-12 xl:col-span-4">
-                <div class="rounded-2xl border border-gray-200 bg-white p-6 h-full flex flex-col">
-                    <div class="mb-6 flex justify-between">
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-800">Facilities Expired & Expiring</h3>
-                        </div>
-                    </div>
-                    <div>
-                        <div id="facilityMaturityChart" class="-ml-5"></div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Regional Distribution with Map -->
             <div class="col-span-12 xl:col-span-4">
                 <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 h-full flex flex-col">
@@ -632,6 +604,37 @@
                     </div>
                     <div class="space-y-5" id="regionList">
                         <!-- Regional statistics will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Donut Chart: New Facilities by Region -->
+            <div class="col-span-12 xl:col-span-4">
+                <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 h-full flex flex-col">
+                    <div class="flex items-center justify-between mb-5">
+                        <h3 class="text-lg font-semibold text-gray-800">
+                            New Facilities by Region
+                        </h3>
+                    </div>
+                    <div class="flex flex-col items-center justify-center gap-8 xl:flex-row flex-1">
+                        <div id="creditClassificationChart" class="chartDarkStyle"></div>
+                        <div id="creditClassificationLegend" class="flex flex-col items-start gap-6 sm:flex-row xl:flex-col">
+                            <!-- Legend items will be dynamically generated -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bar Chart: CAs Coming Due & Facilities Expiring -->
+            <div class="col-span-12 xl:col-span-4">
+                <div class="rounded-2xl border border-gray-200 bg-white p-6 h-full flex flex-col">
+                    <div class="mb-6 flex justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">CAs Coming Due & Facilities Expiring</h3>
+                        </div>
+                    </div>
+                    <div>
+                        <div id="facilityTrendChart" class="-ml-5"></div>
                     </div>
                 </div>
             </div>
@@ -669,23 +672,6 @@
                     </div>
                     <div class="flex-1 w-full overflow-hidden">
                         <div id="relationshipChart" class="-ml-5 pl-2 h-full"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Donut Chart: New Facilities by Region -->
-            <div class="col-span-12 xl:col-span-4">
-                <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 h-full flex flex-col">
-                    <div class="flex items-center justify-between mb-5">
-                        <h3 class="text-lg font-semibold text-gray-800">
-                            New Facilities by Region
-                        </h3>
-                    </div>
-                    <div class="flex flex-col items-center justify-center gap-8 xl:flex-row flex-1">
-                        <div id="creditClassificationChart" class="chartDarkStyle"></div>
-                        <div id="creditClassificationLegend" class="flex flex-col items-start gap-6 sm:flex-row xl:flex-col">
-                            <!-- Legend items will be dynamically generated -->
-                        </div>
                     </div>
                 </div>
             </div>
@@ -870,7 +856,6 @@
                     
                     // Recalculate all metrics and charts
                     calculateMetrics();
-                    createExpirationChart();
                     createFacilityTrendChart();
                     createRegionalChart();
                     createRelationshipChart();
@@ -1274,7 +1259,6 @@
             
             // Step 5: Create charts with sampled data (faster)
             console.time('Create Charts');
-            createExpirationChart();
             createFacilityTrendChart();
             createRegionalChart();
             createRelationshipChart();
@@ -1497,7 +1481,6 @@
             // Recalculate metrics and charts with filtered data (async to prevent blocking)
             requestAnimationFrame(() => {
             calculateMetricsFromFiltered();
-            createExpirationChartFromFiltered();
                 createFacilityTrendChartFromFiltered();
             createRegionalChartFromFiltered();
             createRelationshipChartFromFiltered();
@@ -1756,11 +1739,11 @@
                         data: expiringData
                     }
                 ],
-                colors: ["#7592ff", "#465fff"],
+                colors: ["#93a8ff", "#465fff"],
                 chart: {
                     fontFamily: "Outfit, sans-serif",
                     type: "bar",
-                    stacked: true,
+                    stacked: false,
                     height: 315,
                     toolbar: {
                         show: false
@@ -1772,10 +1755,9 @@
                 plotOptions: {
                     bar: {
                         horizontal: false,
-                        columnWidth: "25%",
-                        borderRadius: 10,
-                        borderRadiusApplication: "end",
-                        borderRadiusWhenStacked: "last"
+                        columnWidth: "55%",
+                        borderRadius: 8,
+                        borderRadiusApplication: "end"
                     }
                 },
                 dataLabels: {
@@ -1956,40 +1938,45 @@
                     }
                 }
                 
-                // Clear existing map DOM
+                // Clear existing map DOM completely - remove all children and SVG elements
                 mapElement.innerHTML = '';
                 
-                // Small delay to ensure DOM is ready
-                setTimeout(() => {
-                    mapInstance = new jsVectorMap({
-                        selector: '#mapOne',
-                        map: 'world',
-                        zoomButtons: false,
-                        regionStyle: {
-                            initial: {
-                                fill: '#D9D9D9'
-                            },
-                            hover: {
-                                fillOpacity: 1,
-                                fill: '#465fff'
-                            }
+                // Extra cleanup: remove any lingering SVG elements
+                const svgElements = mapElement.querySelectorAll('svg');
+                svgElements.forEach(svg => svg.remove());
+                
+                // Remove any jsVectorMap specific classes/attributes that might cause conflicts
+                mapElement.className = 'mapOne map-btn -mx-4 -my-6 h-[212px] w-full';
+                
+                // Create new map immediately (no setTimeout to avoid race conditions)
+                mapInstance = new jsVectorMap({
+                    selector: '#mapOne',
+                    map: 'world',
+                    zoomButtons: false,
+                    regionStyle: {
+                        initial: {
+                            fill: '#D9D9D9'
                         },
-                        markers: markers,
-                        markerStyle: {
-                            initial: {
-                                strokeWidth: 1,
-                        fill: '#465fff',
-                        fillOpacity: 1,
-                        r: 4
+                        hover: {
+                            fillOpacity: 1,
+                            fill: '#465fff'
+                        }
                     },
-                    hover: {
-                        fill: '#465fff',
-                        fillOpacity: 1
+                    markers: markers,
+                    markerStyle: {
+                        initial: {
+                            strokeWidth: 1,
+                            fill: '#465fff',
+                            fillOpacity: 1,
+                            r: 4
+                        },
+                        hover: {
+                            fill: '#465fff',
+                            fillOpacity: 1
+                        }
                     }
-                }
-            });
-                    console.log('✅ Filtered map initialized successfully with', markers.length, 'markers');
-                }, 50); // Small delay to ensure DOM is ready
+                });
+                console.log('✅ Filtered map initialized successfully with', markers.length, 'markers');
             } catch (error) {
                 console.error('Error initializing filtered map:', error);
                 // Map is optional, continue without it
@@ -2681,11 +2668,11 @@
                         data: expiringData
                     }
                 ],
-                colors: ["#7592ff", "#465fff"],
+                colors: ["#93a8ff", "#465fff"],
                 chart: {
                     fontFamily: "Outfit, sans-serif",
                     type: "bar",
-                    stacked: true,
+                    stacked: false,
                     height: 315,
                     toolbar: {
                         show: false
@@ -2697,10 +2684,9 @@
                 plotOptions: {
                     bar: {
                         horizontal: false,
-                        columnWidth: "25%",
-                        borderRadius: 10,
-                        borderRadiusApplication: "end",
-                        borderRadiusWhenStacked: "last"
+                        columnWidth: "55%",
+                        borderRadius: 8,
+                        borderRadiusApplication: "end"
                     }
                 },
                 dataLabels: {
@@ -2788,9 +2774,9 @@
             }
         }
 
-        // Create CA past due & coming due bar chart (next 3 months starting from current month)
+        // Create combined chart for CAs Coming Due & Facilities Expiring
         function createFacilityTrendChart() {
-            console.log('📊 Creating CAs past due & coming due bar chart');
+            console.log('📊 Creating CAs Coming Due & Facilities Expiring chart');
             
             // Get the current reporting month from the data
             const today = new Date();
@@ -2808,36 +2794,52 @@
             
             console.log('Next 3 months starting from current:', next3Months);
             
-            // Group by month-year and categorize as past due or coming due
+            // Group by month-year for both CAs and Facilities
             const monthlyData = {};
             
             // Initialize all 3 months
             next3Months.forEach(monthYear => {
                 monthlyData[monthYear] = {
-                    pastDue: new Set(),
-                    comingDue: new Set()
+                    casComingDue: new Set(),
+                    facilitiesExpiring: []
                 };
             });
             
+            // Collect CAs Coming Due (only future dates)
             portfolioData.forEach(row => {
                 const caExpirationDate = row.CA_Expiration_Date;
                 const caid = row.CAID;
                 
                 if (caExpirationDate && caid) {
                     const dateObj = parseDate(caExpirationDate);
-                    if (dateObj) {
+                    if (dateObj && dateObj >= today) {  // Only future dates (coming due)
                         const year = dateObj.getFullYear();
                         const month = String(dateObj.getMonth() + 1).padStart(2, '0');
                         const monthYear = `${year}-${month}`;
                         
                         // Only include if it's in our next 3 months
                         if (next3Months.includes(monthYear)) {
-                            // Categorize based on whether date is past or future
-                            if (dateObj < today) {
-                                monthlyData[monthYear].pastDue.add(caid);
-                            } else {
-                                monthlyData[monthYear].comingDue.add(caid);
-                            }
+                            monthlyData[monthYear].casComingDue.add(caid);
+                        }
+                    }
+                }
+            });
+            
+            // Collect Facilities Expiring (only future dates)
+            portfolioData.forEach(row => {
+                const maturityDate = row.Maturity_Date;
+                const facilityId = row.Facility_ID;
+                
+                if (maturityDate && facilityId) {
+                    const dateObj = parseDate(maturityDate);
+                    if (dateObj && dateObj >= today) {  // Only future dates (expiring)
+                        const year = dateObj.getFullYear();
+                        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const monthYear = `${year}-${month}`;
+                        
+                        // Only include if it's in our next 3 months
+                        if (next3Months.includes(monthYear)) {
+                            monthlyData[monthYear].facilitiesExpiring.push(facilityId);
                         }
                     }
                 }
@@ -2849,28 +2851,28 @@
                 return date.toLocaleDateString('en-US', { month: 'short' });
             });
             
-            const pastDueData = next3Months.map(month => monthlyData[month].pastDue.size);
-            const comingDueData = next3Months.map(month => monthlyData[month].comingDue.size);
+            const casComingDueData = next3Months.map(month => monthlyData[month].casComingDue.size);
+            const facilitiesExpiringData = next3Months.map(month => monthlyData[month].facilitiesExpiring.length);
             
-            console.log('Past Due:', pastDueData);
-            console.log('Coming Due:', comingDueData);
+            console.log('CAs Coming Due:', casComingDueData);
+            console.log('Facilities Expiring:', facilitiesExpiringData);
             
             const options = {
                 series: [
                     {
-                        name: "Past Due",
-                        data: pastDueData
+                        name: "CAs Coming Due",
+                        data: casComingDueData
                     },
                     {
-                        name: "Coming Due",
-                        data: comingDueData
+                        name: "Facilities Expiring",
+                        data: facilitiesExpiringData
                     }
                 ],
-                colors: ["#7592ff", "#465fff"],
+                colors: ["#93a8ff", "#465fff"],
                 chart: {
                     fontFamily: "Outfit, sans-serif",
                     type: "bar",
-                    stacked: true,
+                    stacked: false,
                     height: 315,
                     toolbar: {
                         show: false
@@ -2882,10 +2884,9 @@
                 plotOptions: {
                     bar: {
                         horizontal: false,
-                        columnWidth: "25%",
-                        borderRadius: 10,
-                        borderRadiusApplication: "end",
-                        borderRadiusWhenStacked: "last"
+                        columnWidth: "55%",
+                        borderRadius: 8,
+                        borderRadiusApplication: "end"
                     }
                 },
                 dataLabels: {
@@ -2933,8 +2934,9 @@
                         show: false
                     },
                     y: {
-                        formatter: function(val) {
-                            return val + ' CAs';
+                        formatter: function(val, opts) {
+                            const seriesName = opts.w.globals.seriesNames[opts.seriesIndex];
+                            return val + (seriesName === 'CAs Coming Due' ? ' CAs' : ' Facilities');
                         }
                     }
                 }
@@ -2972,9 +2974,9 @@
             }
         }
 
-        // Create CA past due & coming due bar chart from filtered data (next 3 months starting from current month)
+        // Create combined chart for CAs Coming Due & Facilities Expiring from filtered data
         function createFacilityTrendChartFromFiltered() {
-            console.log('📊 Creating filtered CAs past due & coming due bar chart');
+            console.log('📊 Creating filtered CAs Coming Due & Facilities Expiring chart');
             
             // Get the current reporting month from the data
             const today = new Date();
@@ -2990,36 +2992,52 @@
                 next3Months.push(`${year}-${month}`);
             }
             
-            // Group by month-year and categorize as past due or coming due
+            // Group by month-year for both CAs and Facilities
             const monthlyData = {};
             
             // Initialize all 3 months
             next3Months.forEach(monthYear => {
                 monthlyData[monthYear] = {
-                    pastDue: new Set(),
-                    comingDue: new Set()
+                    casComingDue: new Set(),
+                    facilitiesExpiring: []
                 };
             });
             
+            // Collect CAs Coming Due (only future dates)
             filteredData.forEach(row => {
                 const caExpirationDate = row.CA_Expiration_Date;
                 const caid = row.CAID;
                 
                 if (caExpirationDate && caid) {
                     const dateObj = parseDate(caExpirationDate);
-                    if (dateObj) {
+                    if (dateObj && dateObj >= today) {  // Only future dates (coming due)
                         const year = dateObj.getFullYear();
                         const month = String(dateObj.getMonth() + 1).padStart(2, '0');
                         const monthYear = `${year}-${month}`;
                         
                         // Only include if it's in our next 3 months
                         if (next3Months.includes(monthYear)) {
-                            // Categorize based on whether date is past or future
-                            if (dateObj < today) {
-                                monthlyData[monthYear].pastDue.add(caid);
-                            } else {
-                                monthlyData[monthYear].comingDue.add(caid);
-                            }
+                            monthlyData[monthYear].casComingDue.add(caid);
+                        }
+                    }
+                }
+            });
+            
+            // Collect Facilities Expiring (only future dates)
+            filteredData.forEach(row => {
+                const maturityDate = row.Maturity_Date;
+                const facilityId = row.Facility_ID;
+                
+                if (maturityDate && facilityId) {
+                    const dateObj = parseDate(maturityDate);
+                    if (dateObj && dateObj >= today) {  // Only future dates (expiring)
+                        const year = dateObj.getFullYear();
+                        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const monthYear = `${year}-${month}`;
+                        
+                        // Only include if it's in our next 3 months
+                        if (next3Months.includes(monthYear)) {
+                            monthlyData[monthYear].facilitiesExpiring.push(facilityId);
                         }
                     }
                 }
@@ -3031,25 +3049,25 @@
                 return date.toLocaleDateString('en-US', { month: 'short' });
             });
             
-            const pastDueData = next3Months.map(month => monthlyData[month].pastDue.size);
-            const comingDueData = next3Months.map(month => monthlyData[month].comingDue.size);
+            const casComingDueData = next3Months.map(month => monthlyData[month].casComingDue.size);
+            const facilitiesExpiringData = next3Months.map(month => monthlyData[month].facilitiesExpiring.length);
             
             const options = {
                 series: [
                     {
-                        name: "Past Due",
-                        data: pastDueData
+                        name: "CAs Coming Due",
+                        data: casComingDueData
                     },
                     {
-                        name: "Coming Due",
-                        data: comingDueData
+                        name: "Facilities Expiring",
+                        data: facilitiesExpiringData
                     }
                 ],
-                colors: ["#7592ff", "#465fff"],
+                colors: ["#93a8ff", "#465fff"],
                 chart: {
                     fontFamily: "Outfit, sans-serif",
                     type: "bar",
-                    stacked: true,
+                    stacked: false,
                     height: 315,
                     toolbar: {
                         show: false
@@ -3061,10 +3079,9 @@
                 plotOptions: {
                     bar: {
                         horizontal: false,
-                        columnWidth: "25%",
-                        borderRadius: 10,
-                        borderRadiusApplication: "end",
-                        borderRadiusWhenStacked: "last"
+                        columnWidth: "55%",
+                        borderRadius: 8,
+                        borderRadiusApplication: "end"
                     }
                 },
                 dataLabels: {
@@ -3112,8 +3129,9 @@
                         show: false
                     },
                     y: {
-                        formatter: function(val) {
-                            return val + ' CAs';
+                        formatter: function(val, opts) {
+                            const seriesName = opts.w.globals.seriesNames[opts.seriesIndex];
+                            return val + (seriesName === 'CAs Coming Due' ? ' CAs' : ' Facilities');
                         }
                     }
                 }
@@ -3382,40 +3400,45 @@
                     }
                 }
                 
-                // Clear existing map DOM
+                // Clear existing map DOM completely - remove all children and SVG elements
                 mapElement.innerHTML = '';
                 
-                // Small delay to ensure DOM is ready
-                setTimeout(() => {
-                    mapInstance = new jsVectorMap({
-                        selector: '#mapOne',
-                        map: 'world',
-                        zoomButtons: false,
-                        regionStyle: {
-                            initial: {
-                                fill: '#D9D9D9'
-                            },
-                            hover: {
-                                fillOpacity: 1,
-                                fill: '#465fff'
-                            }
+                // Extra cleanup: remove any lingering SVG elements
+                const svgElements = mapElement.querySelectorAll('svg');
+                svgElements.forEach(svg => svg.remove());
+                
+                // Remove any jsVectorMap specific classes/attributes that might cause conflicts
+                mapElement.className = 'mapOne map-btn -mx-4 -my-6 h-[212px] w-full';
+                
+                // Create new map immediately (no setTimeout to avoid race conditions)
+                mapInstance = new jsVectorMap({
+                    selector: '#mapOne',
+                    map: 'world',
+                    zoomButtons: false,
+                    regionStyle: {
+                        initial: {
+                            fill: '#D9D9D9'
                         },
-                        markers: markers,
-                        markerStyle: {
-                            initial: {
-                                strokeWidth: 1,
-                                fill: '#465fff',
-                                fillOpacity: 1,
-                        r: 4
+                        hover: {
+                            fillOpacity: 1,
+                            fill: '#465fff'
+                        }
                     },
-                    hover: {
-                        fill: '#465fff',
-                        fillOpacity: 1
+                    markers: markers,
+                    markerStyle: {
+                        initial: {
+                            strokeWidth: 1,
+                            fill: '#465fff',
+                            fillOpacity: 1,
+                            r: 4
+                        },
+                        hover: {
+                            fill: '#465fff',
+                            fillOpacity: 1
+                        }
                     }
-                }
-            });
-                    console.log('✅ Map initialized successfully with', markers.length, 'markers');
-                }, 50); // Small delay to ensure DOM is ready
+                });
+                console.log('✅ Map initialized successfully with', markers.length, 'markers');
             } catch (error) {
                 console.error('Error initializing map:', error);
                 // Map is optional, continue without it
@@ -4161,7 +4184,6 @@
                     
                     // No search term, show all data - update charts to show full data
                     requestAnimationFrame(() => {
-                        createExpirationChart();
                         createFacilityTrendChart();
                         createRegionalChart();
                         createRelationshipChart();
@@ -4185,7 +4207,6 @@
                     // Search term is active, update charts with filtered data
                     requestAnimationFrame(() => {
                         calculateMetricsFromFiltered();
-                        createExpirationChartFromFiltered();
                         createFacilityTrendChartFromFiltered();
                         createRegionalChartFromFiltered();
                         createRelationshipChartFromFiltered();

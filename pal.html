@@ -590,13 +590,13 @@
 
         <!-- Charts Section -->
         <div class="grid grid-cols-12 gap-4 md:gap-6 mb-6">
-            <!-- Area Chart: CAs Past Due & Coming Due -->
+            <!-- Bar Chart: CAs Past Due & Coming Due -->
             <div class="col-span-12 xl:col-span-4">
                 <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 sm:pt-6 h-full flex flex-col">
                     <div class="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800">CAs Past Due & Coming Due</h3>
-                            <p class="mt-1 text-gray-500 text-sm">CA expiration tracking</p>
+                            <p class="mt-1 text-gray-500 text-sm">Next 3 months starting from current month</p>
                         </div>
                         <div class="flex flex-row-reverse items-center justify-end gap-0.5 sm:flex-col sm:items-start">
                             <div class="flex flex-row-reverse items-center gap-3 sm:flex-row sm:gap-2">
@@ -2532,18 +2532,36 @@
             console.log('✅ Maturity statistics boxes updated successfully');
         }
 
-        // Create CA past due & coming due area chart (next 3 months)
+        // Create CA past due & coming due bar chart (next 3 months starting from current month)
         function createFacilityTrendChart() {
-            console.log('📊 Creating CAs past due & coming due chart');
+            console.log('📊 Creating CAs past due & coming due bar chart');
             
-            // Calculate date range: next 3 months
+            // Get the current reporting month from the data
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            const monthsFuture = new Date(today);
-            monthsFuture.setMonth(monthsFuture.getMonth() + 3);
+            
+            // Generate next 3 months starting from current month
+            const next3Months = [];
+            for (let i = 0; i < 3; i++) {
+                const date = new Date(today);
+                date.setMonth(date.getMonth() + i);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                next3Months.push(`${year}-${month}`);
+            }
+            
+            console.log('Next 3 months starting from current:', next3Months);
             
             // Group by month-year and categorize as past due or coming due
-            const monthlyData = {}; // { 'YYYY-MM': { pastDue: Set, comingDue: Set } }
+            const monthlyData = {};
+            
+            // Initialize all 3 months
+            next3Months.forEach(monthYear => {
+                monthlyData[monthYear] = {
+                    pastDue: new Set(),
+                    comingDue: new Set()
+                };
+            });
             
             portfolioData.forEach(row => {
                 const caExpirationDate = row.CA_Expiration_Date;
@@ -2551,40 +2569,32 @@
                 
                 if (caExpirationDate && caid) {
                     const dateObj = parseDate(caExpirationDate);
-                    if (dateObj && dateObj <= monthsFuture) {
+                    if (dateObj) {
                         const year = dateObj.getFullYear();
                         const month = String(dateObj.getMonth() + 1).padStart(2, '0');
                         const monthYear = `${year}-${month}`;
                         
-                        if (!monthlyData[monthYear]) {
-                            monthlyData[monthYear] = {
-                                pastDue: new Set(),
-                                comingDue: new Set()
-                            };
-                        }
-                        
-                        // Categorize based on whether date is past or future
-                        if (dateObj < today) {
-                            monthlyData[monthYear].pastDue.add(caid);
-                        } else {
-                            monthlyData[monthYear].comingDue.add(caid);
+                        // Only include if it's in our next 3 months
+                        if (next3Months.includes(monthYear)) {
+                            // Categorize based on whether date is past or future
+                            if (dateObj < today) {
+                                monthlyData[monthYear].pastDue.add(caid);
+                            } else {
+                                monthlyData[monthYear].comingDue.add(caid);
+                            }
                         }
                     }
                 }
             });
             
-            // Get all months sorted (up to next 3 months)
-            const allMonths = Object.keys(monthlyData).sort();
-            console.log('Months with CA expiration data (3 months):', allMonths);
-            
-            // Prepare data
-            const categories = allMonths.map(m => {
+            // Prepare data for the next 3 months
+            const categories = next3Months.map(m => {
                 const date = new Date(m + '-01');
-                return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+                return date.toLocaleDateString('en-US', { month: 'short' });
             });
             
-            const pastDueData = allMonths.map(month => monthlyData[month].pastDue.size);
-            const comingDueData = allMonths.map(month => monthlyData[month].comingDue.size);
+            const pastDueData = next3Months.map(month => monthlyData[month].pastDue.size);
+            const comingDueData = next3Months.map(month => monthlyData[month].comingDue.size);
             
             // Calculate total CAs
             const totalCAs = pastDueData.reduce((a, b) => a + b, 0) + comingDueData.reduce((a, b) => a + b, 0);
@@ -2592,16 +2602,6 @@
             
             console.log('Past Due:', pastDueData);
             console.log('Coming Due:', comingDueData);
-            
-            // Handle empty data
-            if (allMonths.length === 0) {
-                const chartElement = document.querySelector("#facilityTrendChart");
-                if (chartElement) {
-                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No CA expiration data available for the next 3 months</div>';
-                }
-                document.getElementById('caTrendTotal').textContent = '0';
-                return;
-            }
             
             const options = {
                 series: [
@@ -2614,73 +2614,69 @@
                         data: comingDueData
                     }
                 ],
-                legend: {
-                    show: false,
-                    position: "top",
-                    horizontalAlign: "left"
-                },
-                colors: ["#465FFF", "#9CB9FF"],
+                colors: ["#9CB9FF", "#465fff"],
                 chart: {
                     fontFamily: "Outfit, sans-serif",
+                    type: "bar",
                     height: 310,
-                    type: "area",
                     toolbar: {
                         show: false
                     }
                 },
-                fill: {
-                    gradient: {
-                        enabled: true,
-                        opacityFrom: 0.55,
-                        opacityTo: 0
-                    }
-                },
-                stroke: {
-                    curve: "smooth",
-                    width: ["2", "2"]
-                },
-                markers: {
-                    size: 0
-                },
-                labels: {
-                    show: false,
-                    position: "top"
-                },
-                grid: {
-                    xaxis: {
-                        lines: {
-                            show: false
-                        }
-                    },
-                    yaxis: {
-                        lines: {
-                            show: true
-                        }
+                plotOptions: {
+                    bar: {
+                        horizontal: false,
+                        columnWidth: "55%",
+                        borderRadius: 5,
+                        borderRadiusApplication: "end"
                     }
                 },
                 dataLabels: {
                     enabled: false
                 },
-                tooltip: {
-                    x: {
-                        format: "MMM yyyy"
-                    }
+                stroke: {
+                    show: true,
+                    width: 4,
+                    colors: ["transparent"]
                 },
                 xaxis: {
-                    type: "category",
                     categories: categories,
                     axisBorder: {
                         show: false
                     },
                     axisTicks: {
                         show: false
-                    },
-                    tooltip: false
+                    }
+                },
+                legend: {
+                    show: true,
+                    position: "top",
+                    horizontalAlign: "left",
+                    fontFamily: "Outfit",
+                    markers: {
+                        radius: 99
+                    }
                 },
                 yaxis: {
-                    title: {
-                        style: {
-                            fontSize: "0px"
+                    title: false
+                },
+                grid: {
+                    yaxis: {
+                        lines: {
+                            show: true
+                        }
+                    }
+                },
+                fill: {
+                    opacity: 1
+                },
+                tooltip: {
+                    x: {
+                        show: false
+                    },
+                    y: {
+                        formatter: function(val) {
+                            return val + ' CAs';
                         }
                     }
                 }
@@ -2718,18 +2714,34 @@
             }
         }
 
-        // Create CA past due & coming due area chart from filtered data (next 3 months)
+        // Create CA past due & coming due bar chart from filtered data (next 3 months starting from current month)
         function createFacilityTrendChartFromFiltered() {
-            console.log('📊 Creating filtered CAs past due & coming due chart');
+            console.log('📊 Creating filtered CAs past due & coming due bar chart');
             
-            // Calculate date range: next 3 months
+            // Get the current reporting month from the data
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            const monthsFuture = new Date(today);
-            monthsFuture.setMonth(monthsFuture.getMonth() + 3);
+            
+            // Generate next 3 months starting from current month
+            const next3Months = [];
+            for (let i = 0; i < 3; i++) {
+                const date = new Date(today);
+                date.setMonth(date.getMonth() + i);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                next3Months.push(`${year}-${month}`);
+            }
             
             // Group by month-year and categorize as past due or coming due
-            const monthlyData = {}; // { 'YYYY-MM': { pastDue: Set, comingDue: Set } }
+            const monthlyData = {};
+            
+            // Initialize all 3 months
+            next3Months.forEach(monthYear => {
+                monthlyData[monthYear] = {
+                    pastDue: new Set(),
+                    comingDue: new Set()
+                };
+            });
             
             filteredData.forEach(row => {
                 const caExpirationDate = row.CA_Expiration_Date;
@@ -2737,48 +2749,32 @@
                 
                 if (caExpirationDate && caid) {
                     const dateObj = parseDate(caExpirationDate);
-                    if (dateObj && dateObj <= monthsFuture) {
+                    if (dateObj) {
                         const year = dateObj.getFullYear();
                         const month = String(dateObj.getMonth() + 1).padStart(2, '0');
                         const monthYear = `${year}-${month}`;
                         
-                        if (!monthlyData[monthYear]) {
-                            monthlyData[monthYear] = {
-                                pastDue: new Set(),
-                                comingDue: new Set()
-                            };
-                        }
-                        
-                        // Categorize based on whether date is past or future
-                        if (dateObj < today) {
-                            monthlyData[monthYear].pastDue.add(caid);
-                        } else {
-                            monthlyData[monthYear].comingDue.add(caid);
+                        // Only include if it's in our next 3 months
+                        if (next3Months.includes(monthYear)) {
+                            // Categorize based on whether date is past or future
+                            if (dateObj < today) {
+                                monthlyData[monthYear].pastDue.add(caid);
+                            } else {
+                                monthlyData[monthYear].comingDue.add(caid);
+                            }
                         }
                     }
                 }
             });
             
-            // Get all months sorted
-            const allMonths = Object.keys(monthlyData).sort();
-            
-            // Handle empty data
-            if (allMonths.length === 0) {
-                const chartElement = document.querySelector("#facilityTrendChart");
-                if (chartElement) {
-                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No filtered CA expiration data available for the next 3 months</div>';
-                }
-                document.getElementById('caTrendTotal').textContent = '0';
-                return;
-            }
-            
-            const categories = allMonths.map(m => {
+            // Prepare data for the next 3 months
+            const categories = next3Months.map(m => {
                 const date = new Date(m + '-01');
-                return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+                return date.toLocaleDateString('en-US', { month: 'short' });
             });
             
-            const pastDueData = allMonths.map(month => monthlyData[month].pastDue.size);
-            const comingDueData = allMonths.map(month => monthlyData[month].comingDue.size);
+            const pastDueData = next3Months.map(month => monthlyData[month].pastDue.size);
+            const comingDueData = next3Months.map(month => monthlyData[month].comingDue.size);
             
             // Calculate total CAs
             const totalCAs = pastDueData.reduce((a, b) => a + b, 0) + comingDueData.reduce((a, b) => a + b, 0);
@@ -2795,73 +2791,69 @@
                         data: comingDueData
                     }
                 ],
-                legend: {
-                    show: false,
-                    position: "top",
-                    horizontalAlign: "left"
-                },
-                colors: ["#465FFF", "#9CB9FF"],
+                colors: ["#9CB9FF", "#465fff"],
                 chart: {
                     fontFamily: "Outfit, sans-serif",
+                    type: "bar",
                     height: '100%',
-                    type: "area",
                     toolbar: {
                         show: false
                     }
                 },
-                fill: {
-                    gradient: {
-                        enabled: true,
-                        opacityFrom: 0.55,
-                        opacityTo: 0
-                    }
-                },
-                stroke: {
-                    curve: "smooth",
-                    width: ["2", "2"]
-                },
-                markers: {
-                    size: 0
-                },
-                labels: {
-                    show: false,
-                    position: "top"
-                },
-                grid: {
-                    xaxis: {
-                        lines: {
-                            show: false
-                        }
-                    },
-                    yaxis: {
-                        lines: {
-                            show: true
-                        }
+                plotOptions: {
+                    bar: {
+                        horizontal: false,
+                        columnWidth: "55%",
+                        borderRadius: 5,
+                        borderRadiusApplication: "end"
                     }
                 },
                 dataLabels: {
                     enabled: false
                 },
-                tooltip: {
-                    x: {
-                        format: "MMM yyyy"
-                    }
+                stroke: {
+                    show: true,
+                    width: 4,
+                    colors: ["transparent"]
                 },
                 xaxis: {
-                    type: "category",
                     categories: categories,
                     axisBorder: {
                         show: false
                     },
                     axisTicks: {
                         show: false
-                    },
-                    tooltip: false
+                    }
+                },
+                legend: {
+                    show: true,
+                    position: "top",
+                    horizontalAlign: "left",
+                    fontFamily: "Outfit",
+                    markers: {
+                        radius: 99
+                    }
                 },
                 yaxis: {
-                    title: {
-                        style: {
-                            fontSize: "0px"
+                    title: false
+                },
+                grid: {
+                    yaxis: {
+                        lines: {
+                            show: true
+                        }
+                    }
+                },
+                fill: {
+                    opacity: 1
+                },
+                tooltip: {
+                    x: {
+                        show: false
+                    },
+                    y: {
+                        formatter: function(val) {
+                            return val + ' CAs';
                         }
                     }
                 }
@@ -4027,4 +4019,3 @@
     </script>
 </body>
 </html>
-

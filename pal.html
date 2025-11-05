@@ -621,43 +621,43 @@
         <div class="grid grid-cols-12 gap-4 md:gap-6 mb-6">
             <!-- Bar Chart: CAs Coming Due & Facilities Expiring -->
             <div class="col-span-12 xl:col-span-4">
-                <div class="rounded-2xl border border-gray-200 bg-white p-6 h-full flex flex-col">
-                    <div class="mb-6 flex justify-between items-start">
-                        <div>
+                <div class="rounded-2xl border border-gray-200 bg-gray-100 h-full flex flex-col">
+                    <div class="shadow-default rounded-2xl bg-white px-5 pb-11 pt-5 sm:px-6 sm:pt-6 flex-1 flex flex-col">
+                        <div class="mb-6">
                             <h3 class="text-lg font-semibold text-gray-800">CAs & Facilities Expiring</h3>
                         </div>
-                        <div class="flex flex-col gap-3">
-                            <!-- CAs Expired -->
-                            <div class="flex flex-col items-end gap-1">
-                                <div class="flex items-center gap-1.5">
-                                    <svg class="h-4 w-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                    </svg>
-                                    <span class="text-xs font-medium text-gray-600">CAs Expired</span>
-                                </div>
-                                <div class="flex items-baseline gap-2">
-                                    <span class="text-base font-bold text-gray-900" id="casExpiredCount">0</span>
-                                    <span class="text-xs font-medium text-gray-500">(<span id="casExpiredAmount">$0</span>)</span>
-                                </div>
-                            </div>
-                            
-                            <!-- Facilities Expired -->
-                            <div class="flex flex-col items-end gap-1">
-                                <div class="flex items-center gap-1.5">
-                                    <svg class="h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    <span class="text-xs font-medium text-gray-600">Facilities Expired</span>
-                                </div>
-                                <div class="flex items-baseline gap-2">
-                                    <span class="text-base font-bold text-gray-900" id="facilitiesExpiredCount">0</span>
-                                    <span class="text-xs font-medium text-gray-500">(<span id="facilitiesExpiredAmount">$0</span>)</span>
-                                </div>
-                            </div>
+                        <div class="flex-1">
+                            <div id="facilityTrendChart" class="-ml-5"></div>
                         </div>
                     </div>
-                    <div>
-                        <div id="facilityTrendChart" class="-ml-5"></div>
+                    
+                    <!-- Expired Metrics at Bottom (TailAdmin Style) -->
+                    <div class="flex items-center justify-center gap-5 px-6 py-3.5 sm:gap-8 sm:py-5">
+                        <div>
+                            <p class="mb-1 text-center text-xs text-gray-500 sm:text-sm">
+                                CAs Expired
+                            </p>
+                            <p class="flex items-center justify-center gap-1 text-base font-semibold text-gray-800 sm:text-lg">
+                                <span id="casExpiredCount">0</span>
+                            </p>
+                            <p class="text-center text-xs text-gray-500">
+                                <span id="casExpiredAmount">$0</span>
+                            </p>
+                        </div>
+
+                        <div class="h-12 w-px bg-gray-200"></div>
+
+                        <div>
+                            <p class="mb-1 text-center text-xs text-gray-500 sm:text-sm">
+                                Facilities Expired
+                            </p>
+                            <p class="flex items-center justify-center gap-1 text-base font-semibold text-gray-800 sm:text-lg">
+                                <span id="facilitiesExpiredCount">0</span>
+                            </p>
+                            <p class="text-center text-xs text-gray-500">
+                                <span id="facilitiesExpiredAmount">$0</span>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -4547,27 +4547,33 @@
             }
             
             // Calculate date ranges based on selected period
-            let targetStartDate, targetEndDate;
+            let targetStartDate, targetEndDate, periodLabel;
             if (selectedPeriod === 'current') {
                 // Current month: use the most recent report date's month
                 targetStartDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth(), 1);
+                targetStartDate.setHours(0, 0, 0, 0);
                 targetEndDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth() + 1, 0);
+                targetEndDate.setHours(23, 59, 59, 999);
+                periodLabel = targetStartDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
             } else {
                 // Previous month: one month before the most recent report date
                 targetStartDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth() - 1, 1);
+                targetStartDate.setHours(0, 0, 0, 0);
                 targetEndDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth(), 0);
+                targetEndDate.setHours(23, 59, 59, 999);
+                periodLabel = targetStartDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
             }
             
-            const oneMonthBefore = targetStartDate;
-            
             console.log('Most recent report date:', mostRecentReportDate);
-            console.log('Target date range:', targetStartDate, 'to', targetEndDate);
+            console.log('Target period:', periodLabel);
+            console.log('Target date range:', targetStartDate.toISOString(), 'to', targetEndDate.toISOString());
             console.log('Selected period:', selectedPeriod);
             
             // Track new facilities per product program with amounts
             const productNewFacilities = new Map();
             const productTotalFacilities = new Map();
             const productAmounts = new Map();
+            let totalNewCount = 0;
             
             for (let i = 0; i < portfolioData.length; i++) {
                 const row = portfolioData[i];
@@ -4589,6 +4595,7 @@
                 // Check if facility is "new" (approved within the selected period)
                 if (firstApprovalDate && firstApprovalDate >= targetStartDate && firstApprovalDate <= targetEndDate) {
                     productNewFacilities.get(productProgram).add(facilityId);
+                    totalNewCount++;
                     // Accumulate amounts for new facilities
                     const amounts = productAmounts.get(productProgram);
                     amounts.tfa += parseNumber(row.Facility_Amount);
@@ -4599,6 +4606,7 @@
             }
             
             console.log('Product program new facilities:', productNewFacilities);
+            console.log(`Found ${totalNewCount} new facilities in ${periodLabel}`);
             
             // Convert to arrays for ApexCharts (only showing new facilities)
             const labels = [];
@@ -4619,7 +4627,12 @@
                 console.warn('No new facilities data available');
                 const chartElement = document.querySelector("#creditClassificationChart");
                 if (chartElement) {
-                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No new facilities in the last month</div>';
+                    chartElement.innerHTML = `<div class="flex items-center justify-center h-full text-gray-500">No new facilities in ${periodLabel}</div>`;
+                }
+                // Update chart title even when no data
+                const titleElement = document.querySelector('.text-lg.font-semibold.text-gray-800');
+                if (titleElement && titleElement.textContent.includes('New Facilities by Product Program')) {
+                    titleElement.innerHTML = `New Facilities by Product Program <span class="text-sm font-normal text-gray-500">(${periodLabel})</span>`;
                 }
                 return;
             }
@@ -4770,6 +4783,12 @@
                 // Update legend
                 updateCreditClassificationLegend(labels, series, counts, totalNewFacilities, colors);
                 
+                // Update chart title with period
+                const titleElement = document.querySelector('.text-lg.font-semibold.text-gray-800');
+                if (titleElement && titleElement.textContent.includes('New Facilities by Product Program')) {
+                    titleElement.innerHTML = `New Facilities by Product Program <span class="text-sm font-normal text-gray-500">(${periodLabel})</span>`;
+                }
+                
                 console.log('✅ New facilities by region chart rendered successfully');
             } catch (error) {
                 console.error('❌ Error creating credit classification chart:', error);
@@ -4801,21 +4820,33 @@
             }
             
             // Calculate date ranges based on selected period
-            let targetStartDate, targetEndDate;
+            let targetStartDate, targetEndDate, periodLabel;
             if (selectedPeriod === 'current') {
                 // Current month: use the most recent report date's month
                 targetStartDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth(), 1);
+                targetStartDate.setHours(0, 0, 0, 0);
                 targetEndDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth() + 1, 0);
+                targetEndDate.setHours(23, 59, 59, 999);
+                periodLabel = targetStartDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
             } else {
                 // Previous month: one month before the most recent report date
                 targetStartDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth() - 1, 1);
+                targetStartDate.setHours(0, 0, 0, 0);
                 targetEndDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth(), 0);
+                targetEndDate.setHours(23, 59, 59, 999);
+                periodLabel = targetStartDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
             }
+            
+            console.log('Most recent report date (filtered):', mostRecentReportDate);
+            console.log('Target period (filtered):', periodLabel);
+            console.log('Target date range (filtered):', targetStartDate.toISOString(), 'to', targetEndDate.toISOString());
+            console.log('Selected period:', selectedPeriod);
             
             // Track new facilities per product program with amounts
             const productNewFacilities = new Map();
             const productTotalFacilities = new Map();
             const productAmounts = new Map();
+            let totalNewCount = 0;
             
             for (let i = 0; i < filteredData.length; i++) {
                 const row = filteredData[i];
@@ -4837,6 +4868,7 @@
                 // Check if facility is "new" (approved within the selected period)
                 if (firstApprovalDate && firstApprovalDate >= targetStartDate && firstApprovalDate <= targetEndDate) {
                     productNewFacilities.get(productProgram).add(facilityId);
+                    totalNewCount++;
                     // Accumulate amounts for new facilities
                     const amounts = productAmounts.get(productProgram);
                     amounts.tfa += parseNumber(row.Facility_Amount);
@@ -4845,6 +4877,9 @@
                     amounts.pse += parseNumber(row.PSE_OS);
                 }
             }
+            
+            console.log('Product program new facilities (filtered):', productNewFacilities);
+            console.log(`Found ${totalNewCount} new facilities in ${periodLabel} (from filtered data)`);
             
             // Convert to arrays for ApexCharts (only showing new facilities)
             const labels = [];
@@ -4865,7 +4900,12 @@
                 console.warn('No new facilities data available in filtered dataset');
                 const chartElement = document.querySelector("#creditClassificationChart");
                 if (chartElement) {
-                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No new facilities in the last month</div>';
+                    chartElement.innerHTML = `<div class="flex items-center justify-center h-full text-gray-500">No new facilities in ${periodLabel}</div>`;
+                }
+                // Update chart title even when no data
+                const titleElement = document.querySelector('.text-lg.font-semibold.text-gray-800');
+                if (titleElement && titleElement.textContent.includes('New Facilities by Product Program')) {
+                    titleElement.innerHTML = `New Facilities by Product Program <span class="text-sm font-normal text-gray-500">(${periodLabel})</span>`;
                 }
                 return;
             }
@@ -5010,6 +5050,12 @@
                 
                 // Update legend
                 updateCreditClassificationLegend(labels, series, counts, totalNewFacilities, colors);
+                
+                // Update chart title with period
+                const titleElement = document.querySelector('.text-lg.font-semibold.text-gray-800');
+                if (titleElement && titleElement.textContent.includes('New Facilities by Product Program')) {
+                    titleElement.innerHTML = `New Facilities by Product Program <span class="text-sm font-normal text-gray-500">(${periodLabel})</span>`;
+                }
                 
                 console.log('✅ New facilities by region chart (filtered) rendered successfully');
             } catch (error) {

@@ -64,6 +64,31 @@
                 height: 240px;
             }
         }
+
+        /* Consistent Tooltip Styling for All Charts */
+        .apexcharts-tooltip {
+            background: #ffffff !important;
+            border: 1px solid #e5e7eb !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+            color: #1f2937 !important;
+            border-radius: 8px !important;
+        }
+        
+        .apexcharts-tooltip-custom {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .apexcharts-tooltip * {
+            color: inherit !important;
+        }
+        
+        .apexcharts-tooltip .apexcharts-tooltip-title {
+            background: #f9fafb !important;
+            border-bottom: 1px solid #e5e7eb !important;
+            color: #1f2937 !important;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -253,7 +278,7 @@
 
                 <!-- Metrics By Amount Type Filter -->
                 <div class="flex items-center gap-2">
-                    <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Amount:</span>
+                    <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Exposure:</span>
                     <div class="inline-flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
                         <button id="btnAmountDirect" onclick="selectAmountTypeFilter('direct')" 
                             class="min-w-[65px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white">
@@ -270,6 +295,10 @@
                         <button id="btnAmountOSUC" onclick="selectAmountTypeFilter('osuc')" 
                             class="min-w-[60px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
                             OSUC
+                        </button>
+                        <button id="btnAmountTFA" onclick="selectAmountTypeFilter('tfa')" 
+                            class="min-w-[50px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
+                            TFA
                         </button>
                     </div>
                 </div>
@@ -597,24 +626,33 @@
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800">CAs & Facilities Expiring</h3>
                         </div>
-                        <div class="flex flex-col gap-2 text-right">
-                            <div class="flex items-center gap-2">
-                                <div class="flex items-center gap-1.5">
-                                    <svg class="h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    <span class="text-xs font-medium text-gray-500">Facilities Expired:</span>
-                                </div>
-                                <span class="text-sm font-bold text-gray-800" id="facilitiesExpiredCount">0</span>
-                            </div>
-                            <div class="flex items-center gap-2">
+                        <div class="flex flex-col gap-3">
+                            <!-- CAs Expired -->
+                            <div class="flex flex-col items-end gap-1">
                                 <div class="flex items-center gap-1.5">
                                     <svg class="h-4 w-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                     </svg>
-                                    <span class="text-xs font-medium text-gray-500">CAs Expired:</span>
+                                    <span class="text-xs font-medium text-gray-600">CAs Expired</span>
                                 </div>
-                                <span class="text-sm font-bold text-gray-800" id="casExpiredCount">0</span>
+                                <div class="flex items-baseline gap-2">
+                                    <span class="text-base font-bold text-gray-900" id="casExpiredCount">0</span>
+                                    <span class="text-xs font-medium text-gray-500">(<span id="casExpiredAmount">$0</span>)</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Facilities Expired -->
+                            <div class="flex flex-col items-end gap-1">
+                                <div class="flex items-center gap-1.5">
+                                    <svg class="h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span class="text-xs font-medium text-gray-600">Facilities Expired</span>
+                                </div>
+                                <div class="flex items-baseline gap-2">
+                                    <span class="text-base font-bold text-gray-900" id="facilitiesExpiredCount">0</span>
+                                    <span class="text-xs font-medium text-gray-500">(<span id="facilitiesExpiredAmount">$0</span>)</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -624,13 +662,13 @@
                 </div>
             </div>
 
-            <!-- Donut Chart: New Facilities by Region -->
+            <!-- Donut Chart: New Facilities by Product Program -->
             <div class="col-span-12 xl:col-span-4">
                 <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 h-full flex flex-col">
                     <div class="flex flex-col gap-3 mb-5 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800">
-                                New Facilities by Region
+                                New Facilities by Product Program
                             </h3>
                         </div>
                         <div class="inline-flex w-fit items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
@@ -816,9 +854,17 @@
         let selectedRegion = 'all'; // all, APAC, EMEA, LATAM, NAM
         let includePSE = true; // true = include PSE, false = exclude PSE
         let selectedStatus = 'all'; // all, CM, DM
-        let selectedAmountType = 'direct'; // direct, contingent, pse, osuc (for metrics)
-        let selectedPeriod = 'current'; // current, previous (for New Facilities by Region chart)
+        let selectedAmountType = 'direct'; // direct, contingent, pse, osuc, tfa (for metrics)
+        let selectedPeriod = 'current'; // current, previous (for New Facilities by Product Program chart)
         let selectedRegionalType = 'facilities'; // facilities, cas (for Regional Distribution chart)
+        
+        // Cross-filtering state management
+        let chartFilter = {
+            active: false,
+            type: null, // 'relationship', 'region', 'product', 'facilityType', etc.
+            value: null, // The clicked value (e.g., relationship name, region name, etc.)
+            label: null  // Display label for UI
+        };
         
         // Performance optimization: Cache for expensive calculations
         let metricsCache = {
@@ -1536,6 +1582,237 @@
             renderTable();
         }
 
+        // Apply chart-based filter (cross-filtering)
+        function applyChartFilter(filterType, filterValue, displayLabel) {
+            console.log(`📊 Chart filter applied: ${filterType} = ${filterValue}`);
+            
+            // Set chart filter state
+            chartFilter.active = true;
+            chartFilter.type = filterType;
+            chartFilter.value = filterValue;
+            chartFilter.label = displayLabel || filterValue;
+            
+            // Display chart filter badge
+            displayChartFilterBadge();
+            
+            // Apply the filter
+            applyFiltersWithChartFilter();
+        }
+
+        // Clear chart filter
+        function clearChartFilter() {
+            console.log('📊 Chart filter cleared');
+            
+            chartFilter.active = false;
+            chartFilter.type = null;
+            chartFilter.value = null;
+            chartFilter.label = null;
+            
+            // Remove badge and reapply normal filters
+            const badge = document.getElementById('chartFilterBadge');
+            if (badge) badge.remove();
+            
+            applyFilters();
+        }
+
+        // Display chart filter badge
+        function displayChartFilterBadge() {
+            // Remove existing badge if any
+            const existing = document.getElementById('chartFilterBadge');
+            if (existing) existing.remove();
+            
+            if (!chartFilter.active) return;
+            
+            const badgesContainer = document.getElementById('activeFiltersBadges');
+            if (!badgesContainer) return;
+            
+            badgesContainer.style.display = 'flex';
+            
+            const badge = document.createElement('span');
+            badge.id = 'chartFilterBadge';
+            badge.className = 'inline-flex items-center bg-blue-50 text-sm text-blue-700 border-2 border-blue-500 rounded-lg gap-x-2 py-1.5 pl-3 pr-1 font-medium';
+            badge.innerHTML = `
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+                </svg>
+                <span class="text-blue-700">Chart Filter</span>
+                <span class="h-4 w-px bg-blue-400"></span>
+                <span class="font-semibold text-blue-900">${chartFilter.label}</span>
+                <button type="button" onclick="clearChartFilter()" 
+                    class="flex h-5 w-5 items-center justify-center rounded text-blue-600 hover:bg-blue-100 hover:text-blue-800"
+                    aria-label="Remove">
+                    <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+            `;
+            
+            // Add as first badge
+            badgesContainer.insertBefore(badge, badgesContainer.firstChild);
+        }
+
+        // Apply filters with chart filter included
+        function applyFiltersWithChartFilter() {
+            const startTime = performance.now();
+            
+            // Get advanced filter values (excluding Region and Status which are in smart filters)
+            const filters = {
+                productProgram: document.getElementById('filterProductProgram').value,
+                extendingUnit: document.getElementById('filterExtendingUnit').value,
+                facilityType: document.getElementById('filterFacilityType').value,
+                commitment: document.getElementById('filterCommitment').value,
+                teamLead: document.getElementById('filterTeamLead').value,
+                underwriter: document.getElementById('filterUnderwriter').value,
+                caMaturity: document.getElementById('filterCAMaturity').value,
+                facilityMaturity: document.getElementById('filterFacilityMaturity').value
+            };
+            
+            // Update active filters object (Region and Status are managed by smart filters)
+            activeFilters = {};
+            if (filters.productProgram) activeFilters['Product Program'] = filters.productProgram;
+            if (filters.extendingUnit) activeFilters['Extending Unit'] = filters.extendingUnit;
+            if (filters.facilityType) activeFilters['Facility Type'] = filters.facilityType;
+            if (filters.commitment) activeFilters['Commitment Status'] = filters.commitment;
+            if (filters.teamLead) activeFilters['Team Lead'] = filters.teamLead;
+            if (filters.underwriter) activeFilters['Underwriter'] = filters.underwriter;
+            if (filters.caMaturity) {
+                const days = filters.caMaturity;
+                activeFilters['CAs Maturing'] = days === '30' ? 'Next 30 Days' :
+                                               days === '60' ? 'Next 60 Days' :
+                                               days === '90' ? 'Next 90 Days' :
+                                               days === '180' ? 'Next 6 Months' : 'Next Year';
+            }
+            if (filters.facilityMaturity) {
+                const days = filters.facilityMaturity;
+                activeFilters['Facilities Maturing'] = days === '30' ? 'Next 30 Days' :
+                                                       days === '60' ? 'Next 60 Days' :
+                                                       days === '90' ? 'Next 90 Days' :
+                                                       days === '180' ? 'Next 6 Months' : 'Next Year';
+            }
+            
+            // Display filter badges and update count
+            displayFilterBadges();
+            updateFilterCount();
+            
+            // Pre-calculate date ranges for date filters (avoid recalculating in loop)
+            let caDateRange = null;
+            let facilityDateRange = null;
+            if (filters.caMaturity) {
+                const today = new Date();
+                const futureDate = new Date(today.getTime() + parseInt(filters.caMaturity) * 24 * 60 * 60 * 1000);
+                caDateRange = { today, futureDate };
+            }
+            if (filters.facilityMaturity) {
+                const today = new Date();
+                const futureDate = new Date(today.getTime() + parseInt(filters.facilityMaturity) * 24 * 60 * 60 * 1000);
+                facilityDateRange = { today, futureDate };
+            }
+            
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            // OPTIMIZED filtering: Use early exits and minimal object access
+            filteredData = [];
+            for (let i = 0; i < portfolioData.length; i++) {
+                const row = portfolioData[i];
+                
+                // Apply chart filter first
+                if (chartFilter.active) {
+                    let passChartFilter = false;
+                    
+                    switch(chartFilter.type) {
+                        case 'relationship':
+                            const relName = row.Relationship_Name || row.Relationship_ID;
+                            // Remove index number (e.g., "1. ABC Bank" -> "ABC Bank")
+                            const cleanValue = chartFilter.value.replace(/^\d+\.\s*/, '');
+                            passChartFilter = relName === cleanValue;
+                            break;
+                        case 'region':
+                            passChartFilter = (row.Region || '').toUpperCase() === chartFilter.value.toUpperCase();
+                            break;
+                        case 'product':
+                            passChartFilter = row.Product_Program === chartFilter.value;
+                            break;
+                        case 'facilityType':
+                            passChartFilter = row.Facility_Type === chartFilter.value;
+                            break;
+                    }
+                    
+                    if (!passChartFilter) continue;
+                }
+                
+                // Smart Filters (apply after chart filter for performance)
+                // Region filter (case-insensitive comparison)
+                if (selectedRegion !== 'all') {
+                    const rowRegion = (row.Region || '').toUpperCase();
+                    if (rowRegion !== selectedRegion.toUpperCase()) continue;
+                }
+                
+                // PSE filter (exclude PSE if includePSE is false)
+                // Use PSE_non-PSE column from data
+                if (!includePSE) {
+                    const pseColumn = row['PSE_non-PSE'] || row.PSE_non_PSE || '';
+                    const pseValue = String(pseColumn).toUpperCase();
+                    // If the column contains "PSE" or similar indicator, skip this row
+                    if (pseValue.includes('PSE') || pseValue === 'PSE') continue;
+                }
+                
+                // Management Status filter (CM/DM) - case-insensitive comparison
+                if (selectedStatus !== 'all') {
+                    const rowStatus = (row.Management_Status || '').toUpperCase();
+                    if (rowStatus !== selectedStatus.toUpperCase()) continue;
+                }
+                
+                // Fast path: Check advanced filter string filters (fastest to fail)
+                if (filters.productProgram && row.Product_Program !== filters.productProgram) continue;
+                if (filters.extendingUnit && row.Control_Unit !== filters.extendingUnit) continue;
+                if (filters.facilityType && row.Facility_Type !== filters.facilityType) continue;
+                if (filters.commitment && row['Committed/Uncommitted'] !== filters.commitment) continue;
+                if (filters.teamLead && row.Underwriting_Team_Lead !== filters.teamLead) continue;
+                if (filters.underwriter && row.Lead_Underwriter !== filters.underwriter) continue;
+                
+                // Date filters (use pre-parsed dates from index)
+                if (caDateRange) {
+                    const caDate = indexCache.dates[i].caDate;
+                    if (!caDate || caDate < caDateRange.today || caDate > caDateRange.futureDate) continue;
+                }
+                
+                if (facilityDateRange) {
+                    const maturityDate = indexCache.dates[i].maturityDate;
+                    if (!maturityDate || maturityDate < facilityDateRange.today || maturityDate > facilityDateRange.futureDate) continue;
+                }
+                
+                // Search filter (most expensive, do last)
+                if (searchTerm) {
+                    let found = false;
+                    for (const value of Object.values(row)) {
+                        if (String(value).toLowerCase().includes(searchTerm)) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) continue;
+                }
+                
+                // All filters passed
+                filteredData.push(row);
+            }
+            
+            console.log(`Filtered ${portfolioData.length} to ${filteredData.length} rows (with chart filter) in ${(performance.now() - startTime).toFixed(2)}ms`);
+            
+            // Recalculate metrics and charts with filtered data (async to prevent blocking)
+            requestAnimationFrame(() => {
+                calculateMetricsFromFiltered();
+                createFacilityTrendChartFromFiltered();
+                createRegionalChartFromFiltered();
+                createRelationshipChartFromFiltered();
+                createCreditClassificationChartFromFiltered();
+            });
+            
+            // Reset to first page and render table immediately
+            currentPage = 1;
+            renderTable();
+        }
+
         // Display filter badges
         function displayFilterBadges() {
             const badgesContainer = document.getElementById('activeFiltersBadges');
@@ -1715,35 +1992,51 @@
 
         // Calculate Facilities Expired and CAs Expired metrics from filtered data
         function calculateExpiredMetricsFromFiltered() {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            // Get the current report month
+            const reportDates = filteredData.map(row => parseDate(row.Report_Date)).filter(d => d);
+            if (reportDates.length === 0) return;
             
-            // Count expired facilities and CAs
-            const expiredFacilities = new Set();
+            const maxReportDate = new Date(Math.max(...reportDates));
+            const currentYear = maxReportDate.getFullYear();
+            const currentMonth = maxReportDate.getMonth();
+            
+            // Calculate start and end of current month
+            const monthStart = new Date(currentYear, currentMonth, 1);
+            monthStart.setHours(0, 0, 0, 0);
+            const monthEnd = new Date(currentYear, currentMonth + 1, 0);
+            monthEnd.setHours(23, 59, 59, 999);
+            
+            // Count expired facilities and CAs in current month only
+            let facilitiesExpiredCount = 0;
+            let facilitiesExpiredAmount = 0;
             const expiredCAs = new Set();
+            let casExpiredAmount = 0;
             
             for (let i = 0; i < filteredData.length; i++) {
                 const row = filteredData[i];
                 
-                // Check Facilities Expired
+                // Check Facilities Expired (count ALL lines, not unique)
                 const maturityDate = parseDate(row.Maturity_Date);
-                if (maturityDate && maturityDate < today && row.Facility_ID) {
-                    expiredFacilities.add(row.Facility_ID);
+                if (maturityDate && maturityDate >= monthStart && maturityDate <= monthEnd && maturityDate < maxReportDate) {
+                    facilitiesExpiredCount++;
+                    facilitiesExpiredAmount += parseFloat(row.Facility_Amount) || 0;
                 }
                 
-                // Check CAs Expired
+                // Check CAs Expired (count unique CAIDs, but sum ALL lines)
                 const caExpirationDate = parseDate(row.CA_Expiration_Date);
-                if (caExpirationDate && caExpirationDate < today && row.CAID) {
+                if (caExpirationDate && caExpirationDate >= monthStart && caExpirationDate <= monthEnd && caExpirationDate < maxReportDate && row.CAID) {
                     expiredCAs.add(row.CAID);
+                    casExpiredAmount += parseFloat(row.Facility_Amount) || 0;
                 }
             }
             
-            const facilitiesExpiredCount = expiredFacilities.size;
             const casExpiredCount = expiredCAs.size;
             
             // Update DOM
             document.getElementById('facilitiesExpiredCount').textContent = facilitiesExpiredCount.toLocaleString();
+            document.getElementById('facilitiesExpiredAmount').textContent = formatCurrency(facilitiesExpiredAmount);
             document.getElementById('casExpiredCount').textContent = casExpiredCount.toLocaleString();
+            document.getElementById('casExpiredAmount').textContent = formatCurrency(casExpiredAmount);
         }
 
         // Create expiration chart from filtered data
@@ -1937,7 +2230,7 @@
             
             // Update subtitle
             const subtitle = document.getElementById('regionalDistSubtitle');
-            subtitle.textContent = type === 'facilities' ? 'Facilities expiring next month' : 'CAs expiring next month';
+            subtitle.textContent = type === 'facilities' ? 'Facilities expiring this month' : 'CAs expiring this month';
             
             // Recreate chart with new type
             if (Object.keys(activeFilters).length > 0 || filteredData.length > 0 && filteredData.length < portfolioData.length) {
@@ -1951,7 +2244,9 @@
         function createRegionalChartFromFiltered() {
             initializeMapFromFiltered();
             
-            const regionCounts = getRegionCountsFromFiltered();
+            const regionData = getRegionCountsFromFiltered();
+            const regionCounts = regionData.counts;
+            const regionAmounts = regionData.amounts;
             const totalCount = Object.values(regionCounts).reduce((a, b) => a + b, 0);
             
             // Define all regions
@@ -1965,7 +2260,8 @@
             // Ensure all regions are represented, even with 0 count
             const allRegions = Object.keys(regionInfo).map(region => ({
                 region: region,
-                count: regionCounts[region] || 0
+                count: regionCounts[region] || 0,
+                amount: regionAmounts[region] || 0
             }));
             
             // Sort by count descending
@@ -1976,12 +2272,16 @@
             
             const countLabel = selectedRegionalType === 'facilities' ? 'Facilities' : 'CAs';
             
-            allRegions.forEach(({ region, count }) => {
+            allRegions.forEach(({ region, count, amount }) => {
                 const percentage = totalCount > 0 ? ((count / totalCount) * 100).toFixed(0) : 0;
                 const info = regionInfo[region];
                 
                 const regionItem = document.createElement('div');
-                regionItem.className = 'flex items-center justify-between';
+                regionItem.className = 'flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors';
+                regionItem.onclick = function() {
+                    console.log('Region clicked:', region);
+                    applyChartFilter('region', region, region);
+                };
                 regionItem.innerHTML = `
                     <div class="flex items-center gap-3">
                         <div class="w-12 h-12 flex items-center justify-center rounded-full ${info.color} text-white font-semibold text-sm">
@@ -1989,7 +2289,7 @@
                         </div>
                         <div>
                             <p class="text-sm font-semibold text-gray-800">${region}</p>
-                            <span class="block text-xs text-gray-500">${count} ${countLabel}</span>
+                            <span class="block text-xs text-gray-500">${count} ${countLabel} (${formatCurrency(amount)})</span>
                         </div>
                     </div>
                     <div class="flex w-full max-w-[140px] items-center gap-3">
@@ -2096,69 +2396,77 @@
             }
         }
 
-        // Get region counts from filtered data
+        // Get region counts and amounts from filtered data
         function getRegionCountsFromFiltered() {
             console.log('📍 getRegionCountsFromFiltered called for', selectedRegionalType);
             const regionCounts = {};
+            const regionAmounts = {};
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             
-            // Calculate next month range (first month from the chart)
-            const nextMonth = new Date(today);
-            nextMonth.setMonth(nextMonth.getMonth() + 1);
-            nextMonth.setDate(0); // Last day of next month
+            // Calculate current month end
+            const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            monthEnd.setHours(23, 59, 59, 999);
             
             const regionItems = {};
             let totalExpiring = 0;
             
             if (selectedRegionalType === 'facilities') {
-                // Count unique Facility IDs expiring in next month
-                console.log('Counting filtered Facility IDs by region (expiring next month)');
+                // Count ALL lines (not unique) and sum amounts for facilities expiring this month
+                console.log('Counting filtered Facility lines by region (expiring this month)');
                 
                 filteredData.forEach(row => {
                     const maturityDate = parseDate(row.Maturity_Date);
-                    if (maturityDate && maturityDate >= today && maturityDate <= nextMonth) {
+                    if (maturityDate && maturityDate > today && maturityDate <= monthEnd) {
                         const region = row.Region || 'Unknown';
-                        const facilityId = row.Facility_ID;
                         
                         if (!regionItems[region]) {
-                            regionItems[region] = new Set();
+                            regionItems[region] = { count: 0, amount: 0 };
                         }
-                        if (facilityId) {
-                            regionItems[region].add(facilityId);
-                            totalExpiring++;
-                        }
+                        regionItems[region].count++;
+                        regionItems[region].amount += parseFloat(row.Facility_Amount) || 0;
+                        totalExpiring++;
                     }
                 });
             } else {
-                // Count unique CA IDs expiring in next month
-                console.log('Counting filtered CA IDs by region (expiring next month)');
+                // Count unique CAIDs but sum ALL line amounts for CAs expiring this month
+                console.log('Counting filtered CA IDs by region (expiring this month)');
+                
+                const regionCAIDs = {};
                 
                 filteredData.forEach(row => {
                     const caExpirationDate = parseDate(row.CA_Expiration_Date);
-                    if (caExpirationDate && caExpirationDate >= today && caExpirationDate <= nextMonth) {
+                    if (caExpirationDate && caExpirationDate > today && caExpirationDate <= monthEnd && row.CAID) {
                         const region = row.Region || 'Unknown';
-                        const caid = row.CAID;
                         
+                        if (!regionCAIDs[region]) {
+                            regionCAIDs[region] = new Set();
+                        }
                         if (!regionItems[region]) {
-                            regionItems[region] = new Set();
+                            regionItems[region] = { count: 0, amount: 0 };
                         }
-                        if (caid) {
-                            regionItems[region].add(caid);
-                            totalExpiring++;
-                        }
+                        
+                        regionCAIDs[region].add(row.CAID);
+                        regionItems[region].amount += parseFloat(row.Facility_Amount) || 0;
+                        totalExpiring++;
                     }
+                });
+                
+                // Set counts to unique CAID counts
+                Object.keys(regionCAIDs).forEach(region => {
+                    regionItems[region].count = regionCAIDs[region].size;
                 });
             }
             
-            // Convert Set sizes to counts
+            // Extract counts and amounts
             Object.keys(regionItems).forEach(region => {
-                regionCounts[region] = regionItems[region].size;
+                regionCounts[region] = regionItems[region].count;
+                regionAmounts[region] = regionItems[region].amount;
             });
             
-            console.log(`Found ${totalExpiring} filtered expiring ${selectedRegionalType} across ${Object.keys(regionCounts).length} regions:`, regionCounts);
+            console.log(`Found ${totalExpiring} filtered expiring ${selectedRegionalType} across ${Object.keys(regionCounts).length} regions:`, regionCounts, regionAmounts);
             
-            return regionCounts;
+            return { counts: regionCounts, amounts: regionAmounts };
         }
 
         // Create relationship chart from filtered data (OPTIMIZED)
@@ -2185,6 +2493,10 @@
                     fieldName = 'Direct_OS';
                     seriesName = 'OSUC';
                     break;
+                case 'tfa':
+                    fieldName = 'Facility_Amount';
+                    seriesName = 'Total Facility Amount';
+                    break;
                 default:
                     fieldName = 'Direct_OS';
                     seriesName = 'Direct OS';
@@ -2192,27 +2504,56 @@
             
             console.log('Creating filtered relationship chart, field:', fieldName, 'dataLength:', filteredData.length);
             
-            // Use Map for better performance
-            const relationshipTotals = new Map();
+            // Use Map for better performance - store all exposure types
+            const relationshipData = new Map();
             
             for (let i = 0; i < filteredData.length; i++) {
                 const row = filteredData[i];
                 const relId = row.Relationship_Name || row.Relationship_ID;
-                const amount = parseNumber(row[fieldName]);
                 
-                if (relId && amount > 0) {
-                    relationshipTotals.set(relId, (relationshipTotals.get(relId) || 0) + amount);
+                if (relId) {
+                    if (!relationshipData.has(relId)) {
+                        relationshipData.set(relId, {
+                            tfa: 0,
+                            direct: 0,
+                            contingent: 0,
+                            pse: 0,
+                            facilityCount: 0
+                        });
+                    }
+                    
+                    const data = relationshipData.get(relId);
+                    data.tfa += parseNumber(row.Facility_Amount);
+                    data.direct += parseNumber(row.Direct_OS);
+                    data.contingent += parseNumber(row.Contingeng_OS);
+                    data.pse += parseNumber(row.PSE_OS);
+                    if (row.Facility_ID) data.facilityCount++;
                 }
             }
             
-            console.log('Total unique filtered relationships:', relationshipTotals.size);
+            console.log('Total unique filtered relationships:', relationshipData.size);
+            
+            // Get the selected field value for sorting
+            const relationshipTotals = new Map();
+            for (const [relId, data] of relationshipData.entries()) {
+                let sortValue = 0;
+                switch(selectedAmountType) {
+                    case 'tfa': sortValue = data.tfa; break;
+                    case 'direct': sortValue = data.direct; break;
+                    case 'contingent': sortValue = data.contingent; break;
+                    case 'pse': sortValue = data.pse; break;
+                    case 'osuc': sortValue = data.direct; break; // OSUC uses direct
+                    default: sortValue = data.direct;
+                }
+                relationshipTotals.set(relId, sortValue);
+            }
             
             // Convert to array and sort
             const sorted = Array.from(relationshipTotals.entries())
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, topN);
             
-            console.log(`Filtered chart aggregated ${filteredData.length} rows, found ${relationshipTotals.size} relationships in ${(performance.now() - startTime).toFixed(2)}ms`);
+            console.log(`Filtered chart aggregated ${filteredData.length} rows, found ${relationshipData.size} relationships in ${(performance.now() - startTime).toFixed(2)}ms`);
             
             // Add index numbers (1, 2, 3, ...) before relationship names
             const relationships = sorted.map((item, index) => `${index + 1}. ${item[0]}`);
@@ -2236,6 +2577,14 @@
                     height: 350,
                     toolbar: {
                         show: false
+                    },
+                    events: {
+                        dataPointSelection: function(event, chartContext, config) {
+                            const selectedIndex = config.dataPointIndex;
+                            const selectedRelationship = relationships[selectedIndex];
+                            console.log('Relationship clicked:', selectedRelationship);
+                            applyChartFilter('relationship', selectedRelationship, selectedRelationship);
+                        }
                     }
                 },
                 plotOptions: {
@@ -2295,13 +2644,27 @@
                     opacity: 1
                 },
                 tooltip: {
-                    x: {
-                        show: false
-                    },
-                    y: {
-                        formatter: function(val) {
-                            return formatCurrency(val);
+                    custom: function({series, seriesIndex, dataPointIndex, w}) {
+                        const relName = sorted[dataPointIndex][0]; // Get original name without index
+                        const data = relationshipData.get(relName);
+                        
+                        if (!data) return '';
+                        
+                        let html = `<div class="apexcharts-tooltip-custom" style="padding: 12px; min-width: 220px; background: #ffffff; color: #1f2937;">`;
+                        html += `<div style="font-weight: 600; margin-bottom: 8px; font-size: 13px; color: #1f2937;">${relName}</div>`;
+                        html += `<div style="font-size: 11px; color: #666;">`;
+                        html += `<div style="margin-bottom: 4px;"><strong>${data.facilityCount}</strong> Facilities</div>`;
+                        html += `<div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #eee;">`;
+                        html += `<div>TFA: ${formatCurrency(data.tfa)}</div>`;
+                        html += `<div>Direct: ${formatCurrency(data.direct)}</div>`;
+                        if (data.contingent > 0) {
+                            html += `<div>Contingent: ${formatCurrency(data.contingent)}</div>`;
                         }
+                        if (data.pse > 0) {
+                            html += `<div>PSE: ${formatCurrency(data.pse)}</div>`;
+                        }
+                        html += `</div></div></div>`;
+                        return html;
                     }
                 }
             };
@@ -2397,7 +2760,7 @@
             applyFilters();
         }
         
-        // Select Amount Type Filter (Direct/Contingent/PSE/OSUC)
+        // Select Amount Type Filter (Direct/Contingent/PSE/OSUC/TFA)
         function selectAmountTypeFilter(type) {
             selectedAmountType = type;
             
@@ -2406,7 +2769,8 @@
                 'Direct': { id: 'direct', minWidth: '65px' }, 
                 'Contingent': { id: 'contingent', minWidth: '80px' }, 
                 'PSE': { id: 'pse', minWidth: '50px' }, 
-                'OSUC': { id: 'osuc', minWidth: '60px' }
+                'OSUC': { id: 'osuc', minWidth: '60px' },
+                'TFA': { id: 'tfa', minWidth: '50px' }
             };
             
             Object.keys(types).forEach(t => {
@@ -2433,6 +2797,8 @@
                     titleElement.textContent = 'Top Relationships by PSE OS';
                 } else if (type === 'osuc') {
                     titleElement.textContent = 'Top Relationships by OSUC';
+                } else if (type === 'tfa') {
+                    titleElement.textContent = 'Top Relationships by Total Facility Amount';
                 }
             }
             
@@ -2660,39 +3026,57 @@
 
         // Calculate Facilities Expired and CAs Expired metrics
         function calculateExpiredMetrics() {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            // Get the current report month
+            const reportDates = portfolioData.map(row => parseDate(row.Report_Date)).filter(d => d);
+            if (reportDates.length === 0) return;
             
-            // Count expired facilities and CAs
-            const expiredFacilities = new Set();
+            const maxReportDate = new Date(Math.max(...reportDates));
+            const currentYear = maxReportDate.getFullYear();
+            const currentMonth = maxReportDate.getMonth();
+            
+            // Calculate start and end of current month
+            const monthStart = new Date(currentYear, currentMonth, 1);
+            monthStart.setHours(0, 0, 0, 0);
+            const monthEnd = new Date(currentYear, currentMonth + 1, 0);
+            monthEnd.setHours(23, 59, 59, 999);
+            
+            // Count expired facilities and CAs in current month only
+            let facilitiesExpiredCount = 0;
+            let facilitiesExpiredAmount = 0;
             const expiredCAs = new Set();
+            let casExpiredAmount = 0;
             
             for (let i = 0; i < portfolioData.length; i++) {
                 const row = portfolioData[i];
                 
-                // Check Facilities Expired
+                // Check Facilities Expired (count ALL lines, not unique)
                 const maturityDate = parseDate(row.Maturity_Date);
-                if (maturityDate && maturityDate < today && row.Facility_ID) {
-                    expiredFacilities.add(row.Facility_ID);
+                if (maturityDate && maturityDate >= monthStart && maturityDate <= monthEnd && maturityDate < maxReportDate) {
+                    facilitiesExpiredCount++;
+                    facilitiesExpiredAmount += parseFloat(row.Facility_Amount) || 0;
                 }
                 
-                // Check CAs Expired
+                // Check CAs Expired (count unique CAIDs, but sum ALL lines)
                 const caExpirationDate = parseDate(row.CA_Expiration_Date);
-                if (caExpirationDate && caExpirationDate < today && row.CAID) {
+                if (caExpirationDate && caExpirationDate >= monthStart && caExpirationDate <= monthEnd && caExpirationDate < maxReportDate && row.CAID) {
                     expiredCAs.add(row.CAID);
+                    casExpiredAmount += parseFloat(row.Facility_Amount) || 0;
                 }
             }
             
-            const facilitiesExpiredCount = expiredFacilities.size;
             const casExpiredCount = expiredCAs.size;
             
             // Update DOM
             document.getElementById('facilitiesExpiredCount').textContent = facilitiesExpiredCount.toLocaleString();
+            document.getElementById('facilitiesExpiredAmount').textContent = formatCurrency(facilitiesExpiredAmount);
             document.getElementById('casExpiredCount').textContent = casExpiredCount.toLocaleString();
+            document.getElementById('casExpiredAmount').textContent = formatCurrency(casExpiredAmount);
             
             console.log('Expired Metrics:', {
                 facilitiesExpired: facilitiesExpiredCount,
-                casExpired: casExpiredCount
+                facilitiesExpiredAmount: facilitiesExpiredAmount,
+                casExpired: casExpiredCount,
+                casExpiredAmount: casExpiredAmount
             });
         }
 
@@ -2982,7 +3366,9 @@
             next3Months.forEach(monthYear => {
                 monthlyData[monthYear] = {
                     casComingDue: new Set(),
-                    facilitiesExpiring: []
+                    facilitiesExpiring: [],
+                    caAmounts: { tfa: 0, direct: 0, contingent: 0, pse: 0 },
+                    facilityAmounts: { tfa: 0, direct: 0, contingent: 0, pse: 0 }
                 };
             });
             
@@ -3001,6 +3387,11 @@
                         // Only include if it's in our next 3 months
                         if (next3Months.includes(monthYear)) {
                             monthlyData[monthYear].casComingDue.add(caid);
+                            // Accumulate amounts for CAs
+                            monthlyData[monthYear].caAmounts.tfa += parseFloat(row.Facility_Amount) || 0;
+                            monthlyData[monthYear].caAmounts.direct += parseFloat(row.Direct_OS) || 0;
+                            monthlyData[monthYear].caAmounts.contingent += parseFloat(row.Contingeng_OS) || 0;
+                            monthlyData[monthYear].caAmounts.pse += parseFloat(row.PSE_OS) || 0;
                         }
                     }
                 }
@@ -3021,6 +3412,11 @@
                         // Only include if it's in our next 3 months
                         if (next3Months.includes(monthYear)) {
                             monthlyData[monthYear].facilitiesExpiring.push(facilityId);
+                            // Accumulate amounts for Facilities
+                            monthlyData[monthYear].facilityAmounts.tfa += parseFloat(row.Facility_Amount) || 0;
+                            monthlyData[monthYear].facilityAmounts.direct += parseFloat(row.Direct_OS) || 0;
+                            monthlyData[monthYear].facilityAmounts.contingent += parseFloat(row.Contingeng_OS) || 0;
+                            monthlyData[monthYear].facilityAmounts.pse += parseFloat(row.PSE_OS) || 0;
                         }
                     }
                 }
@@ -3111,14 +3507,58 @@
                     opacity: 1
                 },
                 tooltip: {
-                    x: {
-                        show: false
-                    },
-                    y: {
-                        formatter: function(val, opts) {
-                            const seriesName = opts.w.globals.seriesNames[opts.seriesIndex];
-                            return val + (seriesName === 'CAs Coming Due' ? ' CAs' : ' Facilities');
+                    shared: true,
+                    intersect: false,
+                    custom: function({series, seriesIndex, dataPointIndex, w}) {
+                        const monthKey = next3Months[dataPointIndex];
+                        const monthData = monthlyData[monthKey];
+                        const monthName = categories[dataPointIndex];
+                        
+                        let html = `<div class="apexcharts-tooltip-custom" style="padding: 12px; min-width: 200px; background: #ffffff; color: #1f2937;">`;
+                        html += `<div style="font-weight: 600; margin-bottom: 8px; font-size: 13px; color: #1f2937;">${monthName}</div>`;
+                        
+                        // CAs Coming Due
+                        const casCount = monthData.casComingDue.size;
+                        if (casCount > 0) {
+                            html += `<div style="margin-bottom: 6px;">`;
+                            html += `<div style="display: flex; align-items: center; margin-bottom: 4px;">`;
+                            html += `<span style="width: 8px; height: 8px; background: #93a8ff; border-radius: 50%; margin-right: 6px;"></span>`;
+                            html += `<span style="font-weight: 500;">CAs Coming Due: ${casCount}</span>`;
+                            html += `</div>`;
+                            html += `<div style="padding-left: 14px; font-size: 11px; color: #666;">`;
+                            html += `<div>TFA: ${formatCurrency(monthData.caAmounts.tfa)}</div>`;
+                            html += `<div>Direct: ${formatCurrency(monthData.caAmounts.direct)}</div>`;
+                            if (monthData.caAmounts.contingent > 0) {
+                                html += `<div>Contingent: ${formatCurrency(monthData.caAmounts.contingent)}</div>`;
+                            }
+                            if (monthData.caAmounts.pse > 0) {
+                                html += `<div>PSE: ${formatCurrency(monthData.caAmounts.pse)}</div>`;
+                            }
+                            html += `</div></div>`;
                         }
+                        
+                        // Facilities Expiring
+                        const facilitiesCount = monthData.facilitiesExpiring.length;
+                        if (facilitiesCount > 0) {
+                            html += `<div>`;
+                            html += `<div style="display: flex; align-items: center; margin-bottom: 4px;">`;
+                            html += `<span style="width: 8px; height: 8px; background: #465fff; border-radius: 50%; margin-right: 6px;"></span>`;
+                            html += `<span style="font-weight: 500;">Facilities Expiring: ${facilitiesCount}</span>`;
+                            html += `</div>`;
+                            html += `<div style="padding-left: 14px; font-size: 11px; color: #666;">`;
+                            html += `<div>TFA: ${formatCurrency(monthData.facilityAmounts.tfa)}</div>`;
+                            html += `<div>Direct: ${formatCurrency(monthData.facilityAmounts.direct)}</div>`;
+                            if (monthData.facilityAmounts.contingent > 0) {
+                                html += `<div>Contingent: ${formatCurrency(monthData.facilityAmounts.contingent)}</div>`;
+                            }
+                            if (monthData.facilityAmounts.pse > 0) {
+                                html += `<div>PSE: ${formatCurrency(monthData.facilityAmounts.pse)}</div>`;
+                            }
+                            html += `</div></div>`;
+                        }
+                        
+                        html += `</div>`;
+                        return html;
                     }
                 }
             };
@@ -3180,7 +3620,9 @@
             next3Months.forEach(monthYear => {
                 monthlyData[monthYear] = {
                     casComingDue: new Set(),
-                    facilitiesExpiring: []
+                    facilitiesExpiring: [],
+                    caAmounts: { tfa: 0, direct: 0, contingent: 0, pse: 0 },
+                    facilityAmounts: { tfa: 0, direct: 0, contingent: 0, pse: 0 }
                 };
             });
             
@@ -3199,6 +3641,11 @@
                         // Only include if it's in our next 3 months
                         if (next3Months.includes(monthYear)) {
                             monthlyData[monthYear].casComingDue.add(caid);
+                            // Accumulate amounts for CAs
+                            monthlyData[monthYear].caAmounts.tfa += parseFloat(row.Facility_Amount) || 0;
+                            monthlyData[monthYear].caAmounts.direct += parseFloat(row.Direct_OS) || 0;
+                            monthlyData[monthYear].caAmounts.contingent += parseFloat(row.Contingeng_OS) || 0;
+                            monthlyData[monthYear].caAmounts.pse += parseFloat(row.PSE_OS) || 0;
                         }
                     }
                 }
@@ -3219,6 +3666,11 @@
                         // Only include if it's in our next 3 months
                         if (next3Months.includes(monthYear)) {
                             monthlyData[monthYear].facilitiesExpiring.push(facilityId);
+                            // Accumulate amounts for Facilities
+                            monthlyData[monthYear].facilityAmounts.tfa += parseFloat(row.Facility_Amount) || 0;
+                            monthlyData[monthYear].facilityAmounts.direct += parseFloat(row.Direct_OS) || 0;
+                            monthlyData[monthYear].facilityAmounts.contingent += parseFloat(row.Contingeng_OS) || 0;
+                            monthlyData[monthYear].facilityAmounts.pse += parseFloat(row.PSE_OS) || 0;
                         }
                     }
                 }
@@ -3306,14 +3758,58 @@
                     opacity: 1
                 },
                 tooltip: {
-                    x: {
-                        show: false
-                    },
-                    y: {
-                        formatter: function(val, opts) {
-                            const seriesName = opts.w.globals.seriesNames[opts.seriesIndex];
-                            return val + (seriesName === 'CAs Coming Due' ? ' CAs' : ' Facilities');
+                    shared: true,
+                    intersect: false,
+                    custom: function({series, seriesIndex, dataPointIndex, w}) {
+                        const monthKey = next3Months[dataPointIndex];
+                        const monthData = monthlyData[monthKey];
+                        const monthName = categories[dataPointIndex];
+                        
+                        let html = `<div class="apexcharts-tooltip-custom" style="padding: 12px; min-width: 200px; background: #ffffff; color: #1f2937;">`;
+                        html += `<div style="font-weight: 600; margin-bottom: 8px; font-size: 13px; color: #1f2937;">${monthName}</div>`;
+                        
+                        // CAs Coming Due
+                        const casCount = monthData.casComingDue.size;
+                        if (casCount > 0) {
+                            html += `<div style="margin-bottom: 6px;">`;
+                            html += `<div style="display: flex; align-items: center; margin-bottom: 4px;">`;
+                            html += `<span style="width: 8px; height: 8px; background: #93a8ff; border-radius: 50%; margin-right: 6px;"></span>`;
+                            html += `<span style="font-weight: 500;">CAs Coming Due: ${casCount}</span>`;
+                            html += `</div>`;
+                            html += `<div style="padding-left: 14px; font-size: 11px; color: #666;">`;
+                            html += `<div>TFA: ${formatCurrency(monthData.caAmounts.tfa)}</div>`;
+                            html += `<div>Direct: ${formatCurrency(monthData.caAmounts.direct)}</div>`;
+                            if (monthData.caAmounts.contingent > 0) {
+                                html += `<div>Contingent: ${formatCurrency(monthData.caAmounts.contingent)}</div>`;
+                            }
+                            if (monthData.caAmounts.pse > 0) {
+                                html += `<div>PSE: ${formatCurrency(monthData.caAmounts.pse)}</div>`;
+                            }
+                            html += `</div></div>`;
                         }
+                        
+                        // Facilities Expiring
+                        const facilitiesCount = monthData.facilitiesExpiring.length;
+                        if (facilitiesCount > 0) {
+                            html += `<div>`;
+                            html += `<div style="display: flex; align-items: center; margin-bottom: 4px;">`;
+                            html += `<span style="width: 8px; height: 8px; background: #465fff; border-radius: 50%; margin-right: 6px;"></span>`;
+                            html += `<span style="font-weight: 500;">Facilities Expiring: ${facilitiesCount}</span>`;
+                            html += `</div>`;
+                            html += `<div style="padding-left: 14px; font-size: 11px; color: #666;">`;
+                            html += `<div>TFA: ${formatCurrency(monthData.facilityAmounts.tfa)}</div>`;
+                            html += `<div>Direct: ${formatCurrency(monthData.facilityAmounts.direct)}</div>`;
+                            if (monthData.facilityAmounts.contingent > 0) {
+                                html += `<div>Contingent: ${formatCurrency(monthData.facilityAmounts.contingent)}</div>`;
+                            }
+                            if (monthData.facilityAmounts.pse > 0) {
+                                html += `<div>PSE: ${formatCurrency(monthData.facilityAmounts.pse)}</div>`;
+                            }
+                            html += `</div></div>`;
+                        }
+                        
+                        html += `</div>`;
+                        return html;
                     }
                 }
             };
@@ -3626,76 +4122,86 @@
             }
         }
         
-        // Get region counts for facilities or CAs expiring soon
+        // Get region counts and amounts for facilities or CAs expiring soon
         function getRegionCounts() {
             console.log('📍 getRegionCounts called for', selectedRegionalType);
             const regionCounts = {};
+            const regionAmounts = {};
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             
-            // Calculate next month range (first month from the chart)
-            const nextMonth = new Date(today);
-            nextMonth.setMonth(nextMonth.getMonth() + 1);
-            nextMonth.setDate(0); // Last day of next month
+            // Calculate current month end
+            const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            monthEnd.setHours(23, 59, 59, 999);
             
             const regionItems = {};
             let totalExpiring = 0;
             
             if (selectedRegionalType === 'facilities') {
-                // Count unique Facility IDs expiring in next month
-                console.log('Counting Facility IDs by region (expiring next month)');
+                // Count ALL lines (not unique) and sum amounts for facilities expiring this month
+                console.log('Counting Facility lines by region (expiring this month)');
                 
                 portfolioData.forEach(row => {
                     const maturityDate = parseDate(row.Maturity_Date);
-                    if (maturityDate && maturityDate >= today && maturityDate <= nextMonth) {
+                    if (maturityDate && maturityDate > today && maturityDate <= monthEnd) {
                         const region = row.Region || 'Unknown';
-                        const facilityId = row.Facility_ID;
                         
                         if (!regionItems[region]) {
-                            regionItems[region] = new Set();
+                            regionItems[region] = { count: 0, amount: 0 };
                         }
-                        if (facilityId) {
-                            regionItems[region].add(facilityId);
-                            totalExpiring++;
-                        }
+                        regionItems[region].count++;
+                        regionItems[region].amount += parseFloat(row.Facility_Amount) || 0;
+                        totalExpiring++;
                     }
                 });
             } else {
-                // Count unique CA IDs expiring in next month
-                console.log('Counting CA IDs by region (expiring next month)');
+                // Count unique CAIDs but sum ALL line amounts for CAs expiring this month
+                console.log('Counting CA IDs by region (expiring this month)');
+                
+                const regionCAIDs = {};
                 
                 portfolioData.forEach(row => {
                     const caExpirationDate = parseDate(row.CA_Expiration_Date);
-                    if (caExpirationDate && caExpirationDate >= today && caExpirationDate <= nextMonth) {
+                    if (caExpirationDate && caExpirationDate > today && caExpirationDate <= monthEnd && row.CAID) {
                         const region = row.Region || 'Unknown';
-                        const caid = row.CAID;
                         
+                        if (!regionCAIDs[region]) {
+                            regionCAIDs[region] = new Set();
+                        }
                         if (!regionItems[region]) {
-                            regionItems[region] = new Set();
+                            regionItems[region] = { count: 0, amount: 0 };
                         }
-                        if (caid) {
-                            regionItems[region].add(caid);
-                            totalExpiring++;
-                        }
+                        
+                        regionCAIDs[region].add(row.CAID);
+                        regionItems[region].amount += parseFloat(row.Facility_Amount) || 0;
+                        totalExpiring++;
                     }
+                });
+                
+                // Set counts to unique CAID counts
+                Object.keys(regionCAIDs).forEach(region => {
+                    regionItems[region].count = regionCAIDs[region].size;
                 });
             }
             
-            // Convert Set sizes to counts
+            // Extract counts and amounts
             Object.keys(regionItems).forEach(region => {
-                regionCounts[region] = regionItems[region].size;
+                regionCounts[region] = regionItems[region].count;
+                regionAmounts[region] = regionItems[region].amount;
             });
             
-            console.log(`Found ${totalExpiring} expiring ${selectedRegionalType} across ${Object.keys(regionCounts).length} regions:`, regionCounts);
+            console.log(`Found ${totalExpiring} expiring ${selectedRegionalType} across ${Object.keys(regionCounts).length} regions:`, regionCounts, regionAmounts);
             
-            return regionCounts;
+            return { counts: regionCounts, amounts: regionAmounts };
         }
         
         // Create regional distribution chart with map and list
         function createRegionalChart() {
             initializeMap();
             
-            const regionCounts = getRegionCounts();
+            const regionData = getRegionCounts();
+            const regionCounts = regionData.counts;
+            const regionAmounts = regionData.amounts;
             const totalCount = Object.values(regionCounts).reduce((a, b) => a + b, 0);
             
             // Define all regions
@@ -3709,7 +4215,8 @@
             // Ensure all regions are represented, even with 0 count
             const allRegions = Object.keys(regionInfo).map(region => ({
                 region: region,
-                count: regionCounts[region] || 0
+                count: regionCounts[region] || 0,
+                amount: regionAmounts[region] || 0
             }));
             
             // Sort by count descending
@@ -3720,12 +4227,16 @@
             
             const countLabel = selectedRegionalType === 'facilities' ? 'Facilities' : 'CAs';
             
-            allRegions.forEach(({ region, count }) => {
+            allRegions.forEach(({ region, count, amount }) => {
                 const percentage = totalCount > 0 ? ((count / totalCount) * 100).toFixed(0) : 0;
                 const info = regionInfo[region];
                 
                 const regionItem = document.createElement('div');
-                regionItem.className = 'flex items-center justify-between';
+                regionItem.className = 'flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors';
+                regionItem.onclick = function() {
+                    console.log('Region clicked:', region);
+                    applyChartFilter('region', region, region);
+                };
                 regionItem.innerHTML = `
                     <div class="flex items-center gap-3">
                         <div class="w-12 h-12 flex items-center justify-center rounded-full ${info.color} text-white font-semibold text-sm">
@@ -3733,7 +4244,7 @@
                         </div>
                         <div>
                             <p class="text-sm font-semibold text-gray-800">${region}</p>
-                            <span class="block text-xs text-gray-500">${count} ${countLabel}</span>
+                            <span class="block text-xs text-gray-500">${count} ${countLabel} (${formatCurrency(amount)})</span>
                         </div>
                     </div>
                     <div class="flex w-full max-w-[140px] items-center gap-3">
@@ -3772,6 +4283,10 @@
                     fieldName = 'Direct_OS';
                     seriesName = 'OSUC';
                     break;
+                case 'tfa':
+                    fieldName = 'Facility_Amount';
+                    seriesName = 'Total Facility Amount';
+                    break;
                 default:
                     fieldName = 'Direct_OS';
                     seriesName = 'Direct OS';
@@ -3779,25 +4294,49 @@
             
             console.log('Creating relationship chart, field:', fieldName, 'dataLength:', portfolioData.length);
             
-            // Use Map for better performance with large datasets
-            const relationshipTotals = new Map();
+            // Use Map for better performance - store all exposure types
+            const relationshipData = new Map();
             
             for (let i = 0; i < portfolioData.length; i++) {
                 const row = portfolioData[i];
                 const relId = row.Relationship_Name || row.Relationship_ID;
-                const amount = parseNumber(row[fieldName]);
                 
-                // Debug first few rows
-                if (i < 3) {
-                    console.log(`Row ${i}: relId="${relId}", amount=${amount}, fieldName=${fieldName}, row[fieldName]=${row[fieldName]}`);
-                }
-                
-                if (relId && amount > 0) {
-                    relationshipTotals.set(relId, (relationshipTotals.get(relId) || 0) + amount);
+                if (relId) {
+                    if (!relationshipData.has(relId)) {
+                        relationshipData.set(relId, {
+                            tfa: 0,
+                            direct: 0,
+                            contingent: 0,
+                            pse: 0,
+                            facilityCount: 0
+                        });
+                    }
+                    
+                    const data = relationshipData.get(relId);
+                    data.tfa += parseNumber(row.Facility_Amount);
+                    data.direct += parseNumber(row.Direct_OS);
+                    data.contingent += parseNumber(row.Contingeng_OS);
+                    data.pse += parseNumber(row.PSE_OS);
+                    if (row.Facility_ID) data.facilityCount++;
                 }
             }
             
-            console.log('Total unique relationships:', relationshipTotals.size);
+            console.log('Total unique relationships:', relationshipData.size);
+            
+            // Get the selected field value for sorting
+            const relationshipTotals = new Map();
+            for (const [relId, data] of relationshipData.entries()) {
+                let sortValue = 0;
+                switch(selectedAmountType) {
+                    case 'tfa': sortValue = data.tfa; break;
+                    case 'direct': sortValue = data.direct; break;
+                    case 'contingent': sortValue = data.contingent; break;
+                    case 'pse': sortValue = data.pse; break;
+                    case 'osuc': sortValue = data.direct; break; // OSUC uses direct
+                    default: sortValue = data.direct;
+                }
+                relationshipTotals.set(relId, sortValue);
+            }
             
             // Convert to array and sort (only what we need)
             const sorted = Array.from(relationshipTotals.entries())
@@ -3828,6 +4367,14 @@
                     height: 350,
                     toolbar: {
                         show: false
+                    },
+                    events: {
+                        dataPointSelection: function(event, chartContext, config) {
+                            const selectedIndex = config.dataPointIndex;
+                            const selectedRelationship = relationships[selectedIndex];
+                            console.log('Relationship clicked:', selectedRelationship);
+                            applyChartFilter('relationship', selectedRelationship, selectedRelationship);
+                        }
                     }
                 },
                 plotOptions: {
@@ -3887,13 +4434,27 @@
                     opacity: 1
                 },
                 tooltip: {
-                    x: {
-                        show: false
-                    },
-                    y: {
-                        formatter: function(val) {
-                            return formatCurrency(val);
+                    custom: function({series, seriesIndex, dataPointIndex, w}) {
+                        const relName = sorted[dataPointIndex][0]; // Get original name without index
+                        const data = relationshipData.get(relName);
+                        
+                        if (!data) return '';
+                        
+                        let html = `<div class="apexcharts-tooltip-custom" style="padding: 12px; min-width: 220px; background: #ffffff; color: #1f2937;">`;
+                        html += `<div style="font-weight: 600; margin-bottom: 8px; font-size: 13px; color: #1f2937;">${relName}</div>`;
+                        html += `<div style="font-size: 11px; color: #666;">`;
+                        html += `<div style="margin-bottom: 4px;"><strong>${data.facilityCount}</strong> Facilities</div>`;
+                        html += `<div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #eee;">`;
+                        html += `<div>TFA: ${formatCurrency(data.tfa)}</div>`;
+                        html += `<div>Direct: ${formatCurrency(data.direct)}</div>`;
+                        if (data.contingent > 0) {
+                            html += `<div>Contingent: ${formatCurrency(data.contingent)}</div>`;
                         }
+                        if (data.pse > 0) {
+                            html += `<div>PSE: ${formatCurrency(data.pse)}</div>`;
+                        }
+                        html += `</div></div></div>`;
+                        return html;
                     }
                 }
             };
@@ -3965,11 +4526,11 @@
             }
         }
 
-        // Create New Facilities by Region Donut Chart from all data
+        // Create New Facilities by Product Program Donut Chart from all data
         function createCreditClassificationChart() {
             const startTime = performance.now();
             
-            console.log('Creating new facilities by region chart, dataLength:', portfolioData.length);
+            console.log('Creating new facilities by product program chart, dataLength:', portfolioData.length);
             
             // Find the most recent Report_Date to determine "last month"
             let mostRecentReportDate = null;
@@ -4003,43 +4564,51 @@
             console.log('Target date range:', targetStartDate, 'to', targetEndDate);
             console.log('Selected period:', selectedPeriod);
             
-            // Track new facilities per region
-            const regionNewFacilities = new Map();
-            const regionTotalFacilities = new Map();
+            // Track new facilities per product program with amounts
+            const productNewFacilities = new Map();
+            const productTotalFacilities = new Map();
+            const productAmounts = new Map();
             
             for (let i = 0; i < portfolioData.length; i++) {
                 const row = portfolioData[i];
-                const region = row.Region || 'Unknown';
+                const productProgram = row.Product_Program || 'Unknown';
                 const facilityId = row.Facility_ID;
                 const firstApprovalDate = parseDate(row.Facility_First_Approval_Date);
                 
                 if (!facilityId) continue;
                 
-                // Initialize region tracking
-                if (!regionNewFacilities.has(region)) {
-                    regionNewFacilities.set(region, new Set());
-                    regionTotalFacilities.set(region, new Set());
+                // Initialize product program tracking
+                if (!productNewFacilities.has(productProgram)) {
+                    productNewFacilities.set(productProgram, new Set());
+                    productTotalFacilities.set(productProgram, new Set());
+                    productAmounts.set(productProgram, { tfa: 0, direct: 0, contingent: 0, pse: 0 });
                 }
                 
-                regionTotalFacilities.get(region).add(facilityId);
+                productTotalFacilities.get(productProgram).add(facilityId);
                 
                 // Check if facility is "new" (approved within the selected period)
                 if (firstApprovalDate && firstApprovalDate >= targetStartDate && firstApprovalDate <= targetEndDate) {
-                    regionNewFacilities.get(region).add(facilityId);
+                    productNewFacilities.get(productProgram).add(facilityId);
+                    // Accumulate amounts for new facilities
+                    const amounts = productAmounts.get(productProgram);
+                    amounts.tfa += parseNumber(row.Facility_Amount);
+                    amounts.direct += parseNumber(row.Direct_OS);
+                    amounts.contingent += parseNumber(row.Contingeng_OS);
+                    amounts.pse += parseNumber(row.PSE_OS);
                 }
             }
             
-            console.log('Region new facilities:', regionNewFacilities);
+            console.log('Product program new facilities:', productNewFacilities);
             
             // Convert to arrays for ApexCharts (only showing new facilities)
             const labels = [];
             const series = [];
             const counts = [];
             
-            for (const [region, newFacilitiesSet] of regionNewFacilities.entries()) {
+            for (const [productProgram, newFacilitiesSet] of productNewFacilities.entries()) {
                 const newCount = newFacilitiesSet.size;
-                if (newCount > 0) {  // Only include regions with new facilities
-                    labels.push(region);
+                if (newCount > 0) {  // Only include product programs with new facilities
+                    labels.push(productProgram);
                     series.push(newCount);
                     counts.push(newCount);
                 }
@@ -4070,6 +4639,14 @@
                     type: 'donut',
                     width: 280,
                     height: 280,
+                    events: {
+                        dataPointSelection: function(event, chartContext, config) {
+                            const selectedIndex = config.dataPointIndex;
+                            const selectedProduct = labels[selectedIndex];
+                            console.log('Product clicked:', selectedProduct);
+                            applyChartFilter('product', selectedProduct, selectedProduct);
+                        }
+                    }
                 },
                 stroke: {
                     show: false,
@@ -4114,10 +4691,28 @@
                 },
                 tooltip: {
                     enabled: true,
-                    y: {
-                        formatter: function(val) {
-                            return val.toLocaleString() + ' new facilities';
+                    custom: function({series, seriesIndex, dataPointIndex, w}) {
+                        const productProgram = labels[seriesIndex];
+                        const count = series[seriesIndex];
+                        const amounts = productAmounts.get(productProgram);
+                        
+                        if (!amounts) return '';
+                        
+                        let html = `<div class="apexcharts-tooltip-custom" style="padding: 12px; min-width: 200px; background: #ffffff; color: #1f2937;">`;
+                        html += `<div style="font-weight: 600; margin-bottom: 8px; font-size: 13px; color: #1f2937;">${productProgram}</div>`;
+                        html += `<div style="font-size: 11px; color: #666;">`;
+                        html += `<div style="margin-bottom: 4px;"><strong>${count}</strong> New Facilities</div>`;
+                        html += `<div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #eee;">`;
+                        html += `<div>TFA: ${formatCurrency(amounts.tfa)}</div>`;
+                        html += `<div>Direct: ${formatCurrency(amounts.direct)}</div>`;
+                        if (amounts.contingent > 0) {
+                            html += `<div>Contingent: ${formatCurrency(amounts.contingent)}</div>`;
                         }
+                        if (amounts.pse > 0) {
+                            html += `<div>PSE: ${formatCurrency(amounts.pse)}</div>`;
+                        }
+                        html += `</div></div></div>`;
+                        return html;
                     }
                 },
                 legend: {
@@ -4181,11 +4776,11 @@
             }
         }
 
-        // Create New Facilities by Region Donut Chart from filtered data
+        // Create New Facilities by Product Program Donut Chart from filtered data
         function createCreditClassificationChartFromFiltered() {
             const startTime = performance.now();
             
-            console.log('Creating filtered new facilities by region chart, dataLength:', filteredData.length);
+            console.log('Creating filtered new facilities by product program chart, dataLength:', filteredData.length);
             
             // Find the most recent Report_Date to determine "last month"
             let mostRecentReportDate = null;
@@ -4217,29 +4812,37 @@
                 targetEndDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth(), 0);
             }
             
-            // Track new facilities per region
-            const regionNewFacilities = new Map();
-            const regionTotalFacilities = new Map();
+            // Track new facilities per product program with amounts
+            const productNewFacilities = new Map();
+            const productTotalFacilities = new Map();
+            const productAmounts = new Map();
             
             for (let i = 0; i < filteredData.length; i++) {
                 const row = filteredData[i];
-                const region = row.Region || 'Unknown';
+                const productProgram = row.Product_Program || 'Unknown';
                 const facilityId = row.Facility_ID;
                 const firstApprovalDate = parseDate(row.Facility_First_Approval_Date);
                 
                 if (!facilityId) continue;
                 
-                // Initialize region tracking
-                if (!regionNewFacilities.has(region)) {
-                    regionNewFacilities.set(region, new Set());
-                    regionTotalFacilities.set(region, new Set());
+                // Initialize product program tracking
+                if (!productNewFacilities.has(productProgram)) {
+                    productNewFacilities.set(productProgram, new Set());
+                    productTotalFacilities.set(productProgram, new Set());
+                    productAmounts.set(productProgram, { tfa: 0, direct: 0, contingent: 0, pse: 0 });
                 }
                 
-                regionTotalFacilities.get(region).add(facilityId);
+                productTotalFacilities.get(productProgram).add(facilityId);
                 
                 // Check if facility is "new" (approved within the selected period)
                 if (firstApprovalDate && firstApprovalDate >= targetStartDate && firstApprovalDate <= targetEndDate) {
-                    regionNewFacilities.get(region).add(facilityId);
+                    productNewFacilities.get(productProgram).add(facilityId);
+                    // Accumulate amounts for new facilities
+                    const amounts = productAmounts.get(productProgram);
+                    amounts.tfa += parseNumber(row.Facility_Amount);
+                    amounts.direct += parseNumber(row.Direct_OS);
+                    amounts.contingent += parseNumber(row.Contingeng_OS);
+                    amounts.pse += parseNumber(row.PSE_OS);
                 }
             }
             
@@ -4248,10 +4851,10 @@
             const series = [];
             const counts = [];
             
-            for (const [region, newFacilitiesSet] of regionNewFacilities.entries()) {
+            for (const [productProgram, newFacilitiesSet] of productNewFacilities.entries()) {
                 const newCount = newFacilitiesSet.size;
-                if (newCount > 0) {  // Only include regions with new facilities
-                    labels.push(region);
+                if (newCount > 0) {  // Only include product programs with new facilities
+                    labels.push(productProgram);
                     series.push(newCount);
                     counts.push(newCount);
                 }
@@ -4282,6 +4885,14 @@
                     type: 'donut',
                     width: 280,
                     height: 280,
+                    events: {
+                        dataPointSelection: function(event, chartContext, config) {
+                            const selectedIndex = config.dataPointIndex;
+                            const selectedProduct = labels[selectedIndex];
+                            console.log('Product clicked:', selectedProduct);
+                            applyChartFilter('product', selectedProduct, selectedProduct);
+                        }
+                    }
                 },
                 stroke: {
                     show: false,
@@ -4326,10 +4937,28 @@
                 },
                 tooltip: {
                     enabled: true,
-                    y: {
-                        formatter: function(val) {
-                            return val.toLocaleString() + ' new facilities';
+                    custom: function({series, seriesIndex, dataPointIndex, w}) {
+                        const productProgram = labels[seriesIndex];
+                        const count = series[seriesIndex];
+                        const amounts = productAmounts.get(productProgram);
+                        
+                        if (!amounts) return '';
+                        
+                        let html = `<div class="apexcharts-tooltip-custom" style="padding: 12px; min-width: 200px; background: #ffffff; color: #1f2937;">`;
+                        html += `<div style="font-weight: 600; margin-bottom: 8px; font-size: 13px; color: #1f2937;">${productProgram}</div>`;
+                        html += `<div style="font-size: 11px; color: #666;">`;
+                        html += `<div style="margin-bottom: 4px;"><strong>${count}</strong> New Facilities</div>`;
+                        html += `<div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #eee;">`;
+                        html += `<div>TFA: ${formatCurrency(amounts.tfa)}</div>`;
+                        html += `<div>Direct: ${formatCurrency(amounts.direct)}</div>`;
+                        if (amounts.contingent > 0) {
+                            html += `<div>Contingent: ${formatCurrency(amounts.contingent)}</div>`;
                         }
+                        if (amounts.pse > 0) {
+                            html += `<div>PSE: ${formatCurrency(amounts.pse)}</div>`;
+                        }
+                        html += `</div></div></div>`;
+                        return html;
                     }
                 },
                 legend: {

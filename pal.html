@@ -625,9 +625,10 @@
                     <div class="shadow-default rounded-2xl bg-white px-5 pb-11 pt-5 sm:px-6 sm:pt-6 flex-1 flex flex-col">
                         <div class="mb-6">
                             <h3 class="text-lg font-semibold text-gray-800">CAs & Facilities Expiring</h3>
+                            <p class="mt-1 text-sm text-gray-500">Upcoming expirations for the next 3 months</p>
                         </div>
-                        <div class="flex-1">
-                            <div id="facilityTrendChart" class="-ml-5"></div>
+                        <div class="flex-1 flex items-center">
+                            <div id="facilityTrendChart" class="-ml-5 w-full" style="min-height: 350px;"></div>
                         </div>
                     </div>
                     
@@ -670,6 +671,7 @@
                             <h3 class="text-lg font-semibold text-gray-800">
                                 New Facilities by Product Program
                             </h3>
+                            <p class="mt-1 text-sm text-gray-500" id="newFacilitiesSubtitle">Facilities approved in reporting month</p>
                         </div>
                         <div class="inline-flex w-fit items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
                             <button id="currentMonthBtn" onclick="filterNewFacilitiesByPeriod('current')" 
@@ -697,7 +699,7 @@
                     <div class="flex flex-col gap-3 mb-3 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800">Regional Distribution</h3>
-                            <p class="mt-1 text-sm text-gray-500" id="regionalDistSubtitle">Expiring soon by region</p>
+                            <p class="mt-1 text-sm text-gray-500" id="regionalDistSubtitle">Facilities expiring in current reporting month by region</p>
                         </div>
                         <div class="inline-flex w-fit items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
                             <button id="facilitiesRegionBtn" onclick="filterRegionalDistribution('facilities')" 
@@ -728,7 +730,7 @@
                 <div class="flex flex-col gap-5 mb-6 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                             <h3 class="text-lg font-semibold text-gray-800" id="topRelationshipsTitle">Top Relationships by Direct OS</h3>
-                            <p class="mt-1 text-gray-500 text-sm">Ranked by total exposure</p>
+                            <p class="mt-1 text-gray-500 text-sm" id="topRelationshipsSubtitle">Largest client exposures ranked by outstanding balance</p>
                     </div>
                         <div class="flex items-center">
                             <!-- Top N Selector with TailAdmin Styling -->
@@ -2019,14 +2021,14 @@
                 const maturityDate = parseDate(row.Maturity_Date);
                 if (maturityDate && maturityDate >= monthStart && maturityDate <= monthEnd && maturityDate < maxReportDate) {
                     facilitiesExpiredCount++;
-                    facilitiesExpiredAmount += parseFloat(row.Facility_Amount) || 0;
+                    facilitiesExpiredAmount += parseNumber(row.Fac_Amount || row.Facility_Amount);
                 }
                 
                 // Check CAs Expired (count unique CAIDs, but sum ALL lines)
                 const caExpirationDate = parseDate(row.CA_Expiration_Date);
                 if (caExpirationDate && caExpirationDate >= monthStart && caExpirationDate <= monthEnd && caExpirationDate < maxReportDate && row.CAID) {
                     expiredCAs.add(row.CAID);
-                    casExpiredAmount += parseFloat(row.Facility_Amount) || 0;
+                    casExpiredAmount += parseNumber(row.Fac_Amount || row.Facility_Amount);
                 }
             }
             
@@ -2117,7 +2119,7 @@
                     fontFamily: "Outfit, sans-serif",
                     type: "bar",
                     stacked: false,
-                    height: 315,
+                    height: '100%',
                     toolbar: {
                         show: false
                     },
@@ -2230,7 +2232,9 @@
             
             // Update subtitle
             const subtitle = document.getElementById('regionalDistSubtitle');
-            subtitle.textContent = type === 'facilities' ? 'Facilities expiring this month' : 'CAs expiring this month';
+            subtitle.textContent = type === 'facilities' 
+                ? 'Facilities expiring in current reporting month by region' 
+                : 'Credit Agreements expiring in current reporting month by region';
             
             // Recreate chart with new type
             if (Object.keys(activeFilters).length > 0 || filteredData.length > 0 && filteredData.length < portfolioData.length) {
@@ -2424,7 +2428,7 @@
                             regionItems[region] = { count: 0, amount: 0 };
                         }
                         regionItems[region].count++;
-                        regionItems[region].amount += parseFloat(row.Facility_Amount) || 0;
+                        regionItems[region].amount += parseNumber(row.Fac_Amount || row.Facility_Amount);
                         totalExpiring++;
                     }
                 });
@@ -2447,7 +2451,7 @@
                         }
                         
                         regionCAIDs[region].add(row.CAID);
-                        regionItems[region].amount += parseFloat(row.Facility_Amount) || 0;
+                        regionItems[region].amount += parseNumber(row.Fac_Amount || row.Facility_Amount);
                         totalExpiring++;
                     }
                 });
@@ -2786,19 +2790,25 @@
                 }
             });
             
-            // Update Top Relationships chart title
+            // Update Top Relationships chart title and subtitle
             const titleElement = document.getElementById('topRelationshipsTitle');
+            const subtitleElement = document.getElementById('topRelationshipsSubtitle');
             if (titleElement) {
                 if (type === 'direct') {
                     titleElement.textContent = 'Top Relationships by Direct OS';
+                    if (subtitleElement) subtitleElement.textContent = 'Largest client exposures ranked by direct outstanding balance';
                 } else if (type === 'contingent') {
                     titleElement.textContent = 'Top Relationships by Contingent OS';
+                    if (subtitleElement) subtitleElement.textContent = 'Largest client exposures ranked by contingent outstanding balance';
                 } else if (type === 'pse') {
                     titleElement.textContent = 'Top Relationships by PSE OS';
+                    if (subtitleElement) subtitleElement.textContent = 'Largest client exposures ranked by PSE outstanding balance';
                 } else if (type === 'osuc') {
                     titleElement.textContent = 'Top Relationships by OSUC';
+                    if (subtitleElement) subtitleElement.textContent = 'Largest client exposures ranked by outstandings under commitment';
                 } else if (type === 'tfa') {
                     titleElement.textContent = 'Top Relationships by Total Facility Amount';
+                    if (subtitleElement) subtitleElement.textContent = 'Largest client exposures ranked by total committed facility amounts';
                 }
             }
             
@@ -3053,14 +3063,14 @@
                 const maturityDate = parseDate(row.Maturity_Date);
                 if (maturityDate && maturityDate >= monthStart && maturityDate <= monthEnd && maturityDate < maxReportDate) {
                     facilitiesExpiredCount++;
-                    facilitiesExpiredAmount += parseFloat(row.Facility_Amount) || 0;
+                    facilitiesExpiredAmount += parseNumber(row.Fac_Amount || row.Facility_Amount);
                 }
                 
                 // Check CAs Expired (count unique CAIDs, but sum ALL lines)
                 const caExpirationDate = parseDate(row.CA_Expiration_Date);
                 if (caExpirationDate && caExpirationDate >= monthStart && caExpirationDate <= monthEnd && caExpirationDate < maxReportDate && row.CAID) {
                     expiredCAs.add(row.CAID);
-                    casExpiredAmount += parseFloat(row.Facility_Amount) || 0;
+                    casExpiredAmount += parseNumber(row.Fac_Amount || row.Facility_Amount);
                 }
             }
             
@@ -3238,7 +3248,7 @@
                     fontFamily: "Outfit, sans-serif",
                     type: "bar",
                     stacked: false,
-                    height: 315,
+                    height: '100%',
                     toolbar: {
                         show: false
                     },
@@ -3387,11 +3397,11 @@
                         // Only include if it's in our next 3 months
                         if (next3Months.includes(monthYear)) {
                             monthlyData[monthYear].casComingDue.add(caid);
-                            // Accumulate amounts for CAs
-                            monthlyData[monthYear].caAmounts.tfa += parseFloat(row.Facility_Amount) || 0;
-                            monthlyData[monthYear].caAmounts.direct += parseFloat(row.Direct_OS) || 0;
-                            monthlyData[monthYear].caAmounts.contingent += parseFloat(row.Contingeng_OS) || 0;
-                            monthlyData[monthYear].caAmounts.pse += parseFloat(row.PSE_OS) || 0;
+                            // Accumulate amounts for CAs (sum ALL lines for each CA)
+                            monthlyData[monthYear].caAmounts.tfa += parseNumber(row.Fac_Amount || row.Facility_Amount);
+                            monthlyData[monthYear].caAmounts.direct += parseNumber(row.Direct_OS);
+                            monthlyData[monthYear].caAmounts.contingent += parseNumber(row.Contingeng_OS);
+                            monthlyData[monthYear].caAmounts.pse += parseNumber(row.PSE_OS);
                         }
                     }
                 }
@@ -3412,11 +3422,11 @@
                         // Only include if it's in our next 3 months
                         if (next3Months.includes(monthYear)) {
                             monthlyData[monthYear].facilitiesExpiring.push(facilityId);
-                            // Accumulate amounts for Facilities
-                            monthlyData[monthYear].facilityAmounts.tfa += parseFloat(row.Facility_Amount) || 0;
-                            monthlyData[monthYear].facilityAmounts.direct += parseFloat(row.Direct_OS) || 0;
-                            monthlyData[monthYear].facilityAmounts.contingent += parseFloat(row.Contingeng_OS) || 0;
-                            monthlyData[monthYear].facilityAmounts.pse += parseFloat(row.PSE_OS) || 0;
+                            // Accumulate amounts for Facilities (sum ALL lines)
+                            monthlyData[monthYear].facilityAmounts.tfa += parseNumber(row.Fac_Amount || row.Facility_Amount);
+                            monthlyData[monthYear].facilityAmounts.direct += parseNumber(row.Direct_OS);
+                            monthlyData[monthYear].facilityAmounts.contingent += parseNumber(row.Contingeng_OS);
+                            monthlyData[monthYear].facilityAmounts.pse += parseNumber(row.PSE_OS);
                         }
                     }
                 }
@@ -3450,7 +3460,7 @@
                     fontFamily: "Outfit, sans-serif",
                     type: "bar",
                     stacked: false,
-                    height: 315,
+                    height: '100%',
                     toolbar: {
                         show: false
                     },
@@ -3641,11 +3651,11 @@
                         // Only include if it's in our next 3 months
                         if (next3Months.includes(monthYear)) {
                             monthlyData[monthYear].casComingDue.add(caid);
-                            // Accumulate amounts for CAs
-                            monthlyData[monthYear].caAmounts.tfa += parseFloat(row.Facility_Amount) || 0;
-                            monthlyData[monthYear].caAmounts.direct += parseFloat(row.Direct_OS) || 0;
-                            monthlyData[monthYear].caAmounts.contingent += parseFloat(row.Contingeng_OS) || 0;
-                            monthlyData[monthYear].caAmounts.pse += parseFloat(row.PSE_OS) || 0;
+                            // Accumulate amounts for CAs (sum ALL lines for each CA)
+                            monthlyData[monthYear].caAmounts.tfa += parseNumber(row.Fac_Amount || row.Facility_Amount);
+                            monthlyData[monthYear].caAmounts.direct += parseNumber(row.Direct_OS);
+                            monthlyData[monthYear].caAmounts.contingent += parseNumber(row.Contingeng_OS);
+                            monthlyData[monthYear].caAmounts.pse += parseNumber(row.PSE_OS);
                         }
                     }
                 }
@@ -3666,11 +3676,11 @@
                         // Only include if it's in our next 3 months
                         if (next3Months.includes(monthYear)) {
                             monthlyData[monthYear].facilitiesExpiring.push(facilityId);
-                            // Accumulate amounts for Facilities
-                            monthlyData[monthYear].facilityAmounts.tfa += parseFloat(row.Facility_Amount) || 0;
-                            monthlyData[monthYear].facilityAmounts.direct += parseFloat(row.Direct_OS) || 0;
-                            monthlyData[monthYear].facilityAmounts.contingent += parseFloat(row.Contingeng_OS) || 0;
-                            monthlyData[monthYear].facilityAmounts.pse += parseFloat(row.PSE_OS) || 0;
+                            // Accumulate amounts for Facilities (sum ALL lines)
+                            monthlyData[monthYear].facilityAmounts.tfa += parseNumber(row.Fac_Amount || row.Facility_Amount);
+                            monthlyData[monthYear].facilityAmounts.direct += parseNumber(row.Direct_OS);
+                            monthlyData[monthYear].facilityAmounts.contingent += parseNumber(row.Contingeng_OS);
+                            monthlyData[monthYear].facilityAmounts.pse += parseNumber(row.PSE_OS);
                         }
                     }
                 }
@@ -3701,7 +3711,7 @@
                     fontFamily: "Outfit, sans-serif",
                     type: "bar",
                     stacked: false,
-                    height: 315,
+                    height: '100%',
                     toolbar: {
                         show: false
                     },
@@ -4150,7 +4160,7 @@
                             regionItems[region] = { count: 0, amount: 0 };
                         }
                         regionItems[region].count++;
-                        regionItems[region].amount += parseFloat(row.Facility_Amount) || 0;
+                        regionItems[region].amount += parseNumber(row.Fac_Amount || row.Facility_Amount);
                         totalExpiring++;
                     }
                 });
@@ -4173,7 +4183,7 @@
                         }
                         
                         regionCAIDs[region].add(row.CAID);
-                        regionItems[region].amount += parseFloat(row.Facility_Amount) || 0;
+                        regionItems[region].amount += parseNumber(row.Fac_Amount || row.Facility_Amount);
                         totalExpiring++;
                     }
                 });
@@ -4629,10 +4639,10 @@
                 if (chartElement) {
                     chartElement.innerHTML = `<div class="flex items-center justify-center h-full text-gray-500">No new facilities in ${periodLabel}</div>`;
                 }
-                // Update chart title even when no data
-                const titleElement = document.querySelector('.text-lg.font-semibold.text-gray-800');
-                if (titleElement && titleElement.textContent.includes('New Facilities by Product Program')) {
-                    titleElement.innerHTML = `New Facilities by Product Program <span class="text-sm font-normal text-gray-500">(${periodLabel})</span>`;
+                // Update chart subtitle even when no data
+                const subtitleElement = document.getElementById('newFacilitiesSubtitle');
+                if (subtitleElement) {
+                    subtitleElement.textContent = `Facilities first approved in ${periodLabel}`;
                 }
                 return;
             }
@@ -4783,10 +4793,10 @@
                 // Update legend
                 updateCreditClassificationLegend(labels, series, counts, totalNewFacilities, colors);
                 
-                // Update chart title with period
-                const titleElement = document.querySelector('.text-lg.font-semibold.text-gray-800');
-                if (titleElement && titleElement.textContent.includes('New Facilities by Product Program')) {
-                    titleElement.innerHTML = `New Facilities by Product Program <span class="text-sm font-normal text-gray-500">(${periodLabel})</span>`;
+                // Update chart subtitle with period
+                const subtitleElement = document.getElementById('newFacilitiesSubtitle');
+                if (subtitleElement) {
+                    subtitleElement.textContent = `Facilities first approved in ${periodLabel}`;
                 }
                 
                 console.log('✅ New facilities by region chart rendered successfully');
@@ -4902,10 +4912,10 @@
                 if (chartElement) {
                     chartElement.innerHTML = `<div class="flex items-center justify-center h-full text-gray-500">No new facilities in ${periodLabel}</div>`;
                 }
-                // Update chart title even when no data
-                const titleElement = document.querySelector('.text-lg.font-semibold.text-gray-800');
-                if (titleElement && titleElement.textContent.includes('New Facilities by Product Program')) {
-                    titleElement.innerHTML = `New Facilities by Product Program <span class="text-sm font-normal text-gray-500">(${periodLabel})</span>`;
+                // Update chart subtitle even when no data
+                const subtitleElement = document.getElementById('newFacilitiesSubtitle');
+                if (subtitleElement) {
+                    subtitleElement.textContent = `Facilities first approved in ${periodLabel}`;
                 }
                 return;
             }
@@ -5051,10 +5061,10 @@
                 // Update legend
                 updateCreditClassificationLegend(labels, series, counts, totalNewFacilities, colors);
                 
-                // Update chart title with period
-                const titleElement = document.querySelector('.text-lg.font-semibold.text-gray-800');
-                if (titleElement && titleElement.textContent.includes('New Facilities by Product Program')) {
-                    titleElement.innerHTML = `New Facilities by Product Program <span class="text-sm font-normal text-gray-500">(${periodLabel})</span>`;
+                // Update chart subtitle with period
+                const subtitleElement = document.getElementById('newFacilitiesSubtitle');
+                if (subtitleElement) {
+                    subtitleElement.textContent = `Facilities first approved in ${periodLabel}`;
                 }
                 
                 console.log('✅ New facilities by region chart (filtered) rendered successfully');

@@ -3192,11 +3192,13 @@
             }
             
             console.log('Amount Type filter:', type);
-            // Refresh ONLY the Top Relationships chart (Exposure filter should only affect this chart)
+            // Refresh the Top Relationships chart and ROTCE chart (both should sync)
             if (filteredData.length > 0) {
                 createRelationshipChartFromFiltered();
+                createROTCEChartFromFiltered();
             } else {
                 createRelationshipChart();
+                createROTCEChart();
             }
         }
         
@@ -3500,6 +3502,45 @@
             
             // Regular number
             return parseFloat(str) || 0;
+        }
+        
+        // Parse percentage values (handles "0.1%", "12.5%", or decimal 0.001)
+        function parsePercentage(value) {
+            if (!value && value !== 0) return 0;
+            
+            // If already a number
+            if (typeof value === 'number') {
+                // If it's a small decimal (< 1), assume it's already in decimal form (0.001 = 0.1%)
+                // and convert to percentage
+                if (value < 1 && value > -1) {
+                    return value * 100;
+                }
+                return value;
+            }
+            
+            // Convert to string and clean
+            let str = String(value).trim();
+            
+            // Remove commas
+            str = str.replace(/,/g, '');
+            
+            // Handle percentage sign
+            if (str.includes('%')) {
+                // Remove % and parse - "0.1%" becomes 0.1
+                return parseFloat(str.replace('%', '')) || 0;
+            }
+            
+            // If no % sign, check if it's a small decimal
+            const numValue = parseFloat(str);
+            if (!isNaN(numValue)) {
+                // If it's a small decimal (< 1), assume it's in decimal form and convert
+                if (numValue < 1 && numValue > -1) {
+                    return numValue * 100;
+                }
+                return numValue;
+            }
+            
+            return 0;
         }
         
         // Format currency with M/B notation
@@ -5300,7 +5341,7 @@
             
             portfolioData.forEach(row => {
                 const relName = row.Relationship_Name || row.Relationship_ID;
-                const rotce = parseFloat(row.ROTCE);
+                const rotce = parsePercentage(row.ROTCE);
                 
                 if (relName && !isNaN(rotce)) {
                     if (!rotceByRelationship.has(relName)) {
@@ -5326,25 +5367,53 @@
                 if (!relId) continue;
                 
                 if (!relationshipData.has(relId)) {
-                    relationshipData.set(relId, { direct: 0 });
+                    relationshipData.set(relId, {
+                        tfa: 0,
+                        direct: 0,
+                        contingent: 0,
+                        pse: 0,
+                        osuc: 0,
+                        unused: 0
+                    });
                 }
                 const data = relationshipData.get(relId);
+                data.tfa += parseNumber(row.Facility_Amount);
                 data.direct += parseNumber(row.Direct_OS);
+                data.contingent += parseNumber(row.Contingeng_OS);
+                data.pse += parseNumber(row.PSE_OS);
+                data.osuc += parseNumber(row.OSUC);
+                data.unused += parseNumber(row.Unused_Committed);
             }
             
-            // Get top N relationships by Direct OS (matching Top Relationships chart)
-            const topRelationships = Array.from(relationshipData.entries())
-                .sort((a, b) => b[1].direct - a[1].direct)
+            // Get the selected field value for sorting (sync with Top Relationships chart)
+            const relationshipTotals = new Map();
+            for (const [relId, data] of relationshipData.entries()) {
+                let sortValue = 0;
+                switch (selectedAmountType) {
+                    case 'tfa': sortValue = data.tfa; break;
+                    case 'direct': sortValue = data.direct; break;
+                    case 'contingent': sortValue = data.contingent; break;
+                    case 'pse': sortValue = data.pse; break;
+                    case 'osuc': sortValue = data.osuc; break;
+                    case 'unused': sortValue = data.unused; break;
+                    default: sortValue = data.direct;
+                }
+                relationshipTotals.set(relId, sortValue);
+            }
+            
+            // Get top N relationships by selected exposure type (matching Top Relationships chart)
+            const topRelationships = Array.from(relationshipTotals.entries())
+                .sort((a, b) => b[1] - a[1])
                 .slice(0, topNRelationships)
                 .map(entry => entry[0]);
             
             // Filter and order ROTCE data to match top relationships
             const filteredROTCE = topRelationships
                 .map(relName => relationshipROTCE.find(r => r.name === relName))
-                .filter(r => r !== undefined)
-                .reverse(); // Reverse for horizontal bar chart (top to bottom)
+                .filter(r => r !== undefined);
             
-            const relationships = filteredROTCE.map(r => r.name);
+            // Add index numbers (1, 2, 3, ...) to match Top Relationships chart
+            const relationships = filteredROTCE.map((r, index) => `${index + 1}. ${r.name}`);
             const avgROTCE = filteredROTCE.map(r => r.rotce);
             
             // Update subtitle
@@ -5470,12 +5539,8 @@
         function createROTCEChartFromFiltered() {
             console.log('📊 Creating filtered ROTCE Performance chart');
             
-            // Get Top N from either filter (they should be synced)
-            const topNROTCE = parseInt(document.getElementById('topNFilterROTCE').value);
-            const topNRelationships = parseInt(document.getElementById('topNFilter').value);
-            
-            // Use ROTCE filter if different, otherwise sync with relationships filter
-            const topN = topNROTCE;
+            // Get Top N from Top Relationships filter (synced)
+            const topN = parseInt(document.getElementById('topNFilter').value);
             
             // Group ROTCE by relationship from filtered data
             const rotceByRelationship = new Map();
@@ -5485,7 +5550,7 @@
             
             dataSource.forEach(row => {
                 const relName = row.Relationship_Name || row.Relationship_ID;
-                const rotce = parseFloat(row.ROTCE);
+                const rotce = parsePercentage(row.ROTCE);
                 
                 if (relName && !isNaN(rotce)) {
                     if (!rotceByRelationship.has(relName)) {
@@ -5510,25 +5575,53 @@
                 if (!relId) continue;
                 
                 if (!relationshipData.has(relId)) {
-                    relationshipData.set(relId, { direct: 0 });
+                    relationshipData.set(relId, {
+                        tfa: 0,
+                        direct: 0,
+                        contingent: 0,
+                        pse: 0,
+                        osuc: 0,
+                        unused: 0
+                    });
                 }
                 const data = relationshipData.get(relId);
+                data.tfa += parseNumber(row.Facility_Amount);
                 data.direct += parseNumber(row.Direct_OS);
+                data.contingent += parseNumber(row.Contingeng_OS);
+                data.pse += parseNumber(row.PSE_OS);
+                data.osuc += parseNumber(row.OSUC);
+                data.unused += parseNumber(row.Unused_Committed);
             }
             
-            // Get top N relationships by Direct OS (matching Top Relationships chart)
-            const topRelationships = Array.from(relationshipData.entries())
-                .sort((a, b) => b[1].direct - a[1].direct)
+            // Get the selected field value for sorting (sync with Top Relationships chart)
+            const relationshipTotals = new Map();
+            for (const [relId, data] of relationshipData.entries()) {
+                let sortValue = 0;
+                switch (selectedAmountType) {
+                    case 'tfa': sortValue = data.tfa; break;
+                    case 'direct': sortValue = data.direct; break;
+                    case 'contingent': sortValue = data.contingent; break;
+                    case 'pse': sortValue = data.pse; break;
+                    case 'osuc': sortValue = data.osuc; break;
+                    case 'unused': sortValue = data.unused; break;
+                    default: sortValue = data.direct;
+                }
+                relationshipTotals.set(relId, sortValue);
+            }
+            
+            // Get top N relationships by selected exposure type (matching Top Relationships chart)
+            const topRelationships = Array.from(relationshipTotals.entries())
+                .sort((a, b) => b[1] - a[1])
                 .slice(0, topN)
                 .map(entry => entry[0]);
             
             // Filter and order ROTCE data to match top relationships
             const filteredROTCE = topRelationships
                 .map(relName => relationshipROTCE.find(r => r.name === relName))
-                .filter(r => r !== undefined)
-                .reverse(); // Reverse for horizontal bar chart (top to bottom)
+                .filter(r => r !== undefined);
             
-            const relationships = filteredROTCE.map(r => r.name);
+            // Add index numbers (1, 2, 3, ...) to match Top Relationships chart
+            const relationships = filteredROTCE.map((r, index) => `${index + 1}. ${r.name}`);
             const avgROTCE = filteredROTCE.map(r => r.rotce);
             
             // Update subtitle

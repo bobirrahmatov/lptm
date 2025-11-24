@@ -1742,6 +1742,8 @@
         let facilityTrendChartInstance = null; // Store facility trend chart instance
         let facilityMaturityChartInstance = null; // Store facility maturity chart instance
         let creditClassificationChartInstance = null; // Store credit classification chart instance
+        let rotceChartInstance = null; // Store ROTCE chart instance
+        let updateBarChartTimer = null; // Debounce timer for bar chart updates
         let activeFilters = {};
         let selectedMetricType = "facilityAmount"; // Default to Facility Amount
         
@@ -2537,6 +2539,7 @@
                 // Still need to update charts even when using cache
                 requestAnimationFrame(() => {
                     calculateMetricsFromFiltered();
+                    createExpirationChartFromFiltered();
                     createFacilityTrendChartFromFiltered();
                     createRelationshipChartFromFiltered();
                     createCreditClassificationChartFromFiltered();
@@ -2679,6 +2682,7 @@
             // Recalculate metrics and charts with filtered data (async to prevent blocking)
             requestAnimationFrame(() => {
             calculateMetricsFromFiltered();
+                createExpirationChartFromFiltered();
                 createFacilityTrendChartFromFiltered();
             createRelationshipChartFromFiltered();
             createCreditClassificationChartFromFiltered();
@@ -2981,6 +2985,7 @@
             // Recalculate metrics and charts with filtered data (async to prevent blocking)
             requestAnimationFrame(() => {
                 calculateMetricsFromFiltered();
+                createExpirationChartFromFiltered();
                 createFacilityTrendChartFromFiltered();
                 createRelationshipChartFromFiltered();
                 createCreditClassificationChartFromFiltered();
@@ -5894,13 +5899,21 @@
 
         // Update bar chart
         function updateBarChart() {
-            if (areFiltersActive()) {
+            // Debounce to prevent rapid successive calls when switching between Top N values
+            if (updateBarChartTimer) {
+                clearTimeout(updateBarChartTimer);
+            }
+            
+            updateBarChartTimer = setTimeout(() => {
+                console.log("🔄 Updating bar charts (debounced)");
+                if (areFiltersActive()) {
                 createRelationshipChartFromFiltered();
                 createROTCEChartFromFiltered();
             } else {
                 createRelationshipChart();
                 createROTCEChart();
             }
+            }, 100); // 100ms debounce to prevent glitching
         }
 
         // Filter New Facilities by Period (Current Month or Previous Month)
@@ -6889,7 +6902,7 @@
                 yaxis: {
                     labels: {
                         style: {
-                            colors: "#6B7280",
+                            colors: relationships.map(() => "#6B7280"),
                             fontSize: "11px",
                         },
                         maxWidth: 200,
@@ -6918,7 +6931,16 @@
                 },
             };
 
-            // Destroy existing chart if it exists
+            // Destroy existing chart instance properly
+            if (rotceChartInstance) {
+                try {
+                    rotceChartInstance.destroy();
+                } catch (e) {
+                    console.log("Error destroying ROTCE chart:", e);
+                }
+                rotceChartInstance = null;
+            }
+            
             const chartElement = document.querySelector("#rotceChart");
             if (chartElement) {
                 chartElement.innerHTML = "";
@@ -6930,8 +6952,9 @@
                 return;
             }
 
-            const chart = new ApexCharts(chartElement, chartOptions);
-            chart.render();
+            // Create and store the chart instance
+            rotceChartInstance = new ApexCharts(chartElement, chartOptions);
+            rotceChartInstance.render();
         }
 
         // Create ROTCE chart from filtered data
@@ -7046,7 +7069,16 @@
                 subtitleEl.textContent = `Top ${topN} relationships ROTCE performance`;
             }
             
-            // Destroy existing chart if it exists
+            // Destroy existing chart instance properly
+            if (rotceChartInstance) {
+                try {
+                    rotceChartInstance.destroy();
+                } catch (e) {
+                    console.log("Error destroying ROTCE chart:", e);
+                }
+                rotceChartInstance = null;
+            }
+            
             const chartElement = document.querySelector("#rotceChart");
             if (chartElement) {
                 chartElement.innerHTML = "";
@@ -7144,7 +7176,7 @@
                 yaxis: {
                     labels: {
                         style: {
-                            colors: "#6B7280",
+                            colors: relationships.map(() => "#6B7280"),
                             fontSize: "11px",
                         },
                         maxWidth: 200,
@@ -7173,8 +7205,9 @@
                 },
             };
             
-            const chart = new ApexCharts(chartElement, chartOptions);
-            chart.render();
+            // Create and store the chart instance
+            rotceChartInstance = new ApexCharts(chartElement, chartOptions);
+            rotceChartInstance.render();
         }
 
         // Filter data based on search (works with existing filters)
@@ -7247,9 +7280,19 @@
         // Render table (optimized for large datasets)
         function renderTable() {
             const tbody = document.getElementById("tableBody");
+            
+            // Determine which data source to use
+            const hasActiveFilters = Object.keys(activeFilters).length > 0 || 
+                                     selectedRegion !== "all" || 
+                                     !includePSE || 
+                                     selectedStatus !== "all" ||
+                                     document.getElementById("searchInput").value.trim() !== "";
+            
+            const dataSource = hasActiveFilters ? filteredData : portfolioData;
+            
             const startIdx = (currentPage - 1) * rowsPerPage;
             const endIdx = startIdx + rowsPerPage;
-            const pageData = filteredData.slice(startIdx, endIdx);
+            const pageData = dataSource.slice(startIdx, endIdx);
             
             // Use requestAnimationFrame for smooth rendering
             requestAnimationFrame(() => {
@@ -7296,14 +7339,23 @@
 
         // Update pagination
         function updatePagination() {
-            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            // Determine which data source to use
+            const hasActiveFilters = Object.keys(activeFilters).length > 0 || 
+                                     selectedRegion !== "all" || 
+                                     !includePSE || 
+                                     selectedStatus !== "all" ||
+                                     document.getElementById("searchInput").value.trim() !== "";
+            
+            const dataSource = hasActiveFilters ? filteredData : portfolioData;
+            
+            const totalPages = Math.ceil(dataSource.length / rowsPerPage);
             const startRow = (currentPage - 1) * rowsPerPage + 1;
-            const endRow = Math.min(currentPage * rowsPerPage, filteredData.length);
+            const endRow = Math.min(currentPage * rowsPerPage, dataSource.length);
             
             document.getElementById("startRow").textContent =
-                filteredData.length > 0 ? startRow : 0;
+                dataSource.length > 0 ? startRow : 0;
             document.getElementById("endRow").textContent = endRow;
-            document.getElementById("totalRows").textContent = filteredData.length;
+            document.getElementById("totalRows").textContent = dataSource.length;
             document.getElementById("currentPage").textContent = currentPage;
             document.getElementById("totalPages").textContent = totalPages;
 
@@ -7321,7 +7373,15 @@
         }
 
         function nextPage() {
-            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            // Determine which data source to use
+            const hasActiveFilters = Object.keys(activeFilters).length > 0 || 
+                                     selectedRegion !== "all" || 
+                                     !includePSE || 
+                                     selectedStatus !== "all" ||
+                                     document.getElementById("searchInput").value.trim() !== "";
+            
+            const dataSource = hasActiveFilters ? filteredData : portfolioData;
+            const totalPages = Math.ceil(dataSource.length / rowsPerPage);
             if (currentPage < totalPages) {
                 currentPage++;
                 renderTable();
@@ -8537,4 +8597,3 @@
 </body>
 
 </html>
-

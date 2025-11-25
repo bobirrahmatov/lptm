@@ -743,161 +743,63 @@
         <div class="grid grid-cols-12 gap-4 md:gap-6 mb-6">
             <!-- Bar Chart: CAs Coming Due & Facilities Expiring -->
             <div class="col-span-12 xl:col-span-4">
-                <div class="rounded-2xl border border-gray-200 bg-gray-100 h-full flex flex-col">
-                    <div
-                        class="shadow-default rounded-2xl bg-white px-5 pb-11 pt-5 sm:px-6 sm:pt-6 flex-1 flex flex-col">
-                        <div class="mb-6 flex items-start justify-between">
+                <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 h-full flex flex-col">
+                    <div class="flex flex-col gap-3 mb-5 sm:flex-row sm:items-start sm:justify-between">
                         <div>
-                                <h3 class="text-lg font-semibold text-gray-800">
-                                    CAs & Facilities Expiring
-                                </h3>
-                                <p class="mt-1 text-sm text-gray-500">
-                                    Upcoming expirations for the next 3 months
-                                </p>
-                        </div>
-                            <div x-data="{openDropDown: false}" class="relative">
-                                <button @click="openDropDown = !openDropDown"
-                                    :class="openDropDown ? 'text-gray-700' : 'text-gray-400 hover:text-gray-700'"
-                                    class="transition-colors">
-                                    <svg class="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path fill-rule="evenodd" clip-rule="evenodd"
-                                            d="M10.2441 6C10.2441 5.0335 11.0276 4.25 11.9941 4.25H12.0041C12.9706 4.25 13.7541 5.0335 13.7541 6C13.7541 6.9665 12.9706 7.75 12.0041 7.75H11.9941C11.0276 7.75 10.2441 6.9665 10.2441 6ZM10.2441 18C10.2441 17.0335 11.0276 16.25 11.9941 16.25H12.0041C12.9706 16.25 13.7541 17.0335 13.7541 18C13.7541 18.9665 12.9706 19.75 12.0041 19.75H11.9941C11.0276 19.75 10.2441 18.9665 10.2441 18ZM11.9941 10.25C11.0276 10.25 10.2441 11.0335 10.2441 12C10.2441 12.9665 11.0276 13.75 11.9941 13.75H12.0041C12.9706 13.75 13.7541 12.9665 13.7541 12C13.7541 11.0335 12.9706 10.25 12.0041 10.25H11.9941Z"
-                                            fill="" />
-                                    </svg>
-                                </button>
-                                <div x-show="openDropDown" @click.outside="openDropDown = false"
-                                    class="absolute right-0 top-full z-40 w-40 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
-                                    <button onclick="openChartDataModal('expiring')" @click="openDropDown = false"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-                                        View Data
-                                    </button>
-                                    <button onclick="exportChartData('expiring')" @click="openDropDown = false"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-                                        Export Data
-                                    </button>
-                                    <button onclick="openMethodologyModal('expiring')" @click="openDropDown = false"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-                                        Methodology
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex-1 flex items-center">
-                            <div id="facilityTrendChart" class="-ml-5 w-full" style="min-height: 350px"></div>
-                                </div>
-                            </div>
-                            
-                    <!-- Expired Metrics at Bottom (TailAdmin Style) -->
-                    <div
-                        class="flex items-center justify-center gap-5 bg-gray-50 rounded-b-2xl border-t border-gray-200 px-6 py-4 sm:gap-8 sm:py-5">
-                        <div class="group relative cursor-pointer rounded-lg px-4 py-2 transition-all hover:bg-blue-50 hover:shadow-md"
-                            title="Credit Agreements that expired in the current reporting month (excluding DM status)">
-                            <div class="flex items-center justify-center gap-2 mb-2">
-                                <svg class="h-5 w-5 text-blue-500 transition-transform group-hover:scale-110"
-                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                    </path>
-                                    </svg>
-                                <p class="text-xs font-medium text-gray-600 sm:text-sm group-hover:text-blue-700">
-                                    CAs Expired
-                                </p>
-                                </div>
-                            <p
-                                class="flex items-center justify-center gap-1 text-lg font-bold text-gray-900 sm:text-xl group-hover:text-blue-600">
-                                <span id="casExpiredCount">0</span>
+                            <h3 class="text-lg font-semibold text-gray-800">
+                                CAs & Facilities Expiring
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500">
+                                Upcoming expirations for the next 3 months
                             </p>
-                            <p class="text-center text-xs text-gray-500 mt-1 group-hover:text-blue-600">
-                                <span id="casExpiredAmount">$0</span>
-                            </p>
-                            <!-- Custom Tooltip -->
-                            <div
-                                class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 pointer-events-none">
-                                <div class="bg-white border border-gray-200 rounded-lg py-3 px-4 shadow-xl"
-                                    style="min-width: 220px">
-                                    <div class="font-semibold text-sm text-gray-900 mb-2 border-b border-gray-200 pb-2">
-                                        CAs Expired
-                                    </div>
-                                    <div class="space-y-2">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-xs text-gray-600">Count:</span>
-                                            <span class="text-sm font-semibold text-gray-900"
-                                                id="casExpiredCountTooltip">0</span>
+                            <!-- Expired Metrics (Inline) -->
+                            <div class="flex items-center gap-4 mt-2">
+                                <div class="flex items-center gap-1.5">
+                                    <svg class="h-2 w-2 text-blue-500" fill="currentColor" viewBox="0 0 8 8">
+                                        <circle cx="4" cy="4" r="4"/>
+                                    </svg>
+                                    <span class="text-xs text-gray-600">CAs Expired:</span>
+                                    <span class="text-xs font-semibold text-gray-900" id="casExpiredCount">0</span>
                                 </div>
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-xs text-gray-600">Amount:</span>
-                                            <span class="text-sm font-semibold text-gray-900"
-                                                id="casExpiredAmountTooltip">$0</span>
-                            </div>
-                        </div>
-                                    <div class="text-[10px] text-gray-500 mt-2 pt-2 border-t border-gray-100">
-                                        Unique CAs expired this month (excludes DM)
-                    </div>
-                                    <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px]">
-                                        <div class="border-[6px] border-transparent border-t-white"></div>
-                                        <div
-                                            class="absolute top-[-7px] left-1/2 -translate-x-1/2 border-[7px] border-transparent border-t-gray-200">
-                                        </div>
-                                    </div>
+                                <div class="flex items-center gap-1.5">
+                                    <svg class="h-2 w-2 text-orange-500" fill="currentColor" viewBox="0 0 8 8">
+                                        <circle cx="4" cy="4" r="4"/>
+                                    </svg>
+                                    <span class="text-xs text-gray-600">Facilities Expired:</span>
+                                    <span class="text-xs font-semibold text-gray-900" id="facilitiesExpiredCount">0</span>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="h-16 w-px bg-gray-300"></div>
-
-                        <div class="group relative cursor-pointer rounded-lg px-4 py-2 transition-all hover:bg-orange-50 hover:shadow-md"
-                            title="Facilities that expired in the current reporting month">
-                            <div class="flex items-center justify-center gap-2 mb-2">
-                                <svg class="h-5 w-5 text-orange-500 transition-transform group-hover:scale-110"
-                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
-                                    </path>
+                        <div x-data="{openDropDown: false}" class="relative">
+                            <button @click="openDropDown = !openDropDown"
+                                :class="openDropDown ? 'text-gray-700' : 'text-gray-400 hover:text-gray-700'"
+                                class="transition-colors">
+                                <svg class="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" clip-rule="evenodd"
+                                        d="M10.2441 6C10.2441 5.0335 11.0276 4.25 11.9941 4.25H12.0041C12.9706 4.25 13.7541 5.0335 13.7541 6C13.7541 6.9665 12.9706 7.75 12.0041 7.75H11.9941C11.0276 7.75 10.2441 6.9665 10.2441 6ZM10.2441 18C10.2441 17.0335 11.0276 16.25 11.9941 16.25H12.0041C12.9706 16.25 13.7541 17.0335 13.7541 18C13.7541 18.9665 12.9706 19.75 12.0041 19.75H11.9941C11.0276 19.75 10.2441 18.9665 10.2441 18ZM11.9941 10.25C11.0276 10.25 10.2441 11.0335 10.2441 12C10.2441 12.9665 11.0276 13.75 11.9941 13.75H12.0041C12.9706 13.75 13.7541 12.9665 13.7541 12C13.7541 11.0335 12.9706 10.25 12.0041 10.25H11.9941Z"
+                                        fill="" />
                                 </svg>
-                                <p class="text-xs font-medium text-gray-600 sm:text-sm group-hover:text-orange-700">
-                                    Facilities Expired
-                                </p>
-                            </div>
-                            <p
-                                class="flex items-center justify-center gap-1 text-lg font-bold text-gray-900 sm:text-xl group-hover:text-orange-600">
-                                <span id="facilitiesExpiredCount">0</span>
-                            </p>
-                            <p class="text-center text-xs text-gray-500 mt-1 group-hover:text-orange-600">
-                                <span id="facilitiesExpiredAmount">$0</span>
-                            </p>
-                            <!-- Custom Tooltip -->
-                            <div
-                                class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 pointer-events-none">
-                                <div class="bg-white border border-gray-200 rounded-lg py-3 px-4 shadow-xl"
-                                    style="min-width: 220px">
-                                    <div class="font-semibold text-sm text-gray-900 mb-2 border-b border-gray-200 pb-2">
-                                        Facilities Expired
-                                    </div>
-                                    <div class="space-y-2">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-xs text-gray-600">Count:</span>
-                                            <span class="text-sm font-semibold text-gray-900"
-                                                id="facilitiesExpiredCountTooltip">0</span>
-                                        </div>
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-xs text-gray-600">Amount:</span>
-                                            <span class="text-sm font-semibold text-gray-900"
-                                                id="facilitiesExpiredAmountTooltip">$0</span>
-                                        </div>
-                                    </div>
-                                    <div class="text-[10px] text-gray-500 mt-2 pt-2 border-t border-gray-100">
-                                        All facility lines expired this month
-                                    </div>
-                                    <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px]">
-                                        <div class="border-[6px] border-transparent border-t-white"></div>
-                                        <div
-                                            class="absolute top-[-7px] left-1/2 -translate-x-1/2 border-[7px] border-transparent border-t-gray-200">
-                                        </div>
-                                    </div>
-                                </div>
+                            </button>
+                            <div x-show="openDropDown" @click.outside="openDropDown = false"
+                                class="absolute right-0 top-full z-40 w-40 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                <button onclick="openChartDataModal('expiring')" @click="openDropDown = false"
+                                    class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                                    View Data
+                                </button>
+                                <button onclick="exportChartData('expiring')" @click="openDropDown = false"
+                                    class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                                    Export Data
+                                </button>
+                                <button onclick="openMethodologyModal('expiring')" @click="openDropDown = false"
+                                    class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                                    Methodology
+                                </button>
                             </div>
                         </div>
+                    </div>
+                    <div class="flex-1 flex items-center">
+                        <div id="facilityTrendChart" class="-ml-5 w-full" style="min-height: 350px"></div>
                     </div>
                 </div>
             </div>
@@ -1085,48 +987,59 @@
                 </div>
                 <!-- Metric Group One -->
 
-                <!-- ====== Chart One Start -->
-                <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white px-5 pt-5 sm:px-6 sm:pt-6">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-lg font-semibold text-gray-800">
-                            New Deals Pipeline
-                        </h3>
+                <!-- ====== Pipeline Table Start -->
+                <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+                    <div class="flex items-center justify-between px-5 pt-5 sm:px-6 sm:pt-6 pb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">
+                                Pipeline Deals Aging
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500">
+                                Deals pending origination grouped by approval age
+                            </p>
+                        </div>
                         <div x-data="{openDropDown: false}" class="relative h-fit">
                             <button @click="openDropDown = !openDropDown"
                                 :class="openDropDown ? 'text-gray-700' : 'text-gray-400 hover:text-gray-700'"
-                                class="text-gray-400 hover:text-gray-700">
+                                class="transition-colors">
                                 <svg class="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd" clip-rule="evenodd"
                                         d="M10.2441 6C10.2441 5.0335 11.0276 4.25 11.9941 4.25H12.0041C12.9706 4.25 13.7541 5.0335 13.7541 6C13.7541 6.9665 12.9706 7.75 12.0041 7.75H11.9941C11.0276 7.75 10.2441 6.9665 10.2441 6ZM10.2441 18C10.2441 17.0335 11.0276 16.25 11.9941 16.25H12.0041C12.9706 16.25 13.7541 17.0335 13.7541 18C13.7541 18.9665 12.9706 19.75 12.0041 19.75H11.9941C11.0276 19.75 10.2441 18.9665 10.2441 18ZM11.9941 10.25C11.0276 10.25 10.2441 11.0335 10.2441 12C10.2441 12.9665 11.0276 13.75 11.9941 13.75H12.0041C12.9706 13.75 13.7541 12.9665 13.7541 12C13.7541 11.0335 12.9706 10.25 12.0041 10.25H11.9941Z"
-                                        fill=""></path>
+                                        fill="" />
                                 </svg>
                             </button>
                             <div x-show="openDropDown" @click.outside="openDropDown = false"
-                                class="absolute right-0 z-40 w-40 p-2 space-y-1 bg-white border border-gray-200 shadow-lg rounded-2xl"
-                                style="display: none">
-                                <button
-                                    class="flex w-full px-3 py-2 font-medium text-left text-gray-500 rounded-lg text-xs hover:bg-gray-100 hover:text-gray-700">
-                                    View More
+                                class="absolute right-0 top-full z-40 w-40 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                <button onclick="openChartDataModal('pipeline')" @click="openDropDown = false"
+                                    class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                                    View Data
                                 </button>
-                                <button
-                                    class="flex w-full px-3 py-2 font-medium text-left text-gray-500 rounded-lg text-xs hover:bg-gray-100 hover:text-gray-700">
-                                    Delete
-                            </button>
+                                <button onclick="exportChartData('pipeline')" @click="openDropDown = false"
+                                    class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                                    Export Data
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    </div>
-                    <div class="max-w-full overflow-x-auto custom-scrollbar">
-                        <div id="newDealsChart" class="-ml-5 h-full min-w-[690px] pl-2 xl:min-w-full"
-                            style="min-height: 195px">
-                            <!-- Chart will be rendered here -->
-                            <div class="flex items-center justify-center h-full text-gray-500">
-                                Chart placeholder - New Deals Pipeline
+                    <div class="max-w-full overflow-x-auto">
+                        <table class="w-full table-auto">
+                            <thead>
+                                <tr class="bg-gray-50 text-left">
+                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider">Aging Bucket</th>
+                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-right">Count</th>
+                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-right">Total TFA</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pipelineTableBody" class="divide-y divide-gray-200">
+                                <tr>
+                                    <td colspan="3" class="px-5 py-4 text-center text-sm text-gray-500">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            </div>
-                </div>
-                <!-- ====== Chart One End -->
+                <!-- ====== Pipeline Table End -->
             </div>
         </div>
 
@@ -3214,6 +3127,9 @@
             
             // Calculate new deals YTD/MTD metrics from filtered data
             calculateNewDealsMetricsFromFiltered();
+            
+            // Populate pipeline deals table from filtered data
+            populatePipelineTable();
         }
 
         // Calculate Facilities Expired and CAs Expired metrics from filtered data
@@ -3280,22 +3196,8 @@
             // Update DOM
             document.getElementById("facilitiesExpiredCount").textContent =
                 facilitiesExpiredCount.toLocaleString();
-            document.getElementById("facilitiesExpiredAmount").textContent =
-                formatCurrency(facilitiesExpiredAmount);
             document.getElementById("casExpiredCount").textContent =
                 casExpiredCount.toLocaleString();
-            document.getElementById("casExpiredAmount").textContent =
-                formatCurrency(casExpiredAmount);
-
-            // Update tooltip values
-            document.getElementById("facilitiesExpiredCountTooltip").textContent =
-                facilitiesExpiredCount.toLocaleString();
-            document.getElementById("facilitiesExpiredAmountTooltip").textContent =
-                formatCurrency(facilitiesExpiredAmount);
-            document.getElementById("casExpiredCountTooltip").textContent =
-                casExpiredCount.toLocaleString();
-            document.getElementById("casExpiredAmountTooltip").textContent =
-                formatCurrency(casExpiredAmount);
         }
 
         // Create expiration chart from filtered data
@@ -3516,7 +3418,7 @@
                     seriesName = "Undrawn Commitment";
                     break;
                 case "tfa":
-                    fieldName = "Facility_Amount";
+                    fieldName = "Fac_Amount";
                     seriesName = "Total Facility Amount";
                     break;
                 default:
@@ -3533,6 +3435,35 @@
             
             // Use Map for better performance - store all exposure types
             const relationshipData = new Map();
+            
+            // Debug: Sample a few rows to see what we're working with
+            if (filteredData.length > 0 && selectedAmountType === "tfa") {
+                console.log("DEBUG - Sample first 3 rows of filteredData:");
+                for (let i = 0; i < Math.min(3, filteredData.length); i++) {
+                    console.log(`Row ${i}:`, {
+                        Relationship_Name: filteredData[i].Relationship_Name,
+                        Fac_Amount: filteredData[i].Fac_Amount,
+                        Facility_Amount: filteredData[i].Facility_Amount,
+                        TFA_field_used: filteredData[i].Fac_Amount || filteredData[i].Facility_Amount,
+                        TFA_parsed: parseNumber(filteredData[i].Fac_Amount || filteredData[i].Facility_Amount),
+                        Direct_OS: filteredData[i].Direct_OS,
+                        Direct_OS_parsed: parseNumber(filteredData[i].Direct_OS)
+                    });
+                }
+                
+                // Count how many rows have non-zero TFA
+                let nonZeroCount = 0;
+                let totalFacilityAmount = 0;
+                for (let i = 0; i < filteredData.length; i++) {
+                    const val = parseNumber(filteredData[i].Fac_Amount || filteredData[i].Facility_Amount);
+                    if (val > 0) {
+                        nonZeroCount++;
+                        totalFacilityAmount += val;
+                    }
+                }
+                console.log(`DEBUG - ${nonZeroCount} out of ${filteredData.length} rows have non-zero TFA`);
+                console.log(`DEBUG - Total TFA across all rows: ${formatCurrency(totalFacilityAmount)}`);
+            }
             
             for (let i = 0; i < filteredData.length; i++) {
                 const row = filteredData[i];
@@ -3552,7 +3483,7 @@
                     }
                     
                     const data = relationshipData.get(relId);
-                    data.tfa += parseNumber(row.Facility_Amount);
+                    data.tfa += parseNumber(row.Fac_Amount || row.Facility_Amount);
                     data.direct += parseNumber(row.Direct_OS);
                     data.contingent += parseNumber(row.Contingeng_OS);
                     data.pse += parseNumber(row.PSE_OS);
@@ -3612,12 +3543,30 @@
             );
             const amounts = sorted.map((item) => item[1]);
             
+            // Debug logging for TFA
+            console.log("DEBUG - selectedAmountType:", selectedAmountType);
+            console.log("DEBUG - seriesName:", seriesName);
+            console.log("DEBUG - relationships:", relationships);
+            console.log("DEBUG - amounts:", amounts);
+            console.log("DEBUG - sorted array:", sorted);
+            
             // Handle empty data
             if (relationships.length === 0) {
                 console.warn("No filtered relationship data for chart");
                 const chartElement = document.querySelector("#relationshipChart");
                 if (chartElement) {
                     chartElement.innerHTML = '<div class="flex items-center justify-center h-64 text-gray-500">No data available for the selected filters</div>';
+                }
+                return;
+            }
+            
+            // Check if all amounts are zero
+            const totalAmount = amounts.reduce((sum, val) => sum + val, 0);
+            if (totalAmount === 0) {
+                console.warn("⚠️ All amounts are zero for selectedAmountType:", selectedAmountType);
+                const chartElement = document.querySelector("#relationshipChart");
+                if (chartElement) {
+                    chartElement.innerHTML = `<div class="flex items-center justify-center h-64 text-gray-500">No ${seriesName} data available for the selected filters</div>`;
                 }
                 return;
             }
@@ -3764,6 +3713,10 @@
                 
                 // Clear any previous content to avoid ApexCharts errors
                 chartElement.innerHTML = "";
+                
+                // Log chart options for debugging
+                console.log("DEBUG - Chart options series:", options.series);
+                console.log("DEBUG - Chart options xaxis categories:", options.xaxis.categories);
                 
                 // Create and render new chart
                 relationshipChartInstance = new ApexCharts(chartElement, options);
@@ -4160,6 +4113,9 @@
             
             // Calculate new deals YTD/MTD metrics
             calculateNewDealsMetrics();
+            
+            // Populate pipeline deals table
+            populatePipelineTable();
         }
 
         // Calculate Facilities Expired and CAs Expired metrics
@@ -4226,22 +4182,8 @@
             // Update DOM
             document.getElementById("facilitiesExpiredCount").textContent =
                 facilitiesExpiredCount.toLocaleString();
-            document.getElementById("facilitiesExpiredAmount").textContent =
-                formatCurrency(facilitiesExpiredAmount);
             document.getElementById("casExpiredCount").textContent =
                 casExpiredCount.toLocaleString();
-            document.getElementById("casExpiredAmount").textContent =
-                formatCurrency(casExpiredAmount);
-
-            // Update tooltip values
-            document.getElementById("facilitiesExpiredCountTooltip").textContent =
-                facilitiesExpiredCount.toLocaleString();
-            document.getElementById("facilitiesExpiredAmountTooltip").textContent =
-                formatCurrency(facilitiesExpiredAmount);
-            document.getElementById("casExpiredCountTooltip").textContent =
-                casExpiredCount.toLocaleString();
-            document.getElementById("casExpiredAmountTooltip").textContent =
-                formatCurrency(casExpiredAmount);
 
             console.log("Expired Metrics:", {
                 facilitiesExpired: facilitiesExpiredCount,
@@ -4487,6 +4429,86 @@
             
             const mtdVarianceEl = document.getElementById('newDealsMTDVariance');
             updateVarianceDisplay(mtdVarianceEl, mtdVariance);
+        }
+
+        // Populate Pipeline Deals Table
+        function populatePipelineTable() {
+            const dataSource = filteredData.length > 0 ? filteredData : portfolioData;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Define aging buckets (in days) - Always show these 4 rows
+            const buckets = [
+                { label: '30 days', min: 0, max: 30, count: 0, facilities: new Set(), tfa: 0 },
+                { label: '60 days', min: 31, max: 60, count: 0, facilities: new Set(), tfa: 0 },
+                { label: '90 days', min: 61, max: 90, count: 0, facilities: new Set(), tfa: 0 },
+                { label: 'Over 90 days', min: 91, max: Infinity, count: 0, facilities: new Set(), tfa: 0 }
+            ];
+            
+            // Filter and categorize deals
+            dataSource.forEach(row => {
+                const originationDate = row.Origination_Date;
+                const firstApprovalDate = parseDate(row.Facility_First_Approval_Date);
+                const facilityId = row.Facility_ID;
+                const tfaAmount = parseNumber(row.Fac_Amount || row.Facility_Amount);
+                
+                // Only include deals where Origination_Date is empty and has first approval date
+                if ((!originationDate || originationDate.trim() === '') && firstApprovalDate && facilityId) {
+                    // Calculate days since approval
+                    const daysSinceApproval = Math.floor((today - firstApprovalDate) / (1000 * 60 * 60 * 24));
+                    
+                    // Find appropriate bucket
+                    for (const bucket of buckets) {
+                        if (daysSinceApproval >= bucket.min && daysSinceApproval <= bucket.max) {
+                            bucket.facilities.add(facilityId);
+                            bucket.tfa += tfaAmount;
+                            break;
+                        }
+                    }
+                }
+            });
+            
+            // Update bucket counts from unique facilities
+            buckets.forEach(bucket => {
+                bucket.count = bucket.facilities.size;
+            });
+            
+            // Populate table
+            const tableBody = document.getElementById('pipelineTableBody');
+            if (!tableBody) return;
+            
+            // Calculate totals
+            const totalCount = buckets.reduce((sum, b) => sum + b.count, 0);
+            const totalTFA = buckets.reduce((sum, b) => sum + b.tfa, 0);
+            
+            // Build table rows - always show all 4 buckets
+            let html = '';
+            buckets.forEach(bucket => {
+                html += `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-5 py-3 text-sm text-gray-700">${bucket.label}</td>
+                        <td class="px-5 py-3 text-sm text-gray-900 font-semibold text-right">${bucket.count.toLocaleString()}</td>
+                        <td class="px-5 py-3 text-sm text-gray-900 font-semibold text-right">${formatCurrency(bucket.tfa)}</td>
+                    </tr>
+                `;
+            });
+            
+            // Add total row
+            html += `
+                <tr class="bg-gray-50 font-semibold border-t-2 border-gray-300">
+                    <td class="px-5 py-3 text-sm text-gray-900">Total</td>
+                    <td class="px-5 py-3 text-sm text-gray-900 text-right">${totalCount.toLocaleString()}</td>
+                    <td class="px-5 py-3 text-sm text-gray-900 text-right">${formatCurrency(totalTFA)}</td>
+                </tr>
+            `;
+            
+            tableBody.innerHTML = html;
+            
+            console.log('Pipeline Table populated:', {
+                totalFacilities: totalCount,
+                totalTFA: formatCurrency(totalTFA),
+                buckets: buckets.map(b => ({ label: b.label, count: b.count, tfa: formatCurrency(b.tfa) }))
+            });
         }
 
         // Parse number that might be formatted (e.g., "5.5M", "1.2K", "1,000,000")
@@ -4917,6 +4939,19 @@
             console.log("CAs Coming Due:", casComingDueData);
             console.log("Facilities Expiring:", facilitiesExpiringData);
             
+            // Check if all data is empty
+            const totalCAs = casComingDueData.reduce((sum, val) => sum + val, 0);
+            const totalFacilities = facilitiesExpiringData.reduce((sum, val) => sum + val, 0);
+            
+            if (totalCAs === 0 && totalFacilities === 0) {
+                console.log("⚠️ No expiration data available");
+                const chartElement = document.querySelector("#facilityTrendChart");
+                if (chartElement) {
+                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No upcoming expirations in the next 3 months</div>';
+                }
+                return;
+            }
+            
             const options = {
                 series: [
                     {
@@ -5208,6 +5243,19 @@
             const facilitiesExpiringData = next3Months.map(
                 (month) => monthlyData[month].facilitiesExpiring.length
             );
+            
+            // Check if all data is empty
+            const totalCAs = casComingDueData.reduce((sum, val) => sum + val, 0);
+            const totalFacilities = facilitiesExpiringData.reduce((sum, val) => sum + val, 0);
+            
+            if (totalCAs === 0 && totalFacilities === 0) {
+                console.log("⚠️ No expiration data available for filtered results");
+                const chartElement = document.querySelector("#facilityTrendChart");
+                if (chartElement) {
+                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No upcoming expirations in the next 3 months</div>';
+                }
+                return;
+            }
             
             const options = {
                 series: [
@@ -5621,7 +5669,7 @@
                     seriesName = "Undrawn Commitment";
                     break;
                 case "tfa":
-                    fieldName = "Facility_Amount";
+                    fieldName = "Fac_Amount";
                     seriesName = "Total Facility Amount";
                     break;
                 default:
@@ -5657,7 +5705,7 @@
                     }
                     
                     const data = relationshipData.get(relId);
-                    data.tfa += parseNumber(row.Facility_Amount);
+                    data.tfa += parseNumber(row.Fac_Amount || row.Facility_Amount);
                     data.direct += parseNumber(row.Direct_OS);
                     data.contingent += parseNumber(row.Contingeng_OS);
                     data.pse += parseNumber(row.PSE_OS);
@@ -5714,9 +5762,27 @@
             );
             const amounts = sorted.map((item) => item[1]);
             
+            // Debug logging for TFA
+            console.log("DEBUG (non-filtered) - selectedAmountType:", selectedAmountType);
+            console.log("DEBUG (non-filtered) - seriesName:", seriesName);
+            console.log("DEBUG (non-filtered) - relationships:", relationships);
+            console.log("DEBUG (non-filtered) - amounts:", amounts);
+            console.log("DEBUG (non-filtered) - sorted array:", sorted);
+            
             // Handle empty data
             if (relationships.length === 0) {
                 console.warn("No relationship data for chart");
+                return;
+            }
+            
+            // Check if all amounts are zero
+            const totalAmount = amounts.reduce((sum, val) => sum + val, 0);
+            if (totalAmount === 0) {
+                console.warn("⚠️ All amounts are zero for selectedAmountType:", selectedAmountType);
+                const chartElement = document.querySelector("#relationshipChart");
+                if (chartElement) {
+                    chartElement.innerHTML = `<div class="flex items-center justify-center h-64 text-gray-500">No ${seriesName} data available</div>`;
+                }
                 return;
             }
 
@@ -6756,7 +6822,7 @@
                     });
                 }
                 const data = relationshipData.get(relId);
-                data.tfa += parseNumber(row.Facility_Amount);
+                data.tfa += parseNumber(row.Fac_Amount || row.Facility_Amount);
                 data.direct += parseNumber(row.Direct_OS);
                 data.contingent += parseNumber(row.Contingeng_OS);
                 data.pse += parseNumber(row.PSE_OS);
@@ -6810,10 +6876,29 @@
             );
             const avgROTCE = filteredROTCE.map((r) => r.rotce);
             
+            // Debug logging for ROTCE
+            console.log("DEBUG ROTCE (non-filtered) - selectedAmountType:", selectedAmountType);
+            console.log("DEBUG ROTCE (non-filtered) - topRelationships:", topRelationships);
+            console.log("DEBUG ROTCE (non-filtered) - relationships:", relationships);
+            console.log("DEBUG ROTCE (non-filtered) - avgROTCE:", avgROTCE);
+            console.log("DEBUG ROTCE (non-filtered) - filteredROTCE:", filteredROTCE);
+            
             // Update subtitle
             const subtitleEl = document.getElementById("rotceSubtitle");
             if (subtitleEl) {
                 subtitleEl.textContent = `Top ${topNRelationships} relationships ROTCE performance`;
+            }
+            
+            // Check if all ROTCE values are zero or NaN
+            const validROTCE = avgROTCE.filter(v => !isNaN(v) && v !== 0);
+            if (validROTCE.length === 0) {
+                console.warn("⚠️ No valid ROTCE data for the selected relationships");
+                const chartElement = document.querySelector("#rotceChart");
+                if (chartElement) {
+                    chartElement.innerHTML =
+                        '<div class="flex items-center justify-center h-full text-gray-500">No ROTCE data available for these relationships</div>';
+                }
+                return;
             }
             
             // Conditional colors: red if < 12%, green if >= 12%
@@ -7009,7 +7094,7 @@
                     });
                 }
                 const data = relationshipData.get(relId);
-                data.tfa += parseNumber(row.Facility_Amount);
+                data.tfa += parseNumber(row.Fac_Amount || row.Facility_Amount);
                 data.direct += parseNumber(row.Direct_OS);
                 data.contingent += parseNumber(row.Contingeng_OS);
                 data.pse += parseNumber(row.PSE_OS);
@@ -7063,6 +7148,13 @@
             );
             const avgROTCE = filteredROTCE.map((r) => r.rotce);
             
+            // Debug logging for ROTCE
+            console.log("DEBUG ROTCE (filtered) - selectedAmountType:", selectedAmountType);
+            console.log("DEBUG ROTCE (filtered) - topRelationships:", topRelationships);
+            console.log("DEBUG ROTCE (filtered) - relationships:", relationships);
+            console.log("DEBUG ROTCE (filtered) - avgROTCE:", avgROTCE);
+            console.log("DEBUG ROTCE (filtered) - filteredROTCE:", filteredROTCE);
+            
             // Update subtitle
             const subtitleEl = document.getElementById("rotceSubtitle");
             if (subtitleEl) {
@@ -7087,6 +7179,15 @@
             if (relationships.length === 0) {
                 chartElement.innerHTML =
                     '<div class="flex items-center justify-center h-full text-gray-500">No ROTCE data available</div>';
+                return;
+            }
+            
+            // Check if all ROTCE values are zero or NaN
+            const validROTCE = avgROTCE.filter(v => !isNaN(v) && v !== 0);
+            if (validROTCE.length === 0) {
+                console.warn("⚠️ No valid ROTCE data for the selected relationships");
+                chartElement.innerHTML =
+                    '<div class="flex items-center justify-center h-full text-gray-500">No ROTCE data available for these relationships</div>';
                 return;
             }
             

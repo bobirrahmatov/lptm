@@ -1829,24 +1829,22 @@
                         );
                     }, 100);
                 } else {
-                    console.warn("No data from Confluence, using sample data");
+                    console.error("No data from Confluence");
                     hideLoadingOverlay();
                     showNotification(
-                        "Warning",
+                        "Error",
                         "No data found in Confluence attachment",
-                        "warning"
+                        "error"
                     );
-                    loadSampleData();
                 }
             } catch (error) {
                 console.error("Error loading data from Confluence:", error);
                 hideLoadingOverlay();
                 showNotification(
-                    "Warning",
-                    "Failed to load from Confluence, using sample data",
-                    "warning"
+                    "Error",
+                    "Failed to load data from Confluence: " + error.message,
+                    "error"
                 );
-                loadSampleData();
             }
         }
 
@@ -1973,7 +1971,7 @@
                             `Parsed ${filteredData.length} valid records from Excel`
                         );
                         
-                        // Log sample data structure for debugging
+                        // Log data structure for debugging
                         if (filteredData.length > 0) {
                             console.log(
                                 "Sample record fields:",
@@ -2107,47 +2105,6 @@
             }, 5000);
         }
 
-        // Load sample data if CSV is not available
-        function loadSampleData() {
-            portfolioData = [
-                {
-                    Report_Date: "2024-01-15",
-                    Region: "NAM",
-                    Facility_ID: "FAC001",
-                    Parent_Facility_ID: "PFAC001",
-                    Product_Program: "Commercial Lending",
-                    Management_Status: "Active",
-                    Facility_Type: "Term Loan",
-                    "Committed/Uncommitted": "Committed",
-                    Risk_Category: "Low",
-                    Relationship_ID: "REL001",
-                    Relationship_Name: "ABC Corporation",
-                    CAID: "CAID001",
-                    CA_Expiration_Date: "2025-03-15",
-                    Lead_Underwriter: "John Smith",
-                    Underwriting_Team_Lead: "Jane Doe",
-                    Control_Unit: "CU-001",
-                    Fac_Amount: "5000000",
-                    Total_Reported_Fac_Amount: "5000000",
-                    Direct_OS: "3000000",
-                    Contingeng_OS: "500000",
-                    PSE_OS: "0",
-                    Total_OS: "3500000",
-                    OSUC: "1500000",
-                    Unused_Committed: "1500000",
-                    Total_Comm_Exposure: "5000000",
-                    Maturity_Date: "2025-12-31",
-                    Prodict_Underwriter: "John Smith",
-                    CA_Maturity_Date: "2025-06-30",
-                    PSE_non_PSE: "non-PSE",
-                    Credit_Classification: "Investment Grade",
-                    Facility_First_Approval_Date: "2024-01-10",
-                    ROTCE: "15.5",
-                },
-                // Add more sample data as needed
-            ];
-            initializeDashboard();
-        }
 
         // Build indexes for fast filtering (one-time operation)
         function buildIndexes() {
@@ -2229,8 +2186,8 @@
                 return;
             }
             
-            // Log sample data to verify structure
-            console.log("Sample data row:", portfolioData[0]);
+            // Log data structure for debugging
+            console.log("Data row example:", portfolioData[0]);
             console.log("Available fields:", Object.keys(portfolioData[0]));
             
             // Step 1: Build indexes (one-time, makes filtering much faster)
@@ -3402,7 +3359,7 @@
                     seriesName = "Direct OS";
                     break;
                 case "contingent":
-                    fieldName = "Contingeng_OS";
+                    fieldName = "Contingent_OS";
                     seriesName = "Contingent OS";
                     break;
                 case "pse":
@@ -3485,7 +3442,7 @@
                     const data = relationshipData.get(relId);
                     data.tfa += parseNumber(row.Fac_Amount || row.Facility_Amount);
                     data.direct += parseNumber(row.Direct_OS);
-                    data.contingent += parseNumber(row.Contingeng_OS);
+                    data.contingent += parseNumber(row.Contingent_OS);
                     data.pse += parseNumber(row.PSE_OS);
                     data.osuc += parseNumber(row.OSUC);
                     data.unused += parseNumber(row.Unused_Committed);
@@ -4437,6 +4394,18 @@
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             
+            // Find the most recent Report_Date to determine the reporting year
+            let mostRecentReportDate = null;
+            for (const row of dataSource) {
+                const reportDate = parseDate(row.Report_Date);
+                if (reportDate && (!mostRecentReportDate || reportDate > mostRecentReportDate)) {
+                    mostRecentReportDate = reportDate;
+                }
+            }
+            
+            const reportingYear = mostRecentReportDate ? mostRecentReportDate.getFullYear() : today.getFullYear();
+            console.log('Pipeline Table - Reporting Year:', reportingYear);
+            
             // Define aging buckets (in days) - Always show these 4 rows
             const buckets = [
                 { label: '30 days', min: 0, max: 30, count: 0, facilities: new Set(), tfa: 0 },
@@ -4449,11 +4418,20 @@
             dataSource.forEach(row => {
                 const originationDate = row.Origination_Date;
                 const firstApprovalDate = parseDate(row.Facility_First_Approval_Date);
+                const reportDate = parseDate(row.Report_Date);
                 const facilityId = row.Facility_ID;
                 const tfaAmount = parseNumber(row.Fac_Amount || row.Facility_Amount);
                 
-                // Only include deals where Origination_Date is empty and has first approval date
-                if ((!originationDate || originationDate.trim() === '') && firstApprovalDate && facilityId) {
+                // Only include deals where:
+                // 1. Origination_Date is empty
+                // 2. Has first approval date
+                // 3. Report_Date is in the same year as reporting year
+                if ((!originationDate || originationDate.trim() === '') && 
+                    firstApprovalDate && 
+                    facilityId && 
+                    reportDate && 
+                    reportDate.getFullYear() === reportingYear) {
+                    
                     // Calculate days since approval
                     const daysSinceApproval = Math.floor((today - firstApprovalDate) / (1000 * 60 * 60 * 24));
                     
@@ -4505,6 +4483,7 @@
             tableBody.innerHTML = html;
             
             console.log('Pipeline Table populated:', {
+                reportingYear: reportingYear,
                 totalFacilities: totalCount,
                 totalTFA: formatCurrency(totalTFA),
                 buckets: buckets.map(b => ({ label: b.label, count: b.count, tfa: formatCurrency(b.tfa) }))
@@ -4882,7 +4861,7 @@
                                 row.Direct_OS
                             );
                             monthlyData[monthYear].caAmounts.contingent += parseNumber(
-                                row.Contingeng_OS
+                                row.Contingent_OS
                             );
                             monthlyData[monthYear].caAmounts.pse += parseNumber(row.PSE_OS);
                         }
@@ -4914,7 +4893,7 @@
                                 row.Direct_OS
                             );
                             monthlyData[monthYear].facilityAmounts.contingent +=
-                                parseNumber(row.Contingeng_OS);
+                                parseNumber(row.Contingent_OS);
                             monthlyData[monthYear].facilityAmounts.pse += parseNumber(
                                 row.PSE_OS
                             );
@@ -5190,7 +5169,7 @@
                                 row.Direct_OS
                             );
                             monthlyData[monthYear].caAmounts.contingent += parseNumber(
-                                row.Contingeng_OS
+                                row.Contingent_OS
                             );
                             monthlyData[monthYear].caAmounts.pse += parseNumber(row.PSE_OS);
                         }
@@ -5222,7 +5201,7 @@
                                 row.Direct_OS
                             );
                             monthlyData[monthYear].facilityAmounts.contingent +=
-                                parseNumber(row.Contingeng_OS);
+                                parseNumber(row.Contingent_OS);
                             monthlyData[monthYear].facilityAmounts.pse += parseNumber(
                                 row.PSE_OS
                             );
@@ -5653,7 +5632,7 @@
                     seriesName = "Direct OS";
                     break;
                 case "contingent":
-                    fieldName = "Contingeng_OS";
+                    fieldName = "Contingent_OS";
                     seriesName = "Contingent OS";
                     break;
                 case "pse":
@@ -5707,7 +5686,7 @@
                     const data = relationshipData.get(relId);
                     data.tfa += parseNumber(row.Fac_Amount || row.Facility_Amount);
                     data.direct += parseNumber(row.Direct_OS);
-                    data.contingent += parseNumber(row.Contingeng_OS);
+                    data.contingent += parseNumber(row.Contingent_OS);
                     data.pse += parseNumber(row.PSE_OS);
                     data.osuc += parseNumber(row.OSUC);
                     data.unused += parseNumber(row.Unused_Committed);
@@ -6130,7 +6109,7 @@
                     const amounts = productAmounts.get(productProgram);
                     amounts.tfa += parseNumber(row.Facility_Amount);
                     amounts.direct += parseNumber(row.Direct_OS);
-                    amounts.contingent += parseNumber(row.Contingeng_OS);
+                    amounts.contingent += parseNumber(row.Contingent_OS);
                     amounts.pse += parseNumber(row.PSE_OS);
                 }
             }
@@ -6159,6 +6138,13 @@
             // Handle empty data
             if (labels.length === 0) {
                 console.warn("No new facilities data available");
+                
+                // Destroy existing chart instance first
+                if (creditClassificationChartInstance) {
+                    creditClassificationChartInstance.destroy();
+                    creditClassificationChartInstance = null;
+                }
+                
                 const chartElement = document.querySelector(
                     "#creditClassificationChart"
                 );
@@ -6490,7 +6476,7 @@
                     const amounts = productAmounts.get(productProgram);
                     amounts.tfa += parseNumber(row.Facility_Amount);
                     amounts.direct += parseNumber(row.Direct_OS);
-                    amounts.contingent += parseNumber(row.Contingeng_OS);
+                    amounts.contingent += parseNumber(row.Contingent_OS);
                     amounts.pse += parseNumber(row.PSE_OS);
                 }
             }
@@ -6524,6 +6510,13 @@
             // Handle empty data
             if (labels.length === 0) {
                 console.warn("No new facilities data available in filtered dataset");
+                
+                // Destroy existing chart instance first
+                if (creditClassificationChartInstance) {
+                    creditClassificationChartInstance.destroy();
+                    creditClassificationChartInstance = null;
+                }
+                
                 const chartElement = document.querySelector(
                     "#creditClassificationChart"
                 );
@@ -6824,7 +6817,7 @@
                 const data = relationshipData.get(relId);
                 data.tfa += parseNumber(row.Fac_Amount || row.Facility_Amount);
                 data.direct += parseNumber(row.Direct_OS);
-                data.contingent += parseNumber(row.Contingeng_OS);
+                data.contingent += parseNumber(row.Contingent_OS);
                 data.pse += parseNumber(row.PSE_OS);
                 data.osuc += parseNumber(row.OSUC);
                 data.unused += parseNumber(row.Unused_Committed);
@@ -6865,6 +6858,31 @@
                 .slice(0, topNRelationships)
                 .map((entry) => entry[0]);
             
+            // Check if we have any relationships with non-zero values
+            const hasValidRelationships = Array.from(relationshipTotals.entries())
+                .some(([relId, value]) => value > 0);
+            
+            console.log("DEBUG ROTCE (non-filtered) - relationshipTotals size:", relationshipTotals.size);
+            console.log("DEBUG ROTCE (non-filtered) - hasValidRelationships:", hasValidRelationships);
+            console.log("DEBUG ROTCE (non-filtered) - topRelationships length:", topRelationships.length);
+            
+            // Update subtitle
+            const subtitleEl = document.getElementById("rotceSubtitle");
+            if (subtitleEl) {
+                subtitleEl.textContent = `Top ${topNRelationships} relationships ROTCE performance`;
+            }
+            
+            // If no valid relationships in Top Relationships chart, don't show ROTCE
+            if (!hasValidRelationships || topRelationships.length === 0 || relationshipTotals.size === 0) {
+                console.log("⚠️ No relationships data available - skipping ROTCE chart (non-filtered)");
+                const chartElement = document.querySelector("#rotceChart");
+                if (chartElement) {
+                    chartElement.innerHTML =
+                        '<div class="flex items-center justify-center h-full text-gray-500">No data available</div>';
+                }
+                return;
+            }
+            
             // Filter and order ROTCE data to match top relationships
             const filteredROTCE = topRelationships
                 .map((relName) => relationshipROTCE.find((r) => r.name === relName))
@@ -6882,12 +6900,6 @@
             console.log("DEBUG ROTCE (non-filtered) - relationships:", relationships);
             console.log("DEBUG ROTCE (non-filtered) - avgROTCE:", avgROTCE);
             console.log("DEBUG ROTCE (non-filtered) - filteredROTCE:", filteredROTCE);
-            
-            // Update subtitle
-            const subtitleEl = document.getElementById("rotceSubtitle");
-            if (subtitleEl) {
-                subtitleEl.textContent = `Top ${topNRelationships} relationships ROTCE performance`;
-            }
             
             // Check if all ROTCE values are zero or NaN
             const validROTCE = avgROTCE.filter(v => !isNaN(v) && v !== 0);
@@ -7096,7 +7108,7 @@
                 const data = relationshipData.get(relId);
                 data.tfa += parseNumber(row.Fac_Amount || row.Facility_Amount);
                 data.direct += parseNumber(row.Direct_OS);
-                data.contingent += parseNumber(row.Contingeng_OS);
+                data.contingent += parseNumber(row.Contingent_OS);
                 data.pse += parseNumber(row.PSE_OS);
                 data.osuc += parseNumber(row.OSUC);
                 data.unused += parseNumber(row.Unused_Committed);
@@ -7137,6 +7149,45 @@
                 .slice(0, topN)
                 .map((entry) => entry[0]);
             
+            // Check if we have any relationships with non-zero values
+            const hasValidRelationships = Array.from(relationshipTotals.entries())
+                .some(([relId, value]) => value > 0);
+            
+            console.log("DEBUG ROTCE - relationshipTotals size:", relationshipTotals.size);
+            console.log("DEBUG ROTCE - hasValidRelationships:", hasValidRelationships);
+            console.log("DEBUG ROTCE - topRelationships length:", topRelationships.length);
+            
+            // Destroy existing chart instance properly
+            if (rotceChartInstance) {
+                try {
+                    rotceChartInstance.destroy();
+                } catch (e) {
+                    console.log("Error destroying ROTCE chart:", e);
+                }
+                rotceChartInstance = null;
+            }
+            
+            const chartElement = document.querySelector("#rotceChart");
+            if (chartElement) {
+                chartElement.innerHTML = "";
+            }
+            
+            // Update subtitle
+            const subtitleEl = document.getElementById("rotceSubtitle");
+            if (subtitleEl) {
+                subtitleEl.textContent = `Top ${topN} relationships ROTCE performance`;
+            }
+            
+            // If no valid relationships in Top Relationships chart, don't show ROTCE
+            if (!hasValidRelationships || topRelationships.length === 0 || relationshipTotals.size === 0) {
+                console.log("⚠️ No relationships data available - skipping ROTCE chart (filtered)");
+                if (chartElement) {
+                    chartElement.innerHTML =
+                        '<div class="flex items-center justify-center h-full text-gray-500">No data available for the selected filters</div>';
+                }
+                return;
+            }
+            
             // Filter and order ROTCE data to match top relationships
             const filteredROTCE = topRelationships
                 .map((relName) => relationshipROTCE.find((r) => r.name === relName))
@@ -7154,27 +7205,6 @@
             console.log("DEBUG ROTCE (filtered) - relationships:", relationships);
             console.log("DEBUG ROTCE (filtered) - avgROTCE:", avgROTCE);
             console.log("DEBUG ROTCE (filtered) - filteredROTCE:", filteredROTCE);
-            
-            // Update subtitle
-            const subtitleEl = document.getElementById("rotceSubtitle");
-            if (subtitleEl) {
-                subtitleEl.textContent = `Top ${topN} relationships ROTCE performance`;
-            }
-            
-            // Destroy existing chart instance properly
-            if (rotceChartInstance) {
-                try {
-                    rotceChartInstance.destroy();
-                } catch (e) {
-                    console.log("Error destroying ROTCE chart:", e);
-                }
-                rotceChartInstance = null;
-            }
-            
-            const chartElement = document.querySelector("#rotceChart");
-            if (chartElement) {
-                chartElement.innerHTML = "";
-            }
             
             if (relationships.length === 0) {
                 chartElement.innerHTML =
@@ -7978,7 +8008,7 @@
                             total += parseNumber(row.Direct_OS);
                             break;
                         case "contingent":
-                            total += parseNumber(row.Contingeng_OS);
+                            total += parseNumber(row.Contingent_OS);
                             break;
                         case "pse":
                             total += parseNumber(row.PSE_OS);
@@ -8329,7 +8359,7 @@
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
                                     <li><code class="bg-gray-100 px-1 rounded">Relationship_Name / Relationship_ID</code> - Groups by client</li>
                                     <li><code class="bg-gray-100 px-1 rounded">Direct_OS</code> - Direct outstanding balance</li>
-                                    <li><code class="bg-gray-100 px-1 rounded">Contingeng_OS</code> - Contingent outstanding balance</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Contingent_OS</code> - Contingent outstanding balance</li>
                                     <li><code class="bg-gray-100 px-1 rounded">PSE_OS</code> - Presettlement Exposure outstanding balance</li>
                                     <li><code class="bg-gray-100 px-1 rounded">OSUC</code> - Outstanding under commitment (calculated from Fac_Amount - Direct_OS - Contingent_OS - PSE_OS for committed facilities)</li>
                                     <li><code class="bg-gray-100 px-1 rounded">Unused_Committed</code> - Undrawn commitment (calculated from Fac_Amount - Direct_OS - Contingent_OS - PSE_OS for committed facilities)</li>

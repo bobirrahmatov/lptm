@@ -9,6 +9,27 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        success: {
+                            50: '#f0fdf4',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857'
+                        },
+                        danger: '#dc2626',
+                        warning: '#f59e0b'
+                    },
+                    boxShadow: {
+                        'theme-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+                    }
+                }
+            }
+        }
+    </script>
     <!-- ApexCharts -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <!-- SheetJS for Excel/CSV parsing -->
@@ -92,6 +113,23 @@
             background: #f9fafb !important;
             border-bottom: 1px solid #e5e7eb !important;
             color: #1f2937 !important;
+        }
+
+        /* Notification animations */
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Z-index utilities */
+        .z-9999 {
+            z-index: 9999;
         }
     </style>
 </head>
@@ -634,9 +672,12 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-medium text-gray-500">
-                            Total $ of Facility Amount
+                        <h3 class="text-sm font-medium text-gray-800">
+                            TFA
                         </h3>
+                        <p class="text-xs text-gray-400 mt-0.5">
+                            (Total Facilities Approved)
+                        </p>
                     </div>
                 </div>
                 <div class="flex items-center justify-center">
@@ -657,9 +698,12 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-medium text-gray-500">
-                            Total Outstanding
+                        <h3 class="text-sm font-medium text-gray-800">
+                            Outstanding
                         </h3>
+                        <p class="text-xs text-gray-400 mt-0.5">
+                            (Direct + Contingent + PSE)
+                        </p>
                     </div>
                 </div>
                 <div class="flex items-center justify-center">
@@ -680,9 +724,12 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-medium text-gray-500">
-                            Total $ of OSUC<sup class="text-blue-600">*</sup>
+                        <h3 class="text-sm font-medium text-gray-800">
+                            OSUC<sup class="text-blue-600">*</sup>
                         </h3>
+                        <p class="text-xs text-gray-400 mt-0.5">
+                            (Outstanding + Unused Committed)
+                        </p>
                     </div>
                 </div>
                 <div class="flex items-center justify-center">
@@ -703,7 +750,7 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-medium text-gray-500">
+                        <h3 class="text-sm font-medium text-gray-800">
                             Total # of Facilities
                         </h3>
                     </div>
@@ -726,7 +773,7 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-medium text-gray-500">
+                        <h3 class="text-sm font-medium text-gray-800">
                             Total # of Relationships
                         </h3>
                     </div>
@@ -749,26 +796,26 @@
                             <h3 class="text-lg font-semibold text-gray-800">
                                 CAs & Facilities Expiring
                             </h3>
+                                                        <!-- Expired Metrics (Inline) -->
+                                                        <div class="flex items-center gap-4 mt-2">
+                                                            <div class="flex items-center gap-1.5">
+                                                                <svg class="h-2 w-2 text-blue-500" fill="currentColor" viewBox="0 0 8 8">
+                                                                    <circle cx="4" cy="4" r="4"/>
+                                                                </svg>
+                                                                <span class="text-xs text-gray-600">CAs Expired:</span>
+                                                                <span class="text-xs font-semibold text-gray-900" id="casExpiredCount">0</span>
+                                                            </div>
+                                                            <div class="flex items-center gap-1.5">
+                                                                <svg class="h-2 w-2 text-orange-500" fill="currentColor" viewBox="0 0 8 8">
+                                                                    <circle cx="4" cy="4" r="4"/>
+                                                                </svg>
+                                                                <span class="text-xs text-gray-600">Facilities Expired:</span>
+                                                                <span class="text-xs font-semibold text-gray-900" id="facilitiesExpiredCount">0</span>
+                                                            </div>
+                                                        </div>
                             <p class="mt-1 text-sm text-gray-500">
                                 Upcoming expirations for the next 3 months
                             </p>
-                            <!-- Expired Metrics (Inline) -->
-                            <div class="flex items-center gap-4 mt-2">
-                                <div class="flex items-center gap-1.5">
-                                    <svg class="h-2 w-2 text-blue-500" fill="currentColor" viewBox="0 0 8 8">
-                                        <circle cx="4" cy="4" r="4"/>
-                                    </svg>
-                                    <span class="text-xs text-gray-600">CAs Expired:</span>
-                                    <span class="text-xs font-semibold text-gray-900" id="casExpiredCount">0</span>
-                                </div>
-                                <div class="flex items-center gap-1.5">
-                                    <svg class="h-2 w-2 text-orange-500" fill="currentColor" viewBox="0 0 8 8">
-                                        <circle cx="4" cy="4" r="4"/>
-                                    </svg>
-                                    <span class="text-xs text-gray-600">Facilities Expired:</span>
-                                    <span class="text-xs font-semibold text-gray-900" id="facilitiesExpiredCount">0</span>
-                                </div>
-                            </div>
                         </div>
                         <div x-data="{openDropDown: false}" class="relative">
                             <button @click="openDropDown = !openDropDown"
@@ -868,9 +915,9 @@
             </div>
 
             <!-- New Deals Section -->
-            <div class="col-span-12 space-y-6 xl:col-span-4">
+            <div class="col-span-12 xl:col-span-4 flex flex-col h-full">
                 <!-- Metric Group One -->
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 mb-6">
                     <!-- Metric Item Start -->
                     <div class="rounded-2xl border border-gray-200 bg-white p-5 md:p-6">
                         <div class="flex items-start justify-between mb-3">
@@ -883,7 +930,7 @@
                                     fill=""></path>
                             </svg>
                         </div>
-                                <span class="text-sm font-medium text-gray-500">New Deals Closed YTD</span>
+                                <span class="text-sm font-medium text-gray-800">New Deals Closed YTD</span>
                         </div>
                             <div x-data="{openDropDown: false}" class="relative">
                                 <button @click="openDropDown = !openDropDown"
@@ -940,7 +987,7 @@
                                     fill=""></path>
                             </svg>
                         </div>
-                                <span class="text-sm font-medium text-gray-500">New Deals Closed MTD</span>
+                                <span class="text-sm font-medium text-gray-800">New Deals Closed MTD</span>
                             </div>
                             <div x-data="{openDropDown: false}" class="relative">
                                 <button @click="openDropDown = !openDropDown"
@@ -988,7 +1035,7 @@
                 <!-- Metric Group One -->
 
                 <!-- ====== Pipeline Table Start -->
-                <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+                <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white flex-1 flex flex-col">
                     <div class="flex items-center justify-between px-5 pt-5 sm:px-6 sm:pt-6 pb-4">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800">
@@ -1019,11 +1066,15 @@
                                     class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
                                     Export Data
                                 </button>
+                                <button onclick="openMethodologyModal('pipeline')" @click="openDropDown = false"
+                                    class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                                    Methodology
+                                </button>
                             </div>
                         </div>
                     </div>
-                    <div class="max-w-full overflow-x-auto">
-                        <table class="w-full table-auto">
+                    <div class="max-w-full overflow-x-auto flex-1">
+                        <table class="w-full table-auto h-full">
                             <thead>
                                 <tr class="bg-gray-50 text-left">
                                     <th class="px-5 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider">Aging Bucket</th>
@@ -1626,9 +1677,9 @@
         // All filters and options are dynamically populated from the loaded data
         
         // Update these values to match your Confluence page and attachment
-        const CONFLUENCE_PAGE_ID = "2740868871"; // Your Confluence page ID
+        const CONFLUENCE_PAGE_ID = "3171234502"; // Your Confluence page ID
         const CONFLUENCE_FILE_NAME = "palDashboard.csv"; // Your attachment filename (can be .csv, .xlsx, or .xls)
-        const CONFLUENCE_BASE_URL = "https://cedt-confluence.net/confluence";
+        const CONFLUENCE_BASE_URL = "https://cedt-confluence.nam.nsroot.net/confluence";
         // ==========================================
         
         // ===== PERFORMANCE OPTIMIZATIONS FOR 40K+ ROWS =====
@@ -2055,53 +2106,96 @@
             }
         }
 
-        // Show notification
+        // Show notification (TailAdmin style)
         function showNotification(title, message, type = "success") {
-            const colors = {
+            const configs = {
                 success: {
-                    bg: "bg-green-100",
-                    text: "text-green-600",
-                    border: "border-green-200",
+                    bg: "bg-white",
+                    border: "border-success-500",
+                    iconBg: "bg-success-500",
+                    iconColor: "text-white",
+                    titleColor: "text-gray-800",
+                    messageColor: "text-gray-600",
+                    icon: `<svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M10 0.25C4.61522 0.25 0.25 4.61522 0.25 10C0.25 15.3848 4.61522 19.75 10 19.75C15.3848 19.75 19.75 15.3848 19.75 10C19.75 4.61522 15.3848 0.25 10 0.25ZM13.5303 8.53033C13.8232 8.23744 13.8232 7.76256 13.5303 7.46967C13.2374 7.17678 12.7626 7.17678 12.4697 7.46967L9 10.9393L7.53033 9.46967C7.23744 9.17678 6.76256 9.17678 6.46967 9.46967C6.17678 9.76256 6.17678 10.2374 6.46967 10.5303L8.46967 12.5303C8.76256 12.8232 9.23744 12.8232 9.53033 12.5303L13.5303 8.53033Z" fill=""/>
+                    </svg>`
                 },
                 error: {
-                    bg: "bg-red-100",
-                    text: "text-red-600",
-                    border: "border-red-200",
+                    bg: "bg-white",
+                    border: "border-danger",
+                    iconBg: "bg-danger",
+                    iconColor: "text-white",
+                    titleColor: "text-gray-800",
+                    messageColor: "text-gray-600",
+                    icon: `<svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M10 0.25C4.61522 0.25 0.25 4.61522 0.25 10C0.25 15.3848 4.61522 19.75 10 19.75C15.3848 19.75 19.75 15.3848 19.75 10C19.75 4.61522 15.3848 0.25 10 0.25ZM7.46967 7.46967C7.76256 7.17678 8.23744 7.17678 8.53033 7.46967L10 8.93934L11.4697 7.46967C11.7626 7.17678 12.2374 7.17678 12.5303 7.46967C12.8232 7.76256 12.8232 8.23744 12.5303 8.53033L11.0607 10L12.5303 11.4697C12.8232 11.7626 12.8232 12.2374 12.5303 12.5303C12.2374 12.8232 11.7626 12.8232 11.4697 12.5303L10 11.0607L8.53033 12.5303C8.23744 12.8232 7.76256 12.8232 7.46967 12.5303C7.17678 12.2374 7.17678 11.7626 7.46967 11.4697L8.93934 10L7.46967 8.53033C7.17678 8.23744 7.17678 7.76256 7.46967 7.46967Z" fill=""/>
+                    </svg>`
                 },
                 warning: {
-                    bg: "bg-yellow-100",
-                    text: "text-yellow-600",
-                    border: "border-yellow-200",
+                    bg: "bg-white",
+                    border: "border-warning",
+                    iconBg: "bg-warning",
+                    iconColor: "text-white",
+                    titleColor: "text-gray-800",
+                    messageColor: "text-gray-600",
+                    icon: `<svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M8.25675 2.95158C9.03197 1.6838 10.968 1.6838 11.7432 2.95158L18.4727 14.0129C19.2318 15.2565 18.2804 16.875 16.7295 16.875H3.27054C1.71965 16.875 0.768214 15.2565 1.52733 14.0129L8.25675 2.95158ZM10 7.5C10.4142 7.5 10.75 7.83579 10.75 8.25V11.25C10.75 11.6642 10.4142 12 10 12C9.58579 12 9.25 11.6642 9.25 11.25V8.25C9.25 7.83579 9.58579 7.5 10 7.5ZM10 15C10.5523 15 11 14.5523 11 14C11 13.4477 10.5523 13 10 13C9.44772 13 9 13.4477 9 14C9 14.5523 9.44772 15 10 15Z" fill=""/>
+                    </svg>`
                 },
                 info: {
-                    bg: "bg-blue-100",
-                    text: "text-blue-600",
-                    border: "border-blue-200",
+                    bg: "bg-white",
+                    border: "border-blue-500",
+                    iconBg: "bg-blue-500",
+                    iconColor: "text-white",
+                    titleColor: "text-gray-800",
+                    messageColor: "text-gray-600",
+                    icon: `<svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M10 0.25C4.61522 0.25 0.25 4.61522 0.25 10C0.25 15.3848 4.61522 19.75 10 19.75C15.3848 19.75 19.75 15.3848 19.75 10C19.75 4.61522 15.3848 0.25 10 0.25ZM10 9C10.4142 9 10.75 9.33579 10.75 9.75V13.25C10.75 13.6642 10.4142 14 10 14C9.58579 14 9.25 13.6642 9.25 13.25V9.75C9.25 9.33579 9.58579 9 10 9ZM10 8C10.5523 8 11 7.55228 11 7C11 6.44772 10.5523 6 10 6C9.44772 6 9 6.44772 9 7C9 7.55228 9.44772 8 10 8Z" fill=""/>
+                    </svg>`
                 },
             };
             
-            const color = colors[type] || colors.success;
+            const config = configs[type] || configs.success;
             const notification = document.createElement("div");
-            notification.className = `fixed top-4 right-4 ${color.bg} ${color.border} border ${color.text} px-4 py-3 rounded-lg shadow-lg z-50 max-w-md`;
+            
+            // Create notification with TailAdmin styling and z-9999
+            notification.className = `fixed top-6 right-6 z-9999 max-w-md ${config.bg} border-l-4 ${config.border} rounded-lg shadow-theme-lg transform transition-all duration-300 ease-out`;
+            notification.style.animation = 'slideInRight 0.3s ease-out';
+            
             notification.innerHTML = `
-                <div class="flex items-start gap-3">
-                    <div class="flex-1">
-                        <h4 class="font-semibold">${title}</h4>
-                        <p class="text-sm">${message}</p>
+                <div class="flex items-start gap-4 p-5">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-full ${config.iconBg}">
+                        <div class="${config.iconColor}">
+                            ${config.icon}
+                        </div>
                     </div>
-                    <button onclick="this.parentElement.parentElement.remove()" class="text-gray-500 hover:text-gray-700">
-                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    <div class="flex-1 pt-0.5">
+                        <h5 class="mb-1 text-base font-semibold ${config.titleColor}">
+                            ${title}
+                        </h5>
+                        <p class="text-sm leading-relaxed ${config.messageColor}">
+                            ${message}
+                        </p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M4.29289 4.29289C4.68342 3.90237 5.31658 3.90237 5.70711 4.29289L10 8.58579L14.2929 4.29289C14.6834 3.90237 15.3166 3.90237 15.7071 4.29289C16.0976 4.68342 16.0976 5.31658 15.7071 5.70711L11.4142 10L15.7071 14.2929C16.0976 14.6834 16.0976 15.3166 15.7071 15.7071C15.3166 16.0976 14.6834 16.0976 14.2929 15.7071L10 11.4142L5.70711 15.7071C5.31658 16.0976 4.68342 16.0976 4.29289 15.7071C3.90237 15.3166 3.90237 14.6834 4.29289 14.2929L8.58579 10L4.29289 5.70711C3.90237 5.31658 3.90237 4.68342 4.29289 4.29289Z" fill=""/>
                         </svg>
                     </button>
                 </div>
             `;
+            
             document.body.appendChild(notification);
             
+            // Auto-dismiss after 5 seconds with fade out animation
             setTimeout(() => {
-                if (notification.parentElement) {
-                    notification.remove();
-                }
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.remove();
+                    }
+                }, 300);
             }, 5000);
         }
 
@@ -3268,11 +3362,20 @@
                     axisTicks: {
                         show: false,
                     },
+                    labels: {
+                        style: {
+                            colors: "#6B7280",
+                            fontSize: "12px",
+                            fontFamily: "Outfit, sans-serif",
+                        },
+                    },
                 },
                 legend: {
                     show: true,
                     position: "top",
                     horizontalAlign: "left",
+                    fontFamily: "Outfit, sans-serif",
+                    fontSize: "12px",
                     markers: {
                         size: 5,
                         shape: "circle",
@@ -3286,6 +3389,13 @@
                 },
                 yaxis: {
                     title: false,
+                    labels: {
+                        style: {
+                            colors: "#6B7280",
+                            fontSize: "12px",
+                            fontFamily: "Outfit, sans-serif",
+                        },
+                    },
                 },
                 grid: {
                     yaxis: {
@@ -3580,6 +3690,11 @@
                         formatter: function (val) {
                             return formatCurrency(val);
                         },
+                        style: {
+                            colors: "#6B7280",
+                            fontSize: "12px",
+                            fontFamily: "Outfit, sans-serif",
+                        },
                     },
                     axisBorder: {
                         show: false,
@@ -3592,7 +3707,9 @@
                     title: false,
                     labels: {
                         style: {
+                            colors: "#6B7280",
                             fontSize: "12px",
+                            fontFamily: "Outfit, sans-serif",
                         },
                     },
                 },
@@ -3600,7 +3717,8 @@
                     show: true,
                     position: "top",
                     horizontalAlign: "left",
-                    fontFamily: "Outfit",
+                    fontFamily: "Outfit, sans-serif",
+                    fontSize: "12px",
                     markers: {
                         radius: 99,
                     },
@@ -4722,11 +4840,20 @@
                     axisTicks: {
                         show: false,
                     },
+                    labels: {
+                        style: {
+                            colors: "#6B7280",
+                            fontSize: "12px",
+                            fontFamily: "Outfit, sans-serif",
+                        },
+                    },
                 },
                 legend: {
                     show: true,
                     position: "top",
                     horizontalAlign: "left",
+                    fontFamily: "Outfit, sans-serif",
+                    fontSize: "12px",
                     markers: {
                         size: 5,
                         shape: "circle",
@@ -4740,6 +4867,13 @@
                 },
                 yaxis: {
                     title: false,
+                    labels: {
+                        style: {
+                            colors: "#6B7280",
+                            fontSize: "12px",
+                            fontFamily: "Outfit, sans-serif",
+                        },
+                    },
                 },
                 grid: {
                     yaxis: {
@@ -5817,6 +5951,11 @@
                         formatter: function (val) {
                             return formatCurrency(val);
                         },
+                        style: {
+                            colors: "#6B7280",
+                            fontSize: "12px",
+                            fontFamily: "Outfit, sans-serif",
+                        },
                     },
                     axisBorder: {
                         show: false,
@@ -5829,7 +5968,9 @@
                     title: false,
                     labels: {
                         style: {
+                            colors: "#6B7280",
                             fontSize: "12px",
+                            fontFamily: "Outfit, sans-serif",
                         },
                     },
                 },
@@ -5837,7 +5978,8 @@
                     show: true,
                     position: "top",
                     horizontalAlign: "left",
-                    fontFamily: "Outfit",
+                    fontFamily: "Outfit, sans-serif",
+                    fontSize: "12px",
                     markers: {
                         radius: 99,
                     },
@@ -6953,7 +7095,8 @@
                         return val.toFixed(1) + "%";
                     },
                     style: {
-                        fontSize: "11px",
+                        fontSize: "12px",
+                        fontFamily: "Outfit, sans-serif",
                         colors: ["#fff"],
                         fontWeight: "bold",
                     },
@@ -6969,7 +7112,8 @@
                             style: {
                                     color: "#fff",
                                     background: "#f59e0b",
-                                    fontSize: "11px",
+                                    fontSize: "12px",
+                                    fontFamily: "Outfit, sans-serif",
                                     fontWeight: "bold",
                                 },
                                 text: "Target: 12%",
@@ -6984,6 +7128,7 @@
                         style: {
                             color: "#6B7280",
                             fontSize: "12px",
+                            fontFamily: "Outfit, sans-serif",
                         },
                     },
                     labels: {
@@ -6992,7 +7137,8 @@
                         },
                         style: {
                             colors: "#6B7280",
-                            fontSize: "11px",
+                            fontSize: "12px",
+                            fontFamily: "Outfit, sans-serif",
                         },
                     },
                 },
@@ -7000,7 +7146,8 @@
                     labels: {
                         style: {
                             colors: relationships.map(() => "#6B7280"),
-                            fontSize: "11px",
+                            fontSize: "12px",
+                            fontFamily: "Outfit, sans-serif",
                         },
                         maxWidth: 200,
                     },
@@ -7261,7 +7408,8 @@
                         return val.toFixed(1) + "%";
                     },
                     style: {
-                        fontSize: "11px",
+                        fontSize: "12px",
+                        fontFamily: "Outfit, sans-serif",
                         colors: ["#fff"],
                         fontWeight: "bold",
                     },
@@ -7277,7 +7425,8 @@
                             style: {
                                     color: "#fff",
                                     background: "#f59e0b",
-                                    fontSize: "11px",
+                                    fontSize: "12px",
+                                    fontFamily: "Outfit, sans-serif",
                                     fontWeight: "bold",
                                 },
                                 text: "Target: 12%",
@@ -7292,6 +7441,7 @@
                         style: {
                             color: "#6B7280",
                             fontSize: "12px",
+                            fontFamily: "Outfit, sans-serif",
                         },
                     },
                     labels: {
@@ -7300,7 +7450,8 @@
                         },
                         style: {
                             colors: "#6B7280",
-                            fontSize: "11px",
+                            fontSize: "12px",
+                            fontFamily: "Outfit, sans-serif",
                         },
                     },
                 },
@@ -7308,7 +7459,8 @@
                     labels: {
                         style: {
                             colors: relationships.map(() => "#6B7280"),
-                            fontSize: "11px",
+                            fontSize: "12px",
+                            fontFamily: "Outfit, sans-serif",
                         },
                         maxWidth: 200,
                     },
@@ -7740,14 +7892,16 @@
 
                 exportToXLSX() {
                     if (this.sortedRows.length === 0) {
-                        alert("No data to export");
+                        showNotification("Export Failed", "No data to export", "error");
                         return;
                     }
 
                     // Check if XLSX library is loaded
                     if (typeof XLSX === "undefined") {
-                        alert(
-                            "Export library not loaded. Please refresh the page and try again."
+                        showNotification(
+                            "Export Failed",
+                            "Export library not loaded. Please refresh the page and try again.",
+                            "error"
                         );
                         return;
                     }
@@ -8579,6 +8733,79 @@
                         </div>
                     `,
                 },
+                pipeline: {
+                    title: "Pipeline Deals Aging - Methodology",
+                    content: `
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                    </svg>
+                                    <h5 class="font-semibold text-gray-900">What This Table Shows:</h5>
+                                </div>
+                                <p class="text-gray-600">Tracks facilities that have been approved but not yet originated, grouped by how long they have been waiting since approval. Shows only data for the current reporting year.</p>
+                            </div>
+                            
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <h5 class="font-semibold text-gray-900">Calculation Logic:</h5>
+                                </div>
+                                <ul class="list-disc list-inside space-y-1 text-gray-600">
+                                    <li><strong>Inclusion Criteria:</strong> Facilities where Origination_Date is empty/null AND Report_Date year matches reporting year</li>
+                                    <li><strong>Aging Calculation:</strong> Days Since Approval = Today's Date - Facility_First_Approval_Date</li>
+                                    <li><strong>30 days:</strong> 0-30 days since first approval</li>
+                                    <li><strong>60 days:</strong> 31-60 days since first approval</li>
+                                    <li><strong>90 days:</strong> 61-90 days since first approval</li>
+                                    <li><strong>Over 90 days:</strong> 91+ days since first approval</li>
+                                    <li><strong>Count:</strong> Number of unique Facility_IDs in each bucket</li>
+                                    <li><strong>Total TFA:</strong> Sum of Fac_Amount for facilities in each bucket</li>
+                                </ul>
+                            </div>
+                            
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <h5 class="font-semibold text-gray-900">Key Columns Used:</h5>
+                                </div>
+                                <ul class="list-disc list-inside space-y-1 text-gray-600">
+                                    <li><code class="bg-gray-100 px-1 rounded">Origination_Date</code> - Must be empty/null for pipeline deals</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Facility_First_Approval_Date</code> - Starting point for aging calculation</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Report_Date</code> - To filter by reporting year</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Facility_ID</code> - For unique facility count</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Fac_Amount</code> - Total Facility Amount (TFA)</li>
+                                </ul>
+                            </div>
+                            
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                                    </svg>
+                                    <h5 class="font-semibold text-gray-900">Filters Applied:</h5>
+                                </div>
+                                <p class="text-gray-600">Respects all active filters (Region, Status, Product Program, etc.) and only shows pipeline deals for the current reporting year.</p>
+                            </div>
+                            
+                            <div class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
+                                <div class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div>
+                                        <p class="font-semibold text-blue-900 text-sm">Note:</p>
+                                        <p class="text-blue-800 text-sm">All 4 aging buckets (30, 60, 90, Over 90 days) are always displayed. Buckets with zero facilities will show a count of 0.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `,
+                },
             };
 
             // Get methodology content for the chart type
@@ -8618,14 +8845,16 @@
                 !window.currentChartData.data ||
                 window.currentChartData.data.length === 0
             ) {
-                alert("No data available to export");
+                showNotification("Export Failed", "No data available to export", "error");
                 return;
             }
 
             // Check if XLSX library is loaded
             if (typeof XLSX === "undefined") {
-                alert(
-                    "Export library not loaded. Please refresh the page and try again."
+                showNotification(
+                    "Export Failed",
+                    "Export library not loaded. Please refresh the page and try again.",
+                    "error"
                 );
                 return;
             }
@@ -8652,14 +8881,16 @@
         function exportChartData(chartType) {
             // Check if data is loaded
             if (!portfolioData || portfolioData.length === 0) {
-                alert("No data available. Please ensure the data is loaded first.");
+                showNotification("Export Failed", "No data available. Please ensure the data is loaded first.", "error");
                 return;
             }
 
             // Check if XLSX library is loaded
             if (typeof XLSX === "undefined") {
-                alert(
-                    "Export library not loaded. Please refresh the page and try again."
+                showNotification(
+                    "Export Failed",
+                    "Export library not loaded. Please refresh the page and try again.",
+                    "error"
                 );
                 return;
             }
@@ -8704,8 +8935,10 @@
             );
 
             if (!data || data.length === 0) {
-                alert(
-                    "No data to export for this chart. Please check your filters or ensure data matches the chart criteria."
+                showNotification(
+                    "Export Failed",
+                    "No data to export for this chart. Please check your filters or ensure data matches the chart criteria.",
+                    "warning"
                 );
                 return;
             }

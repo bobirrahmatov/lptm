@@ -2551,12 +2551,12 @@
                 }
                 
                 // PSE filter (exclude PSE if includePSE is false)
-                // Use PSE_non-PSE column from data
+                // Use PSE_non-PSE column from data (values: "PSE" or "non-PSE")
                 if (!includePSE) {
                     const pseColumn = row["PSE_non-PSE"] || row.PSE_non_PSE || "";
-                    const pseValue = String(pseColumn).toUpperCase();
-                    // If the column contains "PSE" or similar indicator, skip this row
-                    if (pseValue.includes("PSE") || pseValue === "PSE") continue;
+                    const pseValue = String(pseColumn).trim().toUpperCase();
+                    // Skip rows where value is exactly "PSE" (not "non-PSE")
+                    if (pseValue === "PSE") continue;
                 }
                 
                 // Management Status filter (CM/DM) - case-insensitive comparison
@@ -2856,12 +2856,12 @@
                 }
 
                 // PSE filter (exclude PSE if includePSE is false)
-                // Use PSE_non-PSE column from data
+                // Use PSE_non-PSE column from data (values: "PSE" or "non-PSE")
                 if (!includePSE) {
                     const pseColumn = row["PSE_non-PSE"] || row.PSE_non_PSE || "";
-                    const pseValue = String(pseColumn).toUpperCase();
-                    // If the column contains "PSE" or similar indicator, skip this row
-                    if (pseValue.includes("PSE") || pseValue === "PSE") continue;
+                    const pseValue = String(pseColumn).trim().toUpperCase();
+                    // Skip rows where value is exactly "PSE" (not "non-PSE")
+                    if (pseValue === "PSE") continue;
                 }
 
                 // Management Status filter (CM/DM) - case-insensitive comparison
@@ -4305,6 +4305,12 @@
             // Iterate through portfolio data
             for (let i = 0; i < portfolioData.length; i++) {
                 const row = portfolioData[i];
+                
+                // Always exclude PSE for New Deals metrics
+                const pseColumn = row["PSE_non-PSE"] || row.PSE_non_PSE || "";
+                const pseValue = String(pseColumn).trim().toUpperCase();
+                if (pseValue === "PSE") continue;
+                
                 const approvalDate = parseDate(row.Origination_Date);
                 const facilityId = row.Facility_ID;
                 const facAmount = parseNumber(row.Fac_Amount);
@@ -4444,6 +4450,12 @@
             // Iterate through data
             for (let i = 0; i < dataSource.length; i++) {
                 const row = dataSource[i];
+                
+                // Always exclude PSE for New Deals metrics
+                const pseColumn = row["PSE_non-PSE"] || row.PSE_non_PSE || "";
+                const pseValue = String(pseColumn).trim().toUpperCase();
+                if (pseValue === "PSE") continue;
+                
                 const approvalDate = parseDate(row.Origination_Date);
                 const facilityId = row.Facility_ID;
                 const facAmount = parseNumber(row.Fac_Amount);
@@ -4526,6 +4538,11 @@
             
             // Filter and categorize deals
             dataSource.forEach(row => {
+                // Always exclude PSE for Pipeline Deals Aging
+                const pseColumn = row["PSE_non-PSE"] || row.PSE_non_PSE || "";
+                const pseValue = String(pseColumn).trim().toUpperCase();
+                if (pseValue === "PSE") return;
+                
                 const originationDate = row.Origination_Date;
                 const firstApprovalDate = parseDate(row.Facility_First_Approval_Date);
                 const facilityId = row.Facility_ID;
@@ -4535,6 +4552,7 @@
                 // 1. Origination_Date is empty or null
                 // 2. Has first approval date
                 // 3. Facility_First_Approval_Date is in the current year
+                // 4. PSE is excluded (checked above)
                 if ((!originationDate || originationDate.trim() === '') && 
                     firstApprovalDate && 
                     facilityId && 
@@ -8622,7 +8640,7 @@
                                     </svg>
                                     <h5 class="font-semibold text-gray-900">What This Metric Shows:</h5>
                                 </div>
-                                <p class="text-gray-600">Tracks the count and total amount of new deals (unique facilities) that were closed year-to-date. A deal is considered "closed" if it has an Origination_Date within the current year (from January 1st to today).</p>
+                                <p class="text-gray-600">Tracks the count and total amount of new deals (unique facilities) that were closed year-to-date. A deal is considered "closed" if it has an Origination_Date within the current year (from January 1st to today). <strong>Note: PSE deals are always excluded from this metric.</strong></p>
                             </div>
                             
                             <div>
@@ -8678,7 +8696,7 @@
                                     </svg>
                                     <h5 class="font-semibold text-gray-900">What This Metric Shows:</h5>
                                 </div>
-                                <p class="text-gray-600">Tracks the count and total amount of new deals (unique facilities) that were closed month-to-date. A deal is considered "closed" if it has an Origination_Date within the current month (from 1st of the month to today).</p>
+                                <p class="text-gray-600">Tracks the count and total amount of new deals (unique facilities) that were closed month-to-date. A deal is considered "closed" if it has an Origination_Date within the current month (from 1st of the month to today). <strong>Note: PSE deals are always excluded from this metric.</strong></p>
                             </div>
                             
                             <div>
@@ -8734,7 +8752,7 @@
                                     </svg>
                                     <h5 class="font-semibold text-gray-900">What This Table Shows:</h5>
                                 </div>
-                                <p class="text-gray-600">Tracks facilities that have been approved but not yet originated, grouped by how long they have been waiting since approval. Shows only data where the Facility_First_Approval_Date is in the current year.</p>
+                                <p class="text-gray-600">Tracks facilities that have been approved but not yet originated, grouped by how long they have been waiting since approval. Shows only data where the Facility_First_Approval_Date is in the current year. <strong>Note: PSE deals are always excluded from this table.</strong></p>
                             </div>
                             
                             <div>
@@ -8745,7 +8763,7 @@
                                     <h5 class="font-semibold text-gray-900">Calculation Logic:</h5>
                                 </div>
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
-                                    <li><strong>Inclusion Criteria:</strong> Facilities where Origination_Date is empty/null AND Facility_First_Approval_Date year matches current year</li>
+                                    <li><strong>Inclusion Criteria:</strong> Facilities where Origination_Date is empty/null AND Facility_First_Approval_Date year matches current year AND PSE_non-PSE is not "PSE" (non-PSE only)</li>
                                     <li><strong>Aging Calculation:</strong> Days Since Approval = Today's Date - Facility_First_Approval_Date</li>
                                     <li><strong>30 days:</strong> 0-30 days since first approval</li>
                                     <li><strong>60 days:</strong> 31-60 days since first approval</li>

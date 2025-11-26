@@ -4512,17 +4512,9 @@
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             
-            // Find the most recent Report_Date to determine the reporting year
-            let mostRecentReportDate = null;
-            for (const row of dataSource) {
-                const reportDate = parseDate(row.Report_Date);
-                if (reportDate && (!mostRecentReportDate || reportDate > mostRecentReportDate)) {
-                    mostRecentReportDate = reportDate;
-                }
-            }
-            
-            const reportingYear = mostRecentReportDate ? mostRecentReportDate.getFullYear() : today.getFullYear();
-            console.log('Pipeline Table - Reporting Year:', reportingYear);
+            // Get the current year for filtering
+            const currentYear = today.getFullYear();
+            console.log('Pipeline Table - Current Year:', currentYear);
             
             // Define aging buckets (in days) - Always show these 4 rows
             const buckets = [
@@ -4536,19 +4528,17 @@
             dataSource.forEach(row => {
                 const originationDate = row.Origination_Date;
                 const firstApprovalDate = parseDate(row.Facility_First_Approval_Date);
-                const reportDate = parseDate(row.Report_Date);
                 const facilityId = row.Facility_ID;
                 const tfaAmount = parseNumber(row.Fac_Amount || row.Facility_Amount);
                 
                 // Only include deals where:
-                // 1. Origination_Date is empty
+                // 1. Origination_Date is empty or null
                 // 2. Has first approval date
-                // 3. Report_Date is in the same year as reporting year
+                // 3. Facility_First_Approval_Date is in the current year
                 if ((!originationDate || originationDate.trim() === '') && 
                     firstApprovalDate && 
                     facilityId && 
-                    reportDate && 
-                    reportDate.getFullYear() === reportingYear) {
+                    firstApprovalDate.getFullYear() === currentYear) {
                     
                     // Calculate days since approval
                     const daysSinceApproval = Math.floor((today - firstApprovalDate) / (1000 * 60 * 60 * 24));
@@ -4601,7 +4591,7 @@
             tableBody.innerHTML = html;
             
             console.log('Pipeline Table populated:', {
-                reportingYear: reportingYear,
+                currentYear: currentYear,
                 totalFacilities: totalCount,
                 totalTFA: formatCurrency(totalTFA),
                 buckets: buckets.map(b => ({ label: b.label, count: b.count, tfa: formatCurrency(b.tfa) }))
@@ -8744,7 +8734,7 @@
                                     </svg>
                                     <h5 class="font-semibold text-gray-900">What This Table Shows:</h5>
                                 </div>
-                                <p class="text-gray-600">Tracks facilities that have been approved but not yet originated, grouped by how long they have been waiting since approval. Shows only data for the current reporting year.</p>
+                                <p class="text-gray-600">Tracks facilities that have been approved but not yet originated, grouped by how long they have been waiting since approval. Shows only data where the Facility_First_Approval_Date is in the current year.</p>
                             </div>
                             
                             <div>
@@ -8755,7 +8745,7 @@
                                     <h5 class="font-semibold text-gray-900">Calculation Logic:</h5>
                                 </div>
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
-                                    <li><strong>Inclusion Criteria:</strong> Facilities where Origination_Date is empty/null AND Report_Date year matches reporting year</li>
+                                    <li><strong>Inclusion Criteria:</strong> Facilities where Origination_Date is empty/null AND Facility_First_Approval_Date year matches current year</li>
                                     <li><strong>Aging Calculation:</strong> Days Since Approval = Today's Date - Facility_First_Approval_Date</li>
                                     <li><strong>30 days:</strong> 0-30 days since first approval</li>
                                     <li><strong>60 days:</strong> 31-60 days since first approval</li>
@@ -8775,8 +8765,7 @@
                                 </div>
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
                                     <li><code class="bg-gray-100 px-1 rounded">Origination_Date</code> - Must be empty/null for pipeline deals</li>
-                                    <li><code class="bg-gray-100 px-1 rounded">Facility_First_Approval_Date</code> - Starting point for aging calculation</li>
-                                    <li><code class="bg-gray-100 px-1 rounded">Report_Date</code> - To filter by reporting year</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Facility_First_Approval_Date</code> - Starting point for aging calculation and year filter (must be in current year)</li>
                                     <li><code class="bg-gray-100 px-1 rounded">Facility_ID</code> - For unique facility count</li>
                                     <li><code class="bg-gray-100 px-1 rounded">Fac_Amount</code> - Total Facility Amount (TFA)</li>
                                 </ul>

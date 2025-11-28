@@ -793,9 +793,9 @@
                 <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 h-full flex flex-col">
                     <div class="flex flex-col gap-3 mb-5 sm:flex-row sm:items-start sm:justify-between">
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-800">
-                                CAs & Facilities Expiring
-                            </h3>
+                                <h3 class="text-lg font-semibold text-gray-800">
+                                    CAs & Facilities Expiring
+                                </h3>
                                                         <!-- Expired Metrics (Inline) -->
                                                         <div class="flex items-center gap-4 mt-2">
                                                             <div class="flex items-center gap-1.5">
@@ -813,40 +813,40 @@
                                                                 <span class="text-xs font-semibold text-gray-900" id="facilitiesExpiredCount">0</span>
                                                             </div>
                                                         </div>
-                            <p class="mt-1 text-sm text-gray-500">
-                                Upcoming expirations for the next 3 months
-                            </p>
+                                <p class="mt-1 text-sm text-gray-500">
+                                    Upcoming expirations for the next 3 months
+                                </p>
                         </div>
-                        <div x-data="{openDropDown: false}" class="relative">
-                            <button @click="openDropDown = !openDropDown"
-                                :class="openDropDown ? 'text-gray-700' : 'text-gray-400 hover:text-gray-700'"
-                                class="transition-colors">
-                                <svg class="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" clip-rule="evenodd"
-                                        d="M10.2441 6C10.2441 5.0335 11.0276 4.25 11.9941 4.25H12.0041C12.9706 4.25 13.7541 5.0335 13.7541 6C13.7541 6.9665 12.9706 7.75 12.0041 7.75H11.9941C11.0276 7.75 10.2441 6.9665 10.2441 6ZM10.2441 18C10.2441 17.0335 11.0276 16.25 11.9941 16.25H12.0041C12.9706 16.25 13.7541 17.0335 13.7541 18C13.7541 18.9665 12.9706 19.75 12.0041 19.75H11.9941C11.0276 19.75 10.2441 18.9665 10.2441 18ZM11.9941 10.25C11.0276 10.25 10.2441 11.0335 10.2441 12C10.2441 12.9665 11.0276 13.75 11.9941 13.75H12.0041C12.9706 13.75 13.7541 12.9665 13.7541 12C13.7541 11.0335 12.9706 10.25 12.0041 10.25H11.9941Z"
-                                        fill="" />
-                                </svg>
-                            </button>
-                            <div x-show="openDropDown" @click.outside="openDropDown = false"
-                                class="absolute right-0 top-full z-40 w-40 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
-                                <button onclick="openChartDataModal('expiring')" @click="openDropDown = false"
-                                    class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-                                    View Data
+                            <div x-data="{openDropDown: false}" class="relative">
+                                <button @click="openDropDown = !openDropDown"
+                                    :class="openDropDown ? 'text-gray-700' : 'text-gray-400 hover:text-gray-700'"
+                                    class="transition-colors">
+                                    <svg class="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                            d="M10.2441 6C10.2441 5.0335 11.0276 4.25 11.9941 4.25H12.0041C12.9706 4.25 13.7541 5.0335 13.7541 6C13.7541 6.9665 12.9706 7.75 12.0041 7.75H11.9941C11.0276 7.75 10.2441 6.9665 10.2441 6ZM10.2441 18C10.2441 17.0335 11.0276 16.25 11.9941 16.25H12.0041C12.9706 16.25 13.7541 17.0335 13.7541 18C13.7541 18.9665 12.9706 19.75 12.0041 19.75H11.9941C11.0276 19.75 10.2441 18.9665 10.2441 18ZM11.9941 10.25C11.0276 10.25 10.2441 11.0335 10.2441 12C10.2441 12.9665 11.0276 13.75 11.9941 13.75H12.0041C12.9706 13.75 13.7541 12.9665 13.7541 12C13.7541 11.0335 12.9706 10.25 12.0041 10.25H11.9941Z"
+                                            fill="" />
+                                    </svg>
                                 </button>
-                                <button onclick="exportChartData('expiring')" @click="openDropDown = false"
-                                    class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-                                    Export Data
-                                </button>
-                                <button onclick="openMethodologyModal('expiring')" @click="openDropDown = false"
-                                    class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-                                    Methodology
-                                </button>
+                                <div x-show="openDropDown" @click.outside="openDropDown = false"
+                                    class="absolute right-0 top-full z-40 w-40 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                    <button onclick="openChartDataModal('expiring')" @click="openDropDown = false"
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                                        View Data
+                                    </button>
+                                    <button onclick="exportChartData('expiring')" @click="openDropDown = false"
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                                        Export Data
+                                    </button>
+                                    <button onclick="openMethodologyModal('expiring')" @click="openDropDown = false"
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                                        Methodology
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="flex-1 flex items-center">
-                        <div id="facilityTrendChart" class="-ml-5 w-full" style="min-height: 350px"></div>
+                        <div class="flex-1 flex items-center">
+                            <div id="facilityTrendChart" class="-ml-5 w-full" style="min-height: 350px"></div>
                     </div>
                 </div>
             </div>
@@ -1038,9 +1038,9 @@
                 <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white flex-1 flex flex-col">
                     <div class="flex items-center justify-between px-5 pt-5 sm:px-6 sm:pt-6 pb-4">
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-800">
+                        <h3 class="text-lg font-semibold text-gray-800">
                                 Pipeline Deals Aging
-                            </h3>
+                        </h3>
                             <p class="mt-1 text-sm text-gray-500">
                                 Deals pending origination grouped by approval age
                             </p>
@@ -1069,9 +1069,9 @@
                                 <button onclick="openMethodologyModal('pipeline')" @click="openDropDown = false"
                                     class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
                                     Methodology
-                                </button>
-                            </div>
+                            </button>
                         </div>
+                    </div>
                     </div>
                     <div class="max-w-full overflow-x-auto flex-1">
                         <table class="w-full table-auto h-full">
@@ -1110,27 +1110,58 @@
                             </p>
                     </div>
                         <div class="flex items-center gap-2">
-                            <!-- Top N Selector with TailAdmin Styling -->
-                            <div x-data="{ isOptionSelected: true }" class="relative z-20 bg-transparent">
-                        <select id="topNFilter" onchange="updateBarChart()" 
-                                    class="shadow-theme-xs focus:border-blue-300 focus:ring-blue-500/10 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pr-11 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden"
-                                    :class="isOptionSelected && 'text-gray-800'" @change="isOptionSelected = true">
-                                    <option value="10" selected class="text-gray-700">
-                                        Top 10
-                                    </option>
-                                    <option value="20" class="text-gray-700">Top 20</option>
-                                    <option value="50" class="text-gray-700">Top 50</option>
-                                    <option value="100" class="text-gray-700">Top 100</option>
-                        </select>
-                                <span
-                                    class="pointer-events-none absolute top-1/2 right-4 z-30 -translate-y-1/2 text-gray-500">
-                                    <svg class="stroke-current" width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396" stroke=""
-                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            <!-- Top N Filter -->
+                            <div x-data="{openTopN: false, topNRelationships: 10}" class="relative">
+                                <button @click="openTopN = !openTopN"
+                                    class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <span>Top <span x-text="topNRelationships"></span></span>
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                     </svg>
-                                </span>
-                    </div>
+                                </button>
+                                <div x-show="openTopN" @click.outside="openTopN = false"
+                                    class="absolute right-0 top-full z-40 w-32 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                    <button @click="topNRelationships = 10; openTopN = false; document.getElementById('topNFilter').value = 10; updateBarChart();"
+                                        :class="topNRelationships === 10 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
+                                        Top 10
+                                    </button>
+                                    <button @click="topNRelationships = 20; openTopN = false; document.getElementById('topNFilter').value = 20; updateBarChart();"
+                                        :class="topNRelationships === 20 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
+                                        Top 20
+                                    </button>
+                                    <button @click="topNRelationships = 30; openTopN = false; document.getElementById('topNFilter').value = 30; updateBarChart();"
+                                        :class="topNRelationships === 30 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
+                                        Top 30
+                                    </button>
+                                    <button @click="topNRelationships = 40; openTopN = false; document.getElementById('topNFilter').value = 40; updateBarChart();"
+                                        :class="topNRelationships === 40 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
+                                        Top 40
+                                    </button>
+                                    <button @click="topNRelationships = 50; openTopN = false; document.getElementById('topNFilter').value = 50; updateBarChart();"
+                                        :class="topNRelationships === 50 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
+                                        Top 50
+                                    </button>
+                                    <button @click="topNRelationships = 100; openTopN = false; document.getElementById('topNFilter').value = 100; updateBarChart();"
+                                        :class="topNRelationships === 100 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
+                                        Top 100
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Hidden select for backward compatibility with existing JavaScript -->
+                            <select id="topNFilter" style="display: none;">
+                                <option value="10" selected>Top 10</option>
+                                <option value="20">Top 20</option>
+                                <option value="30">Top 30</option>
+                                <option value="40">Top 40</option>
+                                <option value="50">Top 50</option>
+                                <option value="100">Top 100</option>
+                            </select>
                             <div x-data="{openDropDown: false}" class="relative">
                                 <button @click="openDropDown = !openDropDown"
                                     :class="openDropDown ? 'text-gray-700' : 'text-gray-400 hover:text-gray-700'"
@@ -1223,278 +1254,436 @@
             </div>
         </div>
 
-        <!-- Data Table -->
-        <div class="overflow-hidden rounded-xl border border-gray-200 bg-white mb-6" x-data="portfolioTable()">
-            <!-- Table Header with Search and Filters -->
-            <div
-                class="flex flex-col justify-between gap-5 border-b border-gray-200 px-5 py-4 sm:flex-row lg:items-center">
+        <!-- Covenants and Reviews Section -->
+        <div class="grid grid-cols-12 gap-4 md:gap-6 mb-6">
+            <!-- Covenants Coming Due and Past Due Table -->
+            <div class="col-span-12 xl:col-span-8" x-data="{ topN: 10, openTopN: false }">
+                <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+                    <div class="flex items-center justify-between px-5 pt-5 sm:px-6 sm:pt-6 pb-4 border-b border-gray-200">
                 <div>
                     <h3 class="text-lg font-semibold text-gray-800">
-                        Portfolio Details
+                                Covenants Coming Due and Past Due
                     </h3>
-                    <p class="text-sm text-gray-500">
-                        Showing <span x-text="displayedRowsCount"></span> lending
-                        facilities
-                        <span id="perfIndicator" class="text-green-600 font-medium"></span>
+                            <p class="mt-1 text-sm text-gray-500">
+                                <span x-text="'Top ' + topN"></span> covenant monitoring deadlines by urgency
                     </p>
                 </div>
-
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-                    <!-- Status Filter -->
-                    <div class="hidden lg:block">
-                        <select x-model="statusFilter" @change="applyTableFilters()"
-                            class="shadow-theme-xs focus:border-blue-300 focus:ring-blue-500/10 h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 pr-11 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden">
-                            <option value="all">All Status</option>
-                            <option value="active">Active</option>
-                            <option value="expiring">Expiring Soon</option>
-                            <option value="expired">Expired</option>
-                        </select>
-            </div>
-
-                    <!-- Export Button -->
-                    <div>
-                        <button @click="exportToXLSX()"
-                            class="shadow-theme-xs relative flex h-11 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-3 whitespace-nowrap text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-700">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"
-                                fill="none">
-                                <path
-                                    d="M16.6661 13.3333V15.4166C16.6661 16.1069 16.1064 16.6666 15.4161 16.6666H4.58203C3.89168 16.6666 3.33203 16.1069 3.33203 15.4166V13.3333M10.0004 3.33325L10.0004 13.3333M6.14456 7.18708L9.9986 3.33549L13.8529 7.18708"
-                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                    stroke-linejoin="round" />
+                        <div class="flex items-center gap-3">
+                            <!-- Top N Filter -->
+                            <div x-data="{openTopN: false}" class="relative">
+                                <button @click="openTopN = !openTopN"
+                                    class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <span>Top <span x-text="topN"></span></span>
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
-                            Export XLSX
+                                </button>
+                                <div x-show="openTopN" @click.outside="openTopN = false"
+                                    class="absolute right-0 top-full z-40 w-32 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                    <button @click="topN = 10; openTopN = false"
+                                        :class="topN === 10 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
+                                        Top 10
+                                    </button>
+                                    <button @click="topN = 20; openTopN = false"
+                                        :class="topN === 20 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
+                                        Top 20
+                                    </button>
+                                    <button @click="topN = 30; openTopN = false"
+                                        :class="topN === 30 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
+                                        Top 30
+                                    </button>
+                                    <button @click="topN = 40; openTopN = false"
+                                        :class="topN === 40 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
+                                        Top 40
+                                    </button>
+                                    <button @click="topN = 50; openTopN = false"
+                                        :class="topN === 50 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
+                                        Top 50
+                                    </button>
+                                    <button @click="topN = 100; openTopN = false"
+                                        :class="topN === 100 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
+                                        Top 100
                         </button>
                     </div>
                 </div>
-            </div>
-
-            <!-- Table Content -->
-            <div class="custom-scrollbar overflow-x-auto">
+                            <!-- Export Menu -->
+                            <div x-data="{openDropDown: false}" class="relative h-fit">
+                                <button @click="openDropDown = !openDropDown"
+                                    :class="openDropDown ? 'text-gray-700' : 'text-gray-400 hover:text-gray-700'"
+                                    class="transition-colors">
+                                    <svg class="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                            d="M10.2441 6C10.2441 5.0335 11.0276 4.25 11.9941 4.25H12.0041C12.9706 4.25 13.7541 5.0335 13.7541 6C13.7541 6.9665 12.9706 7.75 12.0041 7.75H11.9941C11.0276 7.75 10.2441 6.9665 10.2441 6ZM10.2441 18C10.2441 17.0335 11.0276 16.25 11.9941 16.25H12.0041C12.9706 16.25 13.7541 17.0335 13.7541 18C13.7541 18.9665 12.9706 19.75 12.0041 19.75H11.9941C11.0276 19.75 10.2441 18.9665 10.2441 18ZM11.9941 10.25C11.0276 10.25 10.2441 11.0335 10.2441 12C10.2441 12.9665 11.0276 13.75 11.9941 13.75H12.0041C12.9706 13.75 13.7541 12.9665 13.7541 12C13.7541 11.0335 12.9706 10.25 12.0041 10.25H11.9941Z"
+                                            fill="" />
+                                        </svg>
+                                </button>
+                                <div x-show="openDropDown" @click.outside="openDropDown = false"
+                                    class="absolute right-0 top-full z-40 w-40 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                    <button @click="openDropDown = false"
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                                        Export Data
+                            </button>
+                                </div>
+                                </div>
+                                </div>
+                                </div>
+                    <div class="max-w-full overflow-x-auto overflow-y-auto" style="height: 500px;">
                 <table class="w-full table-auto">
-                    <thead>
-                        <tr class="border-b border-gray-200">
-                            <th class="p-4 text-left text-xs font-medium whitespace-nowrap text-gray-500">
-                                Facility ID
-                            </th>
-                            <th class="p-4 text-left text-xs font-medium whitespace-nowrap text-gray-500">
-                                <div class="flex cursor-pointer items-center gap-3" @click="sortBy('relationship')">
-                                    <p class="text-xs font-medium text-gray-500">
-                                        Relationship
-                                    </p>
-                                    <span class="flex flex-col gap-0.5">
-                                        <svg :class="sort.key === 'relationship' && sort.asc ? 'text-gray-800' : 'text-gray-300'"
-                                            width="8" height="5" viewBox="0 0 8 5" fill="none">
-                                            <path
-                                                d="M4.40962 0.585167C4.21057 0.300808 3.78943 0.300807 3.59038 0.585166L1.05071 4.21327C0.81874 4.54466 1.05582 5 1.46033 5H6.53967C6.94418 5 7.18126 4.54466 6.94929 4.21327L4.40962 0.585167Z"
-                                                fill="currentColor" />
-                                        </svg>
-                                        <svg :class="sort.key === 'relationship' && !sort.asc ? 'text-gray-800' : 'text-gray-300'"
-                                            width="8" height="5" viewBox="0 0 8 5" fill="none">
-                                            <path
-                                                d="M4.40962 4.41483C4.21057 4.69919 3.78943 4.69919 3.59038 4.41483L1.05071 0.786732C0.81874 0.455343 1.05582 0 1.46033 0H6.53967C6.94418 0 7.18126 0.455342 6.94929 0.786731L4.40962 4.41483Z"
-                                                fill="currentColor" />
-                                        </svg>
-                                    </span>
-                                </div>
-                            </th>
-                            <th class="p-4 text-left text-xs font-medium whitespace-nowrap text-gray-500">
-                                <div class="flex cursor-pointer items-center gap-3" @click="sortBy('region')">
-                                    <p class="text-xs font-medium text-gray-500">Region</p>
-                                    <span class="flex flex-col gap-0.5">
-                                        <svg :class="sort.key === 'region' && sort.asc ? 'text-gray-800' : 'text-gray-300'"
-                                            width="8" height="5" viewBox="0 0 8 5" fill="none">
-                                            <path
-                                                d="M4.40962 0.585167C4.21057 0.300808 3.78943 0.300807 3.59038 0.585166L1.05071 4.21327C0.81874 4.54466 1.05582 5 1.46033 5H6.53967C6.94418 5 7.18126 4.54466 6.94929 4.21327L4.40962 0.585167Z"
-                                                fill="currentColor" />
-                                        </svg>
-                                        <svg :class="sort.key === 'region' && !sort.asc ? 'text-gray-800' : 'text-gray-300'"
-                                            width="8" height="5" viewBox="0 0 8 5" fill="none">
-                                            <path
-                                                d="M4.40962 4.41483C4.21057 4.69919 3.78943 4.69919 3.59038 4.41483L1.05071 0.786732C0.81874 0.455343 1.05582 0 1.46033 0H6.53967C6.94418 0 7.18126 0.455342 6.94929 0.786731L4.40962 4.41483Z"
-                                                fill="currentColor" />
-                                        </svg>
-                                    </span>
-                                </div>
-                            </th>
-                            <th class="p-4 text-left text-xs font-medium whitespace-nowrap text-gray-500">
-                                Product
-                            </th>
-                            <th class="p-4 text-left text-xs font-medium whitespace-nowrap text-gray-500">
-                                <div class="flex cursor-pointer items-center gap-3" @click="sortBy('amount')">
-                                    <p class="text-xs font-medium text-gray-500">
-                                        Facility Amount
-                                    </p>
-                                    <span class="flex flex-col gap-0.5">
-                                        <svg :class="sort.key === 'amount' && sort.asc ? 'text-gray-800' : 'text-gray-300'"
-                                            width="8" height="5" viewBox="0 0 8 5" fill="none">
-                                            <path
-                                                d="M4.40962 0.585167C4.21057 0.300808 3.78943 0.300807 3.59038 0.585166L1.05071 4.21327C0.81874 4.54466 1.05582 5 1.46033 5H6.53967C6.94418 5 7.18126 4.54466 6.94929 4.21327L4.40962 0.585167Z"
-                                                fill="currentColor" />
-                                        </svg>
-                                        <svg :class="sort.key === 'amount' && !sort.asc ? 'text-gray-800' : 'text-gray-300'"
-                                            width="8" height="5" viewBox="0 0 8 5" fill="none">
-                                            <path
-                                                d="M4.40962 4.41483C4.21057 4.69919 3.78943 4.69919 3.59038 4.41483L1.05071 0.786732C0.81874 0.455343 1.05582 0 1.46033 0H6.53967C6.94418 0 7.18126 0.455342 6.94929 0.786731L4.40962 4.41483Z"
-                                                fill="currentColor" />
-                                        </svg>
-                                    </span>
-                                </div>
-                            </th>
-                            <th class="p-4 text-left text-xs font-medium whitespace-nowrap text-gray-500">
-                                Direct OS
-                            </th>
-                            <th class="p-4 text-left text-xs font-medium whitespace-nowrap text-gray-500">
-                                <div class="flex cursor-pointer items-center gap-3" @click="sortBy('maturity')">
-                                    <p class="text-xs font-medium text-gray-500">
-                                        Maturity Date
-                                    </p>
-                                    <span class="flex flex-col gap-0.5">
-                                        <svg :class="sort.key === 'maturity' && sort.asc ? 'text-gray-800' : 'text-gray-300'"
-                                            width="8" height="5" viewBox="0 0 8 5" fill="none">
-                                            <path
-                                                d="M4.40962 0.585167C4.21057 0.300808 3.78943 0.300807 3.59038 0.585166L1.05071 4.21327C0.81874 4.54466 1.05582 5 1.46033 5H6.53967C6.94418 5 7.18126 4.54466 6.94929 4.21327L4.40962 0.585167Z"
-                                                fill="currentColor" />
-                                        </svg>
-                                        <svg :class="sort.key === 'maturity' && !sort.asc ? 'text-gray-800' : 'text-gray-300'"
-                                            width="8" height="5" viewBox="0 0 8 5" fill="none">
-                                            <path
-                                                d="M4.40962 4.41483C4.21057 4.69919 3.78943 4.69919 3.59038 4.41483L1.05071 0.786732C0.81874 0.455343 1.05582 0 1.46033 0H6.53967C6.94418 0 7.18126 0.455342 6.94929 0.786731L4.40962 4.41483Z"
-                                                fill="currentColor" />
-                                        </svg>
-                                    </span>
-                                </div>
-                            </th>
-                            <th class="p-4 text-left text-xs font-medium whitespace-nowrap text-gray-500">
-                                Status
-                            </th>
+                    <thead class="sticky top-0 bg-gray-50 z-10">
+                                <tr class="text-left">
+                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider">Investment Finance Lead Underwriter</th>
+                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider">Region</th>
+                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider">Facility Type</th>
+                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-center">1-45 Days</th>
+                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-center">46-60 Days</th>
+                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-center">61-90 Days</th>
+                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-center">90+ Days</th>
+                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 uppercase tracking-wider text-center">Coming Due</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-x divide-y divide-gray-200">
-                        <!-- No Data Message -->
-                        <tr x-show="paginatedRows.length === 0">
-                            <td colspan="8" class="p-8 text-center text-gray-500">
-                                <div class="flex flex-col items-center justify-center gap-3">
-                                    <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
-                                        </path>
-                                    </svg>
-                                    <p class="text-sm font-medium">No data available</p>
-                                    <p class="text-xs text-gray-400">
-                                        Please ensure data is loaded from the file
-                                    </p>
-                                </div>
-                            </td>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr x-show="topN >= 1" class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-5 py-3 text-sm text-gray-900 font-medium">John Anderson</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Northeast</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Term Loan</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">3</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td>
+                                    <td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">5</td>
                         </tr>
-                        <!-- Data Rows -->
-                        <template x-for="row in paginatedRows" :key="row.id">
-                            <tr class="transition hover:bg-gray-50">
-                                <td class="p-4 whitespace-nowrap">
-                                    <span class="text-xs font-medium text-gray-700" x-text="row.facilityId"></span>
-                                </td>
-                                <td class="p-4 whitespace-nowrap">
-                                    <span class="text-sm font-medium text-gray-700" x-text="row.relationship"></span>
-                                </td>
-                                <td class="p-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
-                                        :class="{
-                                            'bg-blue-50 text-blue-700': row.region === 'NAM',
-                                            'bg-green-50 text-green-700': row.region === 'EMEA',
-                                            'bg-orange-50 text-orange-700': row.region === 'APAC',
-                                            'bg-purple-50 text-purple-700': row.region === 'LATAM'
-                                        }" x-text="row.region"></span>
-                                </td>
-                                <td class="p-4 whitespace-nowrap">
-                                    <p class="text-sm text-gray-500" x-text="row.product"></p>
-                                </td>
-                                <td class="p-4 whitespace-nowrap">
-                                    <p class="text-sm text-gray-700" x-text="row.facilityAmount"></p>
-                                </td>
-                                <td class="p-4 whitespace-nowrap">
-                                    <p class="text-sm text-gray-700" x-text="row.directOS"></p>
-                                </td>
-                                <td class="p-4 whitespace-nowrap">
-                                    <p class="text-sm text-gray-700">
-                                        <span x-text="row.maturityDate"></span>
-                                    </p>
-                                </td>
-                                <td class="p-4 whitespace-nowrap">
-                                    <span class="text-xs rounded-full px-2 py-0.5 font-medium" :class="{
-                                            'bg-success-50 text-success-700': row.status === 'Active',
-                                            'bg-warning-50 text-warning-700': row.status === 'Expiring Soon',
-                                            'bg-red-50 text-red-700': row.status === 'Expired'
-                                        }" x-text="row.status"></span>
-                                </td>
+                                <tr x-show="topN >= 2" class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-5 py-3 text-sm text-gray-900 font-medium">Sarah Mitchell</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">West</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td>
+                                    <td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">4</td>
                             </tr>
-                        </template>
+                                <tr x-show="topN >= 3" class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-5 py-3 text-sm text-gray-900 font-medium">Michael Chen</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Southeast</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">2</td>
+                                    <td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">3</td>
+                                </tr>
+                                <tr x-show="topN >= 4" class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-5 py-3 text-sm text-gray-900 font-medium">Emily Rodriguez</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Midwest</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Credit Line</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">4</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td>
+                                    <td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td>
+                                    <td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">6</td>
+                                </tr>
+                                <tr x-show="topN >= 5" class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-5 py-3 text-sm text-gray-900 font-medium">David Thompson</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Northeast</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Term Loan</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">3</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">4</td>
+                                </tr>
+                                <tr x-show="topN >= 6" class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-5 py-3 text-sm text-gray-900 font-medium">Jennifer Lee</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">West</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td>
+                                    <td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td>
+                                    <td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">5</td>
+                                </tr>
+                                <tr x-show="topN >= 7" class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-5 py-3 text-sm text-gray-900 font-medium">Robert Martinez</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Southeast</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Term Loan</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">3</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">3</td>
+                                </tr>
+                                <tr x-show="topN >= 8" class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-5 py-3 text-sm text-gray-900 font-medium">Amanda Wilson</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Midwest</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td>
+                                    <td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td>
+                                    <td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">7</td>
+                                </tr>
+                                <tr x-show="topN >= 9" class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-5 py-3 text-sm text-gray-900 font-medium">Christopher Brown</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">West</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Credit Line</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">2</td>
+                                    <td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">2</td>
+                                </tr>
+                                <tr x-show="topN >= 10" class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-5 py-3 text-sm text-gray-900 font-medium">Jessica Taylor</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Northeast</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td>
+                                    <td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">4</td>
+                                </tr>
+                                <tr x-show="topN >= 11" class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-5 py-3 text-sm text-gray-900 font-medium">Daniel Kim</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Southeast</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Term Loan</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">3</td>
+                                </tr>
+                                <tr x-show="topN >= 12" class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-5 py-3 text-sm text-gray-900 font-medium">Patricia Garcia</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Midwest</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">3</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td>
+                                    <td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td>
+                                    <td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">5</td>
+                                </tr>
+                                <tr x-show="topN >= 13" class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-5 py-3 text-sm text-gray-900 font-medium">Kevin O'Brien</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">West</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Credit Line</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td>
+                                    <td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">4</td>
+                                </tr>
+                                <tr x-show="topN >= 14" class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-5 py-3 text-sm text-gray-900 font-medium">Lisa Johnson</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Northeast</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td>
+                                    <td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">6</td>
+                                </tr>
+                                <tr x-show="topN >= 15" class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-5 py-3 text-sm text-gray-900 font-medium">Mark Thompson</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Southeast</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Term Loan</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">3</td>
+                                </tr>
+                                <tr x-show="topN >= 16" class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-5 py-3 text-sm text-gray-900 font-medium">Nancy White</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">West</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td>
+                                    <td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td>
+                                    <td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">4</td>
+                                </tr>
+                                <tr x-show="topN >= 17" class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-5 py-3 text-sm text-gray-900 font-medium">Paul Davis</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Northeast</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Term Loan</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">3</td>
+                                </tr>
+                                <tr x-show="topN >= 18" class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-5 py-3 text-sm text-gray-900 font-medium">Rachel Green</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Midwest</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Credit Line</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">3</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td>
+                                    <td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td>
+                                    <td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">5</td>
+                                </tr>
+                                <tr x-show="topN >= 19" class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-5 py-3 text-sm text-gray-900 font-medium">Steven Harris</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Southeast</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td>
+                                    <td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">2</td>
+                                </tr>
+                                <tr x-show="topN >= 20" class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-5 py-3 text-sm text-gray-900 font-medium">Teresa Martin</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">West</td>
+                                    <td class="px-5 py-3 text-sm text-gray-700">Term Loan</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td>
+                                    <td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td>
+                                    <td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td>
+                                    <td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">4</td>
+                                </tr>
+                                <!-- Additional rows for Top 30, 40, 50, 100 demonstration -->
+                                <tr x-show="topN >= 21" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">William Clark</td><td class="px-5 py-3 text-sm text-gray-700">Northeast</td><td class="px-5 py-3 text-sm text-gray-700">Credit Line</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">3</td></tr>
+                                <tr x-show="topN >= 22" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Victoria Lewis</td><td class="px-5 py-3 text-sm text-gray-700">Southeast</td><td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">2</td></tr>
+                                <tr x-show="topN >= 23" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Xavier Robinson</td><td class="px-5 py-3 text-sm text-gray-700">Midwest</td><td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">5</td></tr>
+                                <tr x-show="topN >= 24" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Yvonne Walker</td><td class="px-5 py-3 text-sm text-gray-700">West</td><td class="px-5 py-3 text-sm text-gray-700">Term Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">3</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">4</td></tr>
+                                <tr x-show="topN >= 25" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Zachary Hall</td><td class="px-5 py-3 text-sm text-gray-700">Northeast</td><td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">6</td></tr>
+                                <tr x-show="topN >= 26" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Andrea Young</td><td class="px-5 py-3 text-sm text-gray-700">Southeast</td><td class="px-5 py-3 text-sm text-gray-700">Credit Line</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">3</td></tr>
+                                <tr x-show="topN >= 27" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Benjamin King</td><td class="px-5 py-3 text-sm text-gray-700">Midwest</td><td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">5</td></tr>
+                                <tr x-show="topN >= 28" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Catherine Wright</td><td class="px-5 py-3 text-sm text-gray-700">West</td><td class="px-5 py-3 text-sm text-gray-700">Term Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">2</td></tr>
+                                <tr x-show="topN >= 29" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Dennis Lopez</td><td class="px-5 py-3 text-sm text-gray-700">Northeast</td><td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">4</td></tr>
+                                <tr x-show="topN >= 30" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Eleanor Hill</td><td class="px-5 py-3 text-sm text-gray-700">Southeast</td><td class="px-5 py-3 text-sm text-gray-700">Credit Line</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">3</td></tr>
+                                <tr x-show="topN >= 31" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Frank Scott</td><td class="px-5 py-3 text-sm text-gray-700">Midwest</td><td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">5</td></tr>
+                                <tr x-show="topN >= 32" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Grace Green</td><td class="px-5 py-3 text-sm text-gray-700">West</td><td class="px-5 py-3 text-sm text-gray-700">Term Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">3</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">4</td></tr>
+                                <tr x-show="topN >= 33" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Henry Adams</td><td class="px-5 py-3 text-sm text-gray-700">Northeast</td><td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">6</td></tr>
+                                <tr x-show="topN >= 34" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Irene Baker</td><td class="px-5 py-3 text-sm text-gray-700">Southeast</td><td class="px-5 py-3 text-sm text-gray-700">Credit Line</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">2</td></tr>
+                                <tr x-show="topN >= 35" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Jack Gonzalez</td><td class="px-5 py-3 text-sm text-gray-700">Midwest</td><td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">5</td></tr>
+                                <tr x-show="topN >= 36" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Karen Nelson</td><td class="px-5 py-3 text-sm text-gray-700">West</td><td class="px-5 py-3 text-sm text-gray-700">Term Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">3</td></tr>
+                                <tr x-show="topN >= 37" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Larry Carter</td><td class="px-5 py-3 text-sm text-gray-700">Northeast</td><td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">4</td></tr>
+                                <tr x-show="topN >= 38" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Monica Mitchell</td><td class="px-5 py-3 text-sm text-gray-700">Southeast</td><td class="px-5 py-3 text-sm text-gray-700">Credit Line</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">6</td></tr>
+                                <tr x-show="topN >= 39" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Nathan Perez</td><td class="px-5 py-3 text-sm text-gray-700">Midwest</td><td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">2</td></tr>
+                                <tr x-show="topN >= 40" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Olivia Roberts</td><td class="px-5 py-3 text-sm text-gray-700">West</td><td class="px-5 py-3 text-sm text-gray-700">Term Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">3</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">5</td></tr>
+                                <tr x-show="topN >= 41" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Peter Turner</td><td class="px-5 py-3 text-sm text-gray-700">Northeast</td><td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">3</td></tr>
+                                <tr x-show="topN >= 42" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Quincy Phillips</td><td class="px-5 py-3 text-sm text-gray-700">Southeast</td><td class="px-5 py-3 text-sm text-gray-700">Credit Line</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">4</td></tr>
+                                <tr x-show="topN >= 43" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Rita Campbell</td><td class="px-5 py-3 text-sm text-gray-700">Midwest</td><td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">5</td></tr>
+                                <tr x-show="topN >= 44" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Samuel Parker</td><td class="px-5 py-3 text-sm text-gray-700">West</td><td class="px-5 py-3 text-sm text-gray-700">Term Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">2</td></tr>
+                                <tr x-show="topN >= 45" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Tina Evans</td><td class="px-5 py-3 text-sm text-gray-700">Northeast</td><td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">6</td></tr>
+                                <tr x-show="topN >= 46" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Uma Edwards</td><td class="px-5 py-3 text-sm text-gray-700">Southeast</td><td class="px-5 py-3 text-sm text-gray-700">Credit Line</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">3</td></tr>
+                                <tr x-show="topN >= 47" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Victor Collins</td><td class="px-5 py-3 text-sm text-gray-700">Midwest</td><td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">4</td></tr>
+                                <tr x-show="topN >= 48" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Wendy Stewart</td><td class="px-5 py-3 text-sm text-gray-700">West</td><td class="px-5 py-3 text-sm text-gray-700">Term Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">3</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">5</td></tr>
+                                <tr x-show="topN >= 49" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Xander Sanchez</td><td class="px-5 py-3 text-sm text-gray-700">Northeast</td><td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">2</td></tr>
+                                <tr x-show="topN >= 50" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Yolanda Morris</td><td class="px-5 py-3 text-sm text-gray-700">Southeast</td><td class="px-5 py-3 text-sm text-gray-700">Credit Line</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">6</td></tr>
+                                <!-- Additional rows for Top 100 -->
+                                <tr x-show="topN >= 51" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Alan Rogers</td><td class="px-5 py-3 text-sm text-gray-700">Midwest</td><td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">3</td></tr>
+                                <tr x-show="topN >= 52" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Brenda Reed</td><td class="px-5 py-3 text-sm text-gray-700">West</td><td class="px-5 py-3 text-sm text-gray-700">Term Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">4</td></tr>
+                                <tr x-show="topN >= 53" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Carl Cook</td><td class="px-5 py-3 text-sm text-gray-700">Northeast</td><td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">2</td></tr>
+                                <tr x-show="topN >= 54" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Diana Morgan</td><td class="px-5 py-3 text-sm text-gray-700">Southeast</td><td class="px-5 py-3 text-sm text-gray-700">Credit Line</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">5</td></tr>
+                                <tr x-show="topN >= 55" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Evan Bell</td><td class="px-5 py-3 text-sm text-gray-700">Midwest</td><td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">3</td></tr>
+                                <tr x-show="topN >= 56" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Fiona Murphy</td><td class="px-5 py-3 text-sm text-gray-700">West</td><td class="px-5 py-3 text-sm text-gray-700">Term Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">3</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">4</td></tr>
+                                <tr x-show="topN >= 57" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Gary Bailey</td><td class="px-5 py-3 text-sm text-gray-700">Northeast</td><td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">6</td></tr>
+                                <tr x-show="topN >= 58" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Hannah Rivera</td><td class="px-5 py-3 text-sm text-gray-700">Southeast</td><td class="px-5 py-3 text-sm text-gray-700">Credit Line</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">2</td></tr>
+                                <tr x-show="topN >= 59" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Ian Cooper</td><td class="px-5 py-3 text-sm text-gray-700">Midwest</td><td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">5</td></tr>
+                                <tr x-show="topN >= 60" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Julia Richardson</td><td class="px-5 py-3 text-sm text-gray-700">West</td><td class="px-5 py-3 text-sm text-gray-700">Term Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">3</td></tr>
+                                <tr x-show="topN >= 61" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Keith Cox</td><td class="px-5 py-3 text-sm text-gray-700">Northeast</td><td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">4</td></tr>
+                                <tr x-show="topN >= 62" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Laura Howard</td><td class="px-5 py-3 text-sm text-gray-700">Southeast</td><td class="px-5 py-3 text-sm text-gray-700">Credit Line</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">6</td></tr>
+                                <tr x-show="topN >= 63" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Martin Ward</td><td class="px-5 py-3 text-sm text-gray-700">Midwest</td><td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">2</td></tr>
+                                <tr x-show="topN >= 64" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Nina Torres</td><td class="px-5 py-3 text-sm text-gray-700">West</td><td class="px-5 py-3 text-sm text-gray-700">Term Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">3</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">5</td></tr>
+                                <tr x-show="topN >= 65" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Oscar Peterson</td><td class="px-5 py-3 text-sm text-gray-700">Northeast</td><td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">3</td></tr>
+                                <tr x-show="topN >= 66" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Pamela Gray</td><td class="px-5 py-3 text-sm text-gray-700">Southeast</td><td class="px-5 py-3 text-sm text-gray-700">Credit Line</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">4</td></tr>
+                                <tr x-show="topN >= 67" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Quentin James</td><td class="px-5 py-3 text-sm text-gray-700">Midwest</td><td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">6</td></tr>
+                                <tr x-show="topN >= 68" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Rosa Watson</td><td class="px-5 py-3 text-sm text-gray-700">West</td><td class="px-5 py-3 text-sm text-gray-700">Term Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">2</td></tr>
+                                <tr x-show="topN >= 69" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Seth Brooks</td><td class="px-5 py-3 text-sm text-gray-700">Northeast</td><td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">5</td></tr>
+                                <tr x-show="topN >= 70" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Tara Kelly</td><td class="px-5 py-3 text-sm text-gray-700">Southeast</td><td class="px-5 py-3 text-sm text-gray-700">Credit Line</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">3</td></tr>
+                                <tr x-show="topN >= 71" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Ulysses Sanders</td><td class="px-5 py-3 text-sm text-gray-700">Midwest</td><td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">4</td></tr>
+                                <tr x-show="topN >= 72" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Vera Price</td><td class="px-5 py-3 text-sm text-gray-700">West</td><td class="px-5 py-3 text-sm text-gray-700">Term Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">3</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">6</td></tr>
+                                <tr x-show="topN >= 73" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Walter Bennett</td><td class="px-5 py-3 text-sm text-gray-700">Northeast</td><td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">2</td></tr>
+                                <tr x-show="topN >= 74" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Xena Wood</td><td class="px-5 py-3 text-sm text-gray-700">Southeast</td><td class="px-5 py-3 text-sm text-gray-700">Credit Line</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">5</td></tr>
+                                <tr x-show="topN >= 75" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">York Barnes</td><td class="px-5 py-3 text-sm text-gray-700">Midwest</td><td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">3</td></tr>
+                                <tr x-show="topN >= 76" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Zara Ross</td><td class="px-5 py-3 text-sm text-gray-700">West</td><td class="px-5 py-3 text-sm text-gray-700">Term Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">4</td></tr>
+                                <tr x-show="topN >= 77" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Adam Henderson</td><td class="px-5 py-3 text-sm text-gray-700">Northeast</td><td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">6</td></tr>
+                                <tr x-show="topN >= 78" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Betty Coleman</td><td class="px-5 py-3 text-sm text-gray-700">Southeast</td><td class="px-5 py-3 text-sm text-gray-700">Credit Line</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">2</td></tr>
+                                <tr x-show="topN >= 79" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Charles Jenkins</td><td class="px-5 py-3 text-sm text-gray-700">Midwest</td><td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">5</td></tr>
+                                <tr x-show="topN >= 80" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Donna Perry</td><td class="px-5 py-3 text-sm text-gray-700">West</td><td class="px-5 py-3 text-sm text-gray-700">Term Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">3</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">3</td></tr>
+                                <tr x-show="topN >= 81" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Eric Powell</td><td class="px-5 py-3 text-sm text-gray-700">Northeast</td><td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">4</td></tr>
+                                <tr x-show="topN >= 82" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Frances Long</td><td class="px-5 py-3 text-sm text-gray-700">Southeast</td><td class="px-5 py-3 text-sm text-gray-700">Credit Line</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">6</td></tr>
+                                <tr x-show="topN >= 83" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">George Patterson</td><td class="px-5 py-3 text-sm text-gray-700">Midwest</td><td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">2</td></tr>
+                                <tr x-show="topN >= 84" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Helen Hughes</td><td class="px-5 py-3 text-sm text-gray-700">West</td><td class="px-5 py-3 text-sm text-gray-700">Term Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">5</td></tr>
+                                <tr x-show="topN >= 85" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Ivan Flores</td><td class="px-5 py-3 text-sm text-gray-700">Northeast</td><td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">3</td></tr>
+                                <tr x-show="topN >= 86" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Janet Washington</td><td class="px-5 py-3 text-sm text-gray-700">Southeast</td><td class="px-5 py-3 text-sm text-gray-700">Credit Line</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">4</td></tr>
+                                <tr x-show="topN >= 87" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Kyle Butler</td><td class="px-5 py-3 text-sm text-gray-700">Midwest</td><td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">6</td></tr>
+                                <tr x-show="topN >= 88" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Linda Simmons</td><td class="px-5 py-3 text-sm text-gray-700">West</td><td class="px-5 py-3 text-sm text-gray-700">Term Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">3</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">2</td></tr>
+                                <tr x-show="topN >= 89" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Marcus Foster</td><td class="px-5 py-3 text-sm text-gray-700">Northeast</td><td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">5</td></tr>
+                                <tr x-show="topN >= 90" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Nora Gonzales</td><td class="px-5 py-3 text-sm text-gray-700">Southeast</td><td class="px-5 py-3 text-sm text-gray-700">Credit Line</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">3</td></tr>
+                                <tr x-show="topN >= 91" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Owen Bryant</td><td class="px-5 py-3 text-sm text-gray-700">Midwest</td><td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">4</td></tr>
+                                <tr x-show="topN >= 92" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Penny Alexander</td><td class="px-5 py-3 text-sm text-gray-700">West</td><td class="px-5 py-3 text-sm text-gray-700">Term Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">6</td></tr>
+                                <tr x-show="topN >= 93" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Quinn Griffin</td><td class="px-5 py-3 text-sm text-gray-700">Northeast</td><td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">2</td></tr>
+                                <tr x-show="topN >= 94" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Ruby Diaz</td><td class="px-5 py-3 text-sm text-gray-700">Southeast</td><td class="px-5 py-3 text-sm text-gray-700">Credit Line</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">5</td></tr>
+                                <tr x-show="topN >= 95" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Simon Hayes</td><td class="px-5 py-3 text-sm text-gray-700">Midwest</td><td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">3</td></tr>
+                                <tr x-show="topN >= 96" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Tiffany Myers</td><td class="px-5 py-3 text-sm text-gray-700">West</td><td class="px-5 py-3 text-sm text-gray-700">Term Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">3</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">4</td></tr>
+                                <tr x-show="topN >= 97" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Ursula Ford</td><td class="px-5 py-3 text-sm text-gray-700">Northeast</td><td class="px-5 py-3 text-sm text-gray-700">Revolving Credit</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">6</td></tr>
+                                <tr x-show="topN >= 98" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Vincent Reynolds</td><td class="px-5 py-3 text-sm text-gray-700">Southeast</td><td class="px-5 py-3 text-sm text-gray-700">Credit Line</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">2</td></tr>
+                                <tr x-show="topN >= 99" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Wanda Fisher</td><td class="px-5 py-3 text-sm text-gray-700">Midwest</td><td class="px-5 py-3 text-sm text-gray-700">Bridge Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">2</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">5</td></tr>
+                                <tr x-show="topN >= 100" class="hover:bg-gray-50 transition-colors"><td class="px-5 py-3 text-sm text-gray-900 font-medium">Xavier Ellis</td><td class="px-5 py-3 text-sm text-gray-700">West</td><td class="px-5 py-3 text-sm text-gray-700">Term Loan</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">1</td><td class="px-5 py-3 text-sm text-gray-900 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-red-600 text-center font-semibold">0</td><td class="px-5 py-3 text-sm text-blue-600 text-center font-semibold">3</td></tr>
                     </tbody>
                 </table>
             </div>
-
-            <!-- Pagination -->
-            <div class="border-t border-gray-200 px-5 py-4">
-                <div class="flex justify-center pb-4 sm:hidden">
-                    <span class="block text-sm font-medium text-gray-500">
-                        Showing <span class="text-gray-800" x-text="startEntry"></span> to
-                        <span class="text-gray-800" x-text="endEntry"></span> of
-                        <span class="text-gray-800" x-text="totalRows"></span>
-                    </span>
+                </div>
                 </div>
 
-                <div class="flex items-center justify-between">
-                    <div class="hidden sm:block">
-                        <span class="block text-sm font-medium text-gray-500">
-                            Showing
-                            <span class="text-gray-800" x-text="startEntry"></span> to
-                            <span class="text-gray-800" x-text="endEntry"></span> of
-                            <span class="text-gray-800" x-text="totalRows"></span>
-                        </span>
+            <!-- Criticized, Classified Memos Reviews Placeholder -->
+            <div class="col-span-12 xl:col-span-4">
+                <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white h-full">
+                    <div class="flex items-center justify-between px-5 pt-5 sm:px-6 sm:pt-6 pb-4 border-b border-gray-200">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">
+                                Criticized, Classified Memos Reviews
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500">
+                                Pending credit memo reviews and classifications
+                            </p>
                     </div>
-                    <div
-                        class="flex w-full items-center justify-between gap-2 rounded-lg bg-gray-50 p-4 sm:w-auto sm:justify-normal sm:rounded-none sm:bg-transparent sm:p-0">
-                        <button @click="page > 1 && page--" :disabled="page === 1"
-                            class="shadow-theme-xs flex items-center gap-2 rounded-lg border border-gray-300 bg-white p-2 text-gray-700 hover:bg-gray-50 hover:text-gray-800 disabled:cursor-not-allowed disabled:opacity-50 sm:p-2.5">
-                            <span>
-                                <svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <div x-data="{openDropDown: false}" class="relative h-fit">
+                            <button @click="openDropDown = !openDropDown"
+                                :class="openDropDown ? 'text-gray-700' : 'text-gray-400 hover:text-gray-700'"
+                                class="transition-colors">
+                                <svg class="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd" clip-rule="evenodd"
-                                        d="M2.58203 9.99868C2.58174 10.1909 2.6549 10.3833 2.80152 10.53L7.79818 15.5301C8.09097 15.8231 8.56584 15.8233 8.85883 15.5305C9.15183 15.2377 9.152 14.7629 8.85921 14.4699L5.13911 10.7472L16.6665 10.7472C17.0807 10.7472 17.4165 10.4114 17.4165 9.99715C17.4165 9.58294 17.0807 9.24715 16.6665 9.24715L5.14456 9.24715L8.85919 5.53016C9.15199 5.23717 9.15184 4.7623 8.85885 4.4695C8.56587 4.1767 8.09099 4.17685 7.79819 4.46984L2.84069 9.43049C2.68224 9.568 2.58203 9.77087 2.58203 9.99715C2.58203 9.99766 2.58203 9.99817 2.58203 9.99868Z"
+                                        d="M10.2441 6C10.2441 5.0335 11.0276 4.25 11.9941 4.25H12.0041C12.9706 4.25 13.7541 5.0335 13.7541 6C13.7541 6.9665 12.9706 7.75 12.0041 7.75H11.9941C11.0276 7.75 10.2441 6.9665 10.2441 6ZM10.2441 18C10.2441 17.0335 11.0276 16.25 11.9941 16.25H12.0041C12.9706 16.25 13.7541 17.0335 13.7541 18C13.7541 18.9665 12.9706 19.75 12.0041 19.75H11.9941C11.0276 19.75 10.2441 18.9665 10.2441 18ZM11.9941 10.25C11.0276 10.25 10.2441 11.0335 10.2441 12C10.2441 12.9665 11.0276 13.75 11.9941 13.75H12.0041C12.9706 13.75 13.7541 12.9665 13.7541 12C13.7541 11.0335 12.9706 10.25 12.0041 10.25H11.9941Z"
                                         fill="" />
                                 </svg>
-                            </span>
                     </button>
-
-                        <span class="block text-sm font-medium text-gray-700 sm:hidden">
-                            Page <span x-text="page"></span> of
-                            <span x-text="totalPages"></span>
-                    </span>
-
-                        <ul class="hidden items-center gap-0.5 sm:flex">
-                            <template x-for="n in displayPages" :key="n">
-                                <li>
-                                    <a href="#" @click.prevent="goToPage(n)"
-                                        :class="page === n ? 'bg-blue-500 text-white' : 'hover:bg-blue-500 text-gray-700 hover:text-white'"
-                                        class="flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium">
-                                        <span x-text="n"></span>
-                                    </a>
-                                </li>
-                            </template>
-                        </ul>
-
-                        <button @click="page < totalPages && page++" :disabled="page === totalPages"
-                            class="shadow-theme-xs flex items-center gap-2 rounded-lg border border-gray-300 bg-white p-2 text-gray-700 hover:bg-gray-50 hover:text-gray-800 disabled:cursor-not-allowed disabled:opacity-50 sm:p-2.5">
-                            <span>
-                                <svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                    <path fill-rule="evenodd" clip-rule="evenodd"
-                                        d="M17.4165 9.9986C17.4168 10.1909 17.3437 10.3832 17.197 10.53L12.2004 15.5301C11.9076 15.8231 11.4327 15.8233 11.1397 15.5305C10.8467 15.2377 10.8465 14.7629 11.1393 14.4699L14.8594 10.7472L3.33203 10.7472C2.91782 10.7472 2.58203 10.4114 2.58203 9.99715C2.58203 9.58294 2.91782 9.24715 3.33203 9.24715L14.854 9.24715L11.1393 5.53016C10.8465 5.23717 10.8467 4.7623 11.1397 4.4695C11.4327 4.1767 11.9075 4.17685 12.2003 4.46984L17.1578 9.43049C17.3163 9.568 17.4165 9.77087 17.4165 9.99715C17.4165 9.99763 17.4165 9.99812 17.4165 9.9986Z"
-                                        fill="" />
-                                </svg>
-                            </span>
+                            <div x-show="openDropDown" @click.outside="openDropDown = false"
+                                class="absolute right-0 top-full z-40 w-40 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                <button @click="openDropDown = false"
+                                    class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                                    Export Data
                     </button>
+                    </div>
+                </div>
+            </div>
+                    <div class="flex flex-col items-center justify-center p-12 text-center">
+                        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 mb-4">
+                            <svg class="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+        </div>
+                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Coming Soon</h4>
+                        <p class="text-sm text-gray-500 max-w-xs">
+                            Credit memo review tracking and classification monitoring will be available here.
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
+
         <!-- Important Notes -->
         <div class="overflow-hidden rounded-xl border border-gray-200 bg-white">
             <div class="flex items-start gap-3 px-5 py-4">
@@ -1698,8 +1887,6 @@
         // Global variables
         let portfolioData = [];
         let filteredData = [];
-        let currentPage = 1;
-        let rowsPerPage = 20; // Show 20 rows per page, load more on pagination
         let expirationChartInstance = null;
         let searchDebounceTimer = null;
         let relationshipChartInstance = null;
@@ -1790,7 +1977,6 @@
 
         // Refresh data from Confluence (read-only, no write operations)
         async function refreshData() {
-            showLoadingState();
             try {
                 console.log("Refreshing data from Confluence...");
                 const data = await fetchDataFromConfluence();
@@ -1855,7 +2041,6 @@
                 "Fetching data from Confluence...",
                 "Connecting to server..."
             );
-            showLoadingState();
             
             try {
                 const data = await fetchDataFromConfluence();
@@ -2083,29 +2268,6 @@
             }
         }
 
-        // Show loading state
-        function showLoadingState() {
-            const tbody = document.getElementById("tableBody");
-            if (tbody) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="9" class="py-16">
-                            <div class="flex flex-col items-center justify-center">
-                                <div class="relative">
-                                    <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-200"></div>
-                                    <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent absolute top-0 left-0"></div>
-                                </div>
-                                <div class="mt-6 text-center">
-                                    <span class="text-base font-medium text-gray-700">Loading data...</span>
-                                    <p class="text-sm text-gray-500 mt-1">Fetching portfolio information from Confluence</p>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            }
-        }
-
         // Show notification (TailAdmin style)
         function showNotification(title, message, type = "success") {
             const configs = {
@@ -2167,7 +2329,7 @@
                     <div class="flex h-10 w-10 items-center justify-center rounded-full ${config.iconBg}">
                         <div class="${config.iconColor}">
                             ${config.icon}
-                        </div>
+                    </div>
                     </div>
                     <div class="flex-1 pt-0.5">
                         <h5 class="mb-1 text-base font-semibold ${config.titleColor}">
@@ -2191,10 +2353,10 @@
             setTimeout(() => {
                 notification.style.opacity = '0';
                 notification.style.transform = 'translateX(100%)';
-                setTimeout(() => {
-                    if (notification.parentElement) {
-                        notification.remove();
-                    }
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
                 }, 300);
             }, 5000);
         }
@@ -2510,8 +2672,6 @@
                     createROTCEChartFromFiltered();
                 });
                 
-                currentPage = 1;
-                renderTable();
                 return;
             }
             
@@ -7550,411 +7710,10 @@
                     });
                 }
                 
-                const elapsed = (performance.now() - startTime).toFixed(0);
-                const perfEl = document.getElementById("perfIndicator");
-                if (perfEl) {
-                    perfEl.textContent = `(${elapsed}ms)`;
-                    perfEl.className =
-                        elapsed < 100
-                            ? "text-green-600 font-medium"
-                            : "text-orange-600 font-medium";
-                }
-                
-                currentPage = 1;
-                renderTable();
             } else {
                 // If filters are active, reapply them (which will include search)
                 applyFilters();
             }
-        }
-
-        // Render table (optimized for large datasets)
-        function renderTable() {
-            const tbody = document.getElementById("tableBody");
-            
-            // Determine which data source to use
-            const hasActiveFilters = Object.keys(activeFilters).length > 0 || 
-                                     selectedRegion !== "all" || 
-                                     !includePSE || 
-                                     selectedStatus !== "all" ||
-                                     document.getElementById("searchInput").value.trim() !== "";
-            
-            const dataSource = hasActiveFilters ? filteredData : portfolioData;
-            
-            const startIdx = (currentPage - 1) * rowsPerPage;
-            const endIdx = startIdx + rowsPerPage;
-            const pageData = dataSource.slice(startIdx, endIdx);
-            
-            // Use requestAnimationFrame for smooth rendering
-            requestAnimationFrame(() => {
-                // Use DocumentFragment for batch DOM insertion (much faster)
-                const fragment = document.createDocumentFragment();
-                
-                pageData.forEach((row) => {
-                    const tr = document.createElement("tr");
-                    tr.className = "hover:bg-gray-50";
-                    tr.innerHTML = `
-                        <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatDate(
-                        row.Report_Date
-                    )}</td>
-                        <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${row.Region || "N/A"
-                        }</td>
-                        <td class="p-4 text-sm font-medium text-gray-800 whitespace-nowrap">${row.Facility_ID || "N/A"
-                        }</td>
-                        <td class="p-4 text-sm text-gray-700">${row.Relationship_Name || "N/A"
-                        }</td>
-                        <td class="p-4 text-sm text-gray-700">${row.Product_Program || "N/A"
-                        }</td>
-                        <td class="p-4 text-sm font-medium text-gray-800 whitespace-nowrap">${formatCurrencyDetailed(
-                            parseNumber(row.Fac_Amount)
-                        )}</td>
-                        <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatCurrencyDetailed(
-                            parseNumber(row.Direct_OS)
-                        )}</td>
-                        <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatDate(
-                            row.Maturity_Date
-                        )}</td>
-                        <td class="p-4 text-sm text-gray-700 whitespace-nowrap">${formatDate(
-                            row.CA_Expiration_Date
-                        )}</td>
-                    `;
-                    fragment.appendChild(tr);
-                });
-                
-                // Single DOM operation instead of multiple
-                tbody.innerHTML = "";
-                tbody.appendChild(fragment);
-                updatePagination();
-            });
-        }
-
-        // Update pagination
-        function updatePagination() {
-            // Determine which data source to use
-            const hasActiveFilters = Object.keys(activeFilters).length > 0 || 
-                                     selectedRegion !== "all" || 
-                                     !includePSE || 
-                                     selectedStatus !== "all" ||
-                                     document.getElementById("searchInput").value.trim() !== "";
-            
-            const dataSource = hasActiveFilters ? filteredData : portfolioData;
-            
-            const totalPages = Math.ceil(dataSource.length / rowsPerPage);
-            const startRow = (currentPage - 1) * rowsPerPage + 1;
-            const endRow = Math.min(currentPage * rowsPerPage, dataSource.length);
-            
-            document.getElementById("startRow").textContent =
-                dataSource.length > 0 ? startRow : 0;
-            document.getElementById("endRow").textContent = endRow;
-            document.getElementById("totalRows").textContent = dataSource.length;
-            document.getElementById("currentPage").textContent = currentPage;
-            document.getElementById("totalPages").textContent = totalPages;
-
-            document.getElementById("prevBtn").disabled = currentPage === 1;
-            document.getElementById("nextBtn").disabled =
-                currentPage === totalPages || totalPages === 0;
-        }
-
-        // Pagination functions
-        function previousPage() {
-            if (currentPage > 1) {
-                currentPage--;
-                renderTable();
-            }
-        }
-
-        function nextPage() {
-            // Determine which data source to use
-            const hasActiveFilters = Object.keys(activeFilters).length > 0 || 
-                                     selectedRegion !== "all" || 
-                                     !includePSE || 
-                                     selectedStatus !== "all" ||
-                                     document.getElementById("searchInput").value.trim() !== "";
-            
-            const dataSource = hasActiveFilters ? filteredData : portfolioData;
-            const totalPages = Math.ceil(dataSource.length / rowsPerPage);
-            if (currentPage < totalPages) {
-                currentPage++;
-                renderTable();
-            }
-        }
-
-        // Alpine.js Portfolio Table Component
-        function portfolioTable() {
-            return {
-                statusFilter: "all",
-                sort: { key: "relationship", asc: true },
-                page: 1,
-                perPage: 20,
-                dataVersion: 0, // Used to trigger reactivity when data changes
-
-                init() {
-                    // Watch for data changes every second
-                    setInterval(() => {
-                        if (
-                            portfolioData &&
-                            portfolioData.length > 0 &&
-                            this.dataVersion === 0
-                        ) {
-                            this.dataVersion++;
-                        }
-                    }, 1000);
-                    
-                    // Store reference to this component for external refresh
-                    window.portfolioTableComponent = this;
-                },
-                
-                refresh() {
-                    // Manually trigger table refresh by incrementing dataVersion
-                    this.dataVersion++;
-                },
-
-                get rows() {
-                    // Convert filteredData to table rows with status calculation
-                    // Use filteredData if available, otherwise use portfolioData
-                    // Access dataVersion to make this reactive
-                    const _ = this.dataVersion;
-                    
-                    const dataSource =
-                        filteredData && filteredData.length > 0
-                            ? filteredData
-                            : portfolioData;
-                    
-                    if (!dataSource || dataSource.length === 0) {
-                        console.log(
-                            "Portfolio Table: No data available. portfolioData length:",
-                            portfolioData?.length,
-                            "filteredData length:",
-                            filteredData?.length
-                        );
-                        return [];
-                    }
-                    
-                    console.log(
-                        "Portfolio Table: Rendering",
-                        dataSource.length,
-                        "rows"
-                    );
-                    
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    const threeMonthsFromNow = new Date(today);
-                    threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
-
-                    return dataSource.map((row, index) => {
-                        const maturityDate = parseDate(row.Maturity_Date);
-                        let status = "Active";
-
-                        if (maturityDate) {
-                            if (maturityDate < today) {
-                                status = "Expired";
-                            } else if (maturityDate <= threeMonthsFromNow) {
-                                status = "Expiring Soon";
-                            }
-                        }
-
-                        return {
-                            id: index,
-                            facilityId: row.Facility_ID || "N/A",
-                            relationship:
-                                row.Relationship_Name || row.Relationship_ID || "N/A",
-                            region: row.Region || "N/A",
-                            product: row.Product_Program || "N/A",
-                            facilityAmount: formatCurrency(
-                                parseNumber(row.Fac_Amount || row.Facility_Amount)
-                            ),
-                            directOS: formatCurrency(parseNumber(row.Direct_OS)),
-                            maturityDate: row.Maturity_Date || "N/A",
-                            status: status,
-                            // Keep original data for sorting
-                            _facilityAmount: parseNumber(
-                                row.Fac_Amount || row.Facility_Amount
-                            ),
-                            _maturityDate: maturityDate,
-                        };
-                    });
-                },
-
-                get filteredRows() {
-                    let result = this.rows;
-
-                    // Apply status filter
-                    if (this.statusFilter !== "all") {
-                        const filterMap = {
-                            active: "Active",
-                            expiring: "Expiring Soon",
-                            expired: "Expired",
-                        };
-                        result = result.filter(
-                            (row) => row.status === filterMap[this.statusFilter]
-                        );
-                    }
-
-                    return result;
-                },
-
-                get sortedRows() {
-                    return this.filteredRows.slice().sort((a, b) => {
-                        let valA, valB;
-
-                        switch (this.sort.key) {
-                            case "amount":
-                                valA = a._facilityAmount;
-                                valB = b._facilityAmount;
-                                break;
-                            case "maturity":
-                                valA = a._maturityDate ? a._maturityDate.getTime() : 0;
-                                valB = b._maturityDate ? b._maturityDate.getTime() : 0;
-                                break;
-                            default:
-                                valA = a[this.sort.key];
-                                valB = b[this.sort.key];
-                                if (typeof valA === "string") valA = valA.toLowerCase();
-                                if (typeof valB === "string") valB = valB.toLowerCase();
-                        }
-
-                        if (valA < valB) return this.sort.asc ? -1 : 1;
-                        if (valA > valB) return this.sort.asc ? 1 : -1;
-                        return 0;
-                    });
-                },
-
-                get totalPages() {
-                    return Math.ceil(this.sortedRows.length / this.perPage) || 1;
-                },
-
-                get paginatedRows() {
-                    const start = (this.page - 1) * this.perPage;
-                    const end = start + this.perPage;
-                    return this.sortedRows.slice(start, end);
-                },
-
-                get startEntry() {
-                    return this.sortedRows.length === 0
-                        ? 0
-                        : (this.page - 1) * this.perPage + 1;
-                },
-
-                get endEntry() {
-                    const end = this.page * this.perPage;
-                    return end > this.sortedRows.length ? this.sortedRows.length : end;
-                },
-
-                get totalRows() {
-                    return this.sortedRows.length;
-                },
-
-                get displayedRowsCount() {
-                    return this.sortedRows.length.toLocaleString();
-                },
-
-                get displayPages() {
-                    // Show max 7 page numbers
-                    const maxPages = 7;
-                    const pages = [];
-
-                    if (this.totalPages <= maxPages) {
-                        for (let i = 1; i <= this.totalPages; i++) {
-                            pages.push(i);
-                        }
-                    } else {
-                        if (this.page <= 4) {
-                            for (let i = 1; i <= 5; i++) pages.push(i);
-                            pages.push("...");
-                            pages.push(this.totalPages);
-                        } else if (this.page >= this.totalPages - 3) {
-                            pages.push(1);
-                            pages.push("...");
-                            for (let i = this.totalPages - 4; i <= this.totalPages; i++)
-                                pages.push(i);
-                        } else {
-                            pages.push(1);
-                            pages.push("...");
-                            for (let i = this.page - 1; i <= this.page + 1; i++)
-                                pages.push(i);
-                            pages.push("...");
-                            pages.push(this.totalPages);
-                        }
-                    }
-
-                    return pages.filter((p) => typeof p === "number");
-                },
-
-                sortBy(key) {
-                    if (this.sort.key === key) {
-                        this.sort.asc = !this.sort.asc;
-                    } else {
-                        this.sort.key = key;
-                        this.sort.asc = true;
-                    }
-                    this.page = 1;
-                },
-
-                goToPage(n) {
-                    if (n >= 1 && n <= this.totalPages) this.page = n;
-                },
-
-                applyTableFilters() {
-                    this.page = 1; // Reset to first page on filter change
-                },
-
-                exportToXLSX() {
-                    if (this.sortedRows.length === 0) {
-                        showNotification("Export Failed", "No data to export", "error");
-                        return;
-                    }
-
-                    // Check if XLSX library is loaded
-                    if (typeof XLSX === "undefined") {
-                        showNotification(
-                            "Export Failed",
-                            "Export library not loaded. Please refresh the page and try again.",
-                            "error"
-                        );
-                        return;
-                    }
-
-                    // Prepare data for export
-                    const exportData = this.sortedRows.map((row) => ({
-                        "Facility ID": row.facilityId,
-                        Relationship: row.relationship,
-                        Region: row.region,
-                        Product: row.product,
-                        "Facility Amount": row.facilityAmount,
-                        "Direct OS": row.directOS,
-                        "Maturity Date": row.maturityDate,
-                        Status: row.status,
-                    }));
-
-                    // Create workbook and worksheet
-                    const wb = XLSX.utils.book_new();
-                    const ws = XLSX.utils.json_to_sheet(exportData);
-
-                    // Set column widths
-                    ws["!cols"] = [
-                        { wch: 15 }, // Facility ID
-                        { wch: 30 }, // Relationship
-                        { wch: 10 }, // Region
-                        { wch: 25 }, // Product
-                        { wch: 15 }, // Facility Amount
-                        { wch: 15 }, // Direct OS
-                        { wch: 12 }, // Maturity Date
-                        { wch: 12 }, // Status
-                    ];
-
-                    // Add worksheet to workbook
-                    XLSX.utils.book_append_sheet(wb, ws, "Portfolio Details");
-
-                    // Generate filename with current date and status filter
-                    const dateStr = new Date().toISOString().split("T")[0];
-                    const statusStr =
-                        this.statusFilter !== "all" ? `_${this.statusFilter}` : "";
-                    const filename = `Wealth_Lending_Portfolio${statusStr}_${dateStr}.xlsx`;
-
-                    // Download file
-                    XLSX.writeFile(wb, filename);
-                },
-            };
         }
 
         // ========================================

@@ -3118,7 +3118,7 @@
                 // Parse Excel file (covenants are in .xlsx format)
                 if (CONFLUENCE_COVENANTS_FILE.endsWith(".xlsx") || CONFLUENCE_COVENANTS_FILE.endsWith(".xls")) {
                     console.log("Parsing covenant Excel file...");
-                    return await parseExcelBlob(blob);
+                    return await parseCovenantExcelBlob(blob);
                 }
                 
                 throw new Error("Covenant file must be .xlsx or .xls format");
@@ -3126,6 +3126,62 @@
                 console.error("Error fetching covenant data from Confluence:", error.message);
                 return null;
             }
+        }
+
+        // Parse Covenant Excel blob (separate parser for covenant files)
+        async function parseCovenantExcelBlob(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        
+                        const workbook = XLSX.read(data, { 
+                            type: "array",
+                            cellDates: true,
+                            cellNF: false,
+                            cellText: false,
+                        });
+                        
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        
+                        console.log("📊 Covenant Excel Sheet Name:", workbook.SheetNames[0]);
+                        
+                        // Convert sheet to JSON
+                        const jsonData = XLSX.utils.sheet_to_json(firstSheet, {
+                            raw: false,
+                            dateNF: "yyyy-mm-dd",
+                        });
+                        
+                        console.log(`📊 Total covenant rows in Excel: ${jsonData.length}`);
+                        
+                        // Don't filter by Facility_ID - covenants might use different key fields
+                        // Filter out completely empty rows
+                        const filteredData = jsonData.filter((row) => {
+                            // Keep row if it has any non-empty values
+                            return Object.values(row).some(val => val !== null && val !== undefined && val !== '');
+                        });
+                        
+                        console.log(`✅ Parsed ${filteredData.length} valid covenant records from Excel`);
+                        
+                        // Log data structure for debugging
+                        if (filteredData.length > 0) {
+                            console.log("📋 Covenant record fields:", Object.keys(filteredData[0]));
+                            console.log("📋 Sample covenant record:", filteredData[0]);
+                        }
+                        
+                        resolve(filteredData);
+                    } catch (error) {
+                        console.error("Error parsing covenant Excel:", error);
+                        reject(error);
+                    }
+                };
+                reader.onerror = function (error) {
+                    console.error("FileReader error:", error);
+                    reject(error);
+                };
+                reader.readAsArrayBuffer(blob);
+            });
         }
 
         // Parse CSV blob (read-only)

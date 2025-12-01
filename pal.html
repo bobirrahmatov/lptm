@@ -1380,11 +1380,11 @@
                 <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white h-full flex flex-col" x-data="{ covenantView: 'pastDue' }">
                     <div class="flex items-center justify-between px-5 pt-5 sm:px-6 sm:pt-6 pb-4">
                     <div>
-                            <h3 class="text-lg font-semibold text-gray-800">
-                                Covenant Monitoring
+                            <h3 class="text-lg font-semibold text-gray-800" x-text="covenantView === 'pastDue' ? 'Past Due Covenants' : 'Coming Due Covenants'">
+                                Past Due Covenants
                             </h3>
-                            <p class="mt-1 text-sm text-gray-500">
-                                Real-time covenant compliance tracking
+                            <p class="mt-1 text-sm text-gray-500" x-text="covenantView === 'pastDue' ? 'Covenants past their due date' : 'Covenants due in the next 30 days'">
+                                Covenants past their due date
                             </p>
                                 </div>
                         <div class="flex items-center gap-2">
@@ -1432,18 +1432,9 @@
                 </div>
             </div>
 
-                    <!-- Radial Chart -->
-                    <div class="relative px-5 py-6">
-                        <div id="covenantMonitoringChart"></div>
-                        <span id="covenantChartLabel"
-                            class="absolute left-1/2 top-[60%] -translate-x-1/2 -translate-y-[60%] text-xs font-normal text-gray-500">
-                            Total Covenants
-                                    </span>
-                                </div>
-
-                    <!-- Categories Breakdown -->
-                    <div id="covenantCategoriesContainer" class="border-t border-gray-200 px-5 py-6 space-y-4">
-                        <!-- Will be populated dynamically -->
+                    <!-- Donut Chart -->
+                    <div class="px-5 py-6">
+                        <div id="covenantMonitoringChart" class="flex justify-center mx-auto"></div>
                                 </div>
                 </div>
             </div>
@@ -5759,20 +5750,26 @@
             console.log('Using data source with', dataSource.length, 'records');
             console.log('Covenant data available:', covenantsData.length > 0 ? 'Yes' : 'No');
             
-            // Initialize category buckets (aggregated for display)
+            // Initialize category buckets - Breakdown shows ALL categories
             const pastDueBuckets = {
-                '1-45 Days': { count: 0, color: '#FBBF24' },      // Aggregates 1-30 and 31-45 from source
+                '1-45 Days': { count: 0, color: '#FBBF24' },
                 '46-90 Days': { count: 0, color: '#F59E0B' },
                 '>90 Days': { count: 0, color: '#DC2626' }
             };
             
-            const comingDueBuckets = {
-                '1-45 Days': { count: 0, color: '#10B981' },      // Aggregates 0-30 and 31-45 from source
-                '46-90 Days': { count: 0, color: '#6366F1' },
-                '>90 Days': { count: 0, color: '#8B5CF6' }
+            // For gauge - only track 46-90 and >90
+            const pastDueGaugeBuckets = {
+                '46-90 Days': { count: 0, color: '#F59E0B' },
+                '>90 Days': { count: 0, color: '#DC2626' }
             };
             
-            let pastDueTotal = 0;
+            // Coming Due only shows next 30 days
+            const comingDueBuckets = {
+                'Next 30 Days': { count: 0, color: '#10B981' }
+            };
+            
+            let pastDueTotalAll = 0;  // Total including 1-45 days (for breakdown)
+            let pastDueTotalGauge = 0; // Total for gauge (46-90 + >90 only)
             let comingDueTotal = 0;
             const processedCovenants = new Set();
             
@@ -5786,68 +5783,75 @@
                 if (!covenantNumber || processedCovenants.has(covenantNumber)) return;
                 processedCovenants.add(covenantNumber);
                 
-                // Process Past Due covenants
+                // Process Past Due covenants - count ALL for breakdown, but only 46+ for gauge
                 if (status.includes('past due') || status === 'past due') {
-                    pastDueTotal++;
+                    pastDueTotalAll++;
                     
-                    // Categorize by days past due or past due category (aggregated display)
                     if (pastDueCategory) {
                         // Use Past_Due_Category if available
                         if (pastDueCategory.includes('>90') || pastDueCategory.includes('90+')) {
                             pastDueBuckets['>90 Days'].count++;
+                            pastDueGaugeBuckets['>90 Days'].count++;
+                            pastDueTotalGauge++;
                         } else if (pastDueCategory.includes('46') || pastDueCategory.includes('61')) {
                             pastDueBuckets['46-90 Days'].count++;
+                            pastDueGaugeBuckets['46-90 Days'].count++;
+                            pastDueTotalGauge++;
                         } else {
-                            // Aggregate 1-30 and 31-45 into 1-45 Days bucket
+                            // 1-45 days - only in breakdown, not in gauge
                             pastDueBuckets['1-45 Days'].count++;
                         }
                     } else if (daysPastDue > 0) {
                         // Fallback to Days_Past_Due
                         if (daysPastDue > 90) {
                             pastDueBuckets['>90 Days'].count++;
+                            pastDueGaugeBuckets['>90 Days'].count++;
+                            pastDueTotalGauge++;
                         } else if (daysPastDue >= 46) {
                             pastDueBuckets['46-90 Days'].count++;
+                            pastDueGaugeBuckets['46-90 Days'].count++;
+                            pastDueTotalGauge++;
                         } else {
-                            // Aggregate 1-45 days (includes both 1-30 and 31-45 from source)
+                            // 1-45 days - only in breakdown, not in gauge
                             pastDueBuckets['1-45 Days'].count++;
                         }
                     } else {
-                        // Default to 1-45 Days if no specific data
+                        // Default to 1-45 Days
                         pastDueBuckets['1-45 Days'].count++;
                     }
                 }
                 
-                // Process Coming Due covenants
+                // Process Coming Due covenants - only show next 30 days
                 if (status.includes('coming due') || status === 'coming due') {
-                    comingDueTotal++;
-                    
-                    // Calculate days until due (aggregated display)
+                    // Calculate days until due using Covenant_Due_Date
                     const covenantDueDate = parseDate(row.Covenant_Due_Date);
                     if (covenantDueDate) {
                         const today = new Date();
                         today.setHours(0, 0, 0, 0);
                         const daysUntilDue = Math.ceil((covenantDueDate - today) / (1000 * 60 * 60 * 24));
                         
-                        if (daysUntilDue > 90) {
-                            comingDueBuckets['>90 Days'].count++;
-                        } else if (daysUntilDue >= 46) {
-                            comingDueBuckets['46-90 Days'].count++;
-                        } else {
-                            // Aggregate 0-45 days (includes both 0-30 and 31-45 from source)
-                            comingDueBuckets['1-45 Days'].count++;
+                        // Only count covenants due in the next 30 days
+                        if (daysUntilDue >= 0 && daysUntilDue <= 30) {
+                            comingDueBuckets['Next 30 Days'].count++;
+                            comingDueTotal++;
                         }
-                    } else {
-                        // Default to 1-45 Days if no date
-                        comingDueBuckets['1-45 Days'].count++;
                     }
                 }
             });
             
-            // Convert buckets to categories with percentages
+            // Convert buckets to categories with percentages (for breakdown display)
             const pastDueCategories = Object.entries(pastDueBuckets).map(([label, data]) => ({
                 label: label,
                 count: data.count,
-                percentage: pastDueTotal > 0 ? parseFloat(((data.count / pastDueTotal) * 100).toFixed(1)) : 0,
+                percentage: pastDueTotalAll > 0 ? parseFloat(((data.count / pastDueTotalAll) * 100).toFixed(1)) : 0,
+                color: data.color
+            }));
+            
+            // Gauge data for donut chart (only 46-90 and >90)
+            const pastDueGaugeCategories = Object.entries(pastDueGaugeBuckets).map(([label, data]) => ({
+                label: label,
+                count: data.count,
+                percentage: pastDueTotalGauge > 0 ? parseFloat(((data.count / pastDueTotalGauge) * 100).toFixed(1)) : 0,
                 color: data.color
             }));
             
@@ -5860,8 +5864,10 @@
             
             // Update global covenant data
             currentCovenantData.pastDue = {
-                count: pastDueTotal,
-                categories: pastDueCategories
+                count: pastDueTotalGauge,  // Gauge shows only 46-90 + >90
+                totalAll: pastDueTotalAll,  // Total including 1-45 days
+                categories: pastDueCategories,  // All categories for breakdown
+                gaugeCategories: pastDueGaugeCategories  // Only 46-90 and >90 for donut chart
             };
             
             currentCovenantData.comingDue = {
@@ -5869,7 +5875,7 @@
                 categories: comingDueCategories
             };
             
-            console.log(`✅ Covenant Monitoring: ${pastDueTotal} Past Due, ${comingDueTotal} Coming Due`);
+            console.log(`✅ Covenant Monitoring: ${pastDueTotalGauge} Past Due in gauge (46+ days), ${pastDueTotalAll} total past due, ${comingDueTotal} Coming Due (next 30 days)`);
         }
 
         function createCovenantMonitoringChart(viewType = 'pastDue') {
@@ -5882,60 +5888,93 @@
             }
 
             const data = currentCovenantData[viewType];
-            const totalCount = data.count;
             const isPastDue = viewType === 'pastDue';
 
-            // Calculate percentage for radial chart (just a visual representation)
-            const maxCount = 100;
-            const percentage = Math.min((data.count / maxCount) * 100, 100);
+            let series, labels, colors;
+
+            if (isPastDue) {
+                // For Past Due: Show ALL categories (1-45, 46-90, >90)
+                const categories = data.categories || [];
+                series = categories.map(cat => cat.count);
+                labels = categories.map(cat => cat.label);
+                colors = categories.map(cat => cat.color);
+            } else {
+                // For Coming Due: Show next 30 days
+                series = [data.count];
+                labels = ["Next 30 Days"];
+                colors = ["#10B981"];
+            }
 
             const options = {
-                series: [percentage],
-                colors: [isPastDue ? "#DC2626" : "#10B981"],
+                series: series,
+                colors: colors,
+                labels: labels,
                 chart: {
                     fontFamily: "Outfit, sans-serif",
-                    type: "radialBar",
-                    height: 300,
-                    sparkline: {
-                        enabled: true,
-                    },
+                    type: "donut",
+                    width: 445,
+                    height: 290,
                 },
                 plotOptions: {
-                    radialBar: {
-                        startAngle: -90,
-                        endAngle: 90,
-                        hollow: {
-                            size: "75%",
-                        },
-                        track: {
-                            background: "#E5E7EB",
-                            strokeWidth: "100%",
-                            margin: 5,
-                        },
-                        dataLabels: {
-                            name: {
-                                show: false,
-                            },
-                            value: {
-                                fontSize: "32px",
-                                fontWeight: "700",
-                                offsetY: -20,
-                                color: "#1F2937",
-                                formatter: function (val) {
-                                    return totalCount;
+                    pie: {
+                        donut: {
+                            size: "65%",
+                            background: "transparent",
+                            labels: {
+                                show: true,
+                                value: {
+                                    show: true,
+                                    offsetY: 0,
                                 },
                             },
                         },
                     },
                 },
-                fill: {
-                    type: "solid",
-                    colors: [isPastDue ? "#DC2626" : "#10B981"],
+                dataLabels: {
+                    enabled: false,
+                },
+                tooltip: {
+                    enabled: true,
+                    y: {
+                        formatter: function(val) {
+                            return val + " covenants";
+                        }
+                    }
                 },
                 stroke: {
-                    lineCap: "round",
+                    show: false,
+                    width: 4,
+                    colors: "transparent",
                 },
-                labels: ["Total Covenants"],
+                legend: {
+                    show: true,
+                    position: "bottom",
+                    horizontalAlign: "center",
+                    fontFamily: "Outfit",
+                    fontSize: "14px",
+                    fontWeight: 400,
+                    markers: {
+                        size: 5,
+                        shape: "circle",
+                        radius: 999,
+                        strokeWidth: 0,
+                    },
+                    itemMargin: {
+                        horizontal: 10,
+                        vertical: 0,
+                    },
+                },
+                responsive: [
+                    {
+                        breakpoint: 640,
+                        options: {
+                            chart: {
+                                width: 370,
+                                height: 290,
+                            },
+                        },
+                    },
+                ],
             };
 
             // Destroy existing chart if it exists
@@ -5947,50 +5986,9 @@
             covenantMonitoringChartInstance = new ApexCharts(chartElement, options);
             covenantMonitoringChartInstance.render();
             console.log('Covenant Monitoring chart rendered successfully');
-
-            // Update categories breakdown
-            updateCovenantCategories(data, viewType);
         }
 
-        function updateCovenantCategories(data, viewType) {
-            const container = document.getElementById("covenantCategoriesContainer");
-            if (!container) return;
-
-            const isPastDue = viewType === 'pastDue';
-            const title = isPastDue ? "Past Due Breakdown" : "Coming Due Breakdown";
-            
-            let html = `
-                <div>
-                    <p class="text-sm font-semibold text-gray-800 mb-3">${title}</p>
-                    <div class="text-xs text-gray-500 mb-2">
-                        Total: <span class="font-semibold text-gray-900">${data.count} covenants</span>
-                    </div>
-                </div>
-            `;
-
-            data.categories.forEach(cat => {
-                html += `
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="flex items-center gap-2">
-                                <p class="text-xs text-gray-500">${cat.label}</p>
-                                <p class="text-sm font-semibold text-gray-800">${cat.count} covenants</p>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <div class="relative block h-2 w-[100px] rounded-sm bg-gray-200">
-                                    <div class="absolute left-0 top-0 flex h-full items-center justify-center rounded-sm text-xs font-medium text-white"
-                                        style="width: ${cat.percentage}%; background-color: ${cat.color}">
-                                    </div>
-                                </div>
-                                <p class="text-xs font-medium text-gray-700 w-10 text-right">${cat.percentage}%</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            container.innerHTML = html;
-        }
+        // Removed updateCovenantCategories - no longer needed with simplified chart design
 
         function updateCovenantChart(viewType) {
             console.log('Updating covenant chart to:', viewType);
@@ -6983,7 +6981,23 @@
                     }
                 }
                 
-                // Try standard date parsing as fallback
+                // Handle "MMM DD, YYYY" format (e.g., "Jan 15, 2024" or "Dec 1, 2023")
+                // This also handles "MMMM DD, YYYY" (e.g., "January 15, 2024")
+                const monthDayYearPattern = /^([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})$/;
+                const match = str.match(monthDayYearPattern);
+                if (match) {
+                    const monthStr = match[1];
+                    const day = parseInt(match[2]);
+                    const year = parseInt(match[3]);
+                    
+                    // Parse month name to number
+                    const date = new Date(`${monthStr} ${day}, ${year}`);
+                    if (!isNaN(date.getTime())) {
+                        return date;
+                    }
+                }
+                
+                // Try standard date parsing as fallback (handles many formats)
                 const date = new Date(str);
                 if (!isNaN(date.getTime())) {
                     return date;
@@ -9949,10 +9963,10 @@
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
                                     <li><strong>Data Source:</strong> Covenants_tw.xlsx file</li>
                                     <li><strong>Status Filter:</strong> Filter by Coming_Due/Past_Due column value</li>
-                                    <li><strong>Total Count:</strong> Count of covenants with matching status displayed in the radial gauge</li>
-                                    <li><strong>Past Due Categorization:</strong> Source file contains 1-30 and 31-45 day buckets in Past_Due_Category column, which are <strong>aggregated</strong> into a single 1-45 Days bucket for display, along with 46-90 Days and >90 Days (3 buckets total)</li>
-                                    <li><strong>Coming Due Categorization:</strong> Calculate days until Covenant_Due_Date. Source data with 0-30 and 31-45 days are <strong>aggregated</strong> into a single 1-45 Days bucket for display, along with 46-90 Days and >90 Days (3 buckets total)</li>
-                                    <li><strong>Percentages:</strong> Each category's count divided by total count for that status</li>
+                                    <li><strong>Past Due:</strong> Donut chart displays all categories (<strong>1-45 Days</strong>, <strong>46-90 Days</strong>, <strong>&gt;90 Days</strong>) with legends at the bottom showing counts for each segment</li>
+                                    <li><strong>Coming Due:</strong> Donut chart shows covenants due in the <strong>next 30 days</strong> calculated from Covenant_Due_Date, with legend at the bottom</li>
+                                    <li><strong>Date Formats:</strong> Supports multiple formats including DD/MM/YYYY, YYYY-MM-DD, and MMM DD, YYYY (e.g., Jan 15, 2024)</li>
+                                    <li><strong>Toggle Views:</strong> Switch between Past Due and Coming Due using the toggle buttons. Title and subtitle update dynamically</li>
                                 </ul>
                             </div>
                             
@@ -10191,5 +10205,7 @@
         }
     </script>
 </body>
+
+</html>
 
 </html>

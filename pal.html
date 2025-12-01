@@ -5752,20 +5752,20 @@
             
             // Initialize category buckets - Breakdown shows ALL categories
             const pastDueBuckets = {
-                '1-45 Days': { count: 0, color: '#FBBF24' },
-                '46-90 Days': { count: 0, color: '#F59E0B' },
-                '>90 Days': { count: 0, color: '#DC2626' }
+                '1-45 Days': { count: 0 },
+                '46-90 Days': { count: 0 },
+                '>90 Days': { count: 0 }
             };
             
             // For gauge - only track 46-90 and >90
             const pastDueGaugeBuckets = {
-                '46-90 Days': { count: 0, color: '#F59E0B' },
-                '>90 Days': { count: 0, color: '#DC2626' }
+                '46-90 Days': { count: 0 },
+                '>90 Days': { count: 0 }
             };
             
             // Coming Due only shows next 30 days
             const comingDueBuckets = {
-                'Next 30 Days': { count: 0, color: '#10B981' }
+                'Next 30 Days': { count: 0 }
             };
             
             let pastDueTotalAll = 0;  // Total including 1-45 days (for breakdown)
@@ -5843,23 +5843,20 @@
             const pastDueCategories = Object.entries(pastDueBuckets).map(([label, data]) => ({
                 label: label,
                 count: data.count,
-                percentage: pastDueTotalAll > 0 ? parseFloat(((data.count / pastDueTotalAll) * 100).toFixed(1)) : 0,
-                color: data.color
+                percentage: pastDueTotalAll > 0 ? parseFloat(((data.count / pastDueTotalAll) * 100).toFixed(1)) : 0
             }));
             
             // Gauge data for donut chart (only 46-90 and >90)
             const pastDueGaugeCategories = Object.entries(pastDueGaugeBuckets).map(([label, data]) => ({
                 label: label,
                 count: data.count,
-                percentage: pastDueTotalGauge > 0 ? parseFloat(((data.count / pastDueTotalGauge) * 100).toFixed(1)) : 0,
-                color: data.color
+                percentage: pastDueTotalGauge > 0 ? parseFloat(((data.count / pastDueTotalGauge) * 100).toFixed(1)) : 0
             }));
             
             const comingDueCategories = Object.entries(comingDueBuckets).map(([label, data]) => ({
                 label: label,
                 count: data.count,
-                percentage: comingDueTotal > 0 ? parseFloat(((data.count / comingDueTotal) * 100).toFixed(1)) : 0,
-                color: data.color
+                percentage: comingDueTotal > 0 ? parseFloat(((data.count / comingDueTotal) * 100).toFixed(1)) : 0
             }));
             
             // Update global covenant data
@@ -5890,19 +5887,22 @@
             const data = currentCovenantData[viewType];
             const isPastDue = viewType === 'pastDue';
 
-            let series, labels, colors;
+            let series, labels, colors, totalCount;
 
             if (isPastDue) {
-                // For Past Due: Show ALL categories (1-45, 46-90, >90)
+                // For Past Due: Show ALL categories (1-45, 46-90, >90) with matching colors
                 const categories = data.categories || [];
                 series = categories.map(cat => cat.count);
                 labels = categories.map(cat => cat.label);
-                colors = categories.map(cat => cat.color);
+                // Use colors matching New Facilities chart style
+                colors = ["#3641f5", "#7592ff", "#dde9ff"]; // Blue shades for Past Due
+                totalCount = data.totalAll || data.count;
             } else {
                 // For Coming Due: Show next 30 days
                 series = [data.count];
                 labels = ["Next 30 Days"];
-                colors = ["#10B981"];
+                colors = ["#10B981"]; // Keep green for Coming Due
+                totalCount = data.count;
             }
 
             const options = {
@@ -5912,8 +5912,13 @@
                 chart: {
                     fontFamily: "Outfit, sans-serif",
                     type: "donut",
-                    width: 445,
-                    height: 290,
+                    width: 280,
+                    height: 280,
+                },
+                stroke: {
+                    show: false,
+                    width: 4,
+                    colors: "transparent",
                 },
                 plotOptions: {
                     pie: {
@@ -5922,9 +5927,27 @@
                             background: "transparent",
                             labels: {
                                 show: true,
-                                value: {
+                                name: {
                                     show: true,
                                     offsetY: 0,
+                                    color: "#1D2939",
+                                    fontSize: "12px",
+                                    fontWeight: "normal",
+                                },
+                                value: {
+                                    show: true,
+                                    offsetY: 10,
+                                    color: "#667085",
+                                    fontSize: "14px",
+                                    formatter: (val) => val.toLocaleString(),
+                                },
+                                total: {
+                                    show: true,
+                                    label: isPastDue ? "Total Past Due" : "Total Coming Due",
+                                    color: "#000000",
+                                    fontSize: "20px",
+                                    fontWeight: "bold",
+                                    formatter: () => totalCount.toLocaleString(),
                                 },
                             },
                         },
@@ -5935,42 +5958,51 @@
                 },
                 tooltip: {
                     enabled: true,
+                    theme: "light",
                     y: {
                         formatter: function(val) {
                             return val + " covenants";
                         }
                     }
                 },
-                stroke: {
-                    show: false,
-                    width: 4,
-                    colors: "transparent",
-                },
                 legend: {
                     show: true,
                     position: "bottom",
                     horizontalAlign: "center",
-                    fontFamily: "Outfit",
+                    fontFamily: "Outfit, sans-serif",
                     fontSize: "14px",
-                    fontWeight: 400,
+                    fontWeight: 500,
+                    labels: {
+                        colors: "#1F2937",
+                    },
                     markers: {
-                        size: 5,
+                        size: 8,
                         shape: "circle",
                         radius: 999,
                         strokeWidth: 0,
+                        offsetX: -2,
                     },
                     itemMargin: {
-                        horizontal: 10,
-                        vertical: 0,
+                        horizontal: 12,
+                        vertical: 8,
                     },
                 },
                 responsive: [
                     {
+                        breakpoint: 2600,
+                        options: {
+                            chart: {
+                                width: 240,
+                                height: 240,
+                            },
+                        },
+                    },
+                    {
                         breakpoint: 640,
                         options: {
                             chart: {
-                                width: 370,
-                                height: 290,
+                                width: 280,
+                                height: 280,
                             },
                         },
                     },
@@ -9963,10 +9995,11 @@
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
                                     <li><strong>Data Source:</strong> Covenants_tw.xlsx file</li>
                                     <li><strong>Status Filter:</strong> Filter by Coming_Due/Past_Due column value</li>
-                                    <li><strong>Past Due:</strong> Donut chart displays all categories (<strong>1-45 Days</strong>, <strong>46-90 Days</strong>, <strong>&gt;90 Days</strong>) with legends at the bottom showing counts for each segment</li>
-                                    <li><strong>Coming Due:</strong> Donut chart shows covenants due in the <strong>next 30 days</strong> calculated from Covenant_Due_Date, with legend at the bottom</li>
+                                    <li><strong>Past Due:</strong> Donut chart displays all categories (<strong>1-45 Days</strong>, <strong>46-90 Days</strong>, <strong>&gt;90 Days</strong>) in blue shades matching the TailAdmin color scheme. Center shows total past due count. Legends at bottom show counts for each segment</li>
+                                    <li><strong>Coming Due:</strong> Donut chart shows covenants due in the <strong>next 30 days</strong> calculated from Covenant_Due_Date, in green color. Center shows total coming due count. Legend at bottom</li>
                                     <li><strong>Date Formats:</strong> Supports multiple formats including DD/MM/YYYY, YYYY-MM-DD, and MMM DD, YYYY (e.g., Jan 15, 2024)</li>
-                                    <li><strong>Toggle Views:</strong> Switch between Past Due and Coming Due using the toggle buttons. Title and subtitle update dynamically</li>
+                                    <li><strong>Toggle Views:</strong> Switch between Past Due and Coming Due using the toggle buttons. Title, subtitle, and center label update dynamically</li>
+                                    <li><strong>Visual Style:</strong> Matches the styling of "New Facilities Approved in CP by Product Program" chart with consistent fonts, colors, and layout</li>
                                 </ul>
                             </div>
                             

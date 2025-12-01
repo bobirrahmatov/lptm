@@ -1497,323 +1497,6 @@
             </div>
         </div>
 
-        <!-- Covenants Coming Due and Past Due Table (Full Width) -->
-        <div class="mb-6">
-            <div class="col-span-12" x-data="covenantsDataTable()">
-                <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white">
-                    <div
-                        class="flex items-center justify-between px-5 pt-5 sm:px-6 sm:pt-6 pb-4 border-b border-gray-200">
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-800">
-                                Covenants Coming Due and Past Due
-                            </h3>
-                            <p class="mt-1 text-sm text-gray-500">
-                                Detailed covenant tracking and monitoring - <span
-                                    x-text="'Showing top ' + topN + ' records'"></span>
-                            </p>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <!-- Column Visibility Control -->
-                            <div x-data="{openColumns: false}" class="relative">
-                                <button @click="openColumns = !openColumns"
-                                    class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 0a2 2 0 012 2v8a2 2 0 01-2 2h-2a2 2 0 01-2-2V9a2 2 0 012-2z" />
-                                        </svg>
-                                    <span>Columns</span>
-                                </button>
-                                <div x-show="openColumns" @click.outside="openColumns = false"
-                                    class="absolute right-0 top-full z-40 w-64 rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg mt-2"
-                                    style="display: none;">
-                                    <div class="text-xs font-semibold text-gray-700 mb-2 px-2">Select Columns to Display
-                                    </div>
-                                    <div class="max-h-80 overflow-y-auto space-y-1">
-                                        <label
-                                            class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer">
-                                            <input type="checkbox" x-model="visibleColumns.relationship_name"
-                                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                            <span class="text-sm text-gray-700">Relationship Name</span>
-                                        </label>
-                                        <label
-                                            class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer">
-                                            <input type="checkbox" x-model="visibleColumns.borrowers_name"
-                                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                            <span class="text-sm text-gray-700">Borrowers Name</span>
-                                        </label>
-                                        <label
-                                            class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer">
-                                            <input type="checkbox" x-model="visibleColumns.region"
-                                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                            <span class="text-sm text-gray-700">Region</span>
-                                        </label>
-                                        <label
-                                            class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer">
-                                            <input type="checkbox" x-model="visibleColumns.lead_underwriter"
-                                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                            <span class="text-sm text-gray-700">Lead Underwriter</span>
-                                        </label>
-                                        <label
-                                            class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer">
-                                            <input type="checkbox" x-model="visibleColumns.product_program_name"
-                                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                            <span class="text-sm text-gray-700">Product Program</span>
-                                        </label>
-                                        <label
-                                            class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer">
-                                            <input type="checkbox" x-model="visibleColumns.facility_type"
-                                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                            <span class="text-sm text-gray-700">Facility Type</span>
-                                        </label>
-                                        <label
-                                            class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer">
-                                            <input type="checkbox" x-model="visibleColumns.covenant_number"
-                                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                            <span class="text-sm text-gray-700">Covenant Number</span>
-                                        </label>
-                                        <label
-                                            class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer">
-                                            <input type="checkbox" x-model="visibleColumns.periodicity_frequency"
-                                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                            <span class="text-sm text-gray-700">Periodicity Frequency</span>
-                                        </label>
-                                        <label
-                                            class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer">
-                                            <input type="checkbox" x-model="visibleColumns.covenant_due_date"
-                                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                            <span class="text-sm text-gray-700">Covenant Due Date</span>
-                                        </label>
-                                        <label
-                                            class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer">
-                                            <input type="checkbox" x-model="visibleColumns.covenant_deferred_date"
-                                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                            <span class="text-sm text-gray-700">Covenant Deferred Date</span>
-                                        </label>
-                                        <label
-                                            class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer">
-                                            <input type="checkbox" x-model="visibleColumns.days_past_due"
-                                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                            <span class="text-sm text-gray-700">Days Past Due</span>
-                                        </label>
-                                        <label
-                                            class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer">
-                                            <input type="checkbox" x-model="visibleColumns.coming_due_past_due"
-                                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                            <span class="text-sm text-gray-700">Coming Due/Past Due</span>
-                                        </label>
-                                        <label
-                                            class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer">
-                                            <input type="checkbox" x-model="visibleColumns.past_due_category"
-                                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                            <span class="text-sm text-gray-700">Past Due Category</span>
-                                        </label>
-                                        <label
-                                            class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer">
-                                            <input type="checkbox" x-model="visibleColumns.covenant_description"
-                                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                            <span class="text-sm text-gray-700">Covenant Description</span>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Top N Filter -->
-                            <div x-data="{openTopN: false}" class="relative">
-                                <button @click="openTopN = !openTopN"
-                                    class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <span>Top <span x-text="topN"></span></span>
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                </button>
-                                <div x-show="openTopN" @click.outside="openTopN = false"
-                                    class="absolute right-0 top-full z-40 w-32 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2"
-                                    style="display: none;">
-                                    <button @click="topN = 10; openTopN = false"
-                                        :class="topN === 10 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
-                                        Top 10
-                                    </button>
-                                    <button @click="topN = 20; openTopN = false"
-                                        :class="topN === 20 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
-                                        Top 20
-                                    </button>
-                                    <button @click="topN = 30; openTopN = false"
-                                        :class="topN === 30 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
-                                        Top 30
-                                    </button>
-                                    <button @click="topN = 40; openTopN = false"
-                                        :class="topN === 40 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
-                                        Top 40
-                                    </button>
-                                    <button @click="topN = 50; openTopN = false"
-                                        :class="topN === 50 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
-                                        Top 50
-                                    </button>
-                                    <button @click="topN = 100; openTopN = false"
-                                        :class="topN === 100 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
-                                        Top 100
-                                    </button>
-                                </div>
-                            </div>
-                            <!-- Export Menu -->
-                            <div x-data="{openDropDown: false}" class="relative h-fit">
-                                <button @click="openDropDown = !openDropDown"
-                                    :class="openDropDown ? 'text-gray-700' : 'text-gray-400 hover:text-gray-700'"
-                                    class="transition-colors">
-                                    <svg class="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path fill-rule="evenodd" clip-rule="evenodd"
-                                            d="M10.2441 6C10.2441 5.0335 11.0276 4.25 11.9941 4.25H12.0041C12.9706 4.25 13.7541 5.0335 13.7541 6C13.7541 6.9665 12.9706 7.75 12.0041 7.75H11.9941C11.0276 7.75 10.2441 6.9665 10.2441 6ZM10.2441 18C10.2441 17.0335 11.0276 16.25 11.9941 16.25H12.0041C12.9706 16.25 13.7541 17.0335 13.7541 18C13.7541 18.9665 12.9706 19.75 12.0041 19.75H11.9941C11.0276 19.75 10.2441 18.9665 10.2441 18ZM11.9941 10.25C11.0276 10.25 10.2441 11.0335 10.2441 12C10.2441 12.9665 11.0276 13.75 11.9941 13.75H12.0041C12.9706 13.75 13.7541 12.9665 13.7541 12C13.7541 11.0335 12.9706 10.25 12.0041 10.25H11.9941Z"
-                                            fill="" />
-                                        </svg>
-                                </button>
-                                <div x-show="openDropDown" @click.outside="openDropDown = false"
-                                    class="absolute right-0 top-full z-40 w-48 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2"
-                                    style="display: none;">
-                                    <button @click="openDropDown = false; openMethodologyModal('covenantsTable')"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-                                        View Methodology
-                                    </button>
-                                    <button @click="openDropDown = false; exportChartData('covenantsTable')"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-                                        Export Data
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="max-w-full overflow-x-auto">
-                        <table class="w-full table-auto">
-                            <thead class="sticky top-0 bg-gray-50 z-10">
-                                <tr class="text-left">
-                                    <th x-show="visibleColumns.relationship_name"
-                                        class="px-4 py-3 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">
-                                        Relationship Name</th>
-                                    <th x-show="visibleColumns.borrowers_name"
-                                        class="px-4 py-3 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">
-                                        Borrowers Name</th>
-                                    <th x-show="visibleColumns.region"
-                                        class="px-4 py-3 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">
-                                        Region</th>
-                                    <th x-show="visibleColumns.lead_underwriter"
-                                        class="px-4 py-3 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">
-                                        Lead Underwriter</th>
-                                    <th x-show="visibleColumns.product_program_name"
-                                        class="px-4 py-3 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">
-                                        Product Program</th>
-                                    <th x-show="visibleColumns.facility_type"
-                                        class="px-4 py-3 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">
-                                        Facility Type</th>
-                                    <th x-show="visibleColumns.covenant_number"
-                                        class="px-4 py-3 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">
-                                        Covenant Number</th>
-                                    <th x-show="visibleColumns.periodicity_frequency"
-                                        class="px-4 py-3 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">
-                                        Periodicity</th>
-                                    <th x-show="visibleColumns.covenant_due_date"
-                                        class="px-4 py-3 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">
-                                        Covenant Due Date</th>
-                                    <th x-show="visibleColumns.covenant_deferred_date"
-                                        class="px-4 py-3 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">
-                                        Deferred Date</th>
-                                    <th x-show="visibleColumns.days_past_due"
-                                        class="px-4 py-3 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap text-center">
-                                        Days Past Due</th>
-                                    <th x-show="visibleColumns.coming_due_past_due"
-                                        class="px-4 py-3 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap text-center">
-                                        Status</th>
-                                    <th x-show="visibleColumns.past_due_category"
-                                        class="px-4 py-3 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">
-                                        Past Due Category</th>
-                                    <th x-show="visibleColumns.covenant_description"
-                                        class="px-4 py-3 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">
-                                        Covenant Description</th>
-                        </tr>
-                    </thead>
-                            <tbody id="covenantsTableBody" class="divide-y divide-gray-200">
-                                <tr>
-                                    <td colspan="14" class="px-5 py-8 text-center text-sm text-gray-500">
-                                        <div class="flex flex-col items-center justify-center">
-                                            <svg class="h-12 w-12 text-gray-400 mb-3" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                        </path>
-                                    </svg>
-                                            <p class="font-medium text-gray-900 mb-1">No covenant data available</p>
-                                            <p class="text-gray-500">Data will be loaded from Covenants_tw.xlsx file</p>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-                    <!-- Pagination Controls -->
-                    <div class="border-t border-gray-100 py-4 pr-4 pl-[18px]">
-                        <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between">
-                            <p class="border-b border-gray-100 pb-3 text-center text-sm font-medium text-gray-500 xl:border-b-0 xl:pb-0 xl:text-left">
-                                Showing <span x-text="startEntry"></span> to <span x-text="endEntry"></span> of <span x-text="totalEntries"></span> entries
-                            </p>
-
-                            <div class="flex items-center justify-center gap-0.5 pt-4 xl:justify-end xl:pt-0">
-                                <button @click="prevPage()"
-                                    class="shadow-theme-xs mr-2.5 flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                                    :disabled="currentPage === 1">
-                                    <svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M2.58301 9.99868C2.58272 10.1909 2.65588 10.3833 2.80249 10.53L7.79915 15.5301C8.09194 15.8231 8.56682 15.8233 8.85981 15.5305C9.15281 15.2377 9.15297 14.7629 8.86018 14.4699L5.14009 10.7472L16.6675 10.7472C17.0817 10.7472 17.4175 10.4114 17.4175 9.99715C17.4175 9.58294 17.0817 9.24715 16.6675 9.24715L5.14554 9.24715L8.86017 5.53016C9.15297 5.23717 9.15282 4.7623 8.85983 4.4695C8.56684 4.1767 8.09197 4.17685 7.79917 4.46984L2.84167 9.43049C2.68321 9.568 2.58301 9.77087 2.58301 9.99715C2.58301 9.99766 2.58301 9.99817 2.58301 9.99868Z" fill="" />
-                                </svg>
-                    </button>
-
-                                <button @click="goToPage(1)"
-                                    :class="currentPage === 1 ? 'bg-blue-500/[0.08] text-blue-600' : 'text-gray-700'"
-                                    class="hover:text-blue-600 flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium hover:bg-blue-500/[0.08]">
-                                    1
-                                </button>
-
-                                <template x-if="currentPage > 3">
-                                    <span class="hover:text-blue-600 flex h-10 w-10 items-center justify-center rounded-lg hover:bg-blue-500/[0.08]">...</span>
-                            </template>
-
-                                <template x-for="page in pagesAroundCurrent" :key="page">
-                                    <button @click="goToPage(page)"
-                                        :class="currentPage === page ? 'bg-blue-500/[0.08] text-blue-600' : 'text-gray-700'"
-                                        class="hover:text-blue-600 flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium hover:bg-blue-500/[0.08]">
-                                        <span x-text="page"></span>
-                                    </button>
-                                </template>
-
-                                <template x-if="currentPage < totalPages - 2">
-                                    <span class="hover:text-blue-600 flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium text-gray-700 hover:bg-blue-500/[0.08]">...</span>
-                                </template>
-
-                                <button @click="goToPage(totalPages)" x-show="totalPages > 1"
-                                    :class="currentPage === totalPages ? 'bg-blue-500/[0.08] text-blue-600' : 'text-gray-700'"
-                                    class="hover:text-blue-600 flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium hover:bg-blue-500/[0.08]">
-                                    <span x-text="totalPages"></span>
-                                </button>
-
-                                <button @click="nextPage()"
-                                    class="shadow-theme-xs ml-2.5 flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                                    :disabled="currentPage === totalPages">
-                                    <svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M17.4175 9.9986C17.4178 10.1909 17.3446 10.3832 17.198 10.53L12.2013 15.5301C11.9085 15.8231 11.4337 15.8233 11.1407 15.5305C10.8477 15.2377 10.8475 14.7629 11.1403 14.4699L14.8604 10.7472L3.33301 10.7472C2.91879 10.7472 2.58301 10.4114 2.58301 9.99715C2.58301 9.58294 2.91879 9.24715 3.33301 9.24715L14.8549 9.24715L11.1403 5.53016C10.8475 5.23717 10.8477 4.7623 11.1407 4.4695C11.4336 4.1767 11.9085 4.17685 12.2013 4.46984L17.1588 9.43049C17.3173 9.568 17.4175 9.77087 17.4175 9.99715C17.4175 9.99763 17.4175 9.99812 17.4175 9.9986Z" fill="" />
-                                </svg>
-                    </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-            </div>
-        </div>
-
-
         <!-- Important Notes -->
         <div class="overflow-hidden rounded-xl border border-gray-200 bg-white">
             <div class="flex items-start gap-3 px-5 py-4">
@@ -2805,7 +2488,7 @@
         
         // Update these values to match your Confluence page and attachment
         const CONFLUENCE_PAGE_ID = "3229979875"; // Your Confluence page ID
-        const CONFLUENCE_FILE_NAME = "palDashboard.csv"; // Your attachment filename (can be .csv, .xlsx, or .xls)
+        const CONFLUENCE_FILE_NAME = "Portfolio_tw.xlsx"; // Your attachment filename (can be .csv, .xlsx, or .xls)
         const CONFLUENCE_COVENANTS_FILE = "Covenants_tw.xlsx"; // Covenants data file
         const CONFLUENCE_BASE_URL = "https://cedt-confluence.nam.nsroot.net/confluence";
         // ==========================================
@@ -6053,101 +5736,6 @@
                 buckets: buckets.map(b => ({ label: b.label, count: b.count, tfa: formatCurrency(b.tfa) }))
             });
         }
-
-        // Covenants Data Table with Pagination
-        function covenantsDataTable() {
-            return {
-                currentPage: 1,
-                perPage: 10,
-                topN: 10,
-                openTopN: false,
-                openColumns: false,
-                visibleColumns: {
-                    relationship_name: true,
-                    borrowers_name: true,
-                    covenant_number: true,
-                    covenant_due_date: true,
-                    days_past_due: true,
-                    coming_due_past_due: true,
-                    region: false,
-                    lead_underwriter: false,
-                    product_program_name: false,
-                    facility_type: false,
-                    periodicity_frequency: false,
-                    covenant_deferred_date: false,
-                    past_due_category: false,
-                    covenant_description: false
-                },
-                data: [],
-
-                init() {
-                    // Watch for topN changes and reset to page 1
-                    this.$watch('topN', () => {
-                        this.currentPage = 1;
-                    });
-                },
-
-                get filteredData() {
-                    // TODO: When covenant data is loaded, filter based on topN
-                    // For now, return empty array as placeholder
-                    return this.data.slice(0, this.topN);
-                },
-
-                get paginatedData() {
-                    const start = (this.currentPage - 1) * this.perPage;
-                    const end = start + this.perPage;
-                    return this.filteredData.slice(start, end);
-                },
-
-                get totalEntries() {
-                    return this.filteredData.length;
-                },
-
-                get startEntry() {
-                    if (this.totalEntries === 0) return 0;
-                    return (this.currentPage - 1) * this.perPage + 1;
-                },
-
-                get endEntry() {
-                    const end = this.currentPage * this.perPage;
-                    return end > this.totalEntries ? this.totalEntries : end;
-                },
-
-                get totalPages() {
-                    return Math.ceil(this.filteredData.length / this.perPage);
-                },
-
-                get pagesAroundCurrent() {
-                    let pages = [];
-                    const startPage = Math.max(2, this.currentPage - 2);
-                    const endPage = Math.min(this.totalPages - 1, this.currentPage + 2);
-
-                    for (let i = startPage; i <= endPage; i++) {
-                        pages.push(i);
-                    }
-                    return pages;
-                },
-
-                goToPage(page) {
-                    if (page >= 1 && page <= this.totalPages) {
-                        this.currentPage = page;
-                    }
-                },
-
-                nextPage() {
-                    if (this.currentPage < this.totalPages) {
-                        this.currentPage++;
-                    }
-                },
-
-                prevPage() {
-                    if (this.currentPage > 1) {
-                        this.currentPage--;
-                    }
-                }
-            };
-        }
-
         // Create Covenant Monitoring Chart (Radial Gauge Style)
         let covenantMonitoringChartInstance = null;
         let currentCovenantData = {
@@ -6171,17 +5759,15 @@
             console.log('Using data source with', dataSource.length, 'records');
             console.log('Covenant data available:', covenantsData.length > 0 ? 'Yes' : 'No');
             
-            // Initialize category buckets
+            // Initialize category buckets (aggregated for display)
             const pastDueBuckets = {
-                '1-30 Days': { count: 0, color: '#FCD34D' },
-                '31-45 Days': { count: 0, color: '#FBBF24' },
+                '1-45 Days': { count: 0, color: '#FBBF24' },      // Aggregates 1-30 and 31-45 from source
                 '46-90 Days': { count: 0, color: '#F59E0B' },
                 '>90 Days': { count: 0, color: '#DC2626' }
             };
             
             const comingDueBuckets = {
-                '0-30 Days': { count: 0, color: '#10B981' },
-                '31-45 Days': { count: 0, color: '#3B82F6' },
+                '1-45 Days': { count: 0, color: '#10B981' },      // Aggregates 0-30 and 31-45 from source
                 '46-90 Days': { count: 0, color: '#6366F1' },
                 '>90 Days': { count: 0, color: '#8B5CF6' }
             };
@@ -6204,17 +5790,16 @@
                 if (status.includes('past due') || status === 'past due') {
                     pastDueTotal++;
                     
-                    // Categorize by days past due or past due category
+                    // Categorize by days past due or past due category (aggregated display)
                     if (pastDueCategory) {
                         // Use Past_Due_Category if available
                         if (pastDueCategory.includes('>90') || pastDueCategory.includes('90+')) {
                             pastDueBuckets['>90 Days'].count++;
                         } else if (pastDueCategory.includes('46') || pastDueCategory.includes('61')) {
                             pastDueBuckets['46-90 Days'].count++;
-                        } else if (pastDueCategory.includes('31') || pastDueCategory.includes('45')) {
-                            pastDueBuckets['31-45 Days'].count++;
                         } else {
-                            pastDueBuckets['1-30 Days'].count++;
+                            // Aggregate 1-30 and 31-45 into 1-45 Days bucket
+                            pastDueBuckets['1-45 Days'].count++;
                         }
                     } else if (daysPastDue > 0) {
                         // Fallback to Days_Past_Due
@@ -6222,14 +5807,13 @@
                             pastDueBuckets['>90 Days'].count++;
                         } else if (daysPastDue >= 46) {
                             pastDueBuckets['46-90 Days'].count++;
-                        } else if (daysPastDue >= 31) {
-                            pastDueBuckets['31-45 Days'].count++;
                         } else {
-                            pastDueBuckets['1-30 Days'].count++;
+                            // Aggregate 1-45 days (includes both 1-30 and 31-45 from source)
+                            pastDueBuckets['1-45 Days'].count++;
                         }
                     } else {
-                        // Default to 1-30 Days if no specific data
-                        pastDueBuckets['1-30 Days'].count++;
+                        // Default to 1-45 Days if no specific data
+                        pastDueBuckets['1-45 Days'].count++;
                     }
                 }
                 
@@ -6237,7 +5821,7 @@
                 if (status.includes('coming due') || status === 'coming due') {
                     comingDueTotal++;
                     
-                    // Calculate days until due
+                    // Calculate days until due (aggregated display)
                     const covenantDueDate = parseDate(row.Covenant_Due_Date);
                     if (covenantDueDate) {
                         const today = new Date();
@@ -6248,14 +5832,13 @@
                             comingDueBuckets['>90 Days'].count++;
                         } else if (daysUntilDue >= 46) {
                             comingDueBuckets['46-90 Days'].count++;
-                        } else if (daysUntilDue >= 31) {
-                            comingDueBuckets['31-45 Days'].count++;
                         } else {
-                            comingDueBuckets['0-30 Days'].count++;
+                            // Aggregate 0-45 days (includes both 0-30 and 31-45 from source)
+                            comingDueBuckets['1-45 Days'].count++;
                         }
                     } else {
-                        // Default to 0-30 Days if no date
-                        comingDueBuckets['0-30 Days'].count++;
+                        // Default to 1-45 Days if no date
+                        comingDueBuckets['1-45 Days'].count++;
                     }
                 }
             });
@@ -9670,7 +9253,10 @@
 
         // Get covenants by product program data
         function getCovenantsByProgramData() {
-            const dataSource = filteredData.length > 0 ? filteredData : portfolioData;
+            // Use covenant data if available, otherwise fall back to portfolio data
+            const dataSource = covenantsData.length > 0 ? covenantsData : (filteredData.length > 0 ? filteredData : portfolioData);
+            
+            console.log("getCovenantsByProgramData - using", covenantsData.length > 0 ? "covenant data" : "portfolio data");
             
             // Filter for rows that have covenant data
             const result = dataSource.filter((row) => {
@@ -9685,7 +9271,10 @@
 
         // Get covenant monitoring data
         function getCovenantMonitoringData() {
-            const dataSource = filteredData.length > 0 ? filteredData : portfolioData;
+            // Use covenant data if available, otherwise fall back to portfolio data
+            const dataSource = covenantsData.length > 0 ? covenantsData : (filteredData.length > 0 ? filteredData : portfolioData);
+            
+            console.log("getCovenantMonitoringData - using", covenantsData.length > 0 ? "covenant data" : "portfolio data");
             
             // Filter for rows that have covenant monitoring data
             const result = dataSource.filter((row) => {
@@ -10345,8 +9934,8 @@
                                     <h5 class="font-semibold text-gray-900">Two Views:</h5>
                                 </div>
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
-                                    <li><strong>Past Due View:</strong> Shows covenants that have missed their deadline, categorized by severity (1-30 days through >90 days)</li>
-                                    <li><strong>Coming Due View:</strong> Shows covenants approaching their deadline in the next 90 days (0-30, 31-60, 61-90 days)</li>
+                                    <li><strong>Past Due View:</strong> Shows covenants that have missed their deadline, categorized by severity in 3 aggregated buckets (1-45, 46-90, >90 days)</li>
+                                    <li><strong>Coming Due View:</strong> Shows covenants approaching their deadline, categorized in 3 aggregated buckets (1-45, 46-90, >90 days)</li>
                                 </ul>
                             </div>
                             
@@ -10361,8 +9950,8 @@
                                     <li><strong>Data Source:</strong> Covenants_tw.xlsx file</li>
                                     <li><strong>Status Filter:</strong> Filter by Coming_Due/Past_Due column value</li>
                                     <li><strong>Total Count:</strong> Count of covenants with matching status displayed in the radial gauge</li>
-                                    <li><strong>Past Due Categorization:</strong> Group by Past_Due_Category column into 4 buckets (1-30, 31-45, 46-90, >90 days)</li>
-                                    <li><strong>Coming Due Categorization:</strong> Calculate days until Covenant_Due_Date and group into 4 buckets (0-30, 31-45, 46-90, >90 days)</li>
+                                    <li><strong>Past Due Categorization:</strong> Source file contains 1-30 and 31-45 day buckets in Past_Due_Category column, which are <strong>aggregated</strong> into a single 1-45 Days bucket for display, along with 46-90 Days and >90 Days (3 buckets total)</li>
+                                    <li><strong>Coming Due Categorization:</strong> Calculate days until Covenant_Due_Date. Source data with 0-30 and 31-45 days are <strong>aggregated</strong> into a single 1-45 Days bucket for display, along with 46-90 Days and >90 Days (3 buckets total)</li>
                                     <li><strong>Percentages:</strong> Each category's count divided by total count for that status</li>
                                 </ul>
                             </div>
@@ -10372,15 +9961,14 @@
                                     <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                                     </svg>
-                                    <h5 class="font-semibold text-gray-900">Past Due Risk Categories:</h5>
+                                    <h5 class="font-semibold text-gray-900">Aggregated Risk Categories (Display Buckets):</h5>
                                 </div>
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
-                                    <li><strong class="text-red-700">>90 days (Critical):</strong> Severe breach - immediate MD action required</li>
-                                    <li><strong class="text-orange-700">61 to 90 days (High):</strong> Escalated risk - urgent follow-up needed</li>
-                                    <li><strong class="text-amber-600">46 to 60 days (Medium):</strong> Elevated monitoring required</li>
-                                    <li><strong class="text-yellow-600">31 to 45 days (Moderate):</strong> Active tracking in progress</li>
-                                    <li><strong class="text-yellow-500">1 to 30 days (Low):</strong> Recent past due - early intervention</li>
+                                    <li><strong class="text-red-700">>90 Days (Critical):</strong> Severe breach - immediate MD action required</li>
+                                    <li><strong class="text-orange-600">46-90 Days (High):</strong> Escalated risk - urgent follow-up and remediation needed</li>
+                                    <li><strong class="text-yellow-600">1-45 Days (Moderate):</strong> Recent past due - combines 1-30 and 31-45 day buckets from source file for consolidated view</li>
                                 </ul>
+                                <p class="text-sm text-gray-500 italic mt-2">Note: The source file (Covenants_tw.xlsx) contains more granular buckets (1-30, 31-45, 46-90, >90), which are aggregated here into 3 display buckets for clearer MD-level reporting.</p>
                             </div>
                             
                             <div>
@@ -10436,95 +10024,6 @@
                                     <div>
                                         <p class="font-semibold text-red-900 text-sm">Critical Alert for MDs:</p>
                                         <p class="text-red-800 text-sm">Any Past Due covenants in the ">90 days" category represent critical covenant breaches requiring immediate attention. These may trigger cross-default provisions, require formal waivers, or necessitate credit committee review. High TFA exposure in Past Due status indicates elevated portfolio risk.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `,
-                },
-                covenantsTable: {
-                    title: "Covenants Coming Due and Past Due - Methodology",
-                    content: `
-                        <div class="space-y-4">
-                            <div>
-                                <div class="flex items-center gap-2 mb-2">
-                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                                    </svg>
-                                    <h5 class="font-semibold text-gray-900">What This Table Shows:</h5>
-                                </div>
-                                <p class="text-gray-600">Comprehensive detailed view of all covenants that are either Past Due or Coming Due. This table provides full covenant tracking information including relationship details, due dates, aging status, and compliance monitoring data. Users can customize visible columns and filter by Top N records.</p>
-                            </div>
-                            
-                            <div>
-                                <div class="flex items-center gap-2 mb-2">
-                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-                                    </svg>
-                                    <h5 class="font-semibold text-gray-900">Available Columns:</h5>
-                                </div>
-                                <ul class="list-disc list-inside space-y-1 text-gray-600 grid grid-cols-2 gap-x-4">
-                                    <li>Relationship Name</li>
-                                    <li>Borrowers Name</li>
-                                    <li>Region</li>
-                                    <li>Lead Underwriter</li>
-                                    <li>Product Program Name</li>
-                                    <li>Facility Type</li>
-                                    <li>Covenant Number</li>
-                                    <li>Periodicity Frequency</li>
-                                    <li>Covenant Due Date</li>
-                                    <li>Covenant Deferred Date</li>
-                                    <li>Days Past Due</li>
-                                    <li>Coming Due/Past Due (Status)</li>
-                                    <li>Past Due Category</li>
-                                    <li>Covenant Description</li>
-                                </ul>
-                            </div>
-                            
-                            <div>
-                                <div class="flex items-center gap-2 mb-2">
-                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
-                                    </svg>
-                                    <h5 class="font-semibold text-gray-900">Table Features:</h5>
-                                </div>
-                                <ul class="list-disc list-inside space-y-1 text-gray-600">
-                                    <li><strong>Column Customization:</strong> Use the "Columns" dropdown to show/hide specific columns based on your needs</li>
-                                    <li><strong>Top N Filter:</strong> Limit display to Top 10, 20, 30, 40, 50, or 100 most urgent covenants</li>
-                                    <li><strong>Pagination:</strong> Navigate through records with page controls and adjustable rows per page</li>
-                                    <li><strong>Search:</strong> Full-text search across all visible columns to quickly find specific covenants</li>
-                                    <li><strong>Sorting:</strong> Click column headers to sort data ascending or descending</li>
-                                </ul>
-                            </div>
-                            
-                            <div>
-                                <div class="flex items-center gap-2 mb-2">
-                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                    </svg>
-                                    <h5 class="font-semibold text-gray-900">Data Source:</h5>
-                                </div>
-                                <p class="text-gray-600"><code class="bg-gray-100 px-1 rounded">Covenants_tw.xlsx</code> - Complete covenant tracking file with all monitoring details and compliance deadlines</p>
-                            </div>
-                            
-                            <div>
-                                <div class="flex items-center gap-2 mb-2">
-                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
-                                    </svg>
-                                    <h5 class="font-semibold text-gray-900">Filters Applied:</h5>
-                                </div>
-                                <p class="text-gray-600">Respects all active filters (Region, Status, etc.) to show covenant data within the selected criteria. Updates dynamically when filters change.</p>
-                            </div>
-                            
-                            <div class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
-                                <div class="flex items-start gap-2">
-                                    <svg class="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                    <div>
-                                        <p class="font-semibold text-blue-900 text-sm">Use Case:</p>
-                                        <p class="text-blue-800 text-sm">This detailed table allows portfolio managers and MDs to drill down into specific covenant details, track individual compliance deadlines, and export filtered data for further analysis or reporting. The customizable columns enable users to focus on the most relevant information for their workflow.</p>
                                     </div>
                                 </div>
                             </div>
@@ -10657,10 +10156,6 @@
                 case "covenantMonitoring":
                     chartName = "Covenant_Monitoring";
                     data = getCovenantMonitoringData();
-                    break;
-                case "covenantsTable":
-                    chartName = "Covenants_Coming_Due_Past_Due";
-                    data = getCovenantMonitoringData(); // Same data source
                     break;
             }
 

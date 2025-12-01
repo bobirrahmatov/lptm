@@ -1433,8 +1433,11 @@
             </div>
 
                     <!-- Donut Chart -->
-                    <div class="px-5 py-6">
-                        <div id="covenantMonitoringChart" class="flex justify-center mx-auto"></div>
+                    <div class="flex flex-col items-center justify-center gap-8 xl:flex-row flex-1 px-5 py-6">
+                        <div id="covenantMonitoringChart" class="chartDarkStyle"></div>
+                        <div id="covenantMonitoringLegend" class="flex flex-col items-start gap-6 sm:flex-row xl:flex-col">
+                            <!-- Legend items will be dynamically generated -->
+                        </div>
                                 </div>
                 </div>
             </div>
@@ -5894,8 +5897,9 @@
                 const categories = data.categories || [];
                 series = categories.map(cat => cat.count);
                 labels = categories.map(cat => cat.label);
-                // Use colors matching New Facilities chart style
-                colors = ["#3641f5", "#7592ff", "#dde9ff"]; // Blue shades for Past Due
+                // Color order: lightest to darkest (least severe to most severe)
+                // 1-45 Days: lightest, 46-90 Days: medium, >90 Days: darkest
+                colors = ["#dde9ff", "#7592ff", "#3641f5"];
                 totalCount = data.totalAll || data.count;
             } else {
                 // For Coming Due: Show next 30 days
@@ -5966,26 +5970,7 @@
                     }
                 },
                 legend: {
-                    show: true,
-                    position: "bottom",
-                    horizontalAlign: "center",
-                    fontFamily: "Outfit, sans-serif",
-                    fontSize: "14px",
-                    fontWeight: 500,
-                    labels: {
-                        colors: "#1F2937",
-                    },
-                    markers: {
-                        size: 8,
-                        shape: "circle",
-                        radius: 999,
-                        strokeWidth: 0,
-                        offsetX: -2,
-                    },
-                    itemMargin: {
-                        horizontal: 12,
-                        vertical: 8,
-                    },
+                    show: false,
                 },
                 responsive: [
                     {
@@ -6018,9 +6003,44 @@
             covenantMonitoringChartInstance = new ApexCharts(chartElement, options);
             covenantMonitoringChartInstance.render();
             console.log('Covenant Monitoring chart rendered successfully');
+
+            // Update custom legend
+            updateCovenantMonitoringLegend(labels, series, totalCount, colors);
         }
 
-        // Removed updateCovenantCategories - no longer needed with simplified chart design
+        // Update the custom legend for covenant monitoring chart
+        function updateCovenantMonitoringLegend(labels, series, totalCount, colors) {
+            const legendElement = document.getElementById("covenantMonitoringLegend");
+            if (!legendElement) return;
+            
+            let legendHTML = "";
+            for (let i = 0; i < labels.length; i++) {
+                const percentage = totalCount > 0 ? ((series[i] / totalCount) * 100).toFixed(0) : 0;
+                const color = colors[i] || "#3641f5";
+                
+                legendHTML += `
+                    <div class="flex items-start gap-2.5">
+                        <div class="mt-1.5 h-2 w-2 rounded-full" style="background-color: ${color};"></div>
+                        <div>
+                            <h5 class="mb-1 font-medium text-gray-800 text-theme-sm">
+                                ${labels[i]}
+                            </h5>
+                            <div class="flex items-center gap-2">
+                                <p class="font-medium text-gray-700 text-theme-sm">
+                                    ${percentage}%
+                                </p>
+                                <div class="w-1 h-1 bg-gray-400 rounded-full"></div>
+                                <p class="text-gray-500 text-theme-sm">
+                                    ${series[i]} Covenants
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            legendElement.innerHTML = legendHTML;
+        }
 
         function updateCovenantChart(viewType) {
             console.log('Updating covenant chart to:', viewType);
@@ -9995,11 +10015,12 @@
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
                                     <li><strong>Data Source:</strong> Covenants_tw.xlsx file</li>
                                     <li><strong>Status Filter:</strong> Filter by Coming_Due/Past_Due column value</li>
-                                    <li><strong>Past Due:</strong> Donut chart displays all categories (<strong>1-45 Days</strong>, <strong>46-90 Days</strong>, <strong>&gt;90 Days</strong>) in blue shades matching the TailAdmin color scheme. Center shows total past due count. Legends at bottom show counts for each segment</li>
-                                    <li><strong>Coming Due:</strong> Donut chart shows covenants due in the <strong>next 30 days</strong> calculated from Covenant_Due_Date, in green color. Center shows total coming due count. Legend at bottom</li>
+                                    <li><strong>Past Due:</strong> Donut chart displays all categories (<strong>1-45 Days</strong> lightest blue, <strong>46-90 Days</strong> medium blue, <strong>&gt;90 Days</strong> darkest blue) with color intensity increasing by severity. Center shows total past due count</li>
+                                    <li><strong>Coming Due:</strong> Donut chart shows covenants due in the <strong>next 30 days</strong> calculated from Covenant_Due_Date, in green color. Center shows total coming due count</li>
+                                    <li><strong>Custom Legend:</strong> Side-by-side layout with percentage and count for each category, matching the exact style of "New Facilities Approved in CP by Product Program"</li>
                                     <li><strong>Date Formats:</strong> Supports multiple formats including DD/MM/YYYY, YYYY-MM-DD, and MMM DD, YYYY (e.g., Jan 15, 2024)</li>
-                                    <li><strong>Toggle Views:</strong> Switch between Past Due and Coming Due using the toggle buttons. Title, subtitle, and center label update dynamically</li>
-                                    <li><strong>Visual Style:</strong> Matches the styling of "New Facilities Approved in CP by Product Program" chart with consistent fonts, colors, and layout</li>
+                                    <li><strong>Toggle Views:</strong> Switch between Past Due and Coming Due using the toggle buttons. Title, subtitle, center label, and legend update dynamically</li>
+                                    <li><strong>Visual Style:</strong> Identical to "New Facilities Approved in CP by Product Program" chart - same colors, fonts, layout, legend style, and spacing</li>
                                 </ul>
                             </div>
                             

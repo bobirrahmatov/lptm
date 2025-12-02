@@ -6169,17 +6169,29 @@
             if (isPastDue) {
                 // For Past Due: Show ALL categories (1-45, 46-90, >90) with matching colors
                 const categories = data.categories || [];
-                series = categories.map(cat => cat.count);
-                labels = categories.map(cat => cat.label);
-                // Color order: lightest to darkest (least severe to most severe)
-                // 1-45 Days: lightest, 46-90 Days: medium, >90 Days: darkest
-                colors = ["#dde9ff", "#7592ff", "#3641f5"];
+                // Color mapping for each category
+                const colorMap = {
+                    '1-45 Days': "#dde9ff",
+                    '46-90 Days': "#7592ff",
+                    '>90 Days': "#3641f5"
+                };
+                // Filter out categories with zero count
+                const filteredCategories = categories.filter(cat => cat.count > 0);
+                series = filteredCategories.map(cat => cat.count);
+                labels = filteredCategories.map(cat => cat.label);
+                colors = filteredCategories.map(cat => colorMap[cat.label] || "#7592ff");
                 totalCount = data.totalAll || data.count;
             } else {
-                // For Coming Due: Show next 30 days
-                series = [data.count];
-                labels = ["Next 30 Days"];
-                colors = ["#10B981"]; // Keep green for Coming Due
+                // For Coming Due: Show next 30 days (only if count > 0)
+                if (data.count > 0) {
+                    series = [data.count];
+                    labels = ["Next 30 Days"];
+                    colors = ["#10B981"]; // Keep green for Coming Due
+                } else {
+                    series = [];
+                    labels = [];
+                    colors = [];
+                }
                 totalCount = data.count;
             }
 
@@ -6482,14 +6494,17 @@
             
             const grandTotal = grandTotalPastDue + grandTotalComingDue;
             
-            // Build table rows
+            // Build table rows - only for regions that have data
             let html = '';
             let total145 = 0;
             let total4690 = 0;
             let totalOver90 = 0;
             let totalComingDue = 0;
             
-            regions.forEach(region => {
+            // Filter regions to only include those with population > 0
+            const regionsWithData = regions.filter(region => regionPopulation[region] > 0);
+            
+            regionsWithData.forEach(region => {
                 // Calculate combined columns
                 const count145 = regionalData[region]['1-30'] + regionalData[region]['31-45'];
                 const count4690 = regionalData[region]['46-60'] + regionalData[region]['61-90'];
@@ -6564,7 +6579,7 @@
                             <div class="relative w-full h-4 bg-gray-200 rounded overflow-hidden">
                                 <div class="absolute top-0 left-0 h-full bg-blue-600 rounded" style="width: ${totalPercentOfTotal}%"></div>
                                 <span class="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">${totalPercentOfTotal}%</span>
-                            </div>
+                                </div>
                         </td>
                     </tr>
                 `;
@@ -6604,9 +6619,23 @@
                 return;
             }
             
-            const regions = ['APAC', 'EMEA', 'NAM', 'LATAM'];
+            const allRegions = ['APAC', 'EMEA', 'NAM', 'LATAM'];
             
-            // Prepare series data from currentCCMData
+            // Filter out regions that have no data (all zeros)
+            const regions = allRegions.filter(region => {
+                const regionKey = region.toLowerCase();
+                const total = (currentCCMData.pastDue[regionKey] || 0) + 
+                              (currentCCMData.comingDue[regionKey] || 0) + 
+                              (currentCCMData.open[regionKey] || 0);
+                return total > 0;
+            });
+            
+            // If no regions have data, show a message or use all regions with zeros
+            if (regions.length === 0) {
+                console.log('No CCM data available for any region');
+            }
+            
+            // Prepare series data from currentCCMData (only for regions with data)
             const series = [
                 {
                     name: "Past Due",
@@ -10678,18 +10707,24 @@
         // Get New Deals YTD data
         function getNewDealsYTDData() {
             const dataSource = filteredData.length > 0 ? filteredData : portfolioData;
-            const now = new Date();
-            const currentYear = now.getFullYear();
+            
+            // Use reporting month instead of actual current date
+            const { monthStart, monthEnd, reportingMonth: repMonth } = getReportingMonthRange();
+            const currentYear = repMonth.getFullYear();
             const yearStartDate = new Date(currentYear, 0, 1);
             yearStartDate.setHours(0, 0, 0, 0);
 
-            // Get unique facilities with origination date in current year
+            // Get unique facilities with origination date in reporting year (up to reporting month)
             const facilitiesSet = new Set();
             const result = dataSource.filter((row) => {
                 const originationDate = parseDate(row.Origination_Date);
                 const facilityId = row.Facility_ID || row.Facility_Name;
+                const region = String(row.Region || "").trim().toUpperCase();
                 
-                if (originationDate && originationDate >= yearStartDate && originationDate <= now && facilityId) {
+                // Apply region filter if active
+                if (selectedRegion !== 'all' && region !== selectedRegion.toUpperCase()) return false;
+                
+                if (originationDate && originationDate >= yearStartDate && originationDate <= repMonth && facilityId) {
                     if (!facilitiesSet.has(facilityId)) {
                         facilitiesSet.add(facilityId);
                         return true;
@@ -10705,17 +10740,21 @@
         // Get New Deals MTD data
         function getNewDealsMTDData() {
             const dataSource = filteredData.length > 0 ? filteredData : portfolioData;
-            const now = new Date();
-            const monthStartDate = new Date(now.getFullYear(), now.getMonth(), 1);
-            monthStartDate.setHours(0, 0, 0, 0);
 
-            // Get unique facilities with origination date in current month
+            // Use reporting month instead of actual current date
+            const { monthStart, monthEnd, reportingMonth: repMonth } = getReportingMonthRange();
+
+            // Get unique facilities with origination date in reporting month
             const facilitiesSet = new Set();
             const result = dataSource.filter((row) => {
                 const originationDate = parseDate(row.Origination_Date);
                 const facilityId = row.Facility_ID || row.Facility_Name;
+                const region = String(row.Region || "").trim().toUpperCase();
                 
-                if (originationDate && originationDate >= monthStartDate && originationDate <= now && facilityId) {
+                // Apply region filter if active
+                if (selectedRegion !== 'all' && region !== selectedRegion.toUpperCase()) return false;
+                
+                if (originationDate && originationDate >= monthStart && originationDate <= monthEnd && facilityId) {
                     if (!facilitiesSet.has(facilityId)) {
                         facilitiesSet.add(facilityId);
                         return true;

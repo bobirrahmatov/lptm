@@ -1373,26 +1373,26 @@
                 </div>
             </div>
 
-                    <!-- Donut Chart -->
-                    <div class="flex flex-col items-center justify-center gap-6 flex-1 px-5 py-6">
+                    <!-- Donut Chart and Legends -->
+                    <div class="flex flex-col items-center px-5 py-6 flex-1">
                         <div id="covenantMonitoringChart" class="chartDarkStyle"></div>
-                        <div id="covenantMonitoringLegend" class="flex items-center justify-center gap-6 flex-wrap sm:flex-nowrap">
+                        <div id="covenantMonitoringLegend" class="flex flex-row items-center justify-center gap-4 sm:gap-6 mt-6 flex-wrap">
                             <!-- Legend items will be dynamically generated -->
-                        </div>
+                                </div>
                                 </div>
                 </div>
             </div>
 
-            <!-- Covenants Summary by Product Program -->
+            <!-- Regional Distribution Table -->
             <div class="col-span-12 xl:col-span-4">
                 <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white h-full flex flex-col">
                     <div class="flex items-center justify-between px-5 pt-5 sm:px-6 sm:pt-6 pb-4">
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-800">
-                                Covenants by Product Program
+                            <h3 class="text-lg font-semibold text-gray-800" id="covenantRegionalTableTitle">
+                                Past Due Covenants by Region
                     </h3>
-                            <p class="mt-1 text-sm text-gray-500">
-                                Covenant counts by product type
+                            <p class="mt-1 text-sm text-gray-500" id="covenantRegionalTableSubtitle">
+                                Regional breakdown of past due covenants
                     </p>
                 </div>
                         <div x-data="{openDropDown: false}" class="relative h-fit">
@@ -1408,15 +1408,15 @@
                             </button>
                             <div x-show="openDropDown" @click.outside="openDropDown = false"
                                 class="absolute right-0 top-full z-40 w-48 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
-                                <button @click="openDropDown = false; openChartDataModal('covenantsByProgram')"
+                                <button @click="openDropDown = false; openChartDataModal('covenantRegional')"
                                     class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
                                     View Data
                                 </button>
-                                <button @click="openDropDown = false; openMethodologyModal('covenantsByProgram')"
+                                <button @click="openDropDown = false; openMethodologyModal('covenantRegional')"
                                     class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
                                     View Methodology
                                 </button>
-                                <button @click="openDropDown = false; exportChartData('covenantsByProgram')"
+                                <button @click="openDropDown = false; exportChartData('covenantRegional')"
                                     class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
                                     Export Data
                         </button>
@@ -1426,70 +1426,70 @@
                     <div class="max-w-full overflow-x-auto flex-1">
                         <table class="w-full table-auto h-full">
                     <thead>
-                                <tr class="bg-gray-50 text-left">
-                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider">
-                                        Product Program</th>
-                                    <th
-                                        class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-right">
-                                        Number of Covenants</th>
+                                <tr class="bg-gray-50 text-left" id="covenantRegionalTableHeader">
+                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider">Region</th>
+                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-right">41-60 Days</th>
+                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-right">61-90 Days</th>
+                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-right">&gt;90 Days</th>
+                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-right">Total</th>
                                 </tr>
                             </thead>
-                            <tbody id="covenantsSummaryTableBody" class="divide-y divide-gray-200">
-                                <!-- Data will be populated dynamically by populateCovenantsByProgramTable() -->
+                            <tbody id="covenantRegionalTableBody" class="divide-y divide-gray-200">
+                                <tr>
+                                    <td colspan="3" class="px-5 py-4 text-center text-sm text-gray-500">Loading...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Criticized, Classified Memos Reviews Placeholder -->
+            <!-- CCM Regional Distribution Chart (Stacked Bar) -->
             <div class="col-span-12 xl:col-span-4">
-                <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white h-full">
-                    <div class="flex items-center justify-between px-5 pt-5 sm:px-6 sm:pt-6 pb-4">
+                <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 h-full flex flex-col pb-0">
+                    <div class="mb-6 flex justify-between">
                     <div>
                             <h3 class="text-lg font-semibold text-gray-800">
-                                Criticized, Classified Memos Reviews
+                                Criticized/Classified Memos & Reviews
                             </h3>
                             <p class="mt-1 text-sm text-gray-500">
-                                Pending credit memo reviews and classifications
+                                Regional distribution of credit committee memo status
                             </p>
-                        </div>
-                        <div x-data="{openDropDown: false}" class="relative h-fit">
-                            <button @click="openDropDown = !openDropDown"
-                                :class="openDropDown ? 'text-gray-700' : 'text-gray-400 hover:text-gray-700'"
-                                class="transition-colors">
-                                <svg class="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" clip-rule="evenodd"
-                                        d="M10.2441 6C10.2441 5.0335 11.0276 4.25 11.9941 4.25H12.0041C12.9706 4.25 13.7541 5.0335 13.7541 6C13.7541 6.9665 12.9706 7.75 12.0041 7.75H11.9941C11.0276 7.75 10.2441 6.9665 10.2441 6ZM10.2441 18C10.2441 17.0335 11.0276 16.25 11.9941 16.25H12.0041C12.9706 16.25 13.7541 17.0335 13.7541 18C13.7541 18.9665 12.9706 19.75 12.0041 19.75H11.9941C11.0276 19.75 10.2441 18.9665 10.2441 18ZM11.9941 10.25C11.0276 10.25 10.2441 11.0335 10.2441 12C10.2441 12.9665 11.0276 13.75 11.9941 13.75H12.0041C12.9706 13.75 13.7541 12.9665 13.7541 12C13.7541 11.0335 12.9706 10.25 12.0041 10.25H11.9941Z"
-                                        fill="" />
-                                        </svg>
-                            </button>
-                            <div x-show="openDropDown" @click.outside="openDropDown = false"
-                                class="absolute right-0 top-full z-40 w-40 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
-                                <button @click="openDropDown = false"
-                                    class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-                                    Export Data
-                        </button>
-                    </div>
-                        </div>
-                    </div>
-                    <div class="flex flex-col items-center justify-center p-12 text-center">
-                        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 mb-4">
-                            <svg class="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                </path>
-                                        </svg>
                                 </div>
-                        <h4 class="text-lg font-semibold text-gray-900 mb-2">Coming Soon</h4>
-                        <p class="text-sm text-gray-500 max-w-xs">
-                            Credit memo review tracking and classification monitoring will be available here.
-                        </p>
+                            <div x-data="{openDropDown: false}" class="relative h-fit">
+                                <button @click="openDropDown = !openDropDown"
+                                    :class="openDropDown ? 'text-gray-700' : 'text-gray-400 hover:text-gray-700'"
+                                    class="transition-colors">
+                                    <svg class="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                            d="M10.2441 6C10.2441 5.0335 11.0276 4.25 11.9941 4.25H12.0041C12.9706 4.25 13.7541 5.0335 13.7541 6C13.7541 6.9665 12.9706 7.75 12.0041 7.75H11.9941C11.0276 7.75 10.2441 6.9665 10.2441 6ZM10.2441 18C10.2441 17.0335 11.0276 16.25 11.9941 16.25H12.0041C12.9706 16.25 13.7541 17.0335 13.7541 18C13.7541 18.9665 12.9706 19.75 12.0041 19.75H11.9941C11.0276 19.75 10.2441 18.9665 10.2441 18ZM11.9941 10.25C11.0276 10.25 10.2441 11.0335 10.2441 12C10.2441 12.9665 11.0276 13.75 11.9941 13.75H12.0041C12.9706 13.75 13.7541 12.9665 13.7541 12C13.7541 11.0335 12.9706 10.25 12.0041 10.25H11.9941Z"
+                                            fill="" />
+                            </svg>
+                                </button>
+                                <div x-show="openDropDown" @click.outside="openDropDown = false"
+                                class="absolute right-0 top-full z-40 w-40 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                <button @click="openDropDown = false; openChartDataModal('ccmRegionalChart')"
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                                        View Data
+                                    </button>
+                                <button @click="openDropDown = false; openMethodologyModal('ccmRegionalChart')"
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                                        View Methodology
+                                    </button>
+                                <button @click="openDropDown = false; exportChartData('ccmRegionalChart')"
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                                        Export Data
+                        </button>
+                                </div>
                     </div>
                 </div>
+                    <div class="flex-1 flex items-center">
+                        <div id="ccmRegionalChart" class="w-full"></div>
             </div>
-        </div>
+                                </div>
+                </div>
+            </div>
 
         <!-- Important Notes -->
         <div class="overflow-hidden rounded-xl border border-gray-200 bg-white">
@@ -1914,10 +1914,10 @@
                     class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 sm:pt-5 h-full flex flex-col">
                     <div class="flex flex-col gap-5 mb-6 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                            <h3 class="text-lg font-semibold text-gray-800" id="topRelationshipsTitle">
+                            <h3 class="text-lg font-semibold text-gray-800" id="topRelationshipsTitleBalances">
                                 Top Relationships by Direct OS
                             </h3>
-                            <p class="mt-1 text-gray-500 text-sm" id="topRelationshipsSubtitle">
+                            <p class="mt-1 text-gray-500 text-sm" id="topRelationshipsSubtitleBalances">
                                 Largest client exposures ranked by outstanding balance
                             </p>
                     </div>
@@ -1935,37 +1935,37 @@
                                 <div x-show="openTopN" @click.outside="openTopN = false"
                                     class="absolute right-0 top-full z-40 w-32 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
                                     <button
-                                        @click="topNRelationships = 10; openTopN = false; document.getElementById('topNFilter').value = 10; updateBarChart();"
+                                        @click="topNRelationships = 10; openTopN = false; document.getElementById('topNFilterBalances').value = 10; updateBarChartBalances();"
                                         :class="topNRelationships === 10 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
                                         class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
                                         Top 10
                                     </button>
                                     <button
-                                        @click="topNRelationships = 20; openTopN = false; document.getElementById('topNFilter').value = 20; updateBarChart();"
+                                        @click="topNRelationships = 20; openTopN = false; document.getElementById('topNFilterBalances').value = 20; updateBarChartBalances();"
                                         :class="topNRelationships === 20 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
                                         class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
                                         Top 20
                                     </button>
                                     <button
-                                        @click="topNRelationships = 30; openTopN = false; document.getElementById('topNFilter').value = 30; updateBarChart();"
+                                        @click="topNRelationships = 30; openTopN = false; document.getElementById('topNFilterBalances').value = 30; updateBarChartBalances();"
                                         :class="topNRelationships === 30 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
                                         class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
                                         Top 30
                                     </button>
                                     <button
-                                        @click="topNRelationships = 40; openTopN = false; document.getElementById('topNFilter').value = 40; updateBarChart();"
+                                        @click="topNRelationships = 40; openTopN = false; document.getElementById('topNFilterBalances').value = 40; updateBarChartBalances();"
                                         :class="topNRelationships === 40 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
                                         class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
                                         Top 40
                                     </button>
                                     <button
-                                        @click="topNRelationships = 50; openTopN = false; document.getElementById('topNFilter').value = 50; updateBarChart();"
+                                        @click="topNRelationships = 50; openTopN = false; document.getElementById('topNFilterBalances').value = 50; updateBarChartBalances();"
                                         :class="topNRelationships === 50 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
                                         class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
                                         Top 50
                                     </button>
                                     <button
-                                        @click="topNRelationships = 100; openTopN = false; document.getElementById('topNFilter').value = 100; updateBarChart();"
+                                        @click="topNRelationships = 100; openTopN = false; document.getElementById('topNFilterBalances').value = 100; updateBarChartBalances();"
                                         :class="topNRelationships === 100 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
                                         class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
                                         Top 100
@@ -1973,7 +1973,7 @@
                     </div>
                             </div>
                             <!-- Hidden select for backward compatibility with existing JavaScript -->
-                            <select id="topNFilter" style="display: none;">
+                            <select id="topNFilterBalances" style="display: none;">
                                 <option value="10" selected>Top 10</option>
                                 <option value="20">Top 20</option>
                                 <option value="30">Top 30</option>
@@ -2014,7 +2014,7 @@
                     </div>
                     <div class="flex-1 w-full overflow-y-auto overflow-x-hidden custom-scrollbar"
                         style="max-height: 450px">
-                        <div id="relationshipChart" class="-ml-5 pl-2"></div>
+                        <div id="relationshipChartBalances" class="-ml-5 pl-2"></div>
                     </div>
                 </div>
             </div>
@@ -2028,7 +2028,7 @@
                             <h3 class="text-lg font-semibold text-gray-800">
                                 ROTCE Performance
                             </h3>
-                            <p class="mt-1 text-gray-500 text-sm" id="rotceSubtitle">
+                            <p class="mt-1 text-gray-500 text-sm" id="rotceSubtitleBalances">
                                 Top N relationships ROTCE performance
                             </p>
                         </div>
@@ -2065,7 +2065,7 @@
                     <!-- ROTCE Chart -->
                     <div class="flex-1 w-full overflow-y-auto overflow-x-hidden custom-scrollbar"
                         style="max-height: 450px">
-                        <div id="rotceChart" class="-ml-5 pl-2">
+                        <div id="rotceChartBalances" class="-ml-5 pl-2">
                             <!-- Chart will be rendered here -->
                         </div>
                     </div>
@@ -2484,6 +2484,7 @@
         const CONFLUENCE_PAGE_ID = "3229979875"; // Your Confluence page ID
         const CONFLUENCE_FILE_NAME = "Portfolio_tw.xlsx"; // Your attachment filename (can be .csv, .xlsx, or .xls)
         const CONFLUENCE_COVENANTS_FILE = "Covenants_tw.xlsx"; // Covenants data file
+        const CONFLUENCE_CCM_FILE = "CCM_tw.xlsx"; // CCM (Credit Committee Memos) data file
         const CONFLUENCE_BASE_URL = "https://cedt-confluence.nam.nsroot.net/confluence";
         // ==========================================
         
@@ -2503,14 +2504,95 @@
         // Global variables
         let portfolioData = [];
         let covenantsData = []; // Separate covenant data from Covenants_tw.xlsx
+        let ccmData = []; // CCM (Credit Committee Memos) data from CCM_tw.xlsx
         let filteredData = [];
+
+        // DUMMY DATA FOR TESTING - Remove when real data is available
+        function initializeDummyData() {
+            const today = new Date();
+            const dummyCovenants = [];
+            
+            // Generate dummy covenant data
+            const regions = ['APAC', 'EMEA', 'NAM', 'LATAM'];
+            const pastDueCategories = ['46-60 Days', '61-90 Days', '>90 Days'];
+            
+            // Past Due Covenants
+            for (let i = 1; i <= 30; i++) {
+                const region = regions[Math.floor(Math.random() * regions.length)];
+                const category = pastDueCategories[Math.floor(Math.random() * pastDueCategories.length)];
+                const daysPastDue = category === '46-60 Days' ? 50 : (category === '61-90 Days' ? 75 : 100);
+                
+                dummyCovenants.push({
+                    Covenant_Number: `COV-PD-${i}`,
+                    'Coming_Due/Past_Due': 'Past Due',
+                    Past_Due_Category: category,
+                    Days_Past_Due: daysPastDue,
+                    Covenant_Due_Date: new Date(today.getTime() - daysPastDue * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    Region: region,
+                    Product_Program: 'Test Program',
+                    Facility_ID: `FAC-${i}`
+                });
+            }
+            
+            // Coming Due Covenants (next 30 days)
+            for (let i = 1; i <= 20; i++) {
+                const region = regions[Math.floor(Math.random() * regions.length)];
+                const daysUntilDue = Math.floor(Math.random() * 30) + 1;
+                
+                dummyCovenants.push({
+                    Covenant_Number: `COV-CD-${i}`,
+                    'Coming_Due/Past_Due': 'Coming Due',
+                    Covenant_Due_Date: new Date(today.getTime() + daysUntilDue * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    Region: region,
+                    Product_Program: 'Test Program',
+                    Facility_ID: `FAC-CD-${i}`
+                });
+            }
+            
+            // CCM Dummy Data
+            const dummyCCM = [];
+            for (let i = 1; i <= 40; i++) {
+                const region = regions[Math.floor(Math.random() * regions.length)];
+                const rand = Math.random();
+                let ccmDueDate;
+                
+                if (rand < 0.3) {
+                    // Past Due
+                    ccmDueDate = new Date(today.getTime() - Math.floor(Math.random() * 60) * 24 * 60 * 60 * 1000);
+                } else if (rand < 0.5) {
+                    // Coming Due (current month)
+                    ccmDueDate = new Date(today.getFullYear(), today.getMonth(), Math.floor(Math.random() * 28) + 1);
+                } else {
+                    // Open (future)
+                    ccmDueDate = new Date(today.getTime() + (Math.floor(Math.random() * 60) + 31) * 24 * 60 * 60 * 1000);
+                }
+                
+                dummyCCM.push({
+                    Region: region,
+                    CCM_Due_Date: ccmDueDate.toISOString().split('T')[0],
+                    Relationship_ID: `REL-${i}`,
+                    CAID: `CA-${i}`
+                });
+            }
+            
+            covenantsData = dummyCovenants;
+            ccmData = dummyCCM;
+            
+            console.log('✅ Dummy data initialized:', {
+                covenants: covenantsData.length,
+                ccm: ccmData.length
+            });
+        }
+        // END DUMMY DATA
         let expirationChartInstance = null;
         let searchDebounceTimer = null;
         let relationshipChartInstance = null;
+        let relationshipChartInstanceBalances = null; // Separate instance for Balances tab
         let facilityTrendChartInstance = null; // Store facility trend chart instance
         let facilityMaturityChartInstance = null; // Store facility maturity chart instance
         let creditClassificationChartInstance = null; // Store credit classification chart instance
         let rotceChartInstance = null; // Store ROTCE chart instance
+        let rotceChartInstanceBalances = null; // Separate instance for Balances tab
         let updateBarChartTimer = null; // Debounce timer for bar chart updates
         let activeFilters = {};
         let selectedMetricType = "facilityAmount"; // Default to Facility Amount
@@ -2573,12 +2655,19 @@
                 console.log("✓ XLSX library loaded successfully");
             }
             
+            // Initialize dummy data for testing (REMOVE THIS WHEN REAL DATA IS AVAILABLE)
+            initializeDummyData();
+            
             // Load data from Confluence attachment
             loadDataFromCSV();
             
-            // Initialize Covenant Monitoring chart with demo data (before data load)
+            // Initialize charts with dummy data
             setTimeout(() => {
+                populateCovenantMonitoringData();
                 createCovenantMonitoringChart('pastDue');
+                updateCovenantRegionalTable('pastDue');
+                calculateCCMStats();
+                createCCMRegionalChart();
             }, 500);
             
             // Setup search functionality with debouncing (increased for large datasets)
@@ -2627,6 +2716,9 @@
                     createRelationshipChart();
                     createCreditClassificationChart();
                     createROTCEChart();
+                    // Refresh Balances tab charts
+                    createRelationshipChartBalances();
+                    createROTCEChartBalances();
                     
                     // Reset filters and reload data
                     activeFilters = {};
@@ -2668,8 +2760,9 @@
                 // Load portfolio data
                 const data = await fetchDataFromConfluence();
                 
-                // Load covenant data (separate file)
+                // Load covenant data and CCM data (separate files) in parallel
                 const covenantDataPromise = fetchCovenantsFromConfluence();
+                const ccmDataPromise = fetchCCMFromConfluence();
                 
                 if (data && data.length > 0) {
                     portfolioData = data;
@@ -2688,6 +2781,16 @@
                     } else {
                         console.warn(`⚠️ No covenant data loaded from ${CONFLUENCE_COVENANTS_FILE}. Covenant charts will use portfolio data.`);
                         covenantsData = []; // Empty array
+                    }
+                    
+                    // Load CCM data in parallel
+                    const ccmResult = await ccmDataPromise;
+                    if (ccmResult && ccmResult.length > 0) {
+                        ccmData = ccmResult;
+                        console.log(`✅ Loaded ${ccmResult.length} CCM records from ${CONFLUENCE_CCM_FILE}`);
+                    } else {
+                        console.warn(`⚠️ No CCM data loaded from ${CONFLUENCE_CCM_FILE}.`);
+                        ccmData = []; // Empty array
                     }
                     
                     // Use setTimeout to allow UI to update
@@ -2850,6 +2953,100 @@
                         resolve(filteredData);
                     } catch (error) {
                         console.error("Error parsing covenant Excel:", error);
+                        reject(error);
+                    }
+                };
+                reader.onerror = function (error) {
+                    console.error("FileReader error:", error);
+                    reject(error);
+                };
+                reader.readAsArrayBuffer(blob);
+            });
+        }
+
+        // Fetch CCM data from Confluence
+        async function fetchCCMFromConfluence() {
+            try {
+                // Construct Confluence API URL for CCM file
+                const url = `${CONFLUENCE_BASE_URL}/download/attachments/${CONFLUENCE_PAGE_ID}/${CONFLUENCE_CCM_FILE}?api=v2`;
+                
+                console.log("Fetching CCM data from Confluence:", url);
+                console.log("CCM file name:", CONFLUENCE_CCM_FILE);
+                
+                const response = await fetch(url, {
+                    headers: {
+                        "X-Atlassian-Token": "no-check",
+                    },
+                });
+
+                if (!response.ok) {
+                    console.warn(
+                        `Failed to fetch ${CONFLUENCE_CCM_FILE}: ${response.status} ${response.statusText}. CCM data will not be available.`
+                    );
+                    return null;
+                }
+
+                console.log("Successfully fetched CCM file from Confluence");
+                const blob = await response.blob();
+                console.log("CCM blob size:", blob.size, "bytes");
+                
+                // Parse Excel file (CCM is in .xlsx format)
+                if (CONFLUENCE_CCM_FILE.endsWith(".xlsx") || CONFLUENCE_CCM_FILE.endsWith(".xls")) {
+                    console.log("Parsing CCM Excel file...");
+                    return await parseCCMExcelBlob(blob);
+                }
+                
+                throw new Error("CCM file must be .xlsx or .xls format");
+            } catch (error) {
+                console.error("Error fetching CCM data from Confluence:", error.message);
+                return null;
+            }
+        }
+
+        // Parse CCM Excel blob
+        async function parseCCMExcelBlob(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        
+                        const workbook = XLSX.read(data, { 
+                            type: "array",
+                            cellDates: true,
+                            cellNF: false,
+                            cellText: false,
+                        });
+                        
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        
+                        console.log("📊 CCM Excel Sheet Name:", workbook.SheetNames[0]);
+                        
+                        // Convert sheet to JSON
+                        const jsonData = XLSX.utils.sheet_to_json(firstSheet, {
+                            raw: false,
+                            dateNF: "yyyy-mm-dd",
+                        });
+                        
+                        console.log(`📊 Total CCM rows in Excel: ${jsonData.length}`);
+                        
+                        // Filter out completely empty rows
+                        const filteredData = jsonData.filter((row) => {
+                            // Keep row if it has any non-empty values
+                            return Object.values(row).some(val => val !== null && val !== undefined && val !== '');
+                        });
+                        
+                        console.log(`✅ Parsed ${filteredData.length} valid CCM records from Excel`);
+                        
+                        // Log data structure for debugging
+                        if (filteredData.length > 0) {
+                            console.log("📋 CCM record fields:", Object.keys(filteredData[0]));
+                            console.log("📋 Sample CCM record:", filteredData[0]);
+                        }
+                        
+                        resolve(filteredData);
+                    } catch (error) {
+                        console.error("Error parsing CCM Excel:", error);
                         reject(error);
                     }
                 };
@@ -3193,6 +3390,9 @@
             createRelationshipChart();
             createCreditClassificationChart();
             createROTCEChart();
+            // Create Balances tab charts
+            createRelationshipChartBalances();
+            createROTCEChartBalances();
             console.timeEnd("Create Charts");
             
             // Step 6: Filter and render table (only first page)
@@ -3532,6 +3732,13 @@
             createRelationshipChartFromFiltered();
             createCreditClassificationChartFromFiltered();
                 createROTCEChartFromFiltered();
+                
+                // Update covenant and CCM charts with region filter
+                populateCovenantMonitoringData();
+                createCovenantMonitoringChart('pastDue');
+                updateCovenantRegionalTable('pastDue');
+                calculateCCMStats();
+                createCCMRegionalChart();
             });
 
             // Reset to first page and render table immediately
@@ -3867,6 +4074,13 @@
                 createRelationshipChartFromFiltered();
                 createCreditClassificationChartFromFiltered();
                 createROTCEChartFromFiltered();
+                
+                // Update covenant and CCM charts with region filter
+                populateCovenantMonitoringData();
+                createCovenantMonitoringChart('pastDue');
+                updateCovenantRegionalTable('pastDue');
+                calculateCCMStats();
+                createCCMRegionalChart();
             });
             
             // Reset to first page and render table immediately
@@ -4130,6 +4344,13 @@
             // Populate Covenant Monitoring data and chart
             populateCovenantMonitoringData();
             createCovenantMonitoringChart('pastDue');
+            updateCovenantRegionalTable('pastDue');
+            createCovenantRegionalStackedChart();
+            
+            // Calculate and display CCM stats
+            calculateCCMStats();
+            createCCMRegionalChart();
+            updateCCMStats('pastDue');
         }
 
         // Calculate Facilities Expired and CAs Expired metrics from filtered data
@@ -4886,50 +5107,63 @@
                 }
             });
             
-            // Update Top Relationships chart title and subtitle
+            // Update Top Relationships chart title and subtitle (Overview tab)
             const titleElement = document.getElementById("topRelationshipsTitle");
             const subtitleElement = document.getElementById(
                 "topRelationshipsSubtitle"
             );
-            if (titleElement) {
-                if (type === "direct") {
-                    titleElement.textContent = "Top Relationships by Direct OS";
-                    if (subtitleElement)
-                        subtitleElement.textContent =
-                            "Largest client exposures ranked by direct outstanding balance";
-                } else if (type === "contingent") {
-                    titleElement.textContent = "Top Relationships by Contingent OS";
-                    if (subtitleElement)
-                        subtitleElement.textContent =
-                            "Largest client exposures ranked by contingent outstanding balance";
-                } else if (type === "pse") {
-                    titleElement.textContent =
-                        "Top Relationships by Presettlement Exposure";
-                    if (subtitleElement)
-                        subtitleElement.textContent =
-                            "Largest client exposures ranked by presettlement exposure outstanding balance";
-                } else if (type === "osuc") {
-                    titleElement.textContent = "Top Relationships by OSUC";
-                    if (subtitleElement)
-                        subtitleElement.textContent =
-                            "Largest client exposures ranked by outstandings under commitment";
-                } else if (type === "unused") {
-                    titleElement.textContent =
-                        "Top Relationships by Undrawn Commitment";
-                    if (subtitleElement)
-                        subtitleElement.textContent =
-                            "Largest client exposures ranked by unused commitment available to draw";
-                } else if (type === "tfa") {
-                    titleElement.textContent =
-                        "Top Relationships by Total Facility Amount";
-                    if (subtitleElement)
-                        subtitleElement.textContent =
-                            "Largest client exposures ranked by total committed facility amounts";
+            
+            // Update Top Relationships chart title and subtitle (Balances tab)
+            const titleElementBalances = document.getElementById("topRelationshipsTitleBalances");
+            const subtitleElementBalances = document.getElementById(
+                "topRelationshipsSubtitleBalances"
+            );
+            
+            // Update titles for both tabs
+            const updateTitles = (titleEl, subtitleEl) => {
+                if (titleEl) {
+                    if (type === "direct") {
+                        titleEl.textContent = "Top Relationships by Direct OS";
+                        if (subtitleEl)
+                            subtitleEl.textContent =
+                                "Largest client exposures ranked by direct outstanding balance";
+                    } else if (type === "contingent") {
+                        titleEl.textContent = "Top Relationships by Contingent OS";
+                        if (subtitleEl)
+                            subtitleEl.textContent =
+                                "Largest client exposures ranked by contingent outstanding balance";
+                    } else if (type === "pse") {
+                        titleEl.textContent =
+                            "Top Relationships by Presettlement Exposure";
+                        if (subtitleEl)
+                            subtitleEl.textContent =
+                                "Largest client exposures ranked by presettlement exposure outstanding balance";
+                    } else if (type === "osuc") {
+                        titleEl.textContent = "Top Relationships by OSUC";
+                        if (subtitleEl)
+                            subtitleEl.textContent =
+                                "Largest client exposures ranked by outstandings under commitment";
+                    } else if (type === "unused") {
+                        titleEl.textContent =
+                            "Top Relationships by Undrawn Commitment";
+                        if (subtitleEl)
+                            subtitleEl.textContent =
+                                "Largest client exposures ranked by unused commitment available to draw";
+                    } else if (type === "tfa") {
+                        titleEl.textContent =
+                            "Top Relationships by Total Facility Amount";
+                        if (subtitleEl)
+                            subtitleEl.textContent =
+                                "Largest client exposures ranked by total committed facility amounts";
+                    }
                 }
-            }
+            };
+            
+            updateTitles(titleElement, subtitleElement);
+            updateTitles(titleElementBalances, subtitleElementBalances);
 
             console.log("Amount Type filter:", type);
-            // Refresh the Top Relationships chart and ROTCE chart (both should sync)
+            // Refresh the Top Relationships chart and ROTCE chart (both tabs should sync)
             if (areFiltersActive()) {
                 createRelationshipChartFromFiltered();
                 createROTCEChartFromFiltered();
@@ -4937,6 +5171,9 @@
                 createRelationshipChart();
                 createROTCEChart();
             }
+            // Always refresh Balances tab charts (they use portfolioData)
+            createRelationshipChartBalances();
+            createROTCEChartBalances();
         }
         
         // Reset All Filters
@@ -5202,6 +5439,13 @@
             // Populate Covenant Monitoring data and chart
             populateCovenantMonitoringData();
             createCovenantMonitoringChart('pastDue');
+            updateCovenantRegionalTable('pastDue');
+            createCovenantRegionalStackedChart();
+            
+            // Calculate and display CCM stats
+            calculateCCMStats();
+            createCCMRegionalChart();
+            updateCCMStats('pastDue');
         }
 
         // Calculate Facilities Expired and CAs Expired metrics
@@ -5781,9 +6025,14 @@
                 const status = String(row['Coming_Due/Past_Due'] || row.Coming_Due_Past_Due || "").trim().toLowerCase();
                 const daysPastDue = parseInt(row.Days_Past_Due || 0);
                 const pastDueCategory = String(row.Past_Due_Category || "").trim();
+                const region = String(row.Region || "").trim().toUpperCase();
                 
                 // Skip if no covenant number or already processed
                 if (!covenantNumber || processedCovenants.has(covenantNumber)) return;
+                
+                // Apply region filter if active
+                if (selectedRegion !== 'all' && region !== selectedRegion.toUpperCase()) return;
+                
                 processedCovenants.add(covenantNumber);
                 
                 // Process Past Due covenants - count ALL for breakdown, but only 46+ for gauge
@@ -5956,10 +6205,10 @@
                             },
                         },
                     },
-                },
-                dataLabels: {
+                        },
+                        dataLabels: {
                     enabled: false,
-                },
+                            },
                 tooltip: {
                     enabled: true,
                     theme: "light",
@@ -5971,7 +6220,7 @@
                         let html = `<div class="apexcharts-tooltip-custom" style="padding: 12px; min-width: 180px; background: #ffffff; color: #1f2937; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border: 1px solid #e5e7eb;">`;
                         html += `<div style="font-weight: 600; margin-bottom: 8px; font-size: 13px; color: #1f2937;">${label}</div>`;
                         html += `<div style="font-size: 11px; color: #666;">`;
-                        html += `<div style="margin-bottom: 4px;"><strong>${count}</strong> Covenants</div>`;
+                        html += `<div style="margin-bottom: 4px;"><strong>${count}</strong></div>`;
                         html += `<div><strong>${percentage}%</strong> of Total</div>`;
                         html += `</div></div>`;
                         return html;
@@ -5979,7 +6228,7 @@
                 },
                 legend: {
                     show: false,
-                },
+                            },
                 responsive: [
                     {
                         breakpoint: 2600,
@@ -5987,18 +6236,18 @@
                             chart: {
                                 width: 240,
                                 height: 240,
-                            },
                         },
                     },
+                },
                     {
                         breakpoint: 640,
                         options: {
                             chart: {
                                 width: 280,
                                 height: 280,
-                            },
+                },
                         },
-                    },
+                },
                 ],
             };
 
@@ -6016,47 +6265,454 @@
             updateCovenantMonitoringLegend(labels, series, totalCount, colors);
         }
 
-        // Update the custom legend for covenant monitoring chart
+        // Update the legend for covenant monitoring chart
         function updateCovenantMonitoringLegend(labels, series, totalCount, colors) {
             const legendElement = document.getElementById("covenantMonitoringLegend");
             if (!legendElement) return;
             
             let legendHTML = "";
             for (let i = 0; i < labels.length; i++) {
-                const percentage = totalCount > 0 ? ((series[i] / totalCount) * 100).toFixed(0) : 0;
                 const color = colors[i] || "#3641f5";
+                const count = series[i] || 0;
                 
                 legendHTML += `
-                    <div class="flex items-start gap-2.5">
-                        <div class="mt-1.5 h-2 w-2 rounded-full" style="background-color: ${color};"></div>
-                        <div>
-                            <h5 class="mb-1 font-medium text-gray-800 text-theme-sm">
-                                ${labels[i]}
-                            </h5>
+                    <div class="flex flex-col items-center gap-2">
                             <div class="flex items-center gap-2">
-                                <p class="font-medium text-gray-700 text-theme-sm">
-                                    ${percentage}%
-                                </p>
-                                <div class="w-1 h-1 bg-gray-400 rounded-full"></div>
-                                <p class="text-gray-500 text-theme-sm">
-                                    ${series[i]} Covenants
-                                </p>
+                            <div class="h-2.5 w-2.5 rounded-full flex-shrink-0" style="background-color: ${color};"></div>
+                            <span class="text-xs font-medium text-gray-700">${labels[i]}</span>
                             </div>
-                        </div>
+                        <div class="text-lg font-bold text-gray-900">${count}</div>
                     </div>
                 `;
             }
-            
+
             legendElement.innerHTML = legendHTML;
         }
+        
+        // Update region distribution for covenant monitoring
+        // Removed updateCovenantRegionDistribution - region data now integrated in legends
 
         function updateCovenantChart(viewType) {
             console.log('Updating covenant chart to:', viewType);
             createCovenantMonitoringChart(viewType);
+            updateCovenantRegionalTable(viewType);
+        }
+
+        // Update the regional distribution table based on view type
+        function updateCovenantRegionalTable(viewType = 'pastDue') {
+            console.log('Updating regional table for:', viewType);
+            
+            const titleEl = document.getElementById('covenantRegionalTableTitle');
+            const subtitleEl = document.getElementById('covenantRegionalTableSubtitle');
+            const headerEl = document.getElementById('covenantRegionalTableHeader');
+            const tableBody = document.getElementById('covenantRegionalTableBody');
+            
+            if (!tableBody) return;
+            
+            const isPastDue = viewType === 'pastDue';
+            
+            // Update title and subtitle
+            if (titleEl) {
+                titleEl.textContent = isPastDue ? 'Past Due Covenants by Region' : 'Coming Due Covenants by Region';
+            }
+            if (subtitleEl) {
+                subtitleEl.textContent = isPastDue ? 'Regional breakdown of past due covenants' : 'Regional breakdown of covenants due in 30 days';
+            }
+            
+            // Update table headers
+            if (headerEl) {
+                if (isPastDue) {
+                    headerEl.innerHTML = `
+                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider">Region</th>
+                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-right">41-60 Days</th>
+                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-right">61-90 Days</th>
+                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-right">&gt;90 Days</th>
+                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-right">Total</th>
+                    `;
+                } else {
+                    headerEl.innerHTML = `
+                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider">Region</th>
+                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-right">Coming Due (30 Days)</th>
+                    `;
+                }
+            }
+            
+            // Calculate regional distribution
+            const dataSource = covenantsData.length > 0 ? covenantsData : portfolioData;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const regions = ['APAC', 'EMEA', 'NAM', 'LATAM'];
+            const regionalData = {};
+            
+            regions.forEach(region => {
+                regionalData[region] = {
+                    '41-60': 0,
+                    '61-90': 0,
+                    '>90': 0,
+                    'comingDue': 0
+                };
+            });
+            
+            const processedCovenants = new Set();
+            
+            dataSource.forEach(row => {
+                const covenantNumber = String(row.Covenant_Number || "").trim();
+                const status = String(row['Coming_Due/Past_Due'] || row.Coming_Due_Past_Due || "").trim().toLowerCase();
+                const region = String(row.Region || "").trim().toUpperCase();
+                const daysPastDue = parseInt(row.Days_Past_Due || 0);
+                const pastDueCategory = String(row.Past_Due_Category || "").trim();
+                const covenantDueDate = parseDate(row.Covenant_Due_Date);
+                
+                if (!covenantNumber || processedCovenants.has(covenantNumber)) return;
+                if (!regions.includes(region)) return;
+                
+                // Apply region filter if active
+                if (selectedRegion !== 'all' && region !== selectedRegion.toUpperCase()) return;
+                
+                processedCovenants.add(covenantNumber);
+                
+                if (isPastDue) {
+                    // For Past Due view
+                    if (status.includes('past due') || status === 'past due') {
+                        if (pastDueCategory) {
+                            if (pastDueCategory.includes('>90') || pastDueCategory.includes('90+')) {
+                                regionalData[region]['>90']++;
+                            } else if (pastDueCategory.includes('61') || pastDueCategory.includes('61-90')) {
+                                regionalData[region]['61-90']++;
+                            } else if (pastDueCategory.includes('41') || pastDueCategory.includes('46')) {
+                                regionalData[region]['41-60']++;
+                            }
+                        } else if (daysPastDue > 0) {
+                            if (daysPastDue > 90) {
+                                regionalData[region]['>90']++;
+                            } else if (daysPastDue >= 61) {
+                                regionalData[region]['61-90']++;
+                            } else if (daysPastDue >= 41) {
+                                regionalData[region]['41-60']++;
+                            }
+                        }
+                    }
+                } else {
+                    // For Coming Due view
+                    if (covenantDueDate && (status.includes('coming due') || status === 'coming due')) {
+                        const daysUntilDue = Math.ceil((covenantDueDate - today) / (1000 * 60 * 60 * 24));
+                        if (daysUntilDue >= 0 && daysUntilDue <= 30) {
+                            regionalData[region]['comingDue']++;
+                        }
+                    }
+                }
+            });
+            
+            // Build table rows
+            let html = '';
+            let total4160 = 0;
+            let total6190 = 0;
+            let totalOver90 = 0;
+            let totalComingDue = 0;
+            
+            regions.forEach(region => {
+                if (isPastDue) {
+                    const count4160 = regionalData[region]['41-60'];
+                    const count6190 = regionalData[region]['61-90'];
+                    const countOver90 = regionalData[region]['>90'];
+                    const regionTotal = count4160 + count6190 + countOver90;
+                    total4160 += count4160;
+                    total6190 += count6190;
+                    totalOver90 += countOver90;
+                    
+                    html += `
+                        <tr>
+                            <td class="px-5 py-4 text-sm font-medium text-gray-700">${region}</td>
+                            <td class="px-5 py-4 text-sm text-gray-700 text-right font-semibold">${count4160}</td>
+                            <td class="px-5 py-4 text-sm text-gray-700 text-right font-semibold">${count6190}</td>
+                            <td class="px-5 py-4 text-sm text-gray-700 text-right font-semibold">${countOver90}</td>
+                            <td class="px-5 py-4 text-sm text-gray-900 text-right font-bold">${regionTotal}</td>
+                        </tr>
+                    `;
+                } else {
+                    const count = regionalData[region]['comingDue'];
+                    totalComingDue += count;
+                    
+                    html += `
+                        <tr>
+                            <td class="px-5 py-4 text-sm font-medium text-gray-700">${region}</td>
+                            <td class="px-5 py-4 text-sm text-gray-700 text-right font-semibold">${count}</td>
+                        </tr>
+                    `;
+                }
+            });
+            
+            // Add total row
+            if (isPastDue) {
+                const grandTotal = total4160 + total6190 + totalOver90;
+                html += `
+                    <tr class="bg-gray-50 font-bold">
+                        <td class="px-5 py-4 text-sm text-gray-900">Total</td>
+                        <td class="px-5 py-4 text-sm text-gray-900 text-right">${total4160}</td>
+                        <td class="px-5 py-4 text-sm text-gray-900 text-right">${total6190}</td>
+                        <td class="px-5 py-4 text-sm text-gray-900 text-right">${totalOver90}</td>
+                        <td class="px-5 py-4 text-sm text-gray-900 text-right">${grandTotal}</td>
+                    </tr>
+                `;
+            } else {
+                html += `
+                    <tr class="bg-gray-50 font-bold">
+                        <td class="px-5 py-4 text-sm text-gray-900">Total</td>
+                        <td class="px-5 py-4 text-sm text-gray-900 text-right">${totalComingDue}</td>
+                    </tr>
+                `;
+            }
+            
+            tableBody.innerHTML = html;
+            
+            // Store regional data globally for the stacked bar chart
+            window.covenantRegionalData = regionalData;
+        }
+
+        // Create the CCM regional stacked bar chart
+        let ccmRegionalChartInstance = null;
+        
+        function createCCMRegionalChart() {
+            console.log('Creating CCM regional stacked bar chart');
+            
+            const chartElement = document.getElementById("ccmRegionalChart");
+            if (!chartElement) {
+                console.error('Chart element "ccmRegionalChart" not found');
+                return;
+            }
+            
+            const regions = ['APAC', 'EMEA', 'NAM', 'LATAM'];
+            
+            // Prepare series data from currentCCMData
+            const series = [
+                {
+                    name: "Past Due",
+                    data: regions.map(region => currentCCMData.pastDue[region.toLowerCase()] || 0)
+                },
+                {
+                    name: "Coming Due",
+                    data: regions.map(region => currentCCMData.comingDue[region.toLowerCase()] || 0)
+                },
+                {
+                    name: "Open",
+                    data: regions.map(region => currentCCMData.open[region.toLowerCase()] || 0)
+                }
+            ];
+            
+            const options = {
+                series: series,
+                colors: ["#2a31d8", "#465fff", "#7592ff"],
+                chart: {
+                    fontFamily: "Outfit, sans-serif",
+                    type: "bar",
+                    stacked: true,
+                    height: "100%",
+                    toolbar: {
+                        show: false,
+                    },
+                    zoom: {
+                        enabled: false,
+                    },
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: false,
+                        columnWidth: "39%",
+                        borderRadius: 10,
+                        borderRadiusApplication: "end",
+                        borderRadiusWhenStacked: "last",
+                    },
+                },
+                dataLabels: {
+                    enabled: true,
+                    formatter: function (val) {
+                        return val > 0 ? val : '';
+                    },
+                    style: {
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        colors: ['#fff']
+                    },
+                    dropShadow: {
+                        enabled: false
+                    }
+                },
+                xaxis: {
+                    categories: regions,
+                    axisBorder: {
+                        show: false,
+                    },
+                    axisTicks: {
+                        show: false,
+                    },
+                    labels: {
+                        style: {
+                            colors: "#6B7280",
+                            fontSize: "12px",
+                            fontFamily: "Outfit, sans-serif",
+                        },
+                    },
+                },
+                legend: {
+                    show: true,
+                    position: "top",
+                    horizontalAlign: "left",
+                    fontFamily: "Outfit, sans-serif",
+                    fontSize: "12px",
+                    markers: {
+                        size: 5,
+                        shape: "circle",
+                        radius: 999,
+                        strokeWidth: 0,
+                    },
+                    itemMargin: {
+                        horizontal: 10,
+                        vertical: 0,
+                    },
+                },
+                yaxis: {
+                    title: false,
+                    labels: {
+                        style: {
+                            colors: "#6B7280",
+                            fontSize: "12px",
+                            fontFamily: "Outfit, sans-serif",
+                        },
+                    },
+                },
+                grid: {
+                    yaxis: {
+                        lines: {
+                            show: true,
+                        },
+                    },
+                },
+                fill: {
+                    opacity: 1,
+                },
+                tooltip: {
+                    theme: "light",
+                    style: {
+                        fontSize: "12px",
+                        fontFamily: "Outfit, sans-serif",
+                    },
+                    x: {
+                        show: false,
+                    },
+                    y: {
+                        formatter: function (val) {
+                            return val + " CCMs";
+                        },
+                    },
+                },
+            };
+            
+            // Destroy existing chart if it exists
+            if (ccmRegionalChartInstance) {
+                ccmRegionalChartInstance.destroy();
+            }
+            
+            chartElement.innerHTML = "";
+            ccmRegionalChartInstance = new ApexCharts(chartElement, options);
+            ccmRegionalChartInstance.render();
+            console.log('CCM regional stacked chart rendered successfully');
         }
 
         // Make it globally accessible for Alpine.js
         window.updateCovenantChart = updateCovenantChart;
+
+        // CCM (Credit Committee Memos) Functions
+        let currentCCMData = {
+            pastDue: { apac: 0, emea: 0, nam: 0, latam: 0 },
+            comingDue: { apac: 0, emea: 0, nam: 0, latam: 0 },
+            open: { apac: 0, emea: 0, nam: 0, latam: 0 }
+        };
+
+        // Calculate CCM stats by region and status
+        function calculateCCMStats() {
+            console.log('📊 Calculating CCM Stats');
+            
+            if (!ccmData || ccmData.length === 0) {
+                console.warn('No CCM data available');
+                return;
+            }
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Get current month range
+            const currentMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+            const currentMonthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            currentMonthEnd.setHours(23, 59, 59, 999);
+
+            // Initialize counters
+            const stats = {
+                pastDue: { APAC: 0, EMEA: 0, NAM: 0, LATAM: 0 },
+                comingDue: { APAC: 0, EMEA: 0, NAM: 0, LATAM: 0 },
+                open: { APAC: 0, EMEA: 0, NAM: 0, LATAM: 0 }
+            };
+
+            ccmData.forEach(row => {
+                const region = String(row.Region || "").trim().toUpperCase();
+                const ccmDueDate = parseDate(row.CCM_Due_Date);
+                
+                if (!ccmDueDate || !region) return;
+                
+                // Ensure region is valid
+                if (!['APAC', 'EMEA', 'NAM', 'LATAM'].includes(region)) return;
+                
+                // Apply region filter if active
+                if (selectedRegion !== 'all' && region !== selectedRegion.toUpperCase()) return;
+
+                // Categorize based on CCM_Due_Date
+                if (ccmDueDate < today) {
+                    // Past Due: CCM_Due_Date is before today
+                    stats.pastDue[region]++;
+                } else if (ccmDueDate >= currentMonthStart && ccmDueDate <= currentMonthEnd) {
+                    // Coming Due: CCM_Due_Date is within current month
+                    stats.comingDue[region]++;
+                } else if (ccmDueDate > currentMonthEnd) {
+                    // Open: CCM_Due_Date is in future but not in current month
+                    stats.open[region]++;
+                }
+            });
+
+            // Convert to lowercase for consistency
+            currentCCMData = {
+                pastDue: {
+                    apac: stats.pastDue.APAC,
+                    emea: stats.pastDue.EMEA,
+                    nam: stats.pastDue.NAM,
+                    latam: stats.pastDue.LATAM
+                },
+                comingDue: {
+                    apac: stats.comingDue.APAC,
+                    emea: stats.comingDue.EMEA,
+                    nam: stats.comingDue.NAM,
+                    latam: stats.comingDue.LATAM
+                },
+                open: {
+                    apac: stats.open.APAC,
+                    emea: stats.open.EMEA,
+                    nam: stats.open.NAM,
+                    latam: stats.open.LATAM
+                }
+            };
+
+            console.log('CCM Stats calculated:', currentCCMData);
+        }
+
+        // Update CCM display based on selected filter
+        function updateCCMStats(filter) {
+            console.log('Updating CCM stats for filter:', filter);
+            
+            // Update the CCM chart
+            createCCMRegionalChart();
+        }
+
+        // Make updateCCMStats globally accessible
+        window.updateCCMStats = updateCCMStats;
 
         // Parse number that might be formatted (e.g., "5.5M", "1.2K", "1,000,000")
         function parseNumber(value) {
@@ -7528,6 +8184,602 @@
                 console.error("❌ Error creating relationship chart:", error);
                 console.error("Error details:", error.message, error.stack);
             }
+        }
+
+        // Create relationship bar chart for Balances tab (duplicate of createRelationshipChart)
+        function createRelationshipChartBalances() {
+            const startTime = performance.now();
+            const topN = parseInt(document.getElementById("topNFilterBalances").value);
+            
+            // Use amount type based on filter selection
+            let fieldName, seriesName;
+            switch (selectedAmountType) {
+                case "direct":
+                    fieldName = "Direct_OS";
+                    seriesName = "Direct OS";
+                    break;
+                case "contingent":
+                    fieldName = "Contingent_OS";
+                    seriesName = "Contingent OS";
+                    break;
+                case "pse":
+                    fieldName = "PSE_OS";
+                    seriesName = "PSE OS";
+                    break;
+                case "osuc":
+                    fieldName = "OSUC";
+                    seriesName = "OSUC";
+                    break;
+                case "unused":
+                    fieldName = "Unused_Committed";
+                    seriesName = "Undrawn Commitment";
+                    break;
+                case "tfa":
+                    fieldName = "Fac_Amount";
+                    seriesName = "Total Facility Amount";
+                    break;
+                default:
+                    fieldName = "Direct_OS";
+                    seriesName = "Direct OS";
+            }
+
+            console.log(
+                "Creating relationship chart (Balances), field:",
+                fieldName,
+                "dataLength:",
+                portfolioData.length
+            );
+            
+            // Use Map for better performance - store all exposure types
+            const relationshipData = new Map();
+            
+            for (let i = 0; i < portfolioData.length; i++) {
+                const row = portfolioData[i];
+                const relId = row.Relationship_Name || row.Relationship_ID;
+                
+                if (relId) {
+                    if (!relationshipData.has(relId)) {
+                        relationshipData.set(relId, {
+                            tfa: 0,
+                            direct: 0,
+                            contingent: 0,
+                            pse: 0,
+                            osuc: 0,
+                            unused: 0,
+                            facilityCount: 0,
+                        });
+                    }
+                    
+                    const data = relationshipData.get(relId);
+                    data.tfa += parseNumber(row.Fac_Amount || row.Facility_Amount);
+                    data.direct += parseNumber(row.Direct_OS);
+                    data.contingent += parseNumber(row.Contingent_OS);
+                    data.pse += parseNumber(row.PSE_OS);
+                    data.osuc += parseNumber(row.OSUC);
+                    data.unused += parseNumber(row.Unused_Committed);
+                    if (row.Facility_ID) data.facilityCount++;
+                }
+            }
+            
+            console.log("Total unique relationships:", relationshipData.size);
+            
+            // Get the selected field value for sorting
+            const relationshipTotals = new Map();
+            for (const [relId, data] of relationshipData.entries()) {
+                let sortValue = 0;
+                switch (selectedAmountType) {
+                    case "tfa":
+                        sortValue = data.tfa;
+                        break;
+                    case "direct":
+                        sortValue = data.direct;
+                        break;
+                    case "contingent":
+                        sortValue = data.contingent;
+                        break;
+                    case "pse":
+                        sortValue = data.pse;
+                        break;
+                    case "osuc":
+                        sortValue = data.osuc;
+                        break;
+                    case "unused":
+                        sortValue = data.unused;
+                        break;
+                    default:
+                        sortValue = data.direct;
+                }
+                relationshipTotals.set(relId, sortValue);
+            }
+            
+            // Convert to array and sort (only what we need)
+            const sorted = Array.from(relationshipTotals.entries())
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, topN);
+            
+            console.log(
+                `Chart aggregated ${portfolioData.length} rows, found ${relationshipTotals.size
+                } relationships in ${(performance.now() - startTime).toFixed(2)}ms`
+            );
+            
+            // Add index numbers (1, 2, 3, ...) before relationship names
+            const relationships = sorted.map(
+                (item, index) => `${index + 1}. ${item[0]}`
+            );
+            const amounts = sorted.map((item) => item[1]);
+            
+            // Handle empty data
+            if (relationships.length === 0) {
+                console.warn("No relationship data for chart");
+                return;
+            }
+
+            // Check if all amounts are zero
+            const totalAmount = amounts.reduce((sum, val) => sum + val, 0);
+            if (totalAmount === 0) {
+                console.warn("⚠️ All amounts are zero for selectedAmountType:", selectedAmountType);
+                const chartElement = document.querySelector("#relationshipChartBalances");
+                if (chartElement) {
+                    chartElement.innerHTML = `<div class="flex items-center justify-center h-64 text-gray-500">No ${seriesName} data available</div>`;
+                }
+                return;
+            }
+
+            // Calculate dynamic height based on number of relationships (35px per bar, min 350px)
+            const calculatedHeight = Math.max(350, relationships.length * 35);
+            
+            const options = {
+                series: [
+                    {
+                    name: seriesName,
+                        data: amounts,
+                    },
+                ],
+                colors: ["#465fff"],
+                chart: {
+                    fontFamily: "Outfit, sans-serif",
+                    type: "bar",
+                    height: calculatedHeight,
+                    toolbar: {
+                        show: false,
+                    },
+                    events: {
+                        dataPointSelection: function (event, chartContext, config) {
+                            const selectedIndex = config.dataPointIndex;
+                            const selectedRelationship = relationships[selectedIndex];
+                            console.log("Relationship clicked:", selectedRelationship);
+                            applyChartFilter(
+                                "relationship",
+                                selectedRelationship,
+                                selectedRelationship
+                            );
+                        },
+                    },
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: true,
+                        borderRadius: 5,
+                        borderRadiusApplication: "end",
+                    },
+                },
+                dataLabels: {
+                    enabled: false,
+                },
+                stroke: {
+                    show: true,
+                    width: 4,
+                    colors: ["transparent"],
+                },
+                xaxis: {
+                    categories: relationships,
+                    labels: {
+                        formatter: function (val) {
+                            return formatCurrency(val);
+                        },
+                        style: {
+                            colors: "#6B7280",
+                            fontSize: "12px",
+                            fontFamily: "Outfit, sans-serif",
+                        },
+                    },
+                    axisBorder: {
+                        show: false,
+                    },
+                    axisTicks: {
+                        show: false,
+                    },
+                },
+                yaxis: {
+                    title: false,
+                    labels: {
+                        style: {
+                            colors: "#6B7280",
+                            fontSize: "12px",
+                            fontFamily: "Outfit, sans-serif",
+                        },
+                    },
+                },
+                legend: {
+                    show: true,
+                    position: "top",
+                    horizontalAlign: "left",
+                    fontFamily: "Outfit, sans-serif",
+                    fontSize: "12px",
+                    markers: {
+                        radius: 99,
+                    },
+                },
+                grid: {
+                    yaxis: {
+                        lines: {
+                            show: false,
+                        },
+                    },
+                },
+                fill: {
+                    opacity: 1,
+                },
+                tooltip: {
+                    theme: "light",
+                    custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                        const relName = sorted[dataPointIndex][0]; // Get original name without index
+                        const data = relationshipData.get(relName);
+                        
+                        if (!data) return "";
+                        
+                        let html = `<div class="apexcharts-tooltip-custom" style="padding: 12px; min-width: 220px; background: #ffffff; color: #1f2937; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border: 1px solid #e5e7eb;">`;
+                        html += `<div style="font-weight: 600; margin-bottom: 8px; font-size: 13px; color: #1f2937;">${relName}</div>`;
+                        html += `<div style="font-size: 11px; color: #666;">`;
+                        html += `<div style="margin-bottom: 4px;"><strong>${data.facilityCount}</strong> Facilities</div>`;
+                        html += `<div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #e5e7eb;">`;
+                        html += `<div>TFA: ${formatCurrency(data.tfa)}</div>`;
+                        html += `<div>Direct: ${formatCurrency(data.direct)}</div>`;
+                        if (data.contingent > 0) {
+                            html += `<div>Contingent: ${formatCurrency(
+                                data.contingent
+                            )}</div>`;
+                        }
+                        if (data.pse > 0) {
+                            html += `<div>Presettlement Exposure: ${formatCurrency(
+                                data.pse
+                            )}</div>`;
+                        }
+                        html += `</div></div></div>`;
+                        return html;
+                    },
+                },
+            };
+
+            // Get the chart element and verify it exists
+                const chartElement = document.querySelector("#relationshipChartBalances");
+                if (!chartElement) {
+                console.error(
+                    "Relationship chart element #relationshipChartBalances not found in DOM"
+                );
+                    return;
+                }
+                
+            // Verify ApexCharts is loaded
+            if (typeof ApexCharts === "undefined") {
+                console.error("ApexCharts library not loaded");
+                return;
+            }
+            
+            try {
+                // Destroy previous instance
+                if (relationshipChartInstanceBalances) {
+                    relationshipChartInstanceBalances.destroy();
+                    relationshipChartInstanceBalances = null;
+                }
+                
+                // Clear any previous content to avoid ApexCharts errors
+                chartElement.innerHTML = "";
+                
+                // Create and render new chart
+                relationshipChartInstanceBalances = new ApexCharts(chartElement, options);
+                relationshipChartInstanceBalances.render();
+                console.log(
+                    "✅ Relationship chart (Balances) rendered successfully with",
+                    relationships.length,
+                    "relationships"
+                );
+            } catch (error) {
+                console.error("❌ Error creating relationship chart (Balances):", error);
+                console.error("Error details:", error.message, error.stack);
+            }
+        }
+
+        // Update bar chart for Balances tab
+        function updateBarChartBalances() {
+            console.log("🔄 Updating bar charts (Balances tab)");
+            createRelationshipChartBalances();
+            createROTCEChartBalances();
+        }
+
+        // Create ROTCE chart for Balances tab (duplicate of createROTCEChart)
+        function createROTCEChartBalances() {
+            console.log("📊 Creating ROTCE Performance chart (Balances)");
+            
+            // Get Top N from Top Relationships filter
+            const topNRelationships = parseInt(
+                document.getElementById("topNFilterBalances").value
+            );
+            
+            // Group ROTCE by relationship
+            const rotceByRelationship = new Map();
+            const rotceValues = [];
+            
+            portfolioData.forEach((row) => {
+                const relName = row.Relationship_Name || row.Relationship_ID;
+                const rotce = parsePercentage(row.ROTCE);
+                
+                if (relName && !isNaN(rotce)) {
+                    if (!rotceByRelationship.has(relName)) {
+                        rotceByRelationship.set(relName, []);
+                    }
+                    rotceByRelationship.get(relName).push(rotce);
+                    rotceValues.push(rotce);
+                }
+            });
+            
+            // Calculate average ROTCE per relationship
+            const relationshipROTCE = [];
+            rotceByRelationship.forEach((values, relName) => {
+                const average =
+                    values.reduce((sum, val) => sum + val, 0) / values.length;
+                relationshipROTCE.push({ name: relName, rotce: average });
+            });
+            
+            // Sort by selected amount type from Top Relationships chart to get same top N
+            // Get Top Relationships to match their order
+            const relationshipData = new Map();
+            for (const row of portfolioData) {
+                const relId = row.Relationship_Name || row.Relationship_ID;
+                if (!relId) continue;
+                
+                if (!relationshipData.has(relId)) {
+                    relationshipData.set(relId, {
+                        tfa: 0,
+                        direct: 0,
+                        contingent: 0,
+                        pse: 0,
+                        osuc: 0,
+                        unused: 0,
+                    });
+                }
+                const data = relationshipData.get(relId);
+                data.tfa += parseNumber(row.Fac_Amount || row.Facility_Amount);
+                data.direct += parseNumber(row.Direct_OS);
+                data.contingent += parseNumber(row.Contingent_OS);
+                data.pse += parseNumber(row.PSE_OS);
+                data.osuc += parseNumber(row.OSUC);
+                data.unused += parseNumber(row.Unused_Committed);
+            }
+
+            // Get the selected field value for sorting (sync with Top Relationships chart)
+            const relationshipTotals = new Map();
+            for (const [relId, data] of relationshipData.entries()) {
+                let sortValue = 0;
+                switch (selectedAmountType) {
+                    case "tfa":
+                        sortValue = data.tfa;
+                        break;
+                    case "direct":
+                        sortValue = data.direct;
+                        break;
+                    case "contingent":
+                        sortValue = data.contingent;
+                        break;
+                    case "pse":
+                        sortValue = data.pse;
+                        break;
+                    case "osuc":
+                        sortValue = data.osuc;
+                        break;
+                    case "unused":
+                        sortValue = data.unused;
+                        break;
+                    default:
+                        sortValue = data.direct;
+                }
+                relationshipTotals.set(relId, sortValue);
+            }
+
+            // Get top N relationships by selected exposure type (matching Top Relationships chart)
+            const topRelationships = Array.from(relationshipTotals.entries())
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, topNRelationships)
+                .map((entry) => entry[0]);
+            
+            // Check if we have any relationships with non-zero values
+            const hasValidRelationships = Array.from(relationshipTotals.entries())
+                .some(([relId, value]) => value > 0);
+
+            // Update subtitle
+            const subtitleEl = document.getElementById("rotceSubtitleBalances");
+            if (subtitleEl) {
+                subtitleEl.textContent = `Top ${topNRelationships} relationships ROTCE performance`;
+            }
+
+            // If no valid relationships in Top Relationships chart, don't show ROTCE
+            if (!hasValidRelationships || topRelationships.length === 0 || relationshipTotals.size === 0) {
+                console.log("⚠️ No relationships data available - skipping ROTCE chart (Balances)");
+                const chartElement = document.querySelector("#rotceChartBalances");
+                if (chartElement) {
+                    chartElement.innerHTML =
+                        '<div class="flex items-center justify-center h-full text-gray-500">No data available</div>';
+                }
+                return;
+            }
+            
+            // Filter and order ROTCE data to match top relationships
+            const filteredROTCE = topRelationships
+                .map((relName) => relationshipROTCE.find((r) => r.name === relName))
+                .filter((r) => r !== undefined);
+
+            // Add index numbers (1, 2, 3, ...) to match Top Relationships chart
+            const relationships = filteredROTCE.map(
+                (r, index) => `${index + 1}. ${r.name}`
+            );
+            const avgROTCE = filteredROTCE.map((r) => r.rotce);
+
+            // Check if all ROTCE values are zero or NaN
+            const validROTCE = avgROTCE.filter(v => !isNaN(v) && v !== 0);
+            if (validROTCE.length === 0) {
+                console.warn("⚠️ No valid ROTCE data for the selected relationships (Balances)");
+                const chartElement = document.querySelector("#rotceChartBalances");
+                if (chartElement) {
+                    chartElement.innerHTML =
+                        '<div class="flex items-center justify-center h-full text-gray-500">No ROTCE data available for these relationships</div>';
+                }
+                return;
+            }
+            
+            // Conditional colors: red if < 12%, green if >= 12%
+            const barColors = avgROTCE.map((rotce) =>
+                rotce < 12 ? "#ef4444" : "#10b981"
+            );
+            
+            // Calculate dynamic height
+            const calculatedHeight = Math.max(350, relationships.length * 35);
+            
+            // Create horizontal bar chart
+            const chartOptions = {
+                series: [
+                    {
+                        name: "Average ROTCE",
+                        data: avgROTCE,
+                    },
+                ],
+                chart: {
+                    type: "bar",
+                    height: calculatedHeight,
+                    toolbar: { show: false },
+                    fontFamily: "Outfit, sans-serif",
+                },
+                colors: barColors,
+                plotOptions: {
+                    bar: {
+                        horizontal: true,
+                        columnWidth: "70%",
+                        borderRadius: 4,
+                        distributed: true, // Enable individual bar colors
+                        dataLabels: {
+                            position: "center",
+                        },
+                    },
+                },
+                dataLabels: {
+                    enabled: true,
+                    formatter: function (val) {
+                        return val.toFixed(1) + "%";
+                    },
+                    style: {
+                        fontSize: "12px",
+                        fontFamily: "Outfit, sans-serif",
+                        colors: ["#fff"],
+                        fontWeight: "bold",
+                    },
+                },
+                annotations: {
+                    xaxis: [
+                        {
+                        x: 12,
+                            borderColor: "#f59e0b",
+                        strokeDashArray: 8,
+                        label: {
+                                borderColor: "#f59e0b",
+                            style: {
+                                    color: "#fff",
+                                    background: "#f59e0b",
+                                    fontSize: "12px",
+                                    fontFamily: "Outfit, sans-serif",
+                                    fontWeight: "bold",
+                                },
+                                text: "Target: 12%",
+                            },
+                        },
+                    ],
+                },
+                xaxis: {
+                    categories: relationships,
+                    title: {
+                        text: "ROTCE (%)",
+                        style: {
+                            color: "#6B7280",
+                            fontSize: "12px",
+                            fontFamily: "Outfit, sans-serif",
+                        },
+                    },
+                    labels: {
+                        formatter: function (val) {
+                            return val.toFixed(0) + "%";
+                        },
+                        style: {
+                            colors: "#6B7280",
+                            fontSize: "12px",
+                            fontFamily: "Outfit, sans-serif",
+                        },
+                    },
+                },
+                yaxis: {
+                    labels: {
+                        style: {
+                            colors: relationships.map(() => "#6B7280"),
+                            fontSize: "12px",
+                            fontFamily: "Outfit, sans-serif",
+                        },
+                        maxWidth: 200,
+                    },
+                },
+                grid: {
+                    borderColor: "#E5E7EB",
+                    xaxis: { lines: { show: true } },
+                    yaxis: { lines: { show: false } },
+                },
+                legend: {
+                    show: false,
+                },
+                tooltip: {
+                    theme: "light",
+                    style: {
+                        fontSize: "12px",
+                        fontFamily: "Outfit, sans-serif",
+                    },
+                    y: {
+                        formatter: function (val) {
+                            const color = val < 12 ? "Below target" : "Above target";
+                            return val.toFixed(2) + "% - " + color;
+                        },
+                    },
+                },
+            };
+
+            // Destroy existing chart instance properly
+            if (rotceChartInstanceBalances) {
+                try {
+                    rotceChartInstanceBalances.destroy();
+                } catch (e) {
+                    console.log("Error destroying ROTCE chart (Balances):", e);
+                }
+                rotceChartInstanceBalances = null;
+            }
+            
+            const chartElement = document.querySelector("#rotceChartBalances");
+            if (chartElement) {
+                chartElement.innerHTML = "";
+            }
+
+            if (relationships.length === 0) {
+                chartElement.innerHTML =
+                    '<div class="flex items-center justify-center h-full text-gray-500">No ROTCE data available</div>';
+                return;
+            }
+
+            // Create and store the chart instance
+            rotceChartInstanceBalances = new ApexCharts(chartElement, chartOptions);
+            rotceChartInstanceBalances.render();
         }
 
         // Helper function to check if any filters are active
@@ -9063,6 +10315,18 @@
                     chartName = "Covenant Monitoring";
                     data = getCovenantMonitoringData();
                     break;
+                case "covenantRegional":
+                    chartName = "Past Due Covenants by Region";
+                    data = covenantsData.length > 0 ? covenantsData : portfolioData;
+                    break;
+                case "ccmRegionalChart":
+                    chartName = "Criticized/Classified Memos & Reviews";
+                    data = ccmData.length > 0 ? ccmData : [];
+                    break;
+                case "ccmStats":
+                    chartName = "Credit Committee Memos";
+                    data = ccmData.length > 0 ? ccmData : [];
+                    break;
                 default:
                     data = filteredData.length > 0 ? filteredData : portfolioData;
             }
@@ -10040,11 +11304,11 @@
                                     <h5 class="font-semibold text-gray-900">Aggregated Risk Categories (Display Buckets):</h5>
                                 </div>
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
-                                    <li><strong class="text-red-700">>90 Days (Critical):</strong> Severe breach - immediate MD action required</li>
+                                    <li><strong class="text-red-700">>90 Days (Critical):</strong> Severe breach - immediate action required</li>
                                     <li><strong class="text-orange-600">46-90 Days (High):</strong> Escalated risk - urgent follow-up and remediation needed</li>
                                     <li><strong class="text-yellow-600">1-45 Days (Moderate):</strong> Recent past due - combines 1-30 and 31-45 day buckets from source file for consolidated view</li>
                                 </ul>
-                                <p class="text-sm text-gray-500 italic mt-2">Note: The source file (Covenants_tw.xlsx) contains more granular buckets (1-30, 31-45, 46-90, >90), which are aggregated here into 3 display buckets for clearer MD-level reporting.</p>
+                                <p class="text-sm text-gray-500 italic mt-2">Note: The source file (Covenants_tw.xlsx) contains more granular buckets (1-30, 31-45, 46-90, >90), which are aggregated here into 3 display buckets for clearer reporting.</p>
                             </div>
                             
                             <div>
@@ -10069,7 +11333,7 @@
                                     <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                                     </svg>
-                                    <h5 class="font-semibold text-gray-900">MD Decision Support:</h5>
+                                    <h5 class="font-semibold text-gray-900">Decision Support:</h5>
                                 </div>
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
                                     <li><strong>Covenant Count:</strong> Number of covenants requiring attention in each status</li>
@@ -10098,11 +11362,223 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                                     </svg>
                                     <div>
-                                        <p class="font-semibold text-red-900 text-sm">Critical Alert for MDs:</p>
+                                        <p class="font-semibold text-red-900 text-sm">Critical Alert:</p>
                                         <p class="text-red-800 text-sm">Any Past Due covenants in the ">90 days" category represent critical covenant breaches requiring immediate attention. These may trigger cross-default provisions, require formal waivers, or necessitate credit committee review. High TFA exposure in Past Due status indicates elevated portfolio risk.</p>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    `,
+                },
+                covenantRegional: {
+                    title: "Past Due Covenants by Region - Methodology",
+                    content: `
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                    </svg>
+                                    <h5 class="font-semibold text-gray-900">What This Table Shows:</h5>
+                                </div>
+                                <p class="text-gray-600">Regional breakdown of past due covenants across time buckets (41-60 Days, 61-90 Days, >90 Days) and coming due covenants (next 30 days). Dynamically updates based on the Past Due/Coming Due toggle selection.</p>
+                            </div>
+                            
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <h5 class="font-semibold text-gray-900">Calculation Logic:</h5>
+                                </div>
+                                <ul class="list-disc list-inside space-y-1 text-gray-600">
+                                    <li><strong>Data Source:</strong> Covenants_tw.xlsx file</li>
+                                    <li><strong>Past Due View:</strong>
+                                        <ul class="list-circle list-inside ml-6 mt-1">
+                                            <li>41-60 Days: Covenants past due for 41-60 days</li>
+                                            <li>61-90 Days: Covenants past due for 61-90 days</li>
+                                            <li>>90 Days: Covenants past due for more than 90 days</li>
+                                            <li>Total: Sum of all three categories per region</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Coming Due View:</strong>
+                                        <ul class="list-circle list-inside ml-6 mt-1">
+                                            <li>Shows only covenants due within the next 30 days</li>
+                                            <li>Calculated from Covenant_Due_Date field</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Regional Grouping:</strong> APAC, EMEA, NAM, LATAM</li>
+                                    <li><strong>Grand Total Row:</strong> Sum of all regions for each time bucket and overall total</li>
+                                </ul>
+                            </div>
+                            
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <h5 class="font-semibold text-gray-900">Key Columns Used:</h5>
+                                </div>
+                                <ul class="list-disc list-inside space-y-1 text-gray-600">
+                                    <li><code class="bg-gray-100 px-1 rounded">Region</code> - Geographic region classification</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Coming_Due/Past_Due</code> - Status indicator</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Past_Due_Category</code> - Time bucket classification</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Days_Past_Due</code> - Number of days overdue</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Covenant_Due_Date</code> - Deadline for compliance</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Covenant_Number</code> - Unique covenant identifier</li>
+                                </ul>
+                            </div>
+                            
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <h5 class="font-semibold text-gray-900">Business Insights:</h5>
+                                </div>
+                                <ul class="list-disc list-inside space-y-1 text-gray-600">
+                                    <li><strong>Regional Risk Concentration:</strong> Identify which regions have the highest past due counts</li>
+                                    <li><strong>Aging Analysis:</strong> Compare severity across regions (>90 days is most critical)</li>
+                                    <li><strong>Proactive Management:</strong> Coming Due view helps prioritize upcoming compliance requirements</li>
+                                    <li><strong>Resource Allocation:</strong> Direct compliance resources to regions with highest concentrations</li>
+                                    <li><strong>Total Column:</strong> Shows overall regional exposure regardless of aging bucket</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
+                                <div class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div>
+                                        <p class="font-semibold text-blue-900 text-sm">Dynamic View Toggle:</p>
+                                        <p class="text-blue-800 text-sm">This table updates dynamically when you toggle between Past Due and Coming Due views. The header columns and data adjust automatically to show the relevant time buckets or coming due period.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `,
+                },
+                ccmRegionalChart: {
+                    title: "Criticized/Classified Memos & Reviews - Methodology",
+                    content: `
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                    </svg>
+                                    <h5 class="font-semibold text-gray-900">What This Chart Shows:</h5>
+                                </div>
+                                <p class="text-gray-600">Regional distribution of Credit Committee Memos (CCMs) by status: Past Due, Coming Due, and Open. Displays the count of CCMs across APAC, EMEA, NAM, and LATAM regions in a stacked bar chart format.</p>
+                            </div>
+                            
+                            <div class="bg-indigo-50 border-l-4 border-indigo-500 p-3 rounded">
+                                <div class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-indigo-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
+                                    </svg>
+                                    <div>
+                                        <p class="font-semibold text-indigo-900 text-sm">ETL Process:</p>
+                                        <p class="text-indigo-800 text-sm">Before loading the data, we have an ETL Process that standardizes the regional files into one unified dataset. The ETL filters out records where <code class="bg-indigo-100 px-1 rounded">Credit_Classification</code> equals "Pass" or "Loss", and keeps only records where <code class="bg-indigo-100 px-1 rounded">DM/CM_Flag</code> equals "CM". The process then standardizes the data and creates one consolidated file for this dashboard to consume.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <h5 class="font-semibold text-gray-900">Calculation Logic:</h5>
+                                </div>
+                                <ul class="list-disc list-inside space-y-1 text-gray-600">
+                                    <li><strong>Data Source:</strong> CCM_tw.xlsx file (after ETL processing)</li>
+                                    <li><strong>Past Due:</strong> CCMs where <code class="bg-gray-100 px-1 rounded">CCM_Due_Date</code> is before today's date</li>
+                                    <li><strong>Coming Due:</strong> CCMs where <code class="bg-gray-100 px-1 rounded">CCM_Due_Date</code> falls within the current month</li>
+                                    <li><strong>Open:</strong> CCMs where <code class="bg-gray-100 px-1 rounded">CCM_Due_Date</code> is in the future but not within the current month</li>
+                                    <li><strong>Regional Grouping:</strong> Aggregated by Region (APAC, EMEA, NAM, LATAM)</li>
+                                    <li><strong>Visual Style:</strong> Vertical stacked bar chart with blue color gradient (Past Due: darkest, Coming Due: medium, Open: lightest)</li>
+                                </ul>
+                            </div>
+                            
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <h5 class="font-semibold text-gray-900">Key Columns Used:</h5>
+                                </div>
+                                <ul class="list-disc list-inside space-y-1 text-gray-600">
+                                    <li><code class="bg-gray-100 px-1 rounded">Report_Date</code> - Current reporting period</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Region</code> - Geographic region (APAC, EMEA, NAM, LATAM)</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Relationship_ID</code> - Unique relationship identifier</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">CAID</code> - Credit Agreement ID</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">DM/CM_Flag</code> - Designates if record is CM (Credit Memo)</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Credit_Classification</code> - Classification status (filtered for non-Pass/Loss)</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">CCM_Due_Date</code> - When the CCM review is due</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">CCM_Final_Approval_Date</code> - When CCM was approved</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Next_CCM_Due_Date</code> - Next scheduled review date</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">CCM_Approver_Name</code> - Who approved the CCM</li>
+                                </ul>
+                            </div>
+                            
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                                    </svg>
+                                    <h5 class="font-semibold text-gray-900">ETL Filters Applied:</h5>
+                                </div>
+                                <ul class="list-disc list-inside space-y-1 text-gray-600">
+                                    <li><strong>Credit_Classification:</strong> Excludes "Pass" and "Loss" classifications</li>
+                                    <li><strong>DM/CM_Flag:</strong> Includes only "CM" (Credit Memo) records</li>
+                                    <li><strong>Data Consolidation:</strong> Multiple regional source files merged into single standardized dataset</li>
+                                    <li><strong>Field Standardization:</strong> Column names and formats normalized across regions</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-3 rounded">
+                                <div class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-yellow-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                    </svg>
+                                    <div>
+                                        <p class="font-semibold text-yellow-900 text-sm">Management Focus:</p>
+                                        <p class="text-yellow-800 text-sm">Monitor CCM completion rates by region. Past Due CCMs indicate delayed credit reviews for criticized/classified relationships. Coming Due shows upcoming review requirements. Open status represents future scheduled reviews to ensure timely monitoring of at-risk exposures.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `,
+                },
+                ccmStats: {
+                    title: "Criticized/Classified Memos & Reviews - Methodology",
+                    content: `
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                    </svg>
+                                    <h5 class="font-semibold text-gray-900">What This Chart Shows:</h5>
+                                </div>
+                                <p class="text-gray-600">Regional distribution of Credit Committee Memos (CCMs) by status: Past Due, Coming Due, and Open. Same data as the stacked bar chart above, providing an alternative view of CCM status across regions.</p>
+                            </div>
+                            
+                            <div class="bg-indigo-50 border-l-4 border-indigo-500 p-3 rounded">
+                                <div class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-indigo-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
+                                    </svg>
+                                    <div>
+                                        <p class="font-semibold text-indigo-900 text-sm">ETL Process:</p>
+                                        <p class="text-indigo-800 text-sm">Before loading the data, we have an ETL Process that standardizes the regional files into one unified dataset. The ETL filters out records where <code class="bg-indigo-100 px-1 rounded">Credit_Classification</code> equals "Pass" or "Loss", and keeps only records where <code class="bg-indigo-100 px-1 rounded">DM/CM_Flag</code> equals "CM". The process then standardizes the data and creates one consolidated file for this dashboard to consume.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <p class="text-gray-600 text-sm italic">For detailed methodology, calculation logic, and column descriptions, please refer to the "Criticized/Classified Memos & Reviews" chart methodology above.</p>
                         </div>
                     `,
                 },

@@ -139,18 +139,25 @@
     <!-- Loading Overlay -->
     <div id="loadingOverlay"
         class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-[10000] flex items-center justify-center hidden">
-        <div class="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4 max-w-sm mx-4">
+        <div class="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-5 max-w-md mx-4">
             <div class="relative">
-                <div class="w-16 h-16 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+                <div class="w-20 h-20 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
             </div>
             <div class="text-center">
-                <h3 class="text-lg font-semibold text-gray-900 mb-1">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2" id="loadingMessage">
                     Loading Portfolio Data
                 </h3>
-                <p class="text-sm text-gray-500" id="loadingMessage">
+                <p class="text-sm text-blue-600 font-medium animate-pulse" id="loadingProgress">
                     Please wait while we fetch your data...
                 </p>
-                <p class="text-xs text-gray-400 mt-2" id="loadingProgress"></p>
+                <p class="text-xs text-gray-400 mt-3">
+                    Large files may take a moment to process
+                </p>
             </div>
         </div>
     </div>
@@ -2751,58 +2758,81 @@
 
         // Load data from Confluence attachment (read-only)
         async function loadDataFromCSV() {
+            const loadStartTime = performance.now();
+            
             showLoadingOverlay(
-                "Fetching data from Confluence...",
-                "Connecting to server..."
+                "Connecting to Confluence...",
+                "Establishing connection..."
             );
             
             try {
-                // Load portfolio data
-                const data = await fetchDataFromConfluence();
+                // Start loading covenant and CCM data in parallel (they're smaller files)
+                showLoadingOverlay(
+                    "Fetching data files...",
+                    "Loading Portfolio, Covenants & CCM data..."
+                );
                 
-                // Load covenant data and CCM data (separate files) in parallel
                 const covenantDataPromise = fetchCovenantsFromConfluence();
                 const ccmDataPromise = fetchCCMFromConfluence();
                 
+                // Load portfolio data (largest file)
+                const data = await fetchDataFromConfluence();
+                
                 if (data && data.length > 0) {
                     portfolioData = data;
-                    console.log(`Loaded ${data.length} records from Confluence`);
+                    console.log(`✅ Loaded ${data.length} portfolio records`);
                     
                     showLoadingOverlay(
-                        "Processing data...",
-                        `Loading ${data.length.toLocaleString()} records...`
+                        "Loading supplementary data...",
+                        `Portfolio: ${data.length.toLocaleString()} records loaded`
                     );
                     
-                    // Load covenant data in parallel
+                    // Wait for covenant data
                     const covenantResult = await covenantDataPromise;
                     if (covenantResult && covenantResult.length > 0) {
                         covenantsData = covenantResult;
-                        console.log(`✅ Loaded ${covenantResult.length} covenant records from ${CONFLUENCE_COVENANTS_FILE}`);
+                        console.log(`✅ Loaded ${covenantResult.length} covenant records`);
                     } else {
-                        console.warn(`⚠️ No covenant data loaded from ${CONFLUENCE_COVENANTS_FILE}. Covenant charts will use portfolio data.`);
-                        covenantsData = []; // Empty array
+                        console.warn(`⚠️ No covenant data loaded from ${CONFLUENCE_COVENANTS_FILE}`);
+                        covenantsData = [];
                     }
                     
-                    // Load CCM data in parallel
+                    showLoadingOverlay(
+                        "Loading CCM data...",
+                        `Covenants: ${covenantsData.length.toLocaleString()} records`
+                    );
+                    
+                    // Wait for CCM data
                     const ccmResult = await ccmDataPromise;
                     if (ccmResult && ccmResult.length > 0) {
                         ccmData = ccmResult;
-                        console.log(`✅ Loaded ${ccmResult.length} CCM records from ${CONFLUENCE_CCM_FILE}`);
+                        console.log(`✅ Loaded ${ccmResult.length} CCM records`);
                     } else {
-                        console.warn(`⚠️ No CCM data loaded from ${CONFLUENCE_CCM_FILE}.`);
-                        ccmData = []; // Empty array
+                        console.warn(`⚠️ No CCM data loaded from ${CONFLUENCE_CCM_FILE}`);
+                        ccmData = [];
                     }
                     
-                    // Use setTimeout to allow UI to update
-                    setTimeout(() => {
-                        initializeDashboard();
-                        hideLoadingOverlay();
-                        showNotification(
-                            "Success",
-                            `Loaded ${data.length.toLocaleString()} records successfully`,
-                            "success"
-                        );
-                    }, 100);
+                    showLoadingOverlay(
+                        "Initializing dashboard...",
+                        "Building charts and metrics..."
+                    );
+                    
+                    // Use requestAnimationFrame for smoother UI update
+                    await new Promise(r => requestAnimationFrame(r));
+                    
+                    // Initialize dashboard
+                    initializeDashboard();
+                    
+                    const loadTime = ((performance.now() - loadStartTime) / 1000).toFixed(1);
+                    hideLoadingOverlay();
+                    
+                    showNotification(
+                        "Success",
+                        `Loaded ${data.length.toLocaleString()} records in ${loadTime}s`,
+                        "success"
+                    );
+                    
+                    console.log(`🎉 Dashboard loaded in ${loadTime}s`);
                 } else {
                     console.error("No data from Confluence");
                     hideLoadingOverlay();
@@ -2848,7 +2878,11 @@
                 const blob = await response.blob();
                 console.log("Blob size:", blob.size, "bytes");
                 
-                // Parse based on file type
+                // Parse based on file type with progress updates
+                const progressCallback = (msg) => {
+                    showLoadingOverlay("Loading Portfolio Data...", msg);
+                };
+                
                 if (CONFLUENCE_FILE_NAME.endsWith(".csv")) {
                     console.log("Parsing CSV file...");
                     return await parseCSVBlob(blob);
@@ -2856,8 +2890,9 @@
                     CONFLUENCE_FILE_NAME.endsWith(".xlsx") ||
                     CONFLUENCE_FILE_NAME.endsWith(".xls")
                 ) {
-                    console.log("Parsing Excel file...");
-                    return await parseExcelBlob(blob);
+                    console.log("Parsing Excel file (this may take a moment for large files)...");
+                    progressCallback("Preparing to parse Excel...");
+                    return await parseExcelBlob(blob, progressCallback);
                 }
                 
                 throw new Error(
@@ -3100,62 +3135,90 @@
             });
         }
 
-        // Parse Excel blob (read-only)
-        async function parseExcelBlob(blob) {
+        // Parse Excel blob (read-only) - OPTIMIZED for large files
+        async function parseExcelBlob(blob, progressCallback = null) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                reader.onload = function (e) {
+                
+                reader.onprogress = function(e) {
+                    if (e.lengthComputable && progressCallback) {
+                        const percent = Math.round((e.loaded / e.total) * 30); // 0-30%
+                        progressCallback(`Reading file... ${percent}%`);
+                    }
+                };
+                
+                reader.onload = async function (e) {
                     try {
-                        const data = new Uint8Array(e.target.result);
+                        if (progressCallback) progressCallback("Parsing Excel structure...");
                         
-                        // Important: cellDates: true converts Excel date serial numbers to JS Dates
+                        const data = new Uint8Array(e.target.result);
+                        const startTime = performance.now();
+                        
+                        // Allow UI to update before heavy parsing
+                        await new Promise(r => setTimeout(r, 10));
+                        
+                        // OPTIMIZED: Use minimal parsing options for speed
                         const workbook = XLSX.read(data, { 
                             type: "array",
-                            cellDates: true, // Convert Excel dates to JavaScript dates
+                            cellDates: true,
                             cellNF: false,
                             cellText: false,
+                            cellStyles: false, // Skip styles for speed
+                            sheetStubs: false, // Skip empty cells
+                            dense: false, // Use sparse array for large files
                         });
+                        
+                        const parseTime = performance.now() - startTime;
+                        console.log(`Excel parsed in ${(parseTime/1000).toFixed(2)}s`);
+                        
+                        if (progressCallback) progressCallback("Converting to data rows...");
+                        await new Promise(r => setTimeout(r, 10));
                         
                         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                        
                         console.log("Excel Sheet Name:", workbook.SheetNames[0]);
                         
-                        // Convert sheet to JSON with date formatting
+                        // OPTIMIZED: Convert sheet to JSON
+                        const convertStart = performance.now();
                         const jsonData = XLSX.utils.sheet_to_json(firstSheet, {
-                            raw: false, // Don't use raw values (converts dates to strings)
-                            dateNF: "yyyy-mm-dd", // Date format
+                            raw: false,
+                            dateNF: "yyyy-mm-dd",
+                            defval: "", // Default value for empty cells
                         });
+                        const convertTime = performance.now() - convertStart;
+                        console.log(`Converted ${jsonData.length} rows in ${(convertTime/1000).toFixed(2)}s`);
                         
-                        console.log(`Total rows in Excel: ${jsonData.length}`);
+                        if (progressCallback) progressCallback(`Filtering ${jsonData.length.toLocaleString()} rows...`);
+                        await new Promise(r => setTimeout(r, 10));
                         
-                        // Filter out empty rows (rows without Facility_ID)
-                        const filteredData = jsonData.filter((row) => row.Facility_ID);
+                        // OPTIMIZED: Filter in chunks to prevent UI blocking
+                        const filteredData = [];
+                        const chunkSize = 5000;
                         
-                        console.log(
-                            `Parsed ${filteredData.length} valid records from Excel`
-                        );
+                        for (let i = 0; i < jsonData.length; i += chunkSize) {
+                            const chunk = jsonData.slice(i, i + chunkSize);
+                            for (const row of chunk) {
+                                if (row.Facility_ID) {
+                                    filteredData.push(row);
+                                }
+                            }
+                            
+                            // Update progress and allow UI to breathe
+                            if (progressCallback) {
+                                const percent = Math.round(((i + chunkSize) / jsonData.length) * 100);
+                                progressCallback(`Processing... ${Math.min(percent, 100)}%`);
+                            }
+                            
+                            // Yield to UI thread every chunk
+                            if (i + chunkSize < jsonData.length) {
+                                await new Promise(r => setTimeout(r, 0));
+                            }
+                        }
                         
-                        // Log data structure for debugging
+                        console.log(`Parsed ${filteredData.length} valid records from Excel`);
+                        
+                        // Log sample data for debugging
                         if (filteredData.length > 0) {
-                            console.log(
-                                "Sample record fields:",
-                                Object.keys(filteredData[0])
-                            );
-                            console.log(
-                                "Sample Maturity_Date:",
-                                filteredData[0].Maturity_Date,
-                                typeof filteredData[0].Maturity_Date
-                            );
-                            console.log(
-                                "Sample CA_Expiration_Date:",
-                                filteredData[0].CA_Expiration_Date,
-                                typeof filteredData[0].CA_Expiration_Date
-                            );
-                            console.log(
-                                "Sample Report_Date:",
-                                filteredData[0].Report_Date,
-                                typeof filteredData[0].Report_Date
-                            );
+                            console.log("Sample record fields:", Object.keys(filteredData[0]));
                         }
                         
                         resolve(filteredData);
@@ -3172,18 +3235,18 @@
             });
         }
 
-        // Show loading overlay
+        // Show loading overlay with title and progress
         function showLoadingOverlay(
-            message = "Please wait while we fetch your data...",
-            progress = ""
+            title = "Loading Portfolio Data",
+            progress = "Please wait while we fetch your data..."
         ) {
             const overlay = document.getElementById("loadingOverlay");
-            const messageEl = document.getElementById("loadingMessage");
+            const titleEl = document.getElementById("loadingMessage");
             const progressEl = document.getElementById("loadingProgress");
             
             if (overlay) {
                 overlay.classList.remove("hidden");
-                if (messageEl) messageEl.textContent = message;
+                if (titleEl) titleEl.textContent = title;
                 if (progressEl) progressEl.textContent = progress;
             }
         }
@@ -10297,7 +10360,7 @@
                     break;
                 case "rotce":
                     chartName = "ROTCE Performance";
-                    data = filteredData.length > 0 ? filteredData : portfolioData;
+                    data = getROTCEData();
                     break;
                 case "newDealsYTD":
                     chartName = "New Deals Closed YTD";
@@ -10317,15 +10380,15 @@
                     break;
                 case "covenantRegional":
                     chartName = "Past Due Covenants by Region";
-                    data = covenantsData.length > 0 ? covenantsData : portfolioData;
+                    data = getCovenantRegionalData();
                     break;
                 case "ccmRegionalChart":
                     chartName = "Criticized/Classified Memos & Reviews";
-                    data = ccmData.length > 0 ? ccmData : [];
+                    data = getCCMFilteredData();
                     break;
                 case "ccmStats":
                     chartName = "Credit Committee Memos";
-                    data = ccmData.length > 0 ? ccmData : [];
+                    data = getCCMFilteredData();
                     break;
                 default:
                     data = filteredData.length > 0 ? filteredData : portfolioData;
@@ -10333,8 +10396,18 @@
 
             // Update modal title
             modalTitle.textContent = chartName + " - Underlying Data";
-            modalSubtitle.textContent = `Showing ${data.length} records${filteredData.length > 0 ? " (filtered)" : ""
-                }`;
+            
+            // Build filter description
+            let filterDesc = [];
+            if (filteredData.length > 0 && filteredData.length < portfolioData.length) {
+                filterDesc.push("portfolio filters applied");
+            }
+            if (selectedRegion !== 'all') {
+                filterDesc.push(`Region: ${selectedRegion.toUpperCase()}`);
+            }
+            
+            const filterText = filterDesc.length > 0 ? ` (${filterDesc.join(", ")})` : "";
+            modalSubtitle.textContent = `Showing ${data.length} records${filterText}`;
 
             // Store data and chart name for export
             window.currentChartData = { data, chartName };
@@ -10596,11 +10669,25 @@
             
             console.log("getCovenantsByProgramData - using", covenantsData.length > 0 ? "covenant data" : "portfolio data");
             
-            // Filter for rows that have covenant data
+            const processedCovenants = new Set();
+            
+            // Filter for rows that have covenant data and apply region filter
             const result = dataSource.filter((row) => {
                 const programName = String(row.Product_Program_Name || "").trim();
                 const covenantNumber = String(row.Covenant_Number || "").trim();
-                return programName !== "" && covenantNumber !== "";
+                const region = String(row.Region || "").trim().toUpperCase();
+                
+                // Skip if no program name or covenant number
+                if (programName === "" || covenantNumber === "") return false;
+                
+                // Skip duplicates
+                if (processedCovenants.has(covenantNumber)) return false;
+                
+                // Apply region filter if active
+                if (selectedRegion !== 'all' && region !== selectedRegion.toUpperCase()) return false;
+                
+                processedCovenants.add(covenantNumber);
+                return true;
             });
             
             console.log("getCovenantsByProgramData - filtered result length:", result.length);
@@ -10614,14 +10701,130 @@
             
             console.log("getCovenantMonitoringData - using", covenantsData.length > 0 ? "covenant data" : "portfolio data");
             
-            // Filter for rows that have covenant monitoring data
+            const processedCovenants = new Set();
+            
+            // Filter for rows that have covenant monitoring data and apply region filter
             const result = dataSource.filter((row) => {
                 const covenantNumber = String(row.Covenant_Number || "").trim();
                 const status = String(row['Coming_Due/Past_Due'] || row.Coming_Due_Past_Due || "").trim();
-                return covenantNumber !== "" && status !== "";
+                const region = String(row.Region || "").trim().toUpperCase();
+                
+                // Skip empty covenant numbers or duplicates
+                if (covenantNumber === "" || processedCovenants.has(covenantNumber)) return false;
+                
+                // Apply region filter if active
+                if (selectedRegion !== 'all' && region !== selectedRegion.toUpperCase()) return false;
+                
+                processedCovenants.add(covenantNumber);
+                return status !== "";
             });
             
             console.log("getCovenantMonitoringData - filtered result length:", result.length);
+            return result;
+        }
+        
+        // Get covenant regional data (for Past Due Covenants by Region table)
+        function getCovenantRegionalData() {
+            const dataSource = covenantsData.length > 0 ? covenantsData : portfolioData;
+            
+            const processedCovenants = new Set();
+            
+            // Filter and apply region filter
+            const result = dataSource.filter((row) => {
+                const covenantNumber = String(row.Covenant_Number || "").trim();
+                const region = String(row.Region || "").trim().toUpperCase();
+                
+                if (covenantNumber === "" || processedCovenants.has(covenantNumber)) return false;
+                
+                // Apply region filter if active
+                if (selectedRegion !== 'all' && region !== selectedRegion.toUpperCase()) return false;
+                
+                processedCovenants.add(covenantNumber);
+                return true;
+            });
+            
+            console.log("getCovenantRegionalData - filtered result length:", result.length);
+            return result;
+        }
+        
+        // Get CCM data with filters applied
+        function getCCMFilteredData() {
+            if (!ccmData || ccmData.length === 0) return [];
+            
+            // Filter CCM data based on region filter
+            const result = ccmData.filter((row) => {
+                const region = String(row.Region || "").trim().toUpperCase();
+                
+                // Apply region filter if active
+                if (selectedRegion !== 'all' && region !== selectedRegion.toUpperCase()) return false;
+                
+                return true;
+            });
+            
+            console.log("getCCMFilteredData - filtered result length:", result.length);
+            return result;
+        }
+        
+        // Get ROTCE data for the top N relationships (matching chart logic)
+        function getROTCEData() {
+            const dataSource = filteredData.length > 0 ? filteredData : portfolioData;
+            const topN = parseInt(document.getElementById("topNFilter").value);
+            
+            // Build relationship data map (same logic as chart)
+            const relationshipData = new Map();
+            for (const row of dataSource) {
+                const relId = row.Relationship_Name || row.Relationship_ID;
+                if (!relId) continue;
+                
+                if (!relationshipData.has(relId)) {
+                    relationshipData.set(relId, {
+                        tfa: 0,
+                        direct: 0,
+                        contingent: 0,
+                        pse: 0,
+                        osuc: 0,
+                        unused: 0,
+                    });
+                }
+                const data = relationshipData.get(relId);
+                data.tfa += parseNumber(row.Fac_Amount || row.Facility_Amount);
+                data.direct += parseNumber(row.Direct_OS);
+                data.contingent += parseNumber(row.Contingent_OS);
+                data.pse += parseNumber(row.PSE_OS);
+                data.osuc += parseNumber(row.OSUC);
+                data.unused += parseNumber(row.Unused_Committed);
+            }
+            
+            // Get the selected field value for sorting
+            const relationshipTotals = new Map();
+            for (const [relId, data] of relationshipData.entries()) {
+                let sortValue = 0;
+                switch (selectedAmountType) {
+                    case "tfa": sortValue = data.tfa; break;
+                    case "direct": sortValue = data.direct; break;
+                    case "contingent": sortValue = data.contingent; break;
+                    case "pse": sortValue = data.pse; break;
+                    case "osuc": sortValue = data.osuc; break;
+                    case "unused": sortValue = data.unused; break;
+                    default: sortValue = data.direct;
+                }
+                relationshipTotals.set(relId, sortValue);
+            }
+            
+            // Get top N relationships by selected exposure type
+            const topRelationships = Array.from(relationshipTotals.entries())
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, topN)
+                .map(([relId]) => relId);
+            
+            // Return rows for top relationships that have ROTCE data
+            const result = dataSource.filter((row) => {
+                const relId = row.Relationship_Name || row.Relationship_ID;
+                const rotce = row.ROTCE;
+                return topRelationships.includes(relId) && rotce !== undefined && rotce !== null && rotce !== '';
+            });
+            
+            console.log("getROTCEData - filtered result length:", result.length);
             return result;
         }
 
@@ -11691,7 +11894,7 @@
                     break;
                 case "rotce":
                     chartName = "ROTCE_Performance";
-                    data = filteredData.length > 0 ? filteredData : portfolioData;
+                    data = getROTCEData();
                     break;
                 case "newDealsYTD":
                     chartName = "New_Deals_Closed_YTD";
@@ -11708,6 +11911,18 @@
                 case "covenantMonitoring":
                     chartName = "Covenant_Monitoring";
                     data = getCovenantMonitoringData();
+                    break;
+                case "covenantRegional":
+                    chartName = "Covenants_by_Region";
+                    data = getCovenantRegionalData();
+                    break;
+                case "ccmRegionalChart":
+                    chartName = "CCM_by_Region";
+                    data = getCCMFilteredData();
+                    break;
+                case "ccmStats":
+                    chartName = "Credit_Committee_Memos";
+                    data = getCCMFilteredData();
                     break;
             }
 

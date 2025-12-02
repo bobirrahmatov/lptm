@@ -6375,6 +6375,7 @@
             
             const regions = ['APAC', 'EMEA', 'NAM', 'LATAM'];
             const regionalData = {};
+            const regionPopulation = {}; // Total unique covenants per region (no status filter)
             
             regions.forEach(region => {
                 regionalData[region] = {
@@ -6385,8 +6386,29 @@
                     '>90': 0,
                     'comingDue': 0
                 };
+                regionPopulation[region] = 0;
             });
             
+            // FIRST PASS: Count total unique Covenant_Numbers per region (Population - no status filter)
+            const populationCovenants = new Set();
+            let totalPopulation = 0;
+            
+            dataSource.forEach(row => {
+                const covenantNumber = String(row.Covenant_Number || "").trim();
+                const region = String(row.Region || "").trim().toUpperCase();
+                
+                if (!covenantNumber || populationCovenants.has(covenantNumber)) return;
+                if (!regions.includes(region)) return;
+                
+                // Apply region filter if active
+                if (selectedRegion !== 'all' && region !== selectedRegion.toUpperCase()) return;
+                
+                populationCovenants.add(covenantNumber);
+                regionPopulation[region]++;
+                totalPopulation++;
+            });
+            
+            // SECOND PASS: Count by status categories (Past Due, Coming Due)
             const processedCovenants = new Set();
             
             dataSource.forEach(row => {
@@ -6481,13 +6503,14 @@
                 
                 // Calculate region totals
                 const regionPastDueTotal = count145 + count4690 + countOver90;
-                const regionPopulation = regionPastDueTotal + countComingDue;
+                // Population is the total unique covenants for this region (calculated in first pass, no status filter)
+                const regPopulation = regionPopulation[region];
                 
                 if (isPastDue) {
-                    // % of Total = Past Due Total for this region / Grand Total (all past due + coming due across all regions)
-                    const percentOfTotal = grandTotal > 0 ? ((regionPastDueTotal / grandTotal) * 100).toFixed(1) : 0;
+                    // % of Total = Past Due Total for this region / Total Population
+                    const percentOfTotal = totalPopulation > 0 ? ((regionPastDueTotal / totalPopulation) * 100).toFixed(1) : 0;
                     
-                html += `
+                    html += `
                         <tr class="border-b border-gray-100 hover:bg-gray-50">
                             <td class="px-2 py-2 text-xs font-medium text-gray-700">${region}</td>
                             <td class="px-2 py-2 text-xs text-gray-700 text-center font-semibold">${count145}</td>
@@ -6497,15 +6520,15 @@
                                 <div class="relative w-full h-4 bg-gray-100 rounded overflow-hidden">
                                     <div class="absolute top-0 left-0 h-full bg-blue-500 rounded transition-all duration-300" style="width: ${percentOfTotal}%"></div>
                                     <span class="absolute inset-0 flex items-center justify-center text-xs font-semibold text-gray-800">${percentOfTotal}%</span>
-                            </div>
+                                </div>
                             </td>
                             <td class="px-2 py-2 text-xs text-gray-900 text-center font-bold">${regionPastDueTotal}</td>
-                            <td class="px-2 py-2 text-xs text-gray-900 text-center font-bold">${regionPopulation}</td>
+                            <td class="px-2 py-2 text-xs text-gray-900 text-center font-bold">${regPopulation}</td>
                         </tr>
                     `;
                 } else {
-                    // % of Total = Coming Due for this region / Grand Total (all past due + coming due across all regions)
-                    const percentOfTotal = grandTotal > 0 ? ((countComingDue / grandTotal) * 100).toFixed(1) : 0;
+                    // % of Total = Coming Due for this region / Total Population
+                    const percentOfTotal = totalPopulation > 0 ? ((countComingDue / totalPopulation) * 100).toFixed(1) : 0;
                     
                     html += `
                         <tr class="border-b border-gray-100 hover:bg-gray-50">
@@ -6515,10 +6538,10 @@
                                 <div class="relative w-full h-4 bg-gray-100 rounded overflow-hidden">
                                     <div class="absolute top-0 left-0 h-full bg-green-500 rounded transition-all duration-300" style="width: ${percentOfTotal}%"></div>
                                     <span class="absolute inset-0 flex items-center justify-center text-xs font-semibold text-gray-800">${percentOfTotal}%</span>
-                                    </div>
+                                </div>
                             </td>
                             <td class="px-2 py-2 text-xs text-gray-900 text-center font-bold">${countComingDue}</td>
-                            <td class="px-2 py-2 text-xs text-gray-900 text-center font-bold">${regionPopulation}</td>
+                            <td class="px-2 py-2 text-xs text-gray-900 text-center font-bold">${regPopulation}</td>
                         </tr>
                     `;
                 }
@@ -6526,10 +6549,9 @@
             
             // Add total row
             const totalPastDue = total145 + total4690 + totalOver90;
-            const totalPopulation = totalPastDue + totalComingDue;
             
             if (isPastDue) {
-                const totalPercentOfTotal = grandTotal > 0 ? ((totalPastDue / grandTotal) * 100).toFixed(1) : 0;
+                const totalPercentOfTotal = totalPopulation > 0 ? ((totalPastDue / totalPopulation) * 100).toFixed(1) : 0;
                 html += `
                     <tr class="bg-gray-50 font-bold border-t-2 border-gray-200">
                         <td class="px-2 py-2 text-xs text-gray-900">Total</td>
@@ -6540,14 +6562,14 @@
                             <div class="relative w-full h-4 bg-gray-200 rounded overflow-hidden">
                                 <div class="absolute top-0 left-0 h-full bg-blue-600 rounded" style="width: ${totalPercentOfTotal}%"></div>
                                 <span class="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">${totalPercentOfTotal}%</span>
-                                </div>
+                            </div>
                         </td>
                         <td class="px-2 py-2 text-xs text-gray-900 text-center">${totalPastDue}</td>
                         <td class="px-2 py-2 text-xs text-gray-900 text-center">${totalPopulation}</td>
                     </tr>
                 `;
             } else {
-                const totalPercentOfTotal = grandTotal > 0 ? ((totalComingDue / grandTotal) * 100).toFixed(1) : 0;
+                const totalPercentOfTotal = totalPopulation > 0 ? ((totalComingDue / totalPopulation) * 100).toFixed(1) : 0;
                 html += `
                     <tr class="bg-gray-50 font-bold border-t-2 border-gray-200">
                         <td class="px-2 py-2 text-xs text-gray-900">Total</td>

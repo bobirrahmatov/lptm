@@ -2547,6 +2547,47 @@
         let selectedStatus = "all"; // all, CM, DM
         let selectedAmountType = "direct"; // direct, contingent, pse, osuc, tfa (for metrics)
         let selectedPeriod = "current"; // current, previous (for New Facilities Approved in CP by Product Program chart)
+        
+        // Chart View States (for View Data filtering)
+        let currentCovenantViewType = "pastDue"; // pastDue, comingDue
+        let currentCCMViewType = "pastDue"; // pastDue, comingDue, open
+        
+        // Reporting Month (derived from max Report_Date in data)
+        let reportingMonth = null; // Will be set after data loads
+        
+        // Get the reporting month from portfolio data (max Report_Date)
+        function getReportingMonth() {
+            if (reportingMonth) return reportingMonth;
+            
+            const dataSource = filteredData.length > 0 ? filteredData : portfolioData;
+            if (!dataSource || dataSource.length === 0) {
+                // Fallback to current date if no data
+                return new Date();
+            }
+            
+            // Get max Report_Date from data
+            const reportDates = dataSource
+                .map(row => parseDate(row.Report_Date))
+                .filter(d => d !== null);
+            
+            if (reportDates.length === 0) {
+                return new Date();
+            }
+            
+            reportingMonth = new Date(Math.max(...reportDates));
+            console.log('📅 Reporting Month set to:', reportingMonth.toLocaleDateString());
+            return reportingMonth;
+        }
+        
+        // Get reporting month start and end dates
+        function getReportingMonthRange() {
+            const repMonth = getReportingMonth();
+            const monthStart = new Date(repMonth.getFullYear(), repMonth.getMonth(), 1);
+            monthStart.setHours(0, 0, 0, 0);
+            const monthEnd = new Date(repMonth.getFullYear(), repMonth.getMonth() + 1, 0);
+            monthEnd.setHours(23, 59, 59, 999);
+            return { monthStart, monthEnd, reportingMonth: repMonth };
+        }
 
         // Cross-filtering state management
         let chartFilter = {
@@ -2717,6 +2758,11 @@
                 if (data && data.length > 0) {
                     portfolioData = data;
                     console.log(`✅ Loaded ${data.length} portfolio records`);
+                    
+                    // Reset reporting month to recalculate from new data
+                    reportingMonth = null;
+                    const repMonth = getReportingMonth();
+                    console.log(`📅 Reporting Month: ${repMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`);
                     
                     showLoadingOverlay(
                         "Loading supplementary data...",
@@ -4992,96 +5038,206 @@
 
         // Smart Filter Functions
         
-        // Select Region Filter
+        // Flag to prevent multiple filter applications during batch operations
+        let isResettingFilters = false;
+        
+        // Select Region Filter (optimized)
         function selectRegionFilter(region) {
             selectedRegion = region;
             
-            // Update button styles for both Portfolio Overview and Portfolio Balances tabs
-            const regions = ["All", "APAC", "EMEA", "LATAM", "NAM"];
-            regions.forEach((r) => {
-                // Update Portfolio Overview buttons
-                const btnId = `btnRegion${r}`;
-                const btn = document.getElementById(btnId);
-                if (btn) {
-                    const minWidth = r === "LATAM" ? "min-w-[60px]" : "min-w-[50px]";
-                    if (r.toLowerCase() === region.toLowerCase()) {
-                        btn.className = `${minWidth} px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white`;
-            } else {
-                        btn.className = `${minWidth} px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900`;
-                    }
-                }
-                
-                // Update Portfolio Balances buttons (with pb- prefix)
-                const pbBtnId = `pb-btnRegion${r}`;
-                const pbBtn = document.getElementById(pbBtnId);
-                if (pbBtn) {
-                    const minWidth = r === "LATAM" ? "min-w-[60px]" : "min-w-[50px]";
-                    if (r.toLowerCase() === region.toLowerCase()) {
-                        pbBtn.className = `${minWidth} px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white`;
-            } else {
-                        pbBtn.className = `${minWidth} px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900`;
-                    }
-                }
-            });
+            // Update button styles using helper
+            updateRegionButtonsUI(region);
             
-            // Update filter count and apply filters
-            updateFilterCount();
-            applyFilters();
+            // Only apply filters if not in batch reset mode
+            if (!isResettingFilters) {
+                updateFilterCount();
+                applyFilters();
+            }
         }
         
-        // Toggle PSE (Include/Exclude)
+        // Toggle PSE (Include/Exclude) - optimized
         function togglePSE(include) {
             includePSE = include;
             console.log("PSE filter:", includePSE ? "Include" : "Exclude");
-            // Update filter count and apply filters
-            updateFilterCount();
-            applyFilters();
+            
+            // Only apply filters if not in batch reset mode
+            if (!isResettingFilters) {
+                updateFilterCount();
+                applyFilters();
+            }
         }
         
-        // Select Status Filter (CM/DM)
+        // Select Status Filter (CM/DM) - optimized
         function selectStatusFilter(status) {
             selectedStatus = status;
             
-            // Update button styles for both tabs
-            const statuses = ["All", "CM", "DM"];
-            statuses.forEach((s) => {
-                // Portfolio Overview buttons
-                const btnId = `btnStatus${s}`;
-                const btn = document.getElementById(btnId);
-                if (btn) {
-                    if (s.toLowerCase() === status.toLowerCase()) {
-                        btn.className =
-                            "min-w-[45px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white";
-            } else {
-                        btn.className =
-                            "min-w-[45px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900";
-                    }
-                }
-                
-                // Portfolio Balances buttons
-                const pbBtnId = `pb-btnStatus${s}`;
-                const pbBtn = document.getElementById(pbBtnId);
-                if (pbBtn) {
-                    if (s.toLowerCase() === status.toLowerCase()) {
-                        pbBtn.className =
-                            "min-w-[45px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white";
-            } else {
-                        pbBtn.className =
-                            "min-w-[45px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900";
-                    }
-                }
-            });
+            // Update button styles using helper
+            updateStatusButtonsUI(status);
             
-            // Update filter count and apply filters
-            updateFilterCount();
-            applyFilters();
+            // Only apply filters if not in batch reset mode
+            if (!isResettingFilters) {
+                updateFilterCount();
+                applyFilters();
+            }
         }
         
-        // Select Amount Type Filter (Direct/Contingent/PSE/OSUC/Unused/TFA)
+        // Select Amount Type Filter (Direct/Contingent/PSE/OSUC/Unused/TFA) - optimized
         function selectAmountTypeFilter(type) {
             selectedAmountType = type;
             
-            // Update button styles for both tabs
+            // Update button styles using helper
+            updateAmountTypeButtonsUI(type);
+            
+            // Update chart titles
+            updateAmountTypeTitles(type);
+
+            console.log("Amount Type filter:", type);
+            
+            // Only refresh charts if not in batch reset mode
+            if (!isResettingFilters) {
+                // Refresh the Top Relationships chart and ROTCE chart (both tabs should sync)
+                if (areFiltersActive()) {
+                    createRelationshipChartFromFiltered();
+                    createROTCEChartFromFiltered();
+                } else {
+                    createRelationshipChart();
+                    createROTCEChart();
+                }
+                // Always refresh Balances tab charts (they use portfolioData)
+                createRelationshipChartBalances();
+                createROTCEChartBalances();
+            }
+        }
+        
+        // Helper: Update amount type chart titles
+        function updateAmountTypeTitles(type) {
+            const titleElement = document.getElementById("topRelationshipsTitle");
+            const subtitleElement = document.getElementById("topRelationshipsSubtitle");
+            const titleElementBalances = document.getElementById("topRelationshipsTitleBalances");
+            const subtitleElementBalances = document.getElementById("topRelationshipsSubtitleBalances");
+            
+            const titles = {
+                direct: { title: "Top Relationships by Direct OS", subtitle: "Largest client exposures ranked by direct outstanding balance" },
+                contingent: { title: "Top Relationships by Contingent OS", subtitle: "Largest client exposures ranked by contingent outstanding balance" },
+                pse: { title: "Top Relationships by Presettlement Exposure", subtitle: "Largest client exposures ranked by presettlement exposure outstanding balance" },
+                osuc: { title: "Top Relationships by OSUC", subtitle: "Largest client exposures ranked by outstandings under commitment" },
+                unused: { title: "Top Relationships by Undrawn Commitment", subtitle: "Largest client exposures ranked by unused commitment available to draw" },
+                tfa: { title: "Top Relationships by Total Facility Amount", subtitle: "Largest client exposures ranked by total committed facility amounts" }
+            };
+            
+            const t = titles[type] || titles.direct;
+            
+            if (titleElement) titleElement.textContent = t.title;
+            if (subtitleElement) subtitleElement.textContent = t.subtitle;
+            if (titleElementBalances) titleElementBalances.textContent = t.title;
+            if (subtitleElementBalances) subtitleElementBalances.textContent = t.subtitle;
+        }
+        
+        // Reset All Filters (OPTIMIZED - batch UI updates, single filter application)
+        function resetAllFilters() {
+            console.log('🔄 Resetting all filters...');
+            const startTime = performance.now();
+            
+            // Set flag to prevent intermediate filter applications
+            isResettingFilters = true;
+            
+            // Reset smart filters to default values (no UI updates yet)
+            selectedRegion = "all";
+            includePSE = true;
+            selectedStatus = "all";
+            selectedAmountType = "direct";
+            
+            // Batch UI updates using requestAnimationFrame for smooth rendering
+            requestAnimationFrame(() => {
+                // Reset PSE toggle checkbox
+                const pseToggle = document.getElementById("pseToggle");
+                if (pseToggle) {
+                    pseToggle.checked = true;
+                }
+                
+                // Reset region buttons UI (both tabs) - UI only, no filter application
+                updateRegionButtonsUI("all");
+                
+                // Reset status buttons UI (both tabs) - UI only
+                updateStatusButtonsUI("all");
+                
+                // Reset amount type buttons UI - UI only
+                updateAmountTypeButtonsUI("direct");
+                
+                // Reset search
+                const searchInput = document.getElementById("searchInput");
+                if (searchInput) {
+                    searchInput.value = "";
+                }
+                
+                // Reset advanced filter dropdowns in single loop
+                const filterIds = [
+                    "filterProductProgram", "filterExtendingUnit", "filterFacilityType",
+                    "filterCommitment", "filterTeamLead", "filterUnderwriter",
+                    "filterCAMaturity", "filterFacilityMaturity"
+                ];
+                filterIds.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = "";
+                });
+                
+                // Clear active filters object
+                activeFilters = {};
+                displayFilterBadges();
+                updateFilterCount();
+                
+                // Clear flag and apply filters ONCE
+                isResettingFilters = false;
+                
+                // Use setTimeout to allow UI to update before heavy processing
+                setTimeout(() => {
+                    applyFilters();
+                    const elapsed = (performance.now() - startTime).toFixed(0);
+                    console.log(`✅ All filters reset in ${elapsed}ms`);
+                    showNotification("Success", "All filters have been reset", "success");
+                }, 10);
+            });
+        }
+        
+        // Helper: Update region buttons UI only (no filter application)
+        function updateRegionButtonsUI(region) {
+            const regions = ["All", "APAC", "EMEA", "LATAM", "NAM"];
+            regions.forEach((r) => {
+                const minWidth = r === "LATAM" ? "min-w-[60px]" : "min-w-[50px]";
+                const activeClass = `${minWidth} px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white`;
+                const inactiveClass = `${minWidth} px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900`;
+                const isActive = r.toLowerCase() === region.toLowerCase();
+                
+                // Overview tab
+                const btn = document.getElementById(`btnRegion${r}`);
+                if (btn) btn.className = isActive ? activeClass : inactiveClass;
+                
+                // Balances tab
+                const pbBtn = document.getElementById(`pb-btnRegion${r}`);
+                if (pbBtn) pbBtn.className = isActive ? activeClass : inactiveClass;
+            });
+        }
+        
+        // Helper: Update status buttons UI only (no filter application)
+        function updateStatusButtonsUI(status) {
+            const statuses = ["All", "CM", "DM"];
+            statuses.forEach((s) => {
+                const activeClass = "min-w-[45px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white";
+                const inactiveClass = "min-w-[45px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900";
+                const isActive = s.toLowerCase() === status.toLowerCase();
+                
+                // Overview tab
+                const btn = document.getElementById(`btnStatus${s}`);
+                if (btn) btn.className = isActive ? activeClass : inactiveClass;
+                
+                // Balances tab
+                const pbBtn = document.getElementById(`pb-btnStatus${s}`);
+                if (pbBtn) pbBtn.className = isActive ? activeClass : inactiveClass;
+            });
+        }
+        
+        // Helper: Update amount type buttons UI only (no filter application)
+        function updateAmountTypeButtonsUI(type) {
             const types = { 
                 Direct: { id: "direct", minWidth: "65px" },
                 Contingent: { id: "contingent", minWidth: "80px" },
@@ -5090,165 +5246,21 @@
                 Unused: { id: "unused", minWidth: "90px" },
                 TFA: { id: "tfa", minWidth: "50px" },
             };
-
+            
             Object.keys(types).forEach((t) => {
-                // Portfolio Overview buttons
-                const btnId = `btnAmount${t}`;
-                const btn = document.getElementById(btnId);
-                if (btn) {
-                    const minWidth = types[t].minWidth;
-                    if (types[t].id === type) {
-                        btn.className = `min-w-[${minWidth}] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white`;
-                    } else {
-                        btn.className = `min-w-[${minWidth}] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900`;
-                    }
-                }
+                const minWidth = types[t].minWidth;
+                const activeClass = `min-w-[${minWidth}] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white`;
+                const inactiveClass = `min-w-[${minWidth}] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900`;
+                const isActive = types[t].id === type;
                 
-                // Portfolio Balances buttons
-                const pbBtnId = `pb-btnAmount${t}`;
-                const pbBtn = document.getElementById(pbBtnId);
-                if (pbBtn) {
-                    const minWidth = types[t].minWidth;
-                    if (types[t].id === type) {
-                        pbBtn.className = `min-w-[${minWidth}] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white`;
-                    } else {
-                        pbBtn.className = `min-w-[${minWidth}] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900`;
-                    }
-                }
+                // Overview tab
+                const btn = document.getElementById(`btnAmount${t}`);
+                if (btn) btn.className = isActive ? activeClass : inactiveClass;
+                
+                // Balances tab
+                const pbBtn = document.getElementById(`pb-btnAmount${t}`);
+                if (pbBtn) pbBtn.className = isActive ? activeClass : inactiveClass;
             });
-            
-            // Update Top Relationships chart title and subtitle (Overview tab)
-            const titleElement = document.getElementById("topRelationshipsTitle");
-            const subtitleElement = document.getElementById(
-                "topRelationshipsSubtitle"
-            );
-            
-            // Update Top Relationships chart title and subtitle (Balances tab)
-            const titleElementBalances = document.getElementById("topRelationshipsTitleBalances");
-            const subtitleElementBalances = document.getElementById(
-                "topRelationshipsSubtitleBalances"
-            );
-            
-            // Update titles for both tabs
-            const updateTitles = (titleEl, subtitleEl) => {
-                if (titleEl) {
-                if (type === "direct") {
-                        titleEl.textContent = "Top Relationships by Direct OS";
-                        if (subtitleEl)
-                            subtitleEl.textContent =
-                            "Largest client exposures ranked by direct outstanding balance";
-                } else if (type === "contingent") {
-                        titleEl.textContent = "Top Relationships by Contingent OS";
-                        if (subtitleEl)
-                            subtitleEl.textContent =
-                            "Largest client exposures ranked by contingent outstanding balance";
-                } else if (type === "pse") {
-                        titleEl.textContent =
-                        "Top Relationships by Presettlement Exposure";
-                        if (subtitleEl)
-                            subtitleEl.textContent =
-                            "Largest client exposures ranked by presettlement exposure outstanding balance";
-                } else if (type === "osuc") {
-                        titleEl.textContent = "Top Relationships by OSUC";
-                        if (subtitleEl)
-                            subtitleEl.textContent =
-                            "Largest client exposures ranked by outstandings under commitment";
-                } else if (type === "unused") {
-                        titleEl.textContent =
-                        "Top Relationships by Undrawn Commitment";
-                        if (subtitleEl)
-                            subtitleEl.textContent =
-                            "Largest client exposures ranked by unused commitment available to draw";
-                } else if (type === "tfa") {
-                        titleEl.textContent =
-                        "Top Relationships by Total Facility Amount";
-                        if (subtitleEl)
-                            subtitleEl.textContent =
-                            "Largest client exposures ranked by total committed facility amounts";
-                }
-            }
-            };
-            
-            updateTitles(titleElement, subtitleElement);
-            updateTitles(titleElementBalances, subtitleElementBalances);
-
-            console.log("Amount Type filter:", type);
-            // Refresh the Top Relationships chart and ROTCE chart (both tabs should sync)
-            if (areFiltersActive()) {
-                createRelationshipChartFromFiltered();
-                createROTCEChartFromFiltered();
-            } else {
-                createRelationshipChart();
-                createROTCEChart();
-            }
-            // Always refresh Balances tab charts (they use portfolioData)
-            createRelationshipChartBalances();
-            createROTCEChartBalances();
-        }
-        
-        // Reset All Filters
-        function resetAllFilters() {
-            console.log('🔄 Resetting all filters...');
-            
-            // Reset smart filters to default values
-            selectedRegion = "all";
-            includePSE = true;
-            selectedStatus = "all";
-            selectedAmountType = "direct";
-            
-            // Reset PSE toggle checkbox and Alpine state
-            const pseToggle = document.getElementById("pseToggle");
-            if (pseToggle) {
-                pseToggle.checked = true;
-                includePSE = true;
-                // Trigger Alpine.js update by dispatching a change event
-                pseToggle.dispatchEvent(new Event('change'));
-            }
-            
-            // Reset region buttons UI
-            selectRegionFilter("all");
-            
-            // Reset status buttons UI
-            selectStatusFilter("all");
-            
-            // Reset amount type buttons UI (exposure type)
-            selectAmountTypeFilter("direct");
-            
-            // Reset search
-            const searchInput = document.getElementById("searchInput");
-            if (searchInput) {
-                searchInput.value = "";
-            }
-            
-            // Reset advanced filter dropdowns
-            const filterIds = [
-                "filterProductProgram",
-                "filterExtendingUnit", 
-                "filterFacilityType",
-                "filterCommitment",
-                "filterTeamLead",
-                "filterUnderwriter",
-                "filterCAMaturity",
-                "filterFacilityMaturity"
-            ];
-            
-            filterIds.forEach(id => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.value = "";
-                }
-            });
-            
-            // Clear active filters object
-            activeFilters = {};
-            displayFilterBadges();
-            updateFilterCount();
-            
-            // Refresh data display
-            filterData();
-            
-            console.log('✅ All filters reset to defaults: Region=All, Status=All, PSE=Include, Exposure=Direct');
-            showNotification("Success", "All filters have been reset", "success");
         }
         
         // Export Functions
@@ -5534,25 +5546,27 @@
 
         // Calculate New Deals Closed YTD and MTD metrics
         function calculateNewDealsMetrics() {
-            const now = new Date();
-            const currentYear = now.getFullYear();
-            const currentMonth = now.getMonth();
+            // Use reporting month instead of actual current date
+            const { monthStart, monthEnd, reportingMonth: repMonth } = getReportingMonthRange();
+            const currentYear = repMonth.getFullYear();
+            const currentMonth = repMonth.getMonth();
+            const reportDay = repMonth.getDate();
             
-            // Calculate date ranges
-            const ytdStart = new Date(currentYear, 0, 1); // Jan 1 of current year
+            // Calculate date ranges based on reporting month
+            const ytdStart = new Date(currentYear, 0, 1); // Jan 1 of reporting year
             ytdStart.setHours(0, 0, 0, 0);
             
-            const mtdStart = new Date(currentYear, currentMonth, 1); // 1st of current month
+            const mtdStart = new Date(currentYear, currentMonth, 1); // 1st of reporting month
             mtdStart.setHours(0, 0, 0, 0);
             
             const priorYtdStart = new Date(currentYear - 1, 0, 1); // Jan 1 of prior year
             priorYtdStart.setHours(0, 0, 0, 0);
-            const priorYtdEnd = new Date(currentYear - 1, currentMonth, now.getDate()); // Same date last year
+            const priorYtdEnd = new Date(currentYear - 1, currentMonth, reportDay); // Same date last year
             priorYtdEnd.setHours(23, 59, 59, 999);
             
             const priorMtdStart = new Date(currentYear, currentMonth - 1, 1); // 1st of prior month
             priorMtdStart.setHours(0, 0, 0, 0);
-            const priorMtdEnd = new Date(currentYear, currentMonth - 1, now.getDate()); // Same date prior month
+            const priorMtdEnd = new Date(currentYear, currentMonth - 1, reportDay); // Same date prior month
             priorMtdEnd.setHours(23, 59, 59, 999);
             
             // Track unique facilities
@@ -5581,16 +5595,16 @@
                 
                 if (!approvalDate || !facilityId) continue;
                 
-                // Check YTD (current year)
-                if (approvalDate >= ytdStart && approvalDate <= now) {
+                // Check YTD (reporting year)
+                if (approvalDate >= ytdStart && approvalDate <= repMonth) {
                     if (!ytdFacilities.has(facilityId)) {
                         ytdFacilities.add(facilityId);
                         ytdAmount += facAmount;
                     }
                 }
                 
-                // Check MTD (current month)
-                if (approvalDate >= mtdStart && approvalDate <= now) {
+                // Check MTD (reporting month)
+                if (approvalDate >= mtdStart && approvalDate <= repMonth) {
                     if (!mtdFacilities.has(facilityId)) {
                         mtdFacilities.add(facilityId);
                         mtdAmount += facAmount;
@@ -5676,11 +5690,13 @@
 
         // Calculate New Deals Closed YTD and MTD metrics from filtered data
         function calculateNewDealsMetricsFromFiltered() {
-            const now = new Date();
-            const currentYear = now.getFullYear();
-            const currentMonth = now.getMonth();
+            // Use reporting month instead of actual current date
+            const { monthStart, monthEnd, reportingMonth: repMonth } = getReportingMonthRange();
+            const currentYear = repMonth.getFullYear();
+            const currentMonth = repMonth.getMonth();
+            const reportDay = repMonth.getDate();
             
-            // Calculate date ranges
+            // Calculate date ranges based on reporting month
             const ytdStart = new Date(currentYear, 0, 1);
             ytdStart.setHours(0, 0, 0, 0);
             
@@ -5689,12 +5705,12 @@
             
             const priorYtdStart = new Date(currentYear - 1, 0, 1);
             priorYtdStart.setHours(0, 0, 0, 0);
-            const priorYtdEnd = new Date(currentYear - 1, currentMonth, now.getDate());
+            const priorYtdEnd = new Date(currentYear - 1, currentMonth, reportDay);
             priorYtdEnd.setHours(23, 59, 59, 999);
             
             const priorMtdStart = new Date(currentYear, currentMonth - 1, 1);
             priorMtdStart.setHours(0, 0, 0, 0);
-            const priorMtdEnd = new Date(currentYear, currentMonth - 1, now.getDate());
+            const priorMtdEnd = new Date(currentYear, currentMonth - 1, reportDay);
             priorMtdEnd.setHours(23, 59, 59, 999);
             
             // Track unique facilities
@@ -5726,16 +5742,16 @@
                 
                 if (!approvalDate || !facilityId) continue;
                 
-                // Check YTD (current year)
-                if (approvalDate >= ytdStart && approvalDate <= now) {
+                // Check YTD (reporting year)
+                if (approvalDate >= ytdStart && approvalDate <= repMonth) {
                     if (!ytdFacilities.has(facilityId)) {
                         ytdFacilities.add(facilityId);
                         ytdAmount += facAmount;
                     }
                 }
                 
-                // Check MTD (current month)
-                if (approvalDate >= mtdStart && approvalDate <= now) {
+                // Check MTD (reporting month)
+                if (approvalDate >= mtdStart && approvalDate <= repMonth) {
                     if (!mtdFacilities.has(facilityId)) {
                         mtdFacilities.add(facilityId);
                         mtdAmount += facAmount;
@@ -6303,6 +6319,7 @@
 
         function updateCovenantChart(viewType) {
             console.log('Updating covenant chart to:', viewType);
+            currentCovenantViewType = viewType; // Update global state for View Data
             createCovenantMonitoringChart(viewType);
             updateCovenantRegionalTable(viewType);
         }
@@ -6462,10 +6479,13 @@
                 totalOver90 += countOver90;
                 totalComingDue += countComingDue;
                 
+                // Calculate region totals
+                const regionPastDueTotal = count145 + count4690 + countOver90;
+                const regionPopulation = regionPastDueTotal + countComingDue;
+                
                 if (isPastDue) {
-                    const regionPastDueTotal = count145 + count4690 + countOver90;
-                    const regionPopulation = regionPastDueTotal + countComingDue;
-                    const percentOfTotal = grandTotal > 0 ? ((regionPopulation / grandTotal) * 100).toFixed(1) : 0;
+                    // % of Total = Past Due Total for this region / Grand Total (all past due + coming due across all regions)
+                    const percentOfTotal = grandTotal > 0 ? ((regionPastDueTotal / grandTotal) * 100).toFixed(1) : 0;
                     
                 html += `
                         <tr class="border-b border-gray-100 hover:bg-gray-50">
@@ -6484,8 +6504,8 @@
                         </tr>
                     `;
                 } else {
-                    const regionPopulation = countComingDue + (regionalData[region]['1-30'] + regionalData[region]['31-45'] + regionalData[region]['46-60'] + regionalData[region]['61-90'] + regionalData[region]['>90']);
-                    const percentOfTotal = grandTotal > 0 ? ((regionPopulation / grandTotal) * 100).toFixed(1) : 0;
+                    // % of Total = Coming Due for this region / Grand Total (all past due + coming due across all regions)
+                    const percentOfTotal = grandTotal > 0 ? ((countComingDue / grandTotal) * 100).toFixed(1) : 0;
                     
                     html += `
                         <tr class="border-b border-gray-100 hover:bg-gray-50">
@@ -6505,9 +6525,11 @@
             });
             
             // Add total row
+            const totalPastDue = total145 + total4690 + totalOver90;
+            const totalPopulation = totalPastDue + totalComingDue;
+            
             if (isPastDue) {
-                const totalPastDue = total145 + total4690 + totalOver90;
-                const totalPopulation = totalPastDue + totalComingDue;
+                const totalPercentOfTotal = grandTotal > 0 ? ((totalPastDue / grandTotal) * 100).toFixed(1) : 0;
                 html += `
                     <tr class="bg-gray-50 font-bold border-t-2 border-gray-200">
                         <td class="px-2 py-2 text-xs text-gray-900">Total</td>
@@ -6516,24 +6538,24 @@
                         <td class="px-2 py-2 text-xs text-gray-900 text-center">${totalOver90}</td>
                         <td class="px-2 py-2 text-xs">
                             <div class="relative w-full h-4 bg-gray-200 rounded overflow-hidden">
-                                <div class="absolute top-0 left-0 h-full bg-blue-600 rounded" style="width: 100%"></div>
-                                <span class="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">100%</span>
-                            </div>
+                                <div class="absolute top-0 left-0 h-full bg-blue-600 rounded" style="width: ${totalPercentOfTotal}%"></div>
+                                <span class="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">${totalPercentOfTotal}%</span>
+                                </div>
                         </td>
                         <td class="px-2 py-2 text-xs text-gray-900 text-center">${totalPastDue}</td>
                         <td class="px-2 py-2 text-xs text-gray-900 text-center">${totalPopulation}</td>
                     </tr>
                 `;
             } else {
-                const totalPopulation = grandTotalPastDue + totalComingDue;
+                const totalPercentOfTotal = grandTotal > 0 ? ((totalComingDue / grandTotal) * 100).toFixed(1) : 0;
                 html += `
                     <tr class="bg-gray-50 font-bold border-t-2 border-gray-200">
                         <td class="px-2 py-2 text-xs text-gray-900">Total</td>
                         <td class="px-2 py-2 text-xs text-gray-900 text-center">${totalComingDue}</td>
                         <td class="px-2 py-2 text-xs">
                             <div class="relative w-full h-4 bg-gray-200 rounded overflow-hidden">
-                                <div class="absolute top-0 left-0 h-full bg-green-600 rounded" style="width: 100%"></div>
-                                <span class="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">100%</span>
+                                <div class="absolute top-0 left-0 h-full bg-green-600 rounded" style="width: ${totalPercentOfTotal}%"></div>
+                                <span class="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">${totalPercentOfTotal}%</span>
                             </div>
                         </td>
                         <td class="px-2 py-2 text-xs text-gray-900 text-center">${totalComingDue}</td>
@@ -6716,13 +6738,12 @@
                 return;
             }
 
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            // Use reporting month instead of actual current date
+            const { monthStart: reportingMonthStart, monthEnd: reportingMonthEnd, reportingMonth: repMonth } = getReportingMonthRange();
             
-            // Get current month range
-            const currentMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-            const currentMonthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-            currentMonthEnd.setHours(23, 59, 59, 999);
+            // For CCM, use reporting month as the reference point
+            const referenceDate = new Date(repMonth);
+            referenceDate.setHours(0, 0, 0, 0);
 
             // Initialize counters
             const stats = {
@@ -6743,15 +6764,15 @@
                 // Apply region filter if active
                 if (selectedRegion !== 'all' && region !== selectedRegion.toUpperCase()) return;
 
-                // Categorize based on CCM_Due_Date
-                if (ccmDueDate < today) {
-                    // Past Due: CCM_Due_Date is before today
+                // Categorize based on CCM_Due_Date relative to reporting month
+                if (ccmDueDate < referenceDate) {
+                    // Past Due: CCM_Due_Date is before reporting date
                     stats.pastDue[region]++;
-                } else if (ccmDueDate >= currentMonthStart && ccmDueDate <= currentMonthEnd) {
-                    // Coming Due: CCM_Due_Date is within current month
+                } else if (ccmDueDate >= reportingMonthStart && ccmDueDate <= reportingMonthEnd) {
+                    // Coming Due: CCM_Due_Date is within reporting month
                     stats.comingDue[region]++;
-                } else if (ccmDueDate > currentMonthEnd) {
-                    // Open: CCM_Due_Date is in future but not in current month
+                } else if (ccmDueDate > reportingMonthEnd) {
+                    // Open: CCM_Due_Date is in future but not in reporting month
                     stats.open[region]++;
                 }
             });
@@ -10390,11 +10411,11 @@
                     data = getCovenantsByProgramData();
                     break;
                 case "covenantMonitoring":
-                    chartName = "Covenant Monitoring";
+                    chartName = currentCovenantViewType === 'pastDue' ? "Past Due Covenants" : "Coming Due Covenants";
                     data = getCovenantMonitoringData();
                     break;
                 case "covenantRegional":
-                    chartName = "Past Due Covenants by Region";
+                    chartName = currentCovenantViewType === 'pastDue' ? "Past Due Covenants by Region" : "Coming Due Covenants by Region";
                     data = getCovenantRegionalData();
                     break;
                 case "ccmRegionalChart":
@@ -10419,6 +10440,14 @@
             }
             if (selectedRegion !== 'all') {
                 filterDesc.push(`Region: ${selectedRegion.toUpperCase()}`);
+            }
+            // Add view type for covenant charts
+            if (chartType === 'covenantMonitoring' || chartType === 'covenantRegional') {
+                filterDesc.push(`View: ${currentCovenantViewType === 'pastDue' ? 'Past Due' : 'Coming Due (30 days)'}`);
+            }
+            // Add status info for CCM charts
+            if (chartType === 'ccmRegionalChart' || chartType === 'ccmStats') {
+                filterDesc.push("All CCM statuses (Past Due, Coming Due, Open)");
             }
             
             const filterText = filterDesc.length > 0 ? ` (${filterDesc.join(", ")})` : "";
@@ -10709,20 +10738,23 @@
             return result;
         }
 
-        // Get covenant monitoring data
+        // Get covenant monitoring data (filtered by current view type: pastDue or comingDue)
         function getCovenantMonitoringData() {
             // Use covenant data if available, otherwise fall back to portfolio data
             const dataSource = covenantsData.length > 0 ? covenantsData : (filteredData.length > 0 ? filteredData : portfolioData);
             
-            console.log("getCovenantMonitoringData - using", covenantsData.length > 0 ? "covenant data" : "portfolio data");
+            console.log("getCovenantMonitoringData - using", covenantsData.length > 0 ? "covenant data" : "portfolio data", "view:", currentCovenantViewType);
             
             const processedCovenants = new Set();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
             
-            // Filter for rows that have covenant monitoring data and apply region filter
+            // Filter for rows based on current view type
             const result = dataSource.filter((row) => {
                 const covenantNumber = String(row.Covenant_Number || "").trim();
-                const status = String(row['Coming_Due/Past_Due'] || row.Coming_Due_Past_Due || "").trim();
+                const status = String(row['Coming_Due/Past_Due'] || row.Coming_Due_Past_Due || "").trim().toLowerCase();
                 const region = String(row.Region || "").trim().toUpperCase();
+                const covenantDueDate = parseDate(row.Covenant_Due_Date);
                 
                 // Skip empty covenant numbers or duplicates
                 if (covenantNumber === "" || processedCovenants.has(covenantNumber)) return false;
@@ -10730,29 +10762,61 @@
                 // Apply region filter if active
                 if (selectedRegion !== 'all' && region !== selectedRegion.toUpperCase()) return false;
                 
+                // Apply view type filter
+                if (currentCovenantViewType === 'pastDue') {
+                    // Past Due: status contains "past due"
+                    if (!status.includes('past due') && status !== 'past due') return false;
+                } else if (currentCovenantViewType === 'comingDue') {
+                    // Coming Due: status contains "coming due" AND due within next 30 days
+                    if (!status.includes('coming due') && status !== 'coming due') return false;
+                    if (covenantDueDate) {
+                        const daysUntilDue = Math.ceil((covenantDueDate - today) / (1000 * 60 * 60 * 24));
+                        if (daysUntilDue < 0 || daysUntilDue > 30) return false;
+                    }
+                }
+                
                 processedCovenants.add(covenantNumber);
-                return status !== "";
+                return true;
             });
             
             console.log("getCovenantMonitoringData - filtered result length:", result.length);
             return result;
         }
         
-        // Get covenant regional data (for Past Due Covenants by Region table)
+        // Get covenant regional data (for Past Due Covenants by Region table - filtered by current view type)
         function getCovenantRegionalData() {
             const dataSource = covenantsData.length > 0 ? covenantsData : portfolioData;
             
-            const processedCovenants = new Set();
+            console.log("getCovenantRegionalData - view:", currentCovenantViewType);
             
-            // Filter and apply region filter
+            const processedCovenants = new Set();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Filter based on current view type
             const result = dataSource.filter((row) => {
                 const covenantNumber = String(row.Covenant_Number || "").trim();
+                const status = String(row['Coming_Due/Past_Due'] || row.Coming_Due_Past_Due || "").trim().toLowerCase();
                 const region = String(row.Region || "").trim().toUpperCase();
+                const covenantDueDate = parseDate(row.Covenant_Due_Date);
                 
                 if (covenantNumber === "" || processedCovenants.has(covenantNumber)) return false;
                 
                 // Apply region filter if active
                 if (selectedRegion !== 'all' && region !== selectedRegion.toUpperCase()) return false;
+                
+                // Apply view type filter
+                if (currentCovenantViewType === 'pastDue') {
+                    // Past Due: status contains "past due"
+                    if (!status.includes('past due') && status !== 'past due') return false;
+                } else if (currentCovenantViewType === 'comingDue') {
+                    // Coming Due: status contains "coming due" AND due within next 30 days
+                    if (!status.includes('coming due') && status !== 'coming due') return false;
+                    if (covenantDueDate) {
+                        const daysUntilDue = Math.ceil((covenantDueDate - today) / (1000 * 60 * 60 * 24));
+                        if (daysUntilDue < 0 || daysUntilDue > 30) return false;
+                    }
+                }
                 
                 processedCovenants.add(covenantNumber);
                 return true;
@@ -10762,11 +10826,16 @@
             return result;
         }
         
-        // Get CCM data with filters applied
+        // Get CCM data with filters applied (includes status categorization)
         function getCCMFilteredData() {
             if (!ccmData || ccmData.length === 0) return [];
             
-            // Filter CCM data based on region filter
+            // Use reporting month instead of actual current date
+            const { monthStart: reportingMonthStart, monthEnd: reportingMonthEnd, reportingMonth: repMonth } = getReportingMonthRange();
+            const referenceDate = new Date(repMonth);
+            referenceDate.setHours(0, 0, 0, 0);
+            
+            // Filter CCM data based on region filter and add status classification
             const result = ccmData.filter((row) => {
                 const region = String(row.Region || "").trim().toUpperCase();
                 
@@ -10774,6 +10843,25 @@
                 if (selectedRegion !== 'all' && region !== selectedRegion.toUpperCase()) return false;
                 
                 return true;
+            }).map((row) => {
+                // Add computed status for display based on reporting month
+                const ccmDueDate = parseDate(row.CCM_Due_Date);
+                let computedStatus = 'Unknown';
+                
+                if (ccmDueDate) {
+                    if (ccmDueDate < referenceDate) {
+                        computedStatus = 'Past Due';
+                    } else if (ccmDueDate >= reportingMonthStart && ccmDueDate <= reportingMonthEnd) {
+                        computedStatus = 'Coming Due';
+                    } else {
+                        computedStatus = 'Open';
+                    }
+                }
+                
+                return {
+                    ...row,
+                    Computed_CCM_Status: computedStatus
+                };
             });
             
             console.log("getCCMFilteredData - filtered result length:", result.length);
@@ -11599,7 +11687,25 @@
                                     </svg>
                                     <h5 class="font-semibold text-gray-900">What This Table Shows:</h5>
                                 </div>
-                                <p class="text-gray-600">Regional breakdown of past due covenants across time buckets (1-45 Days, 46-90 Days, >90 Days) with percentage of total and coming due covenants (next 30 days). Shows both Past Due and Coming Due regional distribution with visual progress bars for percentage comparison. Dynamically updates based on the Past Due/Coming Due toggle selection.</p>
+                                <p class="text-gray-600">Regional breakdown of past due covenants across time buckets (1-45 Days, 46-90 Days, >90 Days) with percentage of total and coming due covenants (next 30 days). Shows both Past Due and Coming Due regional distribution with visual progress bars for percentage comparison. Dynamically updates based on the Past Due/Coming Due toggle selection. Counts are based on unique Covenant_Number values.</p>
+                            </div>
+                            
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <h5 class="font-semibold text-gray-900">Table Columns:</h5>
+                                </div>
+                                <ul class="list-disc list-inside space-y-1 text-gray-600">
+                                    <li><strong>Region:</strong> Geographic region (APAC, EMEA, NAM, LATAM)</li>
+                                    <li><strong>1-45 Days:</strong> Covenants past due for 1-45 days (combines 1-30 and 31-45 day buckets)</li>
+                                    <li><strong>46-90 Days:</strong> Covenants past due for 46-90 days (combines 46-60 and 61-90 day buckets)</li>
+                                    <li><strong>>90 Days:</strong> Covenants past due for more than 90 days</li>
+                                    <li><strong>% Total:</strong> Percentage of covenants for the current view (Past Due or Coming Due) relative to the grand total of all covenants (Past Due + Coming Due across all regions)</li>
+                                    <li><strong>Total:</strong> Sum of covenants for the current view (Past Due sum or Coming Due count) for that region</li>
+                                    <li><strong>Population:</strong> Total count of all covenants for that region (Past Due + Coming Due combined)</li>
+                                </ul>
                             </div>
                             
                             <div>
@@ -11610,23 +11716,25 @@
                                     <h5 class="font-semibold text-gray-900">Calculation Logic:</h5>
                                 </div>
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
-                                    <li><strong>Data Source:</strong> Covenants_tw.xlsx file</li>
+                                    <li><strong>Data Source:</strong> Covenants_tw.xlsx file (unique Covenant_Number)</li>
                                     <li><strong>Past Due View:</strong>
                                         <ul class="list-circle list-inside ml-6 mt-1">
-                                            <li>41-60 Days: Covenants past due for 41-60 days</li>
-                                            <li>61-90 Days: Covenants past due for 61-90 days</li>
+                                            <li>1-45 Days: 1-30 Days + 31-45 Days past due covenants</li>
+                                            <li>46-90 Days: 46-60 Days + 61-90 Days past due covenants</li>
                                             <li>>90 Days: Covenants past due for more than 90 days</li>
-                                            <li>Total: Sum of all three categories per region</li>
+                                            <li>Total: Sum of all three categories (1-45 + 46-90 + >90) per region</li>
+                                            <li>% Total: (Region's Past Due Total / Grand Total of all covenants) × 100</li>
                                         </ul>
                                     </li>
                                     <li><strong>Coming Due View:</strong>
                                         <ul class="list-circle list-inside ml-6 mt-1">
-                                            <li>Shows only covenants due within the next 30 days</li>
-                                            <li>Calculated from Covenant_Due_Date field</li>
+                                            <li>Due (30d): Covenants due within the next 30 days (from Covenant_Due_Date)</li>
+                                            <li>Total: Count of coming due covenants per region</li>
+                                            <li>% Total: (Region's Coming Due / Grand Total of all covenants) × 100</li>
                                         </ul>
                                     </li>
-                                    <li><strong>Regional Grouping:</strong> APAC, EMEA, NAM, LATAM</li>
-                                    <li><strong>Grand Total Row:</strong> Sum of all regions for each time bucket and overall total</li>
+                                    <li><strong>Population:</strong> Region's Past Due Total + Region's Coming Due (all covenants for that region)</li>
+                                    <li><strong>Grand Total:</strong> Sum of all Past Due + all Coming Due across all regions</li>
                                 </ul>
                             </div>
                             
@@ -11924,11 +12032,11 @@
                     data = getCovenantsByProgramData();
                     break;
                 case "covenantMonitoring":
-                    chartName = "Covenant_Monitoring";
+                    chartName = currentCovenantViewType === 'pastDue' ? "Covenants_Past_Due" : "Covenants_Coming_Due";
                     data = getCovenantMonitoringData();
                     break;
                 case "covenantRegional":
-                    chartName = "Covenants_by_Region";
+                    chartName = currentCovenantViewType === 'pastDue' ? "Covenants_Past_Due_by_Region" : "Covenants_Coming_Due_by_Region";
                     data = getCovenantRegionalData();
                     break;
                 case "ccmRegionalChart":

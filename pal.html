@@ -141,18 +141,24 @@
         class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-[10000] flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-5 max-w-md mx-4">
             <div class="relative">
-                <div class="w-20 h-20 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
-                <div class="absolute inset-0 flex items-center justify-center">
-                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                <div class="w-24 h-24 border-4 border-gray-200 rounded-full">
+                    <svg class="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
+                        <circle class="text-gray-200" stroke-width="8" stroke="currentColor" fill="transparent" r="42" cx="50" cy="50"/>
+                        <circle id="loadingProgressCircle" class="text-blue-600 transition-all duration-300" stroke-width="8" stroke="currentColor" fill="transparent" r="42" cx="50" cy="50" 
+                            stroke-linecap="round"
+                            stroke-dasharray="264"
+                            stroke-dashoffset="264"/>
                     </svg>
+                </div>
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <span id="loadingPercent" class="text-xl font-bold text-blue-600">0%</span>
                 </div>
             </div>
             <div class="text-center">
                 <h3 class="text-lg font-semibold text-gray-900 mb-2" id="loadingMessage">
                     Loading Portfolio Data
                 </h3>
-                <p class="text-sm text-blue-600 font-medium animate-pulse" id="loadingProgress">
+                <p class="text-sm text-blue-600 font-medium" id="loadingProgress">
                     Please wait while we fetch your data...
                 </p>
                 <p class="text-xs text-gray-400 mt-3">
@@ -1327,14 +1333,14 @@
             <div class="col-span-12 xl:col-span-4">
                 <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white h-full flex flex-col" x-data="{ covenantView: 'pastDue' }">
                     <div class="flex items-center justify-between px-5 pt-5 sm:px-6 sm:pt-6 pb-4">
-                    <div>
+                <div>
                             <h3 class="text-lg font-semibold text-gray-800" x-text="covenantView === 'pastDue' ? 'Past Due Covenants' : 'Coming Due Covenants'">
                                 Past Due Covenants
-                            </h3>
+                    </h3>
                             <p class="mt-1 text-sm text-gray-500" x-text="covenantView === 'pastDue' ? 'Covenants past their due date' : 'Covenants due in the next 30 days'">
                                 Covenants past their due date
-                            </p>
-                                </div>
+                    </p>
+                </div>
                         <div class="flex items-center gap-2">
                             <!-- Toggle Filter (Smaller) -->
                             <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
@@ -1350,58 +1356,6 @@
                                 </button>
                             </div>
                             <!-- Dropdown Menu -->
-                            <div x-data="{openDropDown: false}" class="relative h-fit">
-                                <button @click="openDropDown = !openDropDown"
-                                    :class="openDropDown ? 'text-gray-700' : 'text-gray-400 hover:text-gray-700'"
-                                    class="transition-colors">
-                                    <svg class="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path fill-rule="evenodd" clip-rule="evenodd"
-                                            d="M10.2441 6C10.2441 5.0335 11.0276 4.25 11.9941 4.25H12.0041C12.9706 4.25 13.7541 5.0335 13.7541 6C13.7541 6.9665 12.9706 7.75 12.0041 7.75H11.9941C11.0276 7.75 10.2441 6.9665 10.2441 6ZM10.2441 18C10.2441 17.0335 11.0276 16.25 11.9941 16.25H12.0041C12.9706 16.25 13.7541 17.0335 13.7541 18C13.7541 18.9665 12.9706 19.75 12.0041 19.75H11.9941C11.0276 19.75 10.2441 18.9665 10.2441 18ZM11.9941 10.25C11.0276 10.25 10.2441 11.0335 10.2441 12C10.2441 12.9665 11.0276 13.75 11.9941 13.75H12.0041C12.9706 13.75 13.7541 12.9665 13.7541 12C13.7541 11.0335 12.9706 10.25 12.0041 10.25H11.9941Z"
-                                            fill="" />
-                            </svg>
-                                </button>
-                                <div x-show="openDropDown" @click.outside="openDropDown = false"
-                                    class="absolute right-0 top-full z-40 w-48 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
-                                    <button @click="openDropDown = false; openChartDataModal('covenantMonitoring')"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-                                        View Data
-                                    </button>
-                                    <button @click="openDropDown = false; openMethodologyModal('covenantMonitoring')"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-                                        View Methodology
-                                    </button>
-                                    <button @click="openDropDown = false; exportChartData('covenantMonitoring')"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-                                        Export Data
-                        </button>
-                                </div>
-                    </div>
-                </div>
-            </div>
-
-                    <!-- Donut Chart and Legends -->
-                    <div class="flex flex-col items-center px-5 py-6 flex-1">
-                        <div id="covenantMonitoringChart" class="chartDarkStyle"></div>
-                        <div id="covenantMonitoringLegend" class="flex flex-row items-center justify-center gap-4 sm:gap-6 mt-6 flex-wrap">
-                            <!-- Legend items will be dynamically generated -->
-                                </div>
-                                </div>
-                </div>
-            </div>
-
-            <!-- Regional Distribution Table -->
-            <div class="col-span-12 xl:col-span-4">
-                <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white h-full flex flex-col">
-                    <div class="flex items-center justify-between px-5 pt-5 sm:px-6 sm:pt-6 pb-4">
-                <div>
-                            <h3 class="text-lg font-semibold text-gray-800" id="covenantRegionalTableTitle">
-                                Past Due Covenants by Region
-                    </h3>
-                            <p class="mt-1 text-sm text-gray-500" id="covenantRegionalTableSubtitle">
-                                Regional breakdown of past due covenants
-                    </p>
-                </div>
                         <div x-data="{openDropDown: false}" class="relative h-fit">
                             <button @click="openDropDown = !openDropDown"
                                 :class="openDropDown ? 'text-gray-700' : 'text-gray-400 hover:text-gray-700'"
@@ -1415,52 +1369,43 @@
                             </button>
                             <div x-show="openDropDown" @click.outside="openDropDown = false"
                                 class="absolute right-0 top-full z-40 w-48 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
-                                <button @click="openDropDown = false; openChartDataModal('covenantRegional')"
+                                    <button @click="openDropDown = false; openChartDataModal('covenantMonitoring')"
                                     class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
                                     View Data
                                 </button>
-                                <button @click="openDropDown = false; openMethodologyModal('covenantRegional')"
+                                    <button @click="openDropDown = false; openMethodologyModal('covenantMonitoring')"
                                     class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
                                     View Methodology
                                 </button>
-                                <button @click="openDropDown = false; exportChartData('covenantRegional')"
+                                    <button @click="openDropDown = false; exportChartData('covenantMonitoring')"
                                     class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
                                     Export Data
                         </button>
                     </div>
                 </div>
             </div>
-                    <div class="max-w-full overflow-x-auto flex-1">
-                        <table class="w-full table-auto h-full">
-                    <thead>
-                                <tr class="bg-gray-50 text-left" id="covenantRegionalTableHeader">
-                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider">Region</th>
-                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-right">41-60 Days</th>
-                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-right">61-90 Days</th>
-                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-right">&gt;90 Days</th>
-                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-right">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody id="covenantRegionalTableBody" class="divide-y divide-gray-200">
-                                <tr>
-                                    <td colspan="3" class="px-5 py-4 text-center text-sm text-gray-500">Loading...</td>
-                                </tr>
-                            </tbody>
-                        </table>
+            </div>
+
+                    <!-- Donut Chart and Legends -->
+                    <div class="flex flex-col items-center px-5 py-6 flex-1">
+                        <div id="covenantMonitoringChart" class="chartDarkStyle"></div>
+                        <div id="covenantMonitoringLegend" class="flex flex-row items-center justify-center gap-4 sm:gap-6 mt-6 flex-wrap">
+                            <!-- Legend items will be dynamically generated -->
+                                </div>
                     </div>
                 </div>
             </div>
 
-            <!-- CCM Regional Distribution Chart (Stacked Bar) -->
+            <!-- Regional Distribution Table -->
             <div class="col-span-12 xl:col-span-4">
-                <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 h-full flex flex-col pb-0">
-                    <div class="mb-6 flex justify-between">
+                <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white h-full flex flex-col">
+                    <div class="flex items-center justify-between px-5 pt-5 sm:px-6 sm:pt-6 pb-4">
                     <div>
-                            <h3 class="text-lg font-semibold text-gray-800">
-                                Criticized/Classified Memos & Reviews
+                            <h3 class="text-lg font-semibold text-gray-800" id="covenantRegionalTableTitle">
+                                Past Due Covenants by Region
                             </h3>
-                            <p class="mt-1 text-sm text-gray-500">
-                                Regional distribution of credit committee memo status
+                            <p class="mt-1 text-sm text-gray-500" id="covenantRegionalTableSubtitle">
+                                Regional breakdown of past due covenants
                             </p>
                                 </div>
                             <div x-data="{openDropDown: false}" class="relative h-fit">
@@ -1475,6 +1420,68 @@
                             </svg>
                                 </button>
                                 <div x-show="openDropDown" @click.outside="openDropDown = false"
+                                    class="absolute right-0 top-full z-40 w-48 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                <button @click="openDropDown = false; openChartDataModal('covenantRegional')"
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                                        View Data
+                                    </button>
+                                <button @click="openDropDown = false; openMethodologyModal('covenantRegional')"
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                                        View Methodology
+                                    </button>
+                                <button @click="openDropDown = false; exportChartData('covenantRegional')"
+                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                                        Export Data
+                        </button>
+                                </div>
+                    </div>
+                </div>
+                    <div class="max-w-full overflow-x-auto flex-1">
+                        <table class="w-full table-auto h-full">
+                    <thead>
+                                <tr class="bg-gray-50 text-left" id="covenantRegionalTableHeader">
+                                    <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">Region</th>
+                                    <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">1-45</th>
+                                    <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">46-90</th>
+                                    <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">&gt;90</th>
+                                    <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap" style="min-width: 80px;">% Total</th>
+                                    <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="covenantRegionalTableBody" class="divide-y divide-gray-200">
+                                <tr>
+                                    <td colspan="6" class="px-5 py-4 text-center text-sm text-gray-500">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+            </div>
+                </div>
+            </div>
+
+            <!-- CCM Regional Distribution Chart (Stacked Bar) -->
+            <div class="col-span-12 xl:col-span-4">
+                <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 h-full flex flex-col pb-0">
+                    <div class="mb-6 flex justify-between">
+                    <div>
+                            <h3 class="text-lg font-semibold text-gray-800">
+                                Criticized/Classified Memos & Reviews
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500">
+                                Regional distribution of credit committee memo status
+                            </p>
+                        </div>
+                        <div x-data="{openDropDown: false}" class="relative h-fit">
+                            <button @click="openDropDown = !openDropDown"
+                                :class="openDropDown ? 'text-gray-700' : 'text-gray-400 hover:text-gray-700'"
+                                class="transition-colors">
+                                <svg class="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" clip-rule="evenodd"
+                                        d="M10.2441 6C10.2441 5.0335 11.0276 4.25 11.9941 4.25H12.0041C12.9706 4.25 13.7541 5.0335 13.7541 6C13.7541 6.9665 12.9706 7.75 12.0041 7.75H11.9941C11.0276 7.75 10.2441 6.9665 10.2441 6ZM10.2441 18C10.2441 17.0335 11.0276 16.25 11.9941 16.25H12.0041C12.9706 16.25 13.7541 17.0335 13.7541 18C13.7541 18.9665 12.9706 19.75 12.0041 19.75H11.9941C11.0276 19.75 10.2441 18.9665 10.2441 18ZM11.9941 10.25C11.0276 10.25 10.2441 11.0335 10.2441 12C10.2441 12.9665 11.0276 13.75 11.9941 13.75H12.0041C12.9706 13.75 13.7541 12.9665 13.7541 12C13.7541 11.0335 12.9706 10.25 12.0041 10.25H11.9941Z"
+                                        fill="" />
+                                        </svg>
+                            </button>
+                            <div x-show="openDropDown" @click.outside="openDropDown = false"
                                 class="absolute right-0 top-full z-40 w-40 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
                                 <button @click="openDropDown = false; openChartDataModal('ccmRegionalChart')"
                                         class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
@@ -1485,18 +1492,18 @@
                                         View Methodology
                                     </button>
                                 <button @click="openDropDown = false; exportChartData('ccmRegionalChart')"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-                                        Export Data
+                                    class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                                    Export Data
                         </button>
-                                </div>
                     </div>
-                </div>
+                        </div>
+                    </div>
                     <div class="flex-1 flex items-center">
                         <div id="ccmRegionalChart" class="w-full"></div>
-            </div>
-                                </div>
+                    </div>
                 </div>
             </div>
+        </div>
 
         <!-- Important Notes -->
         <div class="overflow-hidden rounded-xl border border-gray-200 bg-white">
@@ -2682,14 +2689,16 @@
             
             showLoadingOverlay(
                 "Connecting to Confluence...",
-                "Establishing connection..."
+                "Establishing connection...",
+                5
             );
             
             try {
                 // Start loading covenant and CCM data in parallel (they're smaller files)
                 showLoadingOverlay(
                     "Fetching data files...",
-                    "Loading Portfolio, Covenants & CCM data..."
+                    "Loading Portfolio, Covenants & CCM data...",
+                    10
                 );
                 
                 const covenantDataPromise = fetchCovenantsFromConfluence();
@@ -2704,7 +2713,8 @@
                     
                     showLoadingOverlay(
                         "Loading supplementary data...",
-                        `Portfolio: ${data.length.toLocaleString()} records loaded`
+                        `Portfolio: ${data.length.toLocaleString()} records loaded`,
+                        50
                     );
                     
                     // Wait for covenant data
@@ -2719,7 +2729,8 @@
                     
                     showLoadingOverlay(
                         "Loading CCM data...",
-                        `Covenants: ${covenantsData.length.toLocaleString()} records`
+                        `Covenants: ${covenantsData.length.toLocaleString()} records`,
+                        70
                     );
                     
                     // Wait for CCM data
@@ -2734,21 +2745,37 @@
                     
                     showLoadingOverlay(
                         "Initializing dashboard...",
-                        "Building charts and metrics..."
+                        "Building charts and metrics...",
+                        85
                     );
                     
                     // Use setTimeout to allow UI to update before heavy processing
                     setTimeout(() => {
+                        showLoadingOverlay(
+                            "Finalizing...",
+                            "Almost done...",
+                            95
+                        );
+                        
                         initializeDashboard();
                         
                         const loadTime = ((performance.now() - loadStartTime) / 1000).toFixed(1);
-                        hideLoadingOverlay();
                         
+                        showLoadingOverlay(
+                            "Complete!",
+                            "Dashboard ready",
+                            100
+                        );
+                        
+                        setTimeout(() => {
+                        hideLoadingOverlay();
+                            
                         showNotification(
                             "Success",
-                            `Loaded ${data.length.toLocaleString()} records in ${loadTime}s`,
+                                `Loaded ${data.length.toLocaleString()} records in ${loadTime}s`,
                             "success"
                         );
+                        }, 300);
                         
                         console.log(`🎉 Dashboard loaded in ${loadTime}s`);
                     }, 50);
@@ -3127,19 +3154,44 @@
             });
         }
 
-        // Show loading overlay with title and progress
+        // Show loading overlay with title, progress and percentage
         function showLoadingOverlay(
             title = "Loading Portfolio Data",
-            progress = "Please wait while we fetch your data..."
+            progress = "Please wait while we fetch your data...",
+            percent = null
         ) {
             const overlay = document.getElementById("loadingOverlay");
             const titleEl = document.getElementById("loadingMessage");
             const progressEl = document.getElementById("loadingProgress");
+            const percentEl = document.getElementById("loadingPercent");
+            const progressCircle = document.getElementById("loadingProgressCircle");
             
             if (overlay) {
                 overlay.classList.remove("hidden");
                 if (titleEl) titleEl.textContent = title;
                 if (progressEl) progressEl.textContent = progress;
+                
+                // Update percentage if provided
+                if (percent !== null && percentEl && progressCircle) {
+                    const clampedPercent = Math.min(100, Math.max(0, percent));
+                    percentEl.textContent = `${Math.round(clampedPercent)}%`;
+                    // Circle circumference is 2 * PI * r = 2 * 3.14159 * 42 ≈ 264
+                    const offset = 264 - (264 * clampedPercent / 100);
+                    progressCircle.style.strokeDashoffset = offset;
+                }
+            }
+        }
+        
+        // Update just the loading percentage
+        function updateLoadingPercent(percent) {
+            const percentEl = document.getElementById("loadingPercent");
+            const progressCircle = document.getElementById("loadingProgressCircle");
+            
+            if (percentEl && progressCircle) {
+                const clampedPercent = Math.min(100, Math.max(0, percent));
+                percentEl.textContent = `${Math.round(clampedPercent)}%`;
+                const offset = 264 - (264 * clampedPercent / 100);
+                progressCircle.style.strokeDashoffset = offset;
             }
         }
 
@@ -5076,41 +5128,41 @@
             // Update titles for both tabs
             const updateTitles = (titleEl, subtitleEl) => {
                 if (titleEl) {
-                    if (type === "direct") {
+                if (type === "direct") {
                         titleEl.textContent = "Top Relationships by Direct OS";
                         if (subtitleEl)
                             subtitleEl.textContent =
-                                "Largest client exposures ranked by direct outstanding balance";
-                    } else if (type === "contingent") {
+                            "Largest client exposures ranked by direct outstanding balance";
+                } else if (type === "contingent") {
                         titleEl.textContent = "Top Relationships by Contingent OS";
                         if (subtitleEl)
                             subtitleEl.textContent =
-                                "Largest client exposures ranked by contingent outstanding balance";
-                    } else if (type === "pse") {
+                            "Largest client exposures ranked by contingent outstanding balance";
+                } else if (type === "pse") {
                         titleEl.textContent =
-                            "Top Relationships by Presettlement Exposure";
+                        "Top Relationships by Presettlement Exposure";
                         if (subtitleEl)
                             subtitleEl.textContent =
-                                "Largest client exposures ranked by presettlement exposure outstanding balance";
-                    } else if (type === "osuc") {
+                            "Largest client exposures ranked by presettlement exposure outstanding balance";
+                } else if (type === "osuc") {
                         titleEl.textContent = "Top Relationships by OSUC";
                         if (subtitleEl)
                             subtitleEl.textContent =
-                                "Largest client exposures ranked by outstandings under commitment";
-                    } else if (type === "unused") {
+                            "Largest client exposures ranked by outstandings under commitment";
+                } else if (type === "unused") {
                         titleEl.textContent =
-                            "Top Relationships by Undrawn Commitment";
+                        "Top Relationships by Undrawn Commitment";
                         if (subtitleEl)
                             subtitleEl.textContent =
-                                "Largest client exposures ranked by unused commitment available to draw";
-                    } else if (type === "tfa") {
+                            "Largest client exposures ranked by unused commitment available to draw";
+                } else if (type === "tfa") {
                         titleEl.textContent =
-                            "Top Relationships by Total Facility Amount";
+                        "Top Relationships by Total Facility Amount";
                         if (subtitleEl)
                             subtitleEl.textContent =
-                                "Largest client exposures ranked by total committed facility amounts";
-                    }
+                            "Largest client exposures ranked by total committed facility amounts";
                 }
+            }
             };
             
             updateTitles(titleElement, subtitleElement);
@@ -6276,16 +6328,19 @@
             if (headerEl) {
                 if (isPastDue) {
                     headerEl.innerHTML = `
-                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider">Region</th>
-                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-right">41-60 Days</th>
-                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-right">61-90 Days</th>
-                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-right">&gt;90 Days</th>
-                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-right">Total</th>
+                        <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">Region</th>
+                        <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">1-45</th>
+                        <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">46-90</th>
+                        <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">&gt;90</th>
+                        <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap" style="min-width: 80px;">% Total</th>
+                        <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">Total</th>
                     `;
                 } else {
                     headerEl.innerHTML = `
-                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider">Region</th>
-                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-right">Coming Due (30 Days)</th>
+                        <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">Region</th>
+                        <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">Due (30d)</th>
+                        <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap" style="min-width: 80px;">% Total</th>
+                        <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">Total</th>
                     `;
                 }
             }
@@ -6300,7 +6355,9 @@
             
             regions.forEach(region => {
                 regionalData[region] = {
-                    '41-60': 0,
+                    '1-30': 0,
+                    '31-45': 0,
+                    '46-60': 0,
                     '61-90': 0,
                     '>90': 0,
                     'comingDue': 0
@@ -6325,72 +6382,115 @@
                 
                 processedCovenants.add(covenantNumber);
                 
-                if (isPastDue) {
-                    // For Past Due view
-                    if (status.includes('past due') || status === 'past due') {
-                        if (pastDueCategory) {
-                            if (pastDueCategory.includes('>90') || pastDueCategory.includes('90+')) {
-                                regionalData[region]['>90']++;
-                            } else if (pastDueCategory.includes('61') || pastDueCategory.includes('61-90')) {
-                                regionalData[region]['61-90']++;
-                            } else if (pastDueCategory.includes('41') || pastDueCategory.includes('46')) {
-                                regionalData[region]['41-60']++;
-                            }
-                        } else if (daysPastDue > 0) {
-                            if (daysPastDue > 90) {
-                                regionalData[region]['>90']++;
-                            } else if (daysPastDue >= 61) {
-                                regionalData[region]['61-90']++;
-                            } else if (daysPastDue >= 41) {
-                                regionalData[region]['41-60']++;
-                            }
+                // For Past Due covenants
+                if (status.includes('past due') || status === 'past due') {
+                    if (pastDueCategory) {
+                        if (pastDueCategory.includes('>90') || pastDueCategory.includes('90+')) {
+                            regionalData[region]['>90']++;
+                        } else if (pastDueCategory.includes('61') || pastDueCategory.includes('61-90')) {
+                            regionalData[region]['61-90']++;
+                        } else if (pastDueCategory.includes('46') || pastDueCategory.includes('46-60')) {
+                            regionalData[region]['46-60']++;
+                        } else if (pastDueCategory.includes('31') || pastDueCategory.includes('31-45')) {
+                            regionalData[region]['31-45']++;
+                        } else if (pastDueCategory.includes('1-30') || pastDueCategory.includes('1-15') || pastDueCategory.includes('16-30')) {
+                            regionalData[region]['1-30']++;
+                        } else {
+                            // Default to 1-30 for any other past due
+                            regionalData[region]['1-30']++;
+                        }
+                    } else if (daysPastDue > 0) {
+                        if (daysPastDue > 90) {
+                            regionalData[region]['>90']++;
+                        } else if (daysPastDue >= 61) {
+                            regionalData[region]['61-90']++;
+                        } else if (daysPastDue >= 46) {
+                            regionalData[region]['46-60']++;
+                        } else if (daysPastDue >= 31) {
+                            regionalData[region]['31-45']++;
+                        } else {
+                            regionalData[region]['1-30']++;
                         }
                     }
-                } else {
-                    // For Coming Due view
-                    if (covenantDueDate && (status.includes('coming due') || status === 'coming due')) {
-                        const daysUntilDue = Math.ceil((covenantDueDate - today) / (1000 * 60 * 60 * 24));
-                        if (daysUntilDue >= 0 && daysUntilDue <= 30) {
-                            regionalData[region]['comingDue']++;
-                        }
+                }
+                
+                // For Coming Due covenants
+                if (covenantDueDate && (status.includes('coming due') || status === 'coming due')) {
+                    const daysUntilDue = Math.ceil((covenantDueDate - today) / (1000 * 60 * 60 * 24));
+                    if (daysUntilDue >= 0 && daysUntilDue <= 30) {
+                        regionalData[region]['comingDue']++;
                     }
                 }
             });
             
+            // Calculate totals for percentage calculation
+            let grandTotalPastDue = 0;
+            let grandTotalComingDue = 0;
+            
+            regions.forEach(region => {
+                const pastDueCount = regionalData[region]['1-30'] + regionalData[region]['31-45'] + 
+                                     regionalData[region]['46-60'] + regionalData[region]['61-90'] + 
+                                     regionalData[region]['>90'];
+                grandTotalPastDue += pastDueCount;
+                grandTotalComingDue += regionalData[region]['comingDue'];
+            });
+            
+            const grandTotal = grandTotalPastDue + grandTotalComingDue;
+            
             // Build table rows
             let html = '';
-            let total4160 = 0;
-            let total6190 = 0;
+            let total145 = 0;
+            let total4690 = 0;
             let totalOver90 = 0;
             let totalComingDue = 0;
             
             regions.forEach(region => {
+                // Calculate combined columns
+                const count145 = regionalData[region]['1-30'] + regionalData[region]['31-45'];
+                const count4690 = regionalData[region]['46-60'] + regionalData[region]['61-90'];
+                const countOver90 = regionalData[region]['>90'];
+                const countComingDue = regionalData[region]['comingDue'];
+                
+                total145 += count145;
+                total4690 += count4690;
+                totalOver90 += countOver90;
+                totalComingDue += countComingDue;
+                
                 if (isPastDue) {
-                    const count4160 = regionalData[region]['41-60'];
-                    const count6190 = regionalData[region]['61-90'];
-                    const countOver90 = regionalData[region]['>90'];
-                    const regionTotal = count4160 + count6190 + countOver90;
-                    total4160 += count4160;
-                    total6190 += count6190;
-                    totalOver90 += countOver90;
+                    const regionPastDueTotal = count145 + count4690 + countOver90;
+                    const regionTotal = regionPastDueTotal + countComingDue;
+                    const percentOfTotal = grandTotal > 0 ? ((regionTotal / grandTotal) * 100).toFixed(1) : 0;
                     
                     html += `
-                        <tr>
-                            <td class="px-5 py-4 text-sm font-medium text-gray-700">${region}</td>
-                            <td class="px-5 py-4 text-sm text-gray-700 text-right font-semibold">${count4160}</td>
-                            <td class="px-5 py-4 text-sm text-gray-700 text-right font-semibold">${count6190}</td>
-                            <td class="px-5 py-4 text-sm text-gray-700 text-right font-semibold">${countOver90}</td>
-                            <td class="px-5 py-4 text-sm text-gray-900 text-right font-bold">${regionTotal}</td>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="px-2 py-2 text-xs font-medium text-gray-700">${region}</td>
+                            <td class="px-2 py-2 text-xs text-gray-700 text-center font-semibold">${count145}</td>
+                            <td class="px-2 py-2 text-xs text-gray-700 text-center font-semibold">${count4690}</td>
+                            <td class="px-2 py-2 text-xs text-gray-700 text-center font-semibold">${countOver90}</td>
+                            <td class="px-2 py-2 text-xs">
+                                <div class="relative w-full h-4 bg-gray-100 rounded overflow-hidden">
+                                    <div class="absolute top-0 left-0 h-full bg-blue-500 rounded transition-all duration-300" style="width: ${percentOfTotal}%"></div>
+                                    <span class="absolute inset-0 flex items-center justify-center text-xs font-semibold text-gray-800">${percentOfTotal}%</span>
+                                </div>
+                            </td>
+                            <td class="px-2 py-2 text-xs text-gray-900 text-center font-bold">${regionPastDueTotal}</td>
                         </tr>
                     `;
                 } else {
-                    const count = regionalData[region]['comingDue'];
-                    totalComingDue += count;
+                    const regionTotal = countComingDue;
+                    const percentOfTotal = grandTotalComingDue > 0 ? ((countComingDue / grandTotalComingDue) * 100).toFixed(1) : 0;
                     
                     html += `
-                        <tr>
-                            <td class="px-5 py-4 text-sm font-medium text-gray-700">${region}</td>
-                            <td class="px-5 py-4 text-sm text-gray-700 text-right font-semibold">${count}</td>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="px-2 py-2 text-xs font-medium text-gray-700">${region}</td>
+                            <td class="px-2 py-2 text-xs text-gray-700 text-center font-semibold">${countComingDue}</td>
+                            <td class="px-2 py-2 text-xs">
+                                <div class="relative w-full h-4 bg-gray-100 rounded overflow-hidden">
+                                    <div class="absolute top-0 left-0 h-full bg-green-500 rounded transition-all duration-300" style="width: ${percentOfTotal}%"></div>
+                                    <span class="absolute inset-0 flex items-center justify-center text-xs font-semibold text-gray-800">${percentOfTotal}%</span>
+                                </div>
+                            </td>
+                            <td class="px-2 py-2 text-xs text-gray-900 text-center font-bold">${regionTotal}</td>
                         </tr>
                     `;
                 }
@@ -6398,28 +6498,41 @@
             
             // Add total row
             if (isPastDue) {
-                const grandTotal = total4160 + total6190 + totalOver90;
+                const totalPastDue = total145 + total4690 + totalOver90;
                 html += `
-                    <tr class="bg-gray-50 font-bold">
-                        <td class="px-5 py-4 text-sm text-gray-900">Total</td>
-                        <td class="px-5 py-4 text-sm text-gray-900 text-right">${total4160}</td>
-                        <td class="px-5 py-4 text-sm text-gray-900 text-right">${total6190}</td>
-                        <td class="px-5 py-4 text-sm text-gray-900 text-right">${totalOver90}</td>
-                        <td class="px-5 py-4 text-sm text-gray-900 text-right">${grandTotal}</td>
+                    <tr class="bg-gray-50 font-bold border-t-2 border-gray-200">
+                        <td class="px-2 py-2 text-xs text-gray-900">Total</td>
+                        <td class="px-2 py-2 text-xs text-gray-900 text-center">${total145}</td>
+                        <td class="px-2 py-2 text-xs text-gray-900 text-center">${total4690}</td>
+                        <td class="px-2 py-2 text-xs text-gray-900 text-center">${totalOver90}</td>
+                        <td class="px-2 py-2 text-xs">
+                            <div class="relative w-full h-4 bg-gray-200 rounded overflow-hidden">
+                                <div class="absolute top-0 left-0 h-full bg-blue-600 rounded" style="width: 100%"></div>
+                                <span class="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">100%</span>
+                            </div>
+                        </td>
+                        <td class="px-2 py-2 text-xs text-gray-900 text-center">${totalPastDue}</td>
                     </tr>
                 `;
             } else {
                 html += `
-                    <tr class="bg-gray-50 font-bold">
-                        <td class="px-5 py-4 text-sm text-gray-900">Total</td>
-                        <td class="px-5 py-4 text-sm text-gray-900 text-right">${totalComingDue}</td>
+                    <tr class="bg-gray-50 font-bold border-t-2 border-gray-200">
+                        <td class="px-2 py-2 text-xs text-gray-900">Total</td>
+                        <td class="px-2 py-2 text-xs text-gray-900 text-center">${totalComingDue}</td>
+                        <td class="px-2 py-2 text-xs">
+                            <div class="relative w-full h-4 bg-gray-200 rounded overflow-hidden">
+                                <div class="absolute top-0 left-0 h-full bg-green-600 rounded" style="width: 100%"></div>
+                                <span class="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">100%</span>
+                            </div>
+                        </td>
+                        <td class="px-2 py-2 text-xs text-gray-900 text-center">${totalComingDue}</td>
                     </tr>
                 `;
             }
             
             tableBody.innerHTML = html;
             
-            // Store regional data globally for the stacked bar chart
+            // Store regional data globally for potential use elsewhere
             window.covenantRegionalData = regionalData;
         }
 
@@ -11474,7 +11587,7 @@
                                     </svg>
                                     <h5 class="font-semibold text-gray-900">What This Table Shows:</h5>
                                 </div>
-                                <p class="text-gray-600">Regional breakdown of past due covenants across time buckets (41-60 Days, 61-90 Days, >90 Days) and coming due covenants (next 30 days). Dynamically updates based on the Past Due/Coming Due toggle selection.</p>
+                                <p class="text-gray-600">Regional breakdown of past due covenants across time buckets (1-45 Days, 46-90 Days, >90 Days) with percentage of total and coming due covenants (next 30 days). Shows both Past Due and Coming Due regional distribution with visual progress bars for percentage comparison. Dynamically updates based on the Past Due/Coming Due toggle selection.</p>
                             </div>
                             
                             <div>

@@ -1450,9 +1450,9 @@
                                     <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">1-45</th>
                                     <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">46-90</th>
                                     <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">&gt;90</th>
-                                    <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap" style="min-width: 70px;">% Total</th>
                                     <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">Total</th>
                                     <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">Population</th>
+                                    <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap" style="min-width: 70px;">% Total</th>
                                 </tr>
                             </thead>
                             <tbody id="covenantRegionalTableBody" class="divide-y divide-gray-200">
@@ -5050,8 +5050,8 @@
             
             // Only apply filters if not in batch reset mode
             if (!isResettingFilters) {
-                updateFilterCount();
-                applyFilters();
+            updateFilterCount();
+            applyFilters();
             }
         }
         
@@ -5062,8 +5062,8 @@
             
             // Only apply filters if not in batch reset mode
             if (!isResettingFilters) {
-                updateFilterCount();
-                applyFilters();
+            updateFilterCount();
+            applyFilters();
             }
         }
         
@@ -5076,8 +5076,8 @@
             
             // Only apply filters if not in batch reset mode
             if (!isResettingFilters) {
-                updateFilterCount();
-                applyFilters();
+            updateFilterCount();
+            applyFilters();
             }
         }
         
@@ -5096,12 +5096,12 @@
             // Only refresh charts if not in batch reset mode
             if (!isResettingFilters) {
                 // Refresh the Top Relationships chart and ROTCE chart (both tabs should sync)
-                if (areFiltersActive()) {
-                    createRelationshipChartFromFiltered();
-                    createROTCEChartFromFiltered();
-                } else {
-                    createRelationshipChart();
-                    createROTCEChart();
+            if (areFiltersActive()) {
+                createRelationshipChartFromFiltered();
+                createROTCEChartFromFiltered();
+            } else {
+                createRelationshipChart();
+                createROTCEChart();
                 }
                 // Always refresh Balances tab charts (they use portfolioData)
                 createRelationshipChartBalances();
@@ -5150,42 +5150,42 @@
             // Batch UI updates using requestAnimationFrame for smooth rendering
             requestAnimationFrame(() => {
                 // Reset PSE toggle checkbox
-                const pseToggle = document.getElementById("pseToggle");
-                if (pseToggle) {
-                    pseToggle.checked = true;
-                }
-                
+            const pseToggle = document.getElementById("pseToggle");
+            if (pseToggle) {
+                pseToggle.checked = true;
+            }
+            
                 // Reset region buttons UI (both tabs) - UI only, no filter application
                 updateRegionButtonsUI("all");
-                
+            
                 // Reset status buttons UI (both tabs) - UI only
                 updateStatusButtonsUI("all");
-                
+            
                 // Reset amount type buttons UI - UI only
                 updateAmountTypeButtonsUI("direct");
-                
-                // Reset search
-                const searchInput = document.getElementById("searchInput");
-                if (searchInput) {
-                    searchInput.value = "";
-                }
-                
+            
+            // Reset search
+            const searchInput = document.getElementById("searchInput");
+            if (searchInput) {
+                searchInput.value = "";
+            }
+            
                 // Reset advanced filter dropdowns in single loop
-                const filterIds = [
+            const filterIds = [
                     "filterProductProgram", "filterExtendingUnit", "filterFacilityType",
                     "filterCommitment", "filterTeamLead", "filterUnderwriter",
                     "filterCAMaturity", "filterFacilityMaturity"
                 ];
-                filterIds.forEach(id => {
+            filterIds.forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.value = "";
-                });
-                
-                // Clear active filters object
-                activeFilters = {};
-                displayFilterBadges();
-                updateFilterCount();
-                
+            });
+            
+            // Clear active filters object
+            activeFilters = {};
+            displayFilterBadges();
+            updateFilterCount();
+            
                 // Clear flag and apply filters ONCE
                 isResettingFilters = false;
                 
@@ -5194,7 +5194,7 @@
                     applyFilters();
                     const elapsed = (performance.now() - startTime).toFixed(0);
                     console.log(`✅ All filters reset in ${elapsed}ms`);
-                    showNotification("Success", "All filters have been reset", "success");
+            showNotification("Success", "All filters have been reset", "success");
                 }, 10);
             });
         }
@@ -6353,17 +6353,17 @@
                         <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">1-45</th>
                         <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">46-90</th>
                         <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">&gt;90</th>
-                        <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap" style="min-width: 70px;">% Total</th>
                         <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">Total</th>
                         <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">Population</th>
+                        <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap" style="min-width: 70px;">% Total</th>
                     `;
                 } else {
                     headerEl.innerHTML = `
                         <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">Region</th>
                         <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">Due (30d)</th>
-                        <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap" style="min-width: 70px;">% Total</th>
                         <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">Total</th>
                         <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">Population</th>
+                        <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap" style="min-width: 70px;">% Total</th>
                     `;
                 }
             }
@@ -6510,20 +6510,20 @@
                     // % of Total = Past Due Total for this region / Total Population
                     const percentOfTotal = totalPopulation > 0 ? ((regionPastDueTotal / totalPopulation) * 100).toFixed(1) : 0;
                     
-                    html += `
+                html += `
                         <tr class="border-b border-gray-100 hover:bg-gray-50">
                             <td class="px-2 py-2 text-xs font-medium text-gray-700">${region}</td>
                             <td class="px-2 py-2 text-xs text-gray-700 text-center font-semibold">${count145}</td>
                             <td class="px-2 py-2 text-xs text-gray-700 text-center font-semibold">${count4690}</td>
                             <td class="px-2 py-2 text-xs text-gray-700 text-center font-semibold">${countOver90}</td>
+                            <td class="px-2 py-2 text-xs text-gray-900 text-center font-bold">${regionPastDueTotal}</td>
+                            <td class="px-2 py-2 text-xs text-gray-900 text-center font-bold">${regPopulation}</td>
                             <td class="px-2 py-2 text-xs">
                                 <div class="relative w-full h-4 bg-gray-100 rounded overflow-hidden">
                                     <div class="absolute top-0 left-0 h-full bg-blue-500 rounded transition-all duration-300" style="width: ${percentOfTotal}%"></div>
                                     <span class="absolute inset-0 flex items-center justify-center text-xs font-semibold text-gray-800">${percentOfTotal}%</span>
-                                </div>
+                            </div>
                             </td>
-                            <td class="px-2 py-2 text-xs text-gray-900 text-center font-bold">${regionPastDueTotal}</td>
-                            <td class="px-2 py-2 text-xs text-gray-900 text-center font-bold">${regPopulation}</td>
                         </tr>
                     `;
                 } else {
@@ -6534,14 +6534,14 @@
                         <tr class="border-b border-gray-100 hover:bg-gray-50">
                             <td class="px-2 py-2 text-xs font-medium text-gray-700">${region}</td>
                             <td class="px-2 py-2 text-xs text-gray-700 text-center font-semibold">${countComingDue}</td>
+                            <td class="px-2 py-2 text-xs text-gray-900 text-center font-bold">${countComingDue}</td>
+                            <td class="px-2 py-2 text-xs text-gray-900 text-center font-bold">${regPopulation}</td>
                             <td class="px-2 py-2 text-xs">
                                 <div class="relative w-full h-4 bg-gray-100 rounded overflow-hidden">
                                     <div class="absolute top-0 left-0 h-full bg-green-500 rounded transition-all duration-300" style="width: ${percentOfTotal}%"></div>
                                     <span class="absolute inset-0 flex items-center justify-center text-xs font-semibold text-gray-800">${percentOfTotal}%</span>
-                                </div>
+                                    </div>
                             </td>
-                            <td class="px-2 py-2 text-xs text-gray-900 text-center font-bold">${countComingDue}</td>
-                            <td class="px-2 py-2 text-xs text-gray-900 text-center font-bold">${regPopulation}</td>
                         </tr>
                     `;
                 }
@@ -6558,14 +6558,14 @@
                         <td class="px-2 py-2 text-xs text-gray-900 text-center">${total145}</td>
                         <td class="px-2 py-2 text-xs text-gray-900 text-center">${total4690}</td>
                         <td class="px-2 py-2 text-xs text-gray-900 text-center">${totalOver90}</td>
+                        <td class="px-2 py-2 text-xs text-gray-900 text-center">${totalPastDue}</td>
+                        <td class="px-2 py-2 text-xs text-gray-900 text-center">${totalPopulation}</td>
                         <td class="px-2 py-2 text-xs">
                             <div class="relative w-full h-4 bg-gray-200 rounded overflow-hidden">
                                 <div class="absolute top-0 left-0 h-full bg-blue-600 rounded" style="width: ${totalPercentOfTotal}%"></div>
                                 <span class="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">${totalPercentOfTotal}%</span>
                             </div>
                         </td>
-                        <td class="px-2 py-2 text-xs text-gray-900 text-center">${totalPastDue}</td>
-                        <td class="px-2 py-2 text-xs text-gray-900 text-center">${totalPopulation}</td>
                     </tr>
                 `;
             } else {
@@ -6574,14 +6574,14 @@
                     <tr class="bg-gray-50 font-bold border-t-2 border-gray-200">
                         <td class="px-2 py-2 text-xs text-gray-900">Total</td>
                         <td class="px-2 py-2 text-xs text-gray-900 text-center">${totalComingDue}</td>
+                        <td class="px-2 py-2 text-xs text-gray-900 text-center">${totalComingDue}</td>
+                        <td class="px-2 py-2 text-xs text-gray-900 text-center">${totalPopulation}</td>
                         <td class="px-2 py-2 text-xs">
                             <div class="relative w-full h-4 bg-gray-200 rounded overflow-hidden">
                                 <div class="absolute top-0 left-0 h-full bg-green-600 rounded" style="width: ${totalPercentOfTotal}%"></div>
                                 <span class="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">${totalPercentOfTotal}%</span>
                             </div>
                         </td>
-                        <td class="px-2 py-2 text-xs text-gray-900 text-center">${totalComingDue}</td>
-                        <td class="px-2 py-2 text-xs text-gray-900 text-center">${totalPopulation}</td>
                     </tr>
                 `;
             }

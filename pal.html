@@ -2514,83 +2514,6 @@
         let ccmData = []; // CCM (Credit Committee Memos) data from CCM_tw.xlsx
         let filteredData = [];
 
-        // DUMMY DATA FOR TESTING - Remove when real data is available
-        function initializeDummyData() {
-            const today = new Date();
-            const dummyCovenants = [];
-            
-            // Generate dummy covenant data
-            const regions = ['APAC', 'EMEA', 'NAM', 'LATAM'];
-            const pastDueCategories = ['46-60 Days', '61-90 Days', '>90 Days'];
-            
-            // Past Due Covenants
-            for (let i = 1; i <= 30; i++) {
-                const region = regions[Math.floor(Math.random() * regions.length)];
-                const category = pastDueCategories[Math.floor(Math.random() * pastDueCategories.length)];
-                const daysPastDue = category === '46-60 Days' ? 50 : (category === '61-90 Days' ? 75 : 100);
-                
-                dummyCovenants.push({
-                    Covenant_Number: `COV-PD-${i}`,
-                    'Coming_Due/Past_Due': 'Past Due',
-                    Past_Due_Category: category,
-                    Days_Past_Due: daysPastDue,
-                    Covenant_Due_Date: new Date(today.getTime() - daysPastDue * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                    Region: region,
-                    Product_Program: 'Test Program',
-                    Facility_ID: `FAC-${i}`
-                });
-            }
-            
-            // Coming Due Covenants (next 30 days)
-            for (let i = 1; i <= 20; i++) {
-                const region = regions[Math.floor(Math.random() * regions.length)];
-                const daysUntilDue = Math.floor(Math.random() * 30) + 1;
-                
-                dummyCovenants.push({
-                    Covenant_Number: `COV-CD-${i}`,
-                    'Coming_Due/Past_Due': 'Coming Due',
-                    Covenant_Due_Date: new Date(today.getTime() + daysUntilDue * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                    Region: region,
-                    Product_Program: 'Test Program',
-                    Facility_ID: `FAC-CD-${i}`
-                });
-            }
-            
-            // CCM Dummy Data
-            const dummyCCM = [];
-            for (let i = 1; i <= 40; i++) {
-                const region = regions[Math.floor(Math.random() * regions.length)];
-                const rand = Math.random();
-                let ccmDueDate;
-                
-                if (rand < 0.3) {
-                    // Past Due
-                    ccmDueDate = new Date(today.getTime() - Math.floor(Math.random() * 60) * 24 * 60 * 60 * 1000);
-                } else if (rand < 0.5) {
-                    // Coming Due (current month)
-                    ccmDueDate = new Date(today.getFullYear(), today.getMonth(), Math.floor(Math.random() * 28) + 1);
-                } else {
-                    // Open (future)
-                    ccmDueDate = new Date(today.getTime() + (Math.floor(Math.random() * 60) + 31) * 24 * 60 * 60 * 1000);
-                }
-                
-                dummyCCM.push({
-                    Region: region,
-                    CCM_Due_Date: ccmDueDate.toISOString().split('T')[0],
-                    Relationship_ID: `REL-${i}`,
-                    CAID: `CA-${i}`
-                });
-            }
-            
-            covenantsData = dummyCovenants;
-            ccmData = dummyCCM;
-            
-            console.log('✅ Dummy data initialized:', {
-                covenants: covenantsData.length,
-                ccm: ccmData.length
-            });
-        }
-        // END DUMMY DATA
         let expirationChartInstance = null;
         let searchDebounceTimer = null;
         let relationshipChartInstance = null;
@@ -2661,9 +2584,6 @@
             } else {
                 console.log("✓ XLSX library loaded successfully");
             }
-            
-            // Initialize dummy data for testing (REMOVE THIS WHEN REAL DATA IS AVAILABLE)
-            initializeDummyData();
             
             // Load data from Confluence attachment
             loadDataFromCSV();
@@ -2817,22 +2737,21 @@
                         "Building charts and metrics..."
                     );
                     
-                    // Use requestAnimationFrame for smoother UI update
-                    await new Promise(r => requestAnimationFrame(r));
-                    
-                    // Initialize dashboard
-                    initializeDashboard();
-                    
-                    const loadTime = ((performance.now() - loadStartTime) / 1000).toFixed(1);
-                    hideLoadingOverlay();
-                    
-                    showNotification(
-                        "Success",
-                        `Loaded ${data.length.toLocaleString()} records in ${loadTime}s`,
-                        "success"
-                    );
-                    
-                    console.log(`🎉 Dashboard loaded in ${loadTime}s`);
+                    // Use setTimeout to allow UI to update before heavy processing
+                    setTimeout(() => {
+                        initializeDashboard();
+                        
+                        const loadTime = ((performance.now() - loadStartTime) / 1000).toFixed(1);
+                        hideLoadingOverlay();
+                        
+                        showNotification(
+                            "Success",
+                            `Loaded ${data.length.toLocaleString()} records in ${loadTime}s`,
+                            "success"
+                        );
+                        
+                        console.log(`🎉 Dashboard loaded in ${loadTime}s`);
+                    }, 50);
                 } else {
                     console.error("No data from Confluence");
                     hideLoadingOverlay();
@@ -3142,20 +3061,17 @@
                 
                 reader.onprogress = function(e) {
                     if (e.lengthComputable && progressCallback) {
-                        const percent = Math.round((e.loaded / e.total) * 30); // 0-30%
+                        const percent = Math.round((e.loaded / e.total) * 30);
                         progressCallback(`Reading file... ${percent}%`);
                     }
                 };
                 
-                reader.onload = async function (e) {
+                reader.onload = function (e) {
                     try {
                         if (progressCallback) progressCallback("Parsing Excel structure...");
                         
                         const data = new Uint8Array(e.target.result);
                         const startTime = performance.now();
-                        
-                        // Allow UI to update before heavy parsing
-                        await new Promise(r => setTimeout(r, 10));
                         
                         // OPTIMIZED: Use minimal parsing options for speed
                         const workbook = XLSX.read(data, { 
@@ -3163,16 +3079,14 @@
                             cellDates: true,
                             cellNF: false,
                             cellText: false,
-                            cellStyles: false, // Skip styles for speed
-                            sheetStubs: false, // Skip empty cells
-                            dense: false, // Use sparse array for large files
+                            cellStyles: false,
+                            sheetStubs: false,
                         });
                         
                         const parseTime = performance.now() - startTime;
                         console.log(`Excel parsed in ${(parseTime/1000).toFixed(2)}s`);
                         
                         if (progressCallback) progressCallback("Converting to data rows...");
-                        await new Promise(r => setTimeout(r, 10));
                         
                         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                         console.log("Excel Sheet Name:", workbook.SheetNames[0]);
@@ -3182,37 +3096,15 @@
                         const jsonData = XLSX.utils.sheet_to_json(firstSheet, {
                             raw: false,
                             dateNF: "yyyy-mm-dd",
-                            defval: "", // Default value for empty cells
+                            defval: "",
                         });
                         const convertTime = performance.now() - convertStart;
                         console.log(`Converted ${jsonData.length} rows in ${(convertTime/1000).toFixed(2)}s`);
                         
                         if (progressCallback) progressCallback(`Filtering ${jsonData.length.toLocaleString()} rows...`);
-                        await new Promise(r => setTimeout(r, 10));
                         
-                        // OPTIMIZED: Filter in chunks to prevent UI blocking
-                        const filteredData = [];
-                        const chunkSize = 5000;
-                        
-                        for (let i = 0; i < jsonData.length; i += chunkSize) {
-                            const chunk = jsonData.slice(i, i + chunkSize);
-                            for (const row of chunk) {
-                                if (row.Facility_ID) {
-                                    filteredData.push(row);
-                                }
-                            }
-                            
-                            // Update progress and allow UI to breathe
-                            if (progressCallback) {
-                                const percent = Math.round(((i + chunkSize) / jsonData.length) * 100);
-                                progressCallback(`Processing... ${Math.min(percent, 100)}%`);
-                            }
-                            
-                            // Yield to UI thread every chunk
-                            if (i + chunkSize < jsonData.length) {
-                                await new Promise(r => setTimeout(r, 0));
-                            }
-                        }
+                        // Filter for rows with Facility_ID
+                        const filteredData = jsonData.filter((row) => row.Facility_ID);
                         
                         console.log(`Parsed ${filteredData.length} valid records from Excel`);
                         

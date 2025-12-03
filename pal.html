@@ -215,6 +215,24 @@
                         </svg>
                         Top Names
                     </button>
+                    <button
+                        class="inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors duration-200 ease-in-out whitespace-nowrap"
+                        :class="activeTab === 'covenants' ? 'text-blue-600 border-blue-600' : 'bg-transparent text-gray-500 border-transparent hover:text-gray-700'"
+                        @click="activeTab = 'covenants'">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Covenants
+                    </button>
+                    <button
+                        class="inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors duration-200 ease-in-out whitespace-nowrap"
+                        :class="activeTab === 'ccm' ? 'text-blue-600 border-blue-600' : 'bg-transparent text-gray-500 border-transparent hover:text-gray-700'"
+                        @click="activeTab = 'ccm'">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Credit Reviews
+                    </button>
                 </nav>
             </div>
         </div>
@@ -727,128 +745,94 @@
 
         <!-- Top Metric Cards -->
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 md:gap-6 mb-6">
-            <!-- Card 1: Total $ of Facility Amount -->
-            <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
-                <div class="mb-6 flex items-center gap-3">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100">
-                        <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- Card 1: Total $ of Facility Amount (TFA) -->
+            <div class="rounded-2xl border border-gray-200 bg-white p-5 flex flex-col">
+                <div class="flex items-start gap-3 mb-3">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-100">
+                        <svg class="h-5 w-5 shrink-0 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
                             </path>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-medium text-gray-800">
-                            TFA
-                        </h3>
-                        <p class="text-xs text-gray-400 mt-0.5">
-                            (Total Facilities Approved)
-                        </p>
+                        <h3 class="text-sm font-medium text-gray-500">TFA</h3>
+                        <p class="text-xs text-gray-400">(Total Facilities Approved)</p>
                     </div>
                 </div>
-                <div class="flex items-center justify-center">
-                    <h4 class="text-2xl font-bold text-gray-800" id="totalFacAmount">
-                        $0.00
-                    </h4>
-                </div>
+                <p class="text-2xl font-bold text-gray-900 text-center" id="totalFacAmount">$0.00</p>
             </div>
 
-            <!-- Card 2: Total Outstanding -->
-            <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
-                <div class="mb-6 flex items-center gap-3">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100">
-                        <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-                            </path>
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-medium text-gray-800">
-                            Outstanding
-                        </h3>
-                        <p class="text-xs text-gray-400 mt-0.5">
-                            (Direct + Contingent + PSE)
-                        </p>
-                    </div>
-                </div>
-                <div class="flex items-center justify-center">
-                    <h4 class="text-2xl font-bold text-gray-800" id="totalOutstanding">
-                        $0.00
-                    </h4>
-                </div>
-            </div>
-
-            <!-- Card 3: Total $ of OSUC -->
-            <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
-                <div class="mb-6 flex items-center gap-3">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100">
-                        <svg class="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- Card 2: Total $ of OSUC -->
+            <div class="rounded-2xl border border-gray-200 bg-white p-5 flex flex-col">
+                <div class="flex items-start gap-3 mb-3">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-100">
+                        <svg class="h-5 w-5 shrink-0 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
                             </path>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-medium text-gray-800">
-                            OSUC<sup class="text-blue-600">*</sup>
-                        </h3>
-                        <p class="text-xs text-gray-400 mt-0.5">
-                            (Outstanding + Unused Committed)
-                        </p>
+                        <h3 class="text-sm font-medium text-gray-500">OSUC<sup class="text-blue-600">*</sup></h3>
+                        <p class="text-xs text-gray-400">(OS + Unused Commitment)</p>
                     </div>
                 </div>
-                <div class="flex items-center justify-center">
-                    <h4 class="text-2xl font-bold text-gray-800" id="totalOSUC">
-                        $0.00
-                    </h4>
+                <p class="text-2xl font-bold text-gray-900 text-center" id="totalOSUC">$0.00</p>
+            </div>
+
+            <!-- Card 3: Total Outstanding -->
+            <div class="rounded-2xl border border-gray-200 bg-white p-5 flex flex-col">
+                <div class="flex items-start gap-3 mb-3">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-100">
+                        <svg class="h-5 w-5 shrink-0 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                            </path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-500">Outstanding</h3>
+                        <p class="text-xs text-gray-400">(Direct + Contingent + PSE)</p>
+                    </div>
                 </div>
+                <p class="text-2xl font-bold text-gray-900 text-center" id="totalOutstanding">$0.00</p>
             </div>
 
             <!-- Card 4: Total # of Facilities -->
-            <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
-                <div class="mb-6 flex items-center gap-3">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
-                        <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="rounded-2xl border border-gray-200 bg-white p-5 flex flex-col">
+                <div class="flex items-start gap-3 mb-3">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-100">
+                        <svg class="h-5 w-5 shrink-0 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
                             </path>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-medium text-gray-800">
-                            Total # of Facilities
-                        </h3>
+                        <h3 class="text-sm font-medium text-gray-500">Facilities</h3>
+                        <p class="text-xs text-gray-400">(Total Count)</p>
                     </div>
                 </div>
-                <div class="flex items-center justify-center">
-                    <h4 class="text-2xl font-bold text-gray-800" id="totalFacilities">
-                        0
-                    </h4>
-                </div>
+                <p class="text-2xl font-bold text-gray-900 text-center" id="totalFacilities">0</p>
             </div>
 
             <!-- Card 5: Total # of Relationships -->
-            <div class="rounded-2xl border border-gray-200 bg-white px-6 pb-5 pt-6">
-                <div class="mb-6 flex items-center gap-3">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100">
-                        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="rounded-2xl border border-gray-200 bg-white p-5 flex flex-col">
+                <div class="flex items-start gap-3 mb-3">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100">
+                        <svg class="h-5 w-5 shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
                             </path>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-medium text-gray-800">
-                            Total # of Relationships
-                        </h3>
+                        <h3 class="text-sm font-medium text-gray-500">Relationships</h3>
+                        <p class="text-xs text-gray-400">(Total Count)</p>
                     </div>
                 </div>
-                <div class="flex items-center justify-center">
-                    <h4 class="text-2xl font-bold text-gray-800" id="totalRelationships">
-                        0
-                    </h4>
-                </div>
+                <p class="text-2xl font-bold text-gray-900 text-center" id="totalRelationships">0</p>
             </div>
         </div>
 
@@ -988,16 +972,16 @@
                     <!-- Metric Item Start -->
                     <div class="rounded-2xl border border-gray-200 bg-white p-5 md:p-6">
                         <div class="flex items-start justify-between mb-3">
-                            <div class="flex items-center gap-3">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100">
-                            <svg class="fill-gray-800" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M8.80443 5.60156C7.59109 5.60156 6.60749 6.58517 6.60749 7.79851C6.60749 9.01185 7.59109 9.99545 8.80443 9.99545C10.0178 9.99545 11.0014 9.01185 11.0014 7.79851C11.0014 6.58517 10.0178 5.60156 8.80443 5.60156ZM5.10749 7.79851C5.10749 5.75674 6.76267 4.10156 8.80443 4.10156C10.8462 4.10156 12.5014 5.75674 12.5014 7.79851C12.5014 9.84027 10.8462 11.4955 8.80443 11.4955C6.76267 11.4955 5.10749 9.84027 5.10749 7.79851ZM4.86252 15.3208C4.08769 16.0881 3.70377 17.0608 3.51705 17.8611C3.48384 18.0034 3.5211 18.1175 3.60712 18.2112C3.70161 18.3141 3.86659 18.3987 4.07591 18.3987H13.4249C13.6343 18.3987 13.7992 18.3141 13.8937 18.2112C13.9797 18.1175 14.017 18.0034 13.9838 17.8611C13.7971 17.0608 13.4132 16.0881 12.6383 15.3208C11.8821 14.572 10.6899 13.955 8.75042 13.955C6.81096 13.955 5.61877 14.572 4.86252 15.3208ZM3.8071 14.2549C4.87163 13.2009 6.45602 12.455 8.75042 12.455C11.0448 12.455 12.6292 13.2009 13.6937 14.2549C14.7397 15.2906 15.2207 16.5607 15.4446 17.5202C15.7658 18.8971 14.6071 19.8987 13.4249 19.8987H4.07591C2.89369 19.8987 1.73504 18.8971 2.05628 17.5202C2.28015 16.5607 2.76117 15.2906 3.8071 14.2549ZM15.3042 11.4955C14.4702 11.4955 13.7006 11.2193 13.0821 10.7533C13.3742 10.3314 13.6054 9.86419 13.7632 9.36432C14.1597 9.75463 14.7039 9.99545 15.3042 9.99545C16.5176 9.99545 17.5012 9.01185 17.5012 7.79851C17.5012 6.58517 16.5176 5.60156 15.3042 5.60156C14.7039 5.60156 14.1597 5.84239 13.7632 6.23271C13.6054 5.73284 13.3741 5.26561 13.082 4.84371C13.7006 4.37777 14.4702 4.10156 15.3042 4.10156C17.346 4.10156 19.0012 5.75674 19.0012 7.79851C19.0012 9.84027 17.346 11.4955 15.3042 11.4955ZM19.9248 19.8987H16.3901C16.7014 19.4736 16.9159 18.969 16.9827 18.3987H19.9248C20.1341 18.3987 20.2991 18.3141 20.3936 18.2112C20.4796 18.1175 20.5169 18.0034 20.4837 17.861C20.2969 17.0607 19.913 16.088 19.1382 15.3208C18.4047 14.5945 17.261 13.9921 15.4231 13.9566C15.2232 13.6945 14.9995 13.437 14.7491 13.1891C14.5144 12.9566 14.262 12.7384 13.9916 12.5362C14.3853 12.4831 14.8044 12.4549 15.2503 12.4549C17.5447 12.4549 19.1291 13.2008 20.1936 14.2549C21.2395 15.2906 21.7206 16.5607 21.9444 17.5202C22.2657 18.8971 21.107 19.8987 19.9248 19.8987Z"
-                                    fill=""></path>
+                            <div class="flex items-start gap-3">
+                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-100">
+                                    <svg class="h-5 w-5 shrink-0 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                         </div>
-                                <span class="text-sm font-medium text-gray-800">New Deals Closed YTD</span>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">New Deals</span>
+                                    <p class="text-xs text-gray-400">Closed YTD</p>
+                                </div>
                         </div>
                             <div x-data="{openDropDown: false}" class="relative">
                                 <button @click="openDropDown = !openDropDown"
@@ -1045,16 +1029,16 @@
                     <!-- Metric Item Start -->
                     <div class="rounded-2xl border border-gray-200 bg-white p-5 md:p-6">
                         <div class="flex items-start justify-between mb-3">
-                            <div class="flex items-center gap-3">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100">
-                            <svg class="fill-gray-800" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M11.665 3.75621C11.8762 3.65064 12.1247 3.65064 12.3358 3.75621L18.7807 6.97856L12.3358 10.2009C12.1247 10.3065 11.8762 10.3065 11.665 10.2009L5.22014 6.97856L11.665 3.75621ZM4.29297 8.19203V16.0946C4.29297 16.3787 4.45347 16.6384 4.70757 16.7654L11.25 20.0366V11.6513C11.1631 11.6205 11.0777 11.5843 10.9942 11.5426L4.29297 8.19203ZM12.75 20.037L19.2933 16.7654C19.5474 16.6384 19.7079 16.3787 19.7079 16.0946V8.19202L13.0066 11.5426C12.9229 11.5844 12.8372 11.6208 12.75 11.6516V20.037ZM13.0066 2.41456C12.3732 2.09786 11.6277 2.09786 10.9942 2.41456L4.03676 5.89319C3.27449 6.27432 2.79297 7.05342 2.79297 7.90566V16.0946C2.79297 16.9469 3.27448 17.726 4.03676 18.1071L10.9942 21.5857L11.3296 20.9149L10.9942 21.5857C11.6277 21.9024 12.3732 21.9024 13.0066 21.5857L19.9641 18.1071C20.7264 17.726 21.2079 16.9469 21.2079 16.0946V7.90566C21.2079 7.05342 20.7264 6.27432 19.9641 5.89319L13.0066 2.41456Z"
-                                    fill=""></path>
+                            <div class="flex items-start gap-3">
+                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100">
+                                    <svg class="h-5 w-5 shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                             </svg>
                         </div>
-                                <span class="text-sm font-medium text-gray-800">New Deals Closed MTD</span>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500">New Deals</span>
+                                    <p class="text-xs text-gray-400">Closed MTD</p>
+                                </div>
                             </div>
                             <div x-data="{openDropDown: false}" class="relative">
                                 <button @click="openDropDown = !openDropDown"
@@ -1514,38 +1498,37 @@
 
         <!-- Important Notes -->
         <div class="overflow-hidden rounded-xl border border-gray-200 bg-white">
-            <div class="flex items-start gap-3 px-5 py-4">
-                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 mt-1">
+            <div class="flex items-center gap-3 px-5 py-4">
+                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 shrink-0">
                     <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
                 <div class="flex-1">
-                    <h4 class="text-sm font-semibold text-gray-800 mb-3">
+                    <h4 class="text-sm font-semibold text-gray-800 mb-1">
                         Important Notes
                     </h4>
                     <div class="text-xs text-gray-600 space-y-2.5">
                         <div class="flex items-start gap-2">
                             <span class="font-semibold text-gray-700 mt-0.5">*</span>
                             <p>
-                                <span class="font-semibold text-gray-700">OSUC (Outstanding Undrawn Committed):</span>
-                                Calculated based on the Committed/Uncommitted column. If
-                                "Committed", OSUC = Fac_Amount - (Direct_OS + Contingent_OS +
-                                PSE_OS); if "Uncommitted", OSUC = 0. These values are based on
-                                regional credit data and may vary from risk-reported values as
-                                they are not sourced from Optima.
+                                <span class="font-semibold text-gray-700">Unused Commitment (UC):</span>
+                                Undrawn portion of committed facility.
                             </p>
                         </div>
                         <div class="flex items-start gap-2">
                             <span class="font-semibold text-gray-700 mt-0.5">*</span>
                             <p>
-                                <span class="font-semibold text-gray-700">Undrawn (Unused Committed):</span>
-                                Calculated based on the Committed/Uncommitted column. If
-                                "Committed", Unused_Committed = Fac_Amount - (Direct_OS +
-                                Contingent_OS + PSE_OS); if "Uncommitted", Unused_Committed =
-                                0. Only committed facilities show values; uncommitted
-                                facilities show as $0.
+                                <span class="font-semibold text-gray-700">Outstanding (OS):</span>
+                                Drawn amount or calculated exposure.
+                            </p>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="font-semibold text-gray-700 mt-0.5">*</span>
+                            <p>
+                                <span class="font-semibold text-gray-700">OSUC (Outstanding and Unused Commitment):</span>
+                                For committed facilities, OSUC = Outstanding + Unused Commitment. For uncommitted facilities, OSUC = Outstanding.
                             </p>
                         </div>
                     </div>
@@ -1692,807 +1675,926 @@
         <div x-show="activeTab === 'balances'" style="display: none;">
         <!-- Page Header -->
         <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-5">
-            <!-- First Row: Search Bar, Action Buttons, and Last Updated -->
-            <div class="flex items-center justify-between gap-4 mb-5">
-                <!-- Left: Search Input -->
-                <div class="relative flex-1 max-w-2xl">
-                    <span class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2">
-                        <svg class="fill-gray-500" width="20" height="20" viewBox="0 0 20 20" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" clip-rule="evenodd"
-                                d="M3.04199 9.37381C3.04199 5.87712 5.87735 3.04218 9.37533 3.04218C12.8733 3.04218 15.7087 5.87712 15.7087 9.37381C15.7087 12.8705 12.8733 15.7055 9.37533 15.7055C5.87735 15.7055 3.04199 12.8705 3.04199 9.37381ZM9.37533 1.54218C5.04926 1.54218 1.54199 5.04835 1.54199 9.37381C1.54199 13.6993 5.04926 17.2055 9.37533 17.2055C11.2676 17.2055 13.0032 16.5346 14.3572 15.4178L17.1773 18.2381C17.4702 18.531 17.945 18.5311 18.2379 18.2382C18.5308 17.9453 18.5309 17.4704 18.238 17.1775L15.4182 14.3575C16.5367 13.0035 17.2087 11.2671 17.2087 9.37381C17.2087 5.04835 13.7014 1.54218 9.37533 1.54218Z"
-                                fill=""></path>
-                        </svg>
-                    </span>
-                    <input type="text" id="pb-searchInput" placeholder="Search facilities, relationships, or any data..." 
-                        class="h-11 w-full rounded-lg border border-gray-300 bg-white py-3 pr-4 pl-12 text-sm text-gray-800 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none shadow-sm" />
-                </div>
-                
-                <!-- Middle: Action Buttons -->
-                <div class="flex items-center gap-2">
-                    <button onclick="toggleFilterPopover()" id="pb-filterButton"
-                        class="relative flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z">
-                            </path>
-                        </svg>
-                        <span>More</span>
-                        <span id="pb-filterCount"
-                            class="hidden absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold text-white"></span>
-                    </button>
-
-                    <button onclick="resetAllFilters()" 
-                        class="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-                            </path>
-                        </svg>
-                        <span>Reset</span>
-                    </button>
-
-                    <!-- Export Dropdown -->
-                    <div x-data="{ exportOpen: false }" class="relative">
-                        <button @click="exportOpen = !exportOpen" @click.away="exportOpen = false"
-                            class="flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 px-3 py-2 text-xs font-medium text-white transition-colors">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                </path>
-                            </svg>
-                            <span>Export</span>
-                            <svg class="w-3 h-3 transition-transform" :class="exportOpen ? 'rotate-180' : ''"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                        
-                        <!-- Dropdown Menu -->
-                        <div x-show="exportOpen" x-transition:enter="transition ease-out duration-100"
-                            x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-                            x-transition:leave="transition ease-in duration-75"
-                            x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-                            class="absolute right-0 mt-2 w-44 rounded-lg border border-gray-200 bg-white shadow-xl z-10"
-                            style="display: none">
-                            <div class="py-1">
-                                <button onclick="exportToExcel()"
-                                    class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                        </path>
-                                    </svg>
-                                    <span class="font-medium">Excel (.xlsx)</span>
-                                </button>
-                                <button onclick="exportToPDF()"
-                                    class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z">
-                                        </path>
-                                    </svg>
-                                    <span class="font-medium">PDF (.pdf)</span>
-                                </button>
-                                <button onclick="exportToPPT()"
-                                    class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                        </path>
-                                    </svg>
-                                    <span class="font-medium">PowerPoint (.pptx)</span>
-                                </button>
-                                <button onclick="exportToPNG()"
-                                    class="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                        </path>
-                                    </svg>
-                                    <span class="font-medium">Image (.png)</span>
-                                </button>
-                            </div>
-                        </div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-900">Portfolio Balances</h2>
+                        <p class="mt-1 text-sm text-gray-500">Comprehensive breakdown of portfolio balances by category and exposure type</p>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <p class="text-xs text-gray-400 font-medium">Last Updated</p>
+                        <p class="text-sm font-semibold text-gray-600" id="pb-reportDate">--</p>
                     </div>
                 </div>
-                    
-                <!-- Right: Last Updated -->
-                <div class="text-right shrink-0">
-                    <p class="text-xs text-gray-400 font-medium">Last Updated</p>
-                    <p class="text-sm font-semibold text-gray-600" id="pb-reportDate">
-                        --
-                    </p>
+                </div>
+                
+            <!-- Placeholder Row 1: Key Metrics -->
+            <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
+                <!-- Total Notional Balance -->
+                <div class="col-span-12 md:col-span-6 xl:col-span-3">
+                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100">
+                                <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500">Total Notional Balance</h3>
+                                <p class="text-xs text-gray-400">Sum of Fac_Amount</p>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-900 text-center">$--</p>
+                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for total facility amount</p>
+                    </div>
+                </div>
+                
+                <!-- Total Committed Balance -->
+                <div class="col-span-12 md:col-span-6 xl:col-span-3">
+                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100">
+                                <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500">Total Committed Balance</h3>
+                                <p class="text-xs text-gray-400">Committed facilities only</p>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-900 text-center">$--</p>
+                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for committed balance</p>
+                    </div>
+                </div>
+
+                <!-- Total Outstanding -->
+                <div class="col-span-12 md:col-span-6 xl:col-span-3">
+                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100">
+                                <svg class="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500">Total Outstanding</h3>
+                                <p class="text-xs text-gray-400">Direct_OS + Contingent_OS + PSE_OS</p>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-900 text-center">$--</p>
+                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for total outstanding</p>
+                    </div>
+                </div>
+
+                <!-- Utilization Rate -->
+                <div class="col-span-12 md:col-span-6 xl:col-span-3">
+                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100">
+                                <svg class="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                            </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500">Utilization Rate</h3>
+                                <p class="text-xs text-gray-400">Outstanding / Notional</p>
+                        </div>
+                    </div>
+                        <p class="text-2xl font-bold text-gray-900 text-center">--%</p>
+                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for utilization percentage</p>
+                </div>
                 </div>
             </div>
             
-            <!-- Second Row: All Filter Tabs -->
-            <div class="flex flex-wrap items-center gap-4">
-                <!-- Region Tabs -->
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-medium text-gray-500 tracking-wider">Region:</span>
-                    <div class="inline-flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
-                        <button id="pb-btnRegionAll" onclick="selectRegionFilter('all')" 
-                            class="min-w-[50px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white">
-                            All
-                        </button>
-                        <button id="pb-btnRegionAPAC" onclick="selectRegionFilter('APAC')" 
-                            class="min-w-[50px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
-                            APAC
-                        </button>
-                        <button id="pb-btnRegionEMEA" onclick="selectRegionFilter('EMEA')" 
-                            class="min-w-[50px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
-                            EMEA
-                        </button>
-                        <button id="pb-btnRegionLATAM" onclick="selectRegionFilter('LATAM')" 
-                            class="min-w-[60px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
-                            LATAM
-                        </button>
-                        <button id="pb-btnRegionNAM" onclick="selectRegionFilter('NAM')" 
-                            class="min-w-[50px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
-                            NAM
-                        </button>
+            <!-- Placeholder Row 2: Balance Breakdown Table -->
+            <div class="mb-6">
+                <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6">
+                    <div class="mb-5 flex items-start justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">Balance Breakdown by Category</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Product program breakdown with notional, committed, and outstanding balances</p>
+                    </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-gray-500">
+                            <thead class="text-sm text-gray-700 bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left whitespace-nowrap">Category</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">Notional</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">Committed</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">Outstanding</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">% of Total</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">WoW Change</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td colspan="6" class="px-4 py-8 text-center text-gray-400">
+                                        <div class="flex flex-col items-center gap-2">
+                                            <svg class="h-8 w-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                                            <p class="text-sm">Placeholder for balance breakdown by Product_Program_Name</p>
+                                            <p class="text-xs">Data will be grouped and aggregated from Portfolio_tw.xlsx</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    </div>
+                </div>
+
+            <!-- Placeholder Row 3: Charts -->
+            <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
+                <!-- Balance by Region Chart -->
+                <div class="col-span-12 xl:col-span-6">
+                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
+                        <div class="mb-5">
+                            <h3 class="text-lg font-semibold text-gray-800">Balance Distribution by Region</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Regional breakdown of portfolio balances (APAC, EMEA, NAM, LATAM)</p>
+                        </div>
+                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+                            <div class="text-center text-gray-400">
+                                <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
+                                    </svg>
+                                <p class="text-sm font-medium">Donut Chart Placeholder</p>
+                                <p class="text-xs mt-1">Regional balance distribution</p>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Balance Trend Chart -->
+                <div class="col-span-12 xl:col-span-6">
+                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
+                        <div class="mb-5">
+                            <h3 class="text-lg font-semibold text-gray-800">Balance Trend Over Time</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Historical trend of portfolio balances (requires historical data)</p>
+                    </div>
+                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+                            <div class="text-center text-gray-400">
+                                <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+                                    </svg>
+                                <p class="text-sm font-medium">Line Chart Placeholder</p>
+                                <p class="text-xs mt-1">Balance trend over reporting periods</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Portfolio Balances Tab -->
+
+        <!-- Team View Tab Content -->
+        <div x-show="activeTab === 'team'" style="display: none;">
+            <!-- Page Header -->
+            <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-5">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-900">Team View</h2>
+                        <p class="mt-1 text-sm text-gray-500">Portfolio breakdown by underwriting team leads and team members</p>
+                    </div>
+                <div class="text-right shrink-0">
+                    <p class="text-xs text-gray-400 font-medium">Last Updated</p>
+                        <p class="text-sm font-semibold text-gray-600">--</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Placeholder Row 1: Team Metrics -->
+            <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
+                <!-- Total Teams -->
+                <div class="col-span-12 md:col-span-6 xl:col-span-3">
+                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100">
+                                <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                    </svg>
+                </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500">Total Team Leads</h3>
+                                <p class="text-xs text-gray-400">Unique Underwriting_Team_Lead</p>
+                    </div>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-900 text-center">--</p>
+                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for team lead count</p>
                     </div>
                     </div>
                     
-                <!-- Divider -->
-                <div class="h-8 w-px bg-gray-300"></div>
-
-                <!-- Status Filter -->
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-medium text-gray-500 tracking-wider">Status:</span>
-                    <div class="inline-flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
-                        <button id="pb-btnStatusAll" onclick="selectStatusFilter('all')" 
-                            class="min-w-[45px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white">
-                            All
-                        </button>
-                        <button id="pb-btnStatusCM" onclick="selectStatusFilter('CM')" 
-                            class="min-w-[45px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
-                            CM
-                        </button>
-                        <button id="pb-btnStatusDM" onclick="selectStatusFilter('DM')" 
-                            class="min-w-[45px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
-                            DM
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Divider -->
-                <div class="h-8 w-px bg-gray-300"></div>
-
-                <!-- PSE Toggle -->
-                <div x-data="{ pbPseToggle: true }" class="flex items-center gap-2">
-                    <span class="text-xs font-medium text-gray-500 tracking-wider">PSE:</span>
-                    <label for="pb-pseToggle" class="flex cursor-pointer items-center gap-2 select-none">
-                        <span class="text-xs font-medium"
-                            :class="!pbPseToggle ? 'text-gray-900' : 'text-gray-500'">Exclude</span>
-                        <div class="relative">
-                            <input type="checkbox" id="pb-pseToggle" class="sr-only" 
-                                @change="pbPseToggle = $event.target.checked; togglePSE($event.target.checked)" checked />
-                            <div class="block h-5 w-9 rounded-full transition-colors"
-                                :class="pbPseToggle ? 'bg-blue-600' : 'bg-gray-300'"></div>
-                            <div :class="pbPseToggle ? 'translate-x-4' : 'translate-x-0'"
-                                class="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm duration-200 ease-in-out">
-                        </div>
-                        </div>
-                        <span class="text-xs font-medium"
-                            :class="pbPseToggle ? 'text-gray-900' : 'text-gray-500'">Include</span>
-                    </label>
-                </div>
-
-                <!-- Divider -->
-                <div class="h-8 w-px bg-gray-300"></div>
-
-                <!-- Metrics By Amount Type Filter -->
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-medium text-gray-500 tracking-wider">Exposure:</span>
-                    <div class="inline-flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
-                        <button id="pb-btnAmountDirect" onclick="selectAmountTypeFilter('direct')" 
-                            class="min-w-[65px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white">
-                            Direct
-                        </button>
-                        <button id="pb-btnAmountContingent" onclick="selectAmountTypeFilter('contingent')" 
-                            class="min-w-[80px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
-                            Contingent
-                        </button>
-                        <button id="pb-btnAmountPSE" onclick="selectAmountTypeFilter('pse')" 
-                            class="min-w-[50px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
-                            PSE
-                        </button>
-                        <button id="pb-btnAmountOSUC" onclick="selectAmountTypeFilter('osuc')" 
-                            class="min-w-[60px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
-                            OSUC<sup class="text-blue-600">*</sup>
-                        </button>
-                        <button id="pb-btnAmountUnused" onclick="selectAmountTypeFilter('unused')"
-                            class="min-w-[90px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
-                            Undrawn<sup class="text-blue-600">*</sup>
-                        </button>
-                        <button id="pb-btnAmountTFA" onclick="selectAmountTypeFilter('tfa')" 
-                            class="min-w-[50px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
-                            TFA
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Active Filters Badges -->
-            <div id="pb-activeFiltersBadges" class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-200"
-                style="display: none">
-                <!-- Badges will be dynamically added here -->
-            </div>
-        </div>
-        
-        <!-- Top Relationships and ROTCE Charts -->
-        <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
-        <!-- Bar Chart: Top Relationships by Total Facility Amount / Direct OS -->
-            <div class="col-span-12 xl:col-span-6">
-                <div
-                    class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 sm:pt-5 h-full flex flex-col">
-                    <div class="flex flex-col gap-5 mb-6 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                            <h3 class="text-lg font-semibold text-gray-800" id="topRelationshipsTitleBalances">
-                                Top Relationships by Direct OS
-                            </h3>
-                            <p class="mt-1 text-gray-500 text-sm" id="topRelationshipsSubtitleBalances">
-                                Largest client exposures ranked by outstanding balance
-                            </p>
-                    </div>
-                        <div class="flex items-center gap-2">
-                            <!-- Top N Filter -->
-                            <div x-data="{openTopN: false, topNRelationships: 10}" class="relative">
-                                <button @click="openTopN = !openTopN"
-                                    class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <span>Top <span x-text="topNRelationships"></span></span>
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </button>
-                                <div x-show="openTopN" @click.outside="openTopN = false"
-                                    class="absolute right-0 top-full z-40 w-32 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
-                                    <button
-                                        @click="topNRelationships = 10; openTopN = false; document.getElementById('topNFilterBalances').value = 10; updateBarChartBalances();"
-                                        :class="topNRelationships === 10 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
-                                        Top 10
-                                    </button>
-                                    <button
-                                        @click="topNRelationships = 20; openTopN = false; document.getElementById('topNFilterBalances').value = 20; updateBarChartBalances();"
-                                        :class="topNRelationships === 20 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
-                                        Top 20
-                                    </button>
-                                    <button
-                                        @click="topNRelationships = 30; openTopN = false; document.getElementById('topNFilterBalances').value = 30; updateBarChartBalances();"
-                                        :class="topNRelationships === 30 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
-                                        Top 30
-                                    </button>
-                                    <button
-                                        @click="topNRelationships = 40; openTopN = false; document.getElementById('topNFilterBalances').value = 40; updateBarChartBalances();"
-                                        :class="topNRelationships === 40 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
-                                        Top 40
-                                    </button>
-                                    <button
-                                        @click="topNRelationships = 50; openTopN = false; document.getElementById('topNFilterBalances').value = 50; updateBarChartBalances();"
-                                        :class="topNRelationships === 50 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
-                                        Top 50
-                                    </button>
-                                    <button
-                                        @click="topNRelationships = 100; openTopN = false; document.getElementById('topNFilterBalances').value = 100; updateBarChartBalances();"
-                                        :class="topNRelationships === 100 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
-                                        Top 100
-                                    </button>
-                    </div>
+                <!-- Total Underwriters -->
+                <div class="col-span-12 md:col-span-6 xl:col-span-3">
+                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100">
+                                <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
                             </div>
-                            <!-- Hidden select for backward compatibility with existing JavaScript -->
-                            <select id="topNFilterBalances" style="display: none;">
-                                <option value="10" selected>Top 10</option>
-                                <option value="20">Top 20</option>
-                                <option value="30">Top 30</option>
-                                <option value="40">Top 40</option>
-                                <option value="50">Top 50</option>
-                                <option value="100">Top 100</option>
-                            </select>
-                            <div x-data="{openDropDown: false}" class="relative">
-                                <button @click="openDropDown = !openDropDown"
-                                    :class="openDropDown ? 'text-gray-700' : 'text-gray-400 hover:text-gray-700'"
-                                    class="transition-colors">
-                                    <svg class="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path fill-rule="evenodd" clip-rule="evenodd"
-                                            d="M10.2441 6C10.2441 5.0335 11.0276 4.25 11.9941 4.25H12.0041C12.9706 4.25 13.7541 5.0335 13.7541 6C13.7541 6.9665 12.9706 7.75 12.0041 7.75H11.9941C11.0276 7.75 10.2441 6.9665 10.2441 6ZM10.2441 18C10.2441 17.0335 11.0276 16.25 11.9941 16.25H12.0041C12.9706 16.25 13.7541 17.0335 13.7541 18C13.7541 18.9665 12.9706 19.75 12.0041 19.75H11.9941C11.0276 19.75 10.2441 18.9665 10.2441 18ZM11.9941 10.25C11.0276 10.25 10.2441 11.0335 10.2441 12C10.2441 12.9665 11.0276 13.75 11.9941 13.75H12.0041C12.9706 13.75 13.7541 12.9665 13.7541 12C13.7541 11.0335 12.9706 10.25 12.0041 10.25H11.9941Z"
-                                            fill="" />
-                                    </svg>
-                                </button>
-                                <div x-show="openDropDown" @click.outside="openDropDown = false"
-                                    class="absolute right-0 top-full z-40 w-40 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
-                                    <button onclick="openChartDataModal('topRelationships')"
-                                        @click="openDropDown = false"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-                                        View Data
-                                    </button>
-                                    <button onclick="openMethodologyModal('topRelationships')"
-                                        @click="openDropDown = false"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-                                        View Methodology
-                                    </button>
-                                    <button onclick="exportChartData('topRelationships')" @click="openDropDown = false"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-                                        Export Data
-                                    </button>
-                </div>
-                    </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500">Total Underwriters</h3>
+                                <p class="text-xs text-gray-400">Unique Lead_Underwriter</p>
+                            </div>
                         </div>
-                    </div>
-                    <div class="flex-1 w-full overflow-y-auto overflow-x-hidden custom-scrollbar"
-                        style="max-height: 450px">
-                        <div id="relationshipChartBalances" class="-ml-5 pl-2"></div>
+                        <p class="text-2xl font-bold text-gray-900 text-center">--</p>
+                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for underwriter count</p>
                     </div>
                 </div>
-            </div>
 
-            <!-- ROTCE Performance -->
-            <div class="col-span-12 xl:col-span-6">
-                <div
-                    class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 sm:pt-5 h-full flex flex-col">
-                    <div class="mb-5 flex items-start justify-between">
+                <!-- Avg Portfolio per Team -->
+                <div class="col-span-12 md:col-span-6 xl:col-span-3">
+                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100">
+                                <svg class="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                </svg>
+                        </div>
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-800">
-                                ROTCE Performance
-                            </h3>
-                            <p class="mt-1 text-gray-500 text-sm" id="rotceSubtitleBalances">
-                                Top N relationships ROTCE performance
-                            </p>
+                                <h3 class="text-sm font-medium text-gray-500">Avg Portfolio per Team</h3>
+                                <p class="text-xs text-gray-400">Average TFA per team lead</p>
                         </div>
-                        <div x-data="{openDropDown: false}" class="relative">
-                                <button @click="openDropDown = !openDropDown"
-                                    :class="openDropDown ? 'text-gray-700' : 'text-gray-400 hover:text-gray-700'"
-                                    class="transition-colors">
-                                    <svg class="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path fill-rule="evenodd" clip-rule="evenodd"
-                                            d="M10.2441 6C10.2441 5.0335 11.0276 4.25 11.9941 4.25H12.0041C12.9706 4.25 13.7541 5.0335 13.7541 6C13.7541 6.9665 12.9706 7.75 12.0041 7.75H11.9941C11.0276 7.75 10.2441 6.9665 10.2441 6ZM10.2441 18C10.2441 17.0335 11.0276 16.25 11.9941 16.25H12.0041C12.9706 16.25 13.7541 17.0335 13.7541 18C13.7541 18.9665 12.9706 19.75 12.0041 19.75H11.9941C11.0276 19.75 10.2441 18.9665 10.2441 18ZM11.9941 10.25C11.0276 10.25 10.2441 11.0335 10.2441 12C10.2441 12.9665 11.0276 13.75 11.9941 13.75H12.0041C12.9706 13.75 13.7541 12.9665 13.7541 12C13.7541 11.0335 12.9706 10.25 12.0041 10.25H11.9941Z"
-                                            fill="" />
-                                    </svg>
-                                </button>
-                                <div x-show="openDropDown" @click.outside="openDropDown = false"
-                                    class="absolute right-0 z-40 w-40 p-2 space-y-1 bg-white border border-gray-200 shadow-theme-lg top-full rounded-2xl"
-                                style="display: none">
-                                    <button onclick="openChartDataModal('rotce')"
-                                        class="flex w-full px-3 py-2 font-medium text-left text-gray-500 rounded-lg text-xs hover:bg-gray-100 hover:text-gray-700">
-                                        View Data
-                                    </button>
-                                    <button onclick="openMethodologyModal('rotce')"
-                                        class="flex w-full px-3 py-2 font-medium text-left text-gray-500 rounded-lg text-xs hover:bg-gray-100 hover:text-gray-700">
-                                        View Methodology
-                                    </button>
-                                    <button onclick="exportChartData('rotce')"
-                                        class="flex w-full px-3 py-2 font-medium text-left text-gray-500 rounded-lg text-xs hover:bg-gray-100 hover:text-gray-700">
-                                        Export Data
-                                    </button>
                                 </div>
+                        <p class="text-2xl font-bold text-gray-900 text-center">$--</p>
+                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for average portfolio</p>
                         </div>
-                    </div>
+                </div>
 
-                    <!-- ROTCE Chart -->
-                    <div class="flex-1 w-full overflow-y-auto overflow-x-hidden custom-scrollbar"
-                        style="max-height: 450px">
-                        <div id="rotceChartBalances" class="-ml-5 pl-2">
-                            <!-- Chart will be rendered here -->
+                <!-- Top Performing Team -->
+                <div class="col-span-12 md:col-span-6 xl:col-span-3">
+                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100">
+                                <svg class="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                                </svg>
                         </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500">Top Performing Team</h3>
+                                <p class="text-xs text-gray-400">By ROTCE performance</p>
+                    </div>
+                        </div>
+                        <p class="text-lg font-bold text-gray-900 text-center">--</p>
+                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for top team name</p>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Pivot Table Section -->
+            <!-- Placeholder Row 2: Team Portfolio Table -->
         <div class="mb-6">
             <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6">
                 <div class="mb-5 flex items-start justify-between">
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-800">
-                            Portfolio Balances - Pivot View
-                        </h3>
-                        <p class="mt-1 text-gray-500 text-sm">
-                            Comprehensive breakdown by region and exposure type
-                        </p>
+                            <h3 class="text-lg font-semibold text-gray-800">Portfolio by Team Lead</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Facility assignments and performance metrics by Underwriting_Team_Lead</p>
                     </div>
-                    <div x-data="{openDropDown: false}" class="relative">
-                        <button @click="openDropDown = !openDropDown"
-                            :class="openDropDown ? 'text-gray-700' : 'text-gray-400 hover:text-gray-700'"
-                            class="transition-colors">
-                            <svg class="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M10.2441 6C10.2441 5.0335 11.0276 4.25 11.9941 4.25H12.0041C12.9706 4.25 13.7541 5.0335 13.7541 6C13.7541 6.9665 12.9706 7.75 12.0041 7.75H11.9941C11.0276 7.75 10.2441 6.9665 10.2441 6ZM10.2441 18C10.2441 17.0335 11.0276 16.25 11.9941 16.25H12.0041C12.9706 16.25 13.7541 17.0335 13.7541 18C13.7541 18.9665 12.9706 19.75 12.0041 19.75H11.9941C11.0276 19.75 10.2441 18.9665 10.2441 18ZM11.9941 10.25C11.0276 10.25 10.2441 11.0335 10.2441 12C10.2441 12.9665 11.0276 13.75 11.9941 13.75H12.0041C12.9706 13.75 13.7541 12.9665 13.7541 12C13.7541 11.0335 12.9706 10.25 12.0041 10.25H11.9941Z"
-                                    fill="" />
+                        </div>
+                    <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-gray-500">
+                        <thead class="text-sm text-gray-700 bg-gray-50">
+                            <tr>
+                                    <th class="px-4 py-3 text-left whitespace-nowrap">Team Lead</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">Relationships</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">Facilities</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">Total TFA</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">Avg ROTCE</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">% of Total</th>
+                            </tr>
+                        </thead>
+                            <tbody>
+                            <tr class="border-b hover:bg-gray-50">
+                                    <td colspan="6" class="px-4 py-8 text-center text-gray-400">
+                                        <div class="flex flex-col items-center gap-2">
+                                            <svg class="h-8 w-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                            </svg>
+                                            <p class="text-sm">Placeholder for team portfolio breakdown</p>
+                                            <p class="text-xs">Data grouped by Underwriting_Team_Lead from Portfolio_tw.xlsx</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                                    </div>
+            </div>
+        </div>
+        
+            <!-- Placeholder Row 3: Team Charts -->
+        <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
+                <!-- Portfolio by Team Lead Chart -->
+            <div class="col-span-12 xl:col-span-6">
+                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
+                        <div class="mb-5">
+                            <h3 class="text-lg font-semibold text-gray-800">Top Team Leads by TFA</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Bar chart showing total facility amount by team lead</p>
+                    </div>
+                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+                            <div class="text-center text-gray-400">
+                                <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                    </svg>
+                                <p class="text-sm font-medium">Bar Chart Placeholder</p>
+                                <p class="text-xs mt-1">Top team leads by total facility amount</p>
+                    </div>
+                            </div>
+                </div>
+                    </div>
+
+                <!-- Team ROTCE Performance Chart -->
+                <div class="col-span-12 xl:col-span-6">
+                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
+                        <div class="mb-5">
+                            <h3 class="text-lg font-semibold text-gray-800">Team ROTCE Performance</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Average ROTCE performance by team lead</p>
+                        </div>
+                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+                            <div class="text-center text-gray-400">
+                                <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                </svg>
+                                <p class="text-sm font-medium">Bar Chart Placeholder</p>
+                                <p class="text-xs mt-1">ROTCE performance with 12% target line</p>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+        <!-- End Team View Tab -->
+
+        <!-- Top Names Tab Content -->
+        <div x-show="activeTab === 'topnames'" style="display: none;">
+            <!-- Page Header -->
+            <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-5">
+                <div class="flex items-center justify-between">
+                        <div>
+                        <h2 class="text-xl font-semibold text-gray-900">Top Names</h2>
+                        <p class="mt-1 text-sm text-gray-500">Largest relationships and their portfolio composition</p>
+                        </div>
+                    <div class="text-right shrink-0">
+                        <p class="text-xs text-gray-400 font-medium">Last Updated</p>
+                        <p class="text-sm font-semibold text-gray-600">--</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Placeholder Row 1: Top Names Metrics -->
+            <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
+                <!-- Total Relationships -->
+                <div class="col-span-12 md:col-span-6 xl:col-span-3">
+                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100">
+                                <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                    </svg>
+                                </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500">Total Relationships</h3>
+                                <p class="text-xs text-gray-400">Unique Relationship_Name</p>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-900 text-center">--</p>
+                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for relationship count</p>
+                        </div>
+                    </div>
+
+                <!-- Top 10 Concentration -->
+                <div class="col-span-12 md:col-span-6 xl:col-span-3">
+                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100">
+                                <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                                </svg>
+                        </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500">Top 10 Concentration</h3>
+                                <p class="text-xs text-gray-400">% of total portfolio</p>
+                    </div>
+                </div>
+                        <p class="text-2xl font-bold text-gray-900 text-center">--%</p>
+                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for concentration %</p>
+            </div>
+        </div>
+
+                <!-- Largest Relationship -->
+                <div class="col-span-12 md:col-span-6 xl:col-span-3">
+                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100">
+                                <svg class="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                                </svg>
+                                    </div>
+                    <div>
+                                <h3 class="text-sm font-medium text-gray-500">Largest Relationship</h3>
+                                <p class="text-xs text-gray-400">By total facility amount</p>
+                    </div>
+                        </div>
+                        <p class="text-lg font-bold text-gray-900 truncate text-center">--</p>
+                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for largest name</p>
+                    </div>
+                </div>
+
+                <!-- Avg Relationship Size -->
+                <div class="col-span-12 md:col-span-6 xl:col-span-3">
+                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100">
+                                <svg class="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                             </svg>
-                        </button>
-                        <div x-show="openDropDown" @click.outside="openDropDown = false"
-                            class="absolute right-0 z-40 w-40 p-2 space-y-1 bg-white border border-gray-200 shadow-theme-lg top-full rounded-2xl"
-                            style="display: none">
-                            <button @click="openDropDown = false"
-                                class="flex w-full px-3 py-2 font-medium text-left text-gray-500 rounded-lg text-xs hover:bg-gray-100 hover:text-gray-700">
-                                Export to Excel
-                            </button>
-                            <button @click="openDropDown = false"
-                                class="flex w-full px-3 py-2 font-medium text-left text-gray-500 rounded-lg text-xs hover:bg-gray-100 hover:text-gray-700">
-                                Export to PDF
-                            </button>
+                                    </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500">Avg Relationship Size</h3>
+                                <p class="text-xs text-gray-400">Average TFA per relationship</p>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-900 text-center">$--</p>
+                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for average size</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Pivot Table -->
-                <div class="overflow-x-auto custom-scrollbar">
-                    <style>
-                        .bar-chart-container {
-                            position: relative;
-                            width: 100%;
-                            height: 24px;
-                            background-color: #f3f4f6;
-                            border-radius: 4px;
-                            overflow: hidden;
-                        }
-                        .bar-chart-fill {
-                            position: absolute;
-                            top: 0;
-                            left: 0;
-                            height: 100%;
-                            background-color: #3b82f6;
-                            transition: width 0.3s ease;
-                        }
-                        .bar-chart-text {
-                            position: absolute;
-                            top: 50%;
-                            left: 50%;
-                            transform: translate(-50%, -50%);
-                            font-size: 14px;
-                            font-weight: 500;
-                            color: #1f2937;
-                            z-index: 1;
-                            line-height: 1.5;
-                        }
-                    </style>
+            <!-- Placeholder Row 2: Top Relationships Table -->
+            <div class="mb-6">
+                <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6">
+                    <div class="mb-5 flex items-start justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">Top Relationships</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Detailed view of largest relationships with exposure breakdown</p>
+                                    </div>
+                    </div>
+                    <div class="overflow-x-auto">
                     <table class="w-full text-sm text-gray-500">
                         <thead class="text-sm text-gray-700 bg-gray-50">
                             <tr>
-                                <th scope="col" class="px-4 py-3 text-left whitespace-nowrap w-1/4">
-                                    Categories
-                                </th>
-                                <th scope="col" class="px-4 py-3 text-center whitespace-nowrap">
-                                    Notional Balance
-                                </th>
-                                <th scope="col" class="px-4 py-3 text-center whitespace-nowrap">
-                                    Committed Balance
-                                </th>
-                                <th scope="col" class="px-4 py-3 text-center whitespace-nowrap">
-                                    % of Total Loan Portfolio
-                                </th>
-                                <th scope="col" class="px-4 py-3 text-center whitespace-nowrap">
-                                    vs Prior Year End
-                                </th>
-                                <th scope="col" class="px-4 py-3 text-center whitespace-nowrap">
-                                    WoW Difference
-                                </th>
-                                <th scope="col" class="px-4 py-3 text-center whitespace-nowrap">
-                                    QoQ Difference
-                                </th>
-                                <th scope="col" class="px-4 py-3 text-center whitespace-nowrap">
-                                    YoY Difference
-                                </th>
+                                    <th class="px-4 py-3 text-left whitespace-nowrap">Rank</th>
+                                    <th class="px-4 py-3 text-left whitespace-nowrap">Relationship Name</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">Facilities</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">TFA</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">Direct OS</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">ROTCE</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">% of Total</th>
                             </tr>
                         </thead>
-                        <tbody id="pivotTableBody">
-                            <!-- Securities Based Lending -->
+                            <tbody>
                             <tr class="border-b hover:bg-gray-50">
-                                <td class="px-4 py-3 text-left font-medium text-gray-900 whitespace-nowrap">
-                                    Securities Based Lending
-                                </td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">
-                                    <div class="bar-chart-container">
-                                        <div class="bar-chart-fill" style="width: 0%"></div>
-                                        <div class="bar-chart-text">0.0%</div>
+                                    <td colspan="7" class="px-4 py-8 text-center text-gray-400">
+                                        <div class="flex flex-col items-center gap-2">
+                                            <svg class="h-8 w-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                                            </svg>
+                                            <p class="text-sm">Placeholder for top relationships breakdown</p>
+                                            <p class="text-xs">Data grouped by Relationship_Name from Portfolio_tw.xlsx</p>
                                     </div>
                                 </td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                            </tr>
-
-                            <!-- Residential Mortgages -->
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="px-4 py-3 text-left font-medium text-gray-900 whitespace-nowrap">
-                                    Residential Mortgages
-                                </td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">
-                                    <div class="bar-chart-container">
-                                        <div class="bar-chart-fill" style="width: 0%"></div>
-                                        <div class="bar-chart-text">0.0%</div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                            </tr>
-
-                            <!-- Commercial Real Estate -->
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="px-4 py-3 text-left font-medium text-gray-900 whitespace-nowrap">
-                                    Commercial Real Estate
-                                </td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">
-                                    <div class="bar-chart-container">
-                                        <div class="bar-chart-fill" style="width: 0%"></div>
-                                        <div class="bar-chart-text">0.0%</div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                            </tr>
-
-                            <!-- Other Structured Lending -->
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="px-4 py-3 text-left font-medium text-gray-900 whitespace-nowrap">
-                                    Other Structured Lending
-                                </td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">
-                                    <div class="bar-chart-container">
-                                        <div class="bar-chart-fill" style="width: 0%"></div>
-                                        <div class="bar-chart-text">0.0%</div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                            </tr>
-
-                            <!-- Art Lending - Subcategory -->
-                            <tr class="border-b">
-                                <td class="px-4 py-3 text-left pl-12 text-gray-900 whitespace-nowrap">
-                                    Art Lending
-                                </td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">
-                                    <div class="bar-chart-container">
-                                        <div class="bar-chart-fill" style="width: 0%"></div>
-                                        <div class="bar-chart-text">0.0%</div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                            </tr>
-
-                            <!-- Aircraft Financing - Subcategory -->
-                            <tr class="border-b">
-                                <td class="px-4 py-3 text-left pl-12 text-gray-900 whitespace-nowrap">
-                                    Aircraft Financing
-                                </td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">
-                                    <div class="bar-chart-container">
-                                        <div class="bar-chart-fill" style="width: 0%"></div>
-                                        <div class="bar-chart-text">0.0%</div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                            </tr>
-
-                            <!-- Sports Financing - Subcategory -->
-                            <tr class="border-b">
-                                <td class="px-4 py-3 text-left pl-12 text-gray-900 whitespace-nowrap">
-                                    Sports Financing
-                                </td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">
-                                    <div class="bar-chart-container">
-                                        <div class="bar-chart-fill" style="width: 0%"></div>
-                                        <div class="bar-chart-text">0.0%</div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                            </tr>
-
-                            <!-- Law Firm / Partner Lending - Subcategory -->
-                            <tr class="border-b">
-                                <td class="px-4 py-3 text-left pl-12 text-gray-900 whitespace-nowrap">
-                                    Law Firm / Partner Lending
-                                </td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">
-                                    <div class="bar-chart-container">
-                                        <div class="bar-chart-fill" style="width: 0%"></div>
-                                        <div class="bar-chart-text">0.0%</div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                            </tr>
-
-                            <!-- Subscription Financing - Subcategory -->
-                            <tr class="border-b">
-                                <td class="px-4 py-3 text-left pl-12 text-gray-900 whitespace-nowrap">
-                                    Subscription Financing
-                                </td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">
-                                    <div class="bar-chart-container">
-                                        <div class="bar-chart-fill" style="width: 0%"></div>
-                                        <div class="bar-chart-text">0.0%</div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                            </tr>
-
-                            <!-- Other Secured - Subcategory -->
-                            <tr class="border-b">
-                                <td class="px-4 py-3 text-left pl-12 text-gray-900 whitespace-nowrap">
-                                    Other Secured
-                                </td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">
-                                    <div class="bar-chart-container">
-                                        <div class="bar-chart-fill" style="width: 0%"></div>
-                                        <div class="bar-chart-text">0.0%</div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                            </tr>
-
-                            <!-- Unsecured Lending -->
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="px-4 py-3 text-left font-medium text-gray-900 whitespace-nowrap">
-                                    Unsecured Lending
-                                </td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">
-                                    <div class="bar-chart-container">
-                                        <div class="bar-chart-fill" style="width: 0%"></div>
-                                        <div class="bar-chart-text">0.0%</div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                            </tr>
-
-                            <!-- Cards -->
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="px-4 py-3 text-left font-medium text-gray-900 whitespace-nowrap">
-                                    Cards
-                                </td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">$0.00</td>
-                                <td class="px-4 py-3 text-center">
-                                    <div class="bar-chart-container">
-                                        <div class="bar-chart-fill" style="width: 0%"></div>
-                                        <div class="bar-chart-text">0.0%</div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
-                                <td class="px-4 py-3 text-center">+0.0%</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                
-                <!-- Table Footer -->
-                <nav class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4" aria-label="Table navigation">
-                    <span class="text-sm font-normal text-gray-500">
-                        Showing all loan categories and subcategories
-                    </span>
-                    <div class="inline-flex items-center space-x-2">
-                        <span class="text-xs text-gray-700">* Notional Balance represents total committed amount</span>
-                    </div>
-                </nav>
             </div>
         </div>
 
-        <!-- Important Notes -->
-        <div class="overflow-hidden rounded-xl border border-gray-200 bg-white">
-            <div class="flex items-start gap-3 px-5 py-4">
-                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 mt-1">
+            <!-- Placeholder Row 3: Charts -->
+            <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
+                <!-- Concentration Chart -->
+                <div class="col-span-12 xl:col-span-6">
+                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
+                        <div class="mb-5">
+                            <h3 class="text-lg font-semibold text-gray-800">Portfolio Concentration</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Top 10 vs Rest of Portfolio distribution</p>
+                                    </div>
+                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+                            <div class="text-center text-gray-400">
+                                <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
+                    </svg>
+                                <p class="text-sm font-medium">Donut Chart Placeholder</p>
+                                <p class="text-xs mt-1">Concentration risk visualization</p>
+                </div>
+                        </div>
+                        </div>
+                    </div>
+
+                <!-- Relationship Size Distribution -->
+                <div class="col-span-12 xl:col-span-6">
+                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
+                        <div class="mb-5">
+                            <h3 class="text-lg font-semibold text-gray-800">Relationship Size Distribution</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Distribution of relationships by size buckets</p>
+                                    </div>
+                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+                            <div class="text-center text-gray-400">
+                                <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                <p class="text-sm font-medium">Histogram Placeholder</p>
+                                <p class="text-xs mt-1">Size bucket distribution chart</p>
+            </div>
+        </div>
+        </div>
+            </div>
+        </div>
+            </div>
+        <!-- End Top Names Tab -->
+
+        <!-- Covenants Tab Content -->
+        <div x-show="activeTab === 'covenants'" style="display: none;">
+            <!-- Page Header -->
+            <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-5">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-900">Covenants Monitoring</h2>
+                        <p class="mt-1 text-sm text-gray-500">Track covenant compliance status, past due items, and upcoming due dates</p>
+                                    </div>
+                    <div class="text-right shrink-0">
+                        <p class="text-xs text-gray-400 font-medium">Last Updated</p>
+                        <p class="text-sm font-semibold text-gray-600">--</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Placeholder Row 1: Covenant Status Metrics -->
+            <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
+                <!-- Total Covenants -->
+                <div class="col-span-12 md:col-span-6 xl:col-span-3">
+                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100">
+                                <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                    </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500">Total Covenants</h3>
+                                <p class="text-xs text-gray-400">Unique Covenant_Number</p>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-900 text-center">--</p>
+                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for covenant count</p>
+                    </div>
+                </div>
+
+                <!-- Past Due -->
+                <div class="col-span-12 md:col-span-6 xl:col-span-3">
+                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-red-100">
+                                <svg class="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                    </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500">Past Due</h3>
+                                <p class="text-xs text-gray-400">Covenant_Due_Date < today</p>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold text-red-600 text-center">--</p>
+                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for past due count</p>
+                    </div>
+                </div>
+
+                <!-- Coming Due (30 Days) -->
+                <div class="col-span-12 md:col-span-6 xl:col-span-3">
+                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100">
+                                <svg class="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                    </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500">Coming Due (30 Days)</h3>
+                                <p class="text-xs text-gray-400">Due within next 30 days</p>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold text-amber-600 text-center">--</p>
+                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for coming due count</p>
+                    </div>
+                </div>
+
+                <!-- Compliance Rate -->
+                <div class="col-span-12 md:col-span-6 xl:col-span-3">
+                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100">
+                                <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                    </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500">Compliance Rate</h3>
+                                <p class="text-xs text-gray-400">On-time / Total</p>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold text-green-600 text-center">--%</p>
+                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for compliance %</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Placeholder Row 2: Covenant Status Charts -->
+            <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
+                <!-- Past Due Covenants Chart -->
+                <div class="col-span-12 xl:col-span-4">
+                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
+                        <div class="mb-5">
+                            <h3 class="text-lg font-semibold text-gray-800">Past Due Covenants</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Breakdown by aging bucket (1-45, 46-90, >90 days)</p>
+                                    </div>
+                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+                            <div class="text-center text-gray-400">
+                                <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
+                                </svg>
+                                <p class="text-sm font-medium">Donut Chart Placeholder</p>
+                                <p class="text-xs mt-1">Past due aging distribution</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Covenants by Region Table -->
+                <div class="col-span-12 xl:col-span-4">
+                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
+                        <div class="mb-5">
+                            <h3 class="text-lg font-semibold text-gray-800">Covenants by Region</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Regional distribution with aging breakdown</p>
+                                    </div>
+                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+                            <div class="text-center text-gray-400">
+                                <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </svg>
+                                <p class="text-sm font-medium">Table Placeholder</p>
+                                <p class="text-xs mt-1">Region × Aging bucket matrix</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coming Due Chart -->
+                <div class="col-span-12 xl:col-span-4">
+                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
+                        <div class="mb-5">
+                            <h3 class="text-lg font-semibold text-gray-800">Coming Due (Next 30 Days)</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Covenants due within the next 30 days</p>
+                                    </div>
+                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+                            <div class="text-center text-gray-400">
+                                <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
+                                </svg>
+                                <p class="text-sm font-medium">Donut Chart Placeholder</p>
+                                <p class="text-xs mt-1">Coming due by region</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Placeholder Row 3: Covenant Details Table -->
+            <div class="mb-6">
+                <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6">
+                    <div class="mb-5 flex items-start justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">Covenant Details</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Detailed view of all covenants with status and due dates</p>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-gray-500">
+                            <thead class="text-sm text-gray-700 bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left whitespace-nowrap">Covenant #</th>
+                                    <th class="px-4 py-3 text-left whitespace-nowrap">Relationship</th>
+                                    <th class="px-4 py-3 text-left whitespace-nowrap">Region</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">Due Date</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">Status</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">Days Past Due</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <tr class="border-b hover:bg-gray-50">
+                                    <td colspan="6" class="px-4 py-8 text-center text-gray-400">
+                                        <div class="flex flex-col items-center gap-2">
+                                            <svg class="h-8 w-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            <p class="text-sm">Placeholder for covenant details</p>
+                                            <p class="text-xs">Data from Covenants_tw.xlsx</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Covenants Tab -->
+
+        <!-- Credit Reviews (CCM) Tab Content -->
+        <div x-show="activeTab === 'ccm'" style="display: none;">
+            <!-- Page Header -->
+            <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-5">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-900">Credit Reviews</h2>
+                        <p class="mt-1 text-sm text-gray-500">Criticized/Classified Memos and Reviews tracking by region and status</p>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <p class="text-xs text-gray-400 font-medium">Last Updated</p>
+                        <p class="text-sm font-semibold text-gray-600">--</p>
+                    </div>
+            </div>
+        </div>
+
+            <!-- Placeholder Row 1: CCM Status Metrics -->
+            <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
+                <!-- Total CCMs -->
+                <div class="col-span-12 md:col-span-6 xl:col-span-3">
+                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100">
                     <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
                 </div>
-                <div class="flex-1">
-                    <h4 class="text-sm font-semibold text-gray-800 mb-3">
-                        Important Notes
-                    </h4>
-                    <div class="text-xs text-gray-600 space-y-2.5">
-                        <div class="flex items-start gap-2">
-                            <span class="font-semibold text-gray-700 mt-0.5">*</span>
-                            <p>
-                                <span class="font-semibold text-gray-700">OSUC (Outstanding Undrawn Committed):</span>
-                                Calculated based on the Committed/Uncommitted column. If
-                                "Committed", OSUC = Fac_Amount - (Direct_OS + Contingent_OS +
-                                PSE_OS); if "Uncommitted", OSUC = 0. These values are based on
-                                regional credit data and may vary from risk-reported values as
-                                they are not sourced from Optima.
-                            </p>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500">Total Credit Reviews</h3>
+                                <p class="text-xs text-gray-400">Active CCM records</p>
                         </div>
-                        <div class="flex items-start gap-2">
-                            <span class="font-semibold text-gray-700 mt-0.5">*</span>
-                            <p>
-                                <span class="font-semibold text-gray-700">Undrawn (Unused Committed):</span>
-                                Calculated based on the Committed/Uncommitted column. If
-                                "Committed", Unused_Committed = Fac_Amount - (Direct_OS +
-                                Contingent_OS + PSE_OS); if "Uncommitted", Unused_Committed =
-                                0. Only committed facilities show values; uncommitted
-                                facilities show as $0.
-                            </p>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-900 text-center">--</p>
+                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for CCM count</p>
+                    </div>
+                </div>
+
+                <!-- Past Due CCMs -->
+                <div class="col-span-12 md:col-span-6 xl:col-span-3">
+                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-red-100">
+                                <svg class="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+            </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500">Past Due</h3>
+                                <p class="text-xs text-gray-400">CCM_Due_Date < today</p>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold text-red-600 text-center">--</p>
+                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for past due count</p>
+        </div>
+        </div>
+
+                <!-- Coming Due CCMs -->
+                <div class="col-span-12 md:col-span-6 xl:col-span-3">
+                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100">
+                                <svg class="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500">Coming Due</h3>
+                                <p class="text-xs text-gray-400">Within current month</p>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold text-amber-600 text-center">--</p>
+                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for coming due count</p>
+            </div>
+        </div>
+
+                <!-- Open CCMs -->
+                <div class="col-span-12 md:col-span-6 xl:col-span-3">
+                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
+                        <div class="flex items-center gap-3 mb-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100">
+                                <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-500">Open</h3>
+                                <p class="text-xs text-gray-400">Future due date</p>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold text-green-600 text-center">--</p>
+                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for open count</p>
+            </div>
+        </div>
+            </div>
+
+            <!-- Placeholder Row 2: CCM Charts -->
+            <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
+                <!-- CCM by Region Chart -->
+                <div class="col-span-12 xl:col-span-6">
+                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
+                        <div class="mb-5">
+                            <h3 class="text-lg font-semibold text-gray-800">Credit Reviews by Region</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Regional distribution of CCMs (APAC, EMEA, NAM, LATAM)</p>
+                        </div>
+                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+                            <div class="text-center text-gray-400">
+                                <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                <p class="text-sm font-medium">Stacked Bar Chart Placeholder</p>
+                                <p class="text-xs mt-1">Past Due / Coming Due / Open by region</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CCM Status by Region Table -->
+                <div class="col-span-12 xl:col-span-6">
+                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
+                        <div class="mb-5">
+                            <h3 class="text-lg font-semibold text-gray-800">Status Summary by Region</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Counts of Past Due, Coming Due, and Open by region</p>
+                        </div>
+                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+                            <div class="text-center text-gray-400">
+                                <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </svg>
+                                <p class="text-sm font-medium">Summary Table Placeholder</p>
+                                <p class="text-xs mt-1">Region × Status matrix with totals</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        </div>
 
-        <!-- Team View Tab Content -->
-        <div x-show="activeTab === 'team'" style="display: none;">
-            <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-6">
-                <h2 class="text-2xl font-semibold text-gray-900 mb-4">Team View</h2>
-                <p class="text-gray-600">Team view will be displayed here. This section can show team member portfolios, assignments, and performance metrics.</p>
+            <!-- Placeholder Row 3: CCM Details Table -->
+            <div class="mb-6">
+                <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6">
+                    <div class="mb-5 flex items-start justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">Credit Review Details</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Detailed view of all credit committee memos with status and approvals</p>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-gray-500">
+                            <thead class="text-sm text-gray-700 bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left whitespace-nowrap">Relationship</th>
+                                    <th class="px-4 py-3 text-left whitespace-nowrap">Region</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">Risk Rating</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">CCM Due Date</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">Status</th>
+                                    <th class="px-4 py-3 text-left whitespace-nowrap">Approver</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td colspan="6" class="px-4 py-8 text-center text-gray-400">
+                                        <div class="flex flex-col items-center gap-2">
+                                            <svg class="h-8 w-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                            </svg>
+                                            <p class="text-sm">Placeholder for CCM details</p>
+                                            <p class="text-xs">Data from CCM_tw.xlsx</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Important Notes -->
+            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white">
+                <div class="flex items-center gap-3 px-5 py-4">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 shrink-0">
+                        <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-semibold text-gray-800 mb-1">ETL Process</h4>
+                        <p class="text-xs text-gray-600">Before loading the data, the ETL process standardizes regional files into one, filters out Credit_Classification = Pass and Loss, keeps only CM in DM/CM_Flag, then standardizes and creates one file for this dashboard to consume.</p>
+                    </div>
+                </div>
             </div>
         </div>
-
-        <!-- Top Names Tab Content -->
-        <div x-show="activeTab === 'topnames'" style="display: none;">
-            <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-6">
-                <h2 class="text-2xl font-semibold text-gray-900 mb-4">Top Names</h2>
-                <p class="text-gray-600">Top names view will be displayed here. This section can show the top performing or highest value portfolio items.</p>
-            </div>
-        </div>
+        <!-- End Credit Reviews Tab -->
     </div>
 
     <script>
@@ -2531,12 +2633,10 @@
         let expirationChartInstance = null;
         let searchDebounceTimer = null;
         let relationshipChartInstance = null;
-        let relationshipChartInstanceBalances = null; // Separate instance for Balances tab
         let facilityTrendChartInstance = null; // Store facility trend chart instance
         let facilityMaturityChartInstance = null; // Store facility maturity chart instance
         let creditClassificationChartInstance = null; // Store credit classification chart instance
         let rotceChartInstance = null; // Store ROTCE chart instance
-        let rotceChartInstanceBalances = null; // Separate instance for Balances tab
         let updateBarChartTimer = null; // Debounce timer for bar chart updates
         let activeFilters = {};
         let selectedMetricType = "facilityAmount"; // Default to Facility Amount
@@ -2698,9 +2798,6 @@
                     createRelationshipChart();
                     createCreditClassificationChart();
                     createROTCEChart();
-                    // Refresh Balances tab charts
-                    createRelationshipChartBalances();
-                    createROTCEChartBalances();
                     
                     // Reset filters and reload data
                     activeFilters = {};
@@ -3447,9 +3544,6 @@
             createRelationshipChart();
             createCreditClassificationChart();
             createROTCEChart();
-            // Create Balances tab charts
-            createRelationshipChartBalances();
-            createROTCEChartBalances();
             console.timeEnd("Create Charts");
             
             // Step 6: Filter and render table (only first page)
@@ -3874,35 +3968,6 @@
                 // Add as first badge
                 badgesContainer.insertBefore(badge, badgesContainer.firstChild);
             }
-            
-            // Update Portfolio Balances badges
-            const pbBadgesContainer = document.getElementById("pb-activeFiltersBadges");
-            if (pbBadgesContainer) {
-                pbBadgesContainer.style.display = "flex";
-
-                const pbBadge = document.createElement("span");
-                pbBadge.id = "pb-chartFilterBadge";
-                pbBadge.className =
-                    "inline-flex items-center bg-blue-50 text-sm text-blue-700 border-2 border-blue-500 rounded-lg gap-x-2 py-1.5 pl-3 pr-1 font-medium";
-                pbBadge.innerHTML = `
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
-                    </svg>
-                    <span class="text-blue-700">Chart Filter</span>
-                    <span class="h-4 w-px bg-blue-400"></span>
-                    <span class="font-semibold text-blue-900">${chartFilter.label}</span>
-                    <button type="button" onclick="clearChartFilter()" 
-                        class="flex h-5 w-5 items-center justify-center rounded text-blue-600 hover:bg-blue-100 hover:text-blue-800"
-                        aria-label="Remove">
-                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                        </svg>
-                    </button>
-                `;
-
-                // Add as first badge
-                pbBadgesContainer.insertBefore(pbBadge, pbBadgesContainer.firstChild);
-            }
         }
 
         // Apply filters with chart filter included
@@ -4147,21 +4212,16 @@
 
         // Display filter badges
         function displayFilterBadges() {
-            // Update both Portfolio Overview and Portfolio Balances badges
             const badgesContainer = document.getElementById("activeFiltersBadges");
-            const pbBadgesContainer = document.getElementById("pb-activeFiltersBadges");
             
             if (badgesContainer) badgesContainer.innerHTML = "";
-            if (pbBadgesContainer) pbBadgesContainer.innerHTML = "";
             
             if (Object.keys(activeFilters).length === 0) {
                 if (badgesContainer) badgesContainer.style.display = "none";
-                if (pbBadgesContainer) pbBadgesContainer.style.display = "none";
                 return;
             }
             
             if (badgesContainer) badgesContainer.style.display = "flex";
-            if (pbBadgesContainer) pbBadgesContainer.style.display = "flex";
             
             Object.entries(activeFilters).forEach(([label, value]) => {
                 // Create badge for Portfolio Overview
@@ -4182,26 +4242,6 @@
                         </button>
                     `;
                     badgesContainer.appendChild(badge);
-                }
-                
-                // Create badge for Portfolio Balances
-                if (pbBadgesContainer) {
-                    const pbBadge = document.createElement("span");
-                    pbBadge.className =
-                        "inline-flex items-center bg-white text-sm text-gray-600 border border-gray-300 rounded-lg gap-x-2 py-1.5 pl-3 pr-1";
-                    pbBadge.innerHTML = `
-                        <span class="text-gray-600">${label}</span>
-                        <span class="h-4 w-px bg-gray-300"></span>
-                        <span class="font-medium text-gray-800">${value}</span>
-                        <button type="button" onclick="removeFilter('${label}')" 
-                            class="flex h-5 w-5 items-center justify-center rounded text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-                            aria-label="Remove">
-                            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                            </svg>
-                        </button>
-                    `;
-                    pbBadgesContainer.appendChild(pbBadge);
                 }
             });
         }
@@ -5102,10 +5142,7 @@
             } else {
                 createRelationshipChart();
                 createROTCEChart();
-                }
-                // Always refresh Balances tab charts (they use portfolioData)
-                createRelationshipChartBalances();
-                createROTCEChartBalances();
+            }
             }
         }
         
@@ -5113,8 +5150,6 @@
         function updateAmountTypeTitles(type) {
             const titleElement = document.getElementById("topRelationshipsTitle");
             const subtitleElement = document.getElementById("topRelationshipsSubtitle");
-            const titleElementBalances = document.getElementById("topRelationshipsTitleBalances");
-            const subtitleElementBalances = document.getElementById("topRelationshipsSubtitleBalances");
             
             const titles = {
                 direct: { title: "Top Relationships by Direct OS", subtitle: "Largest client exposures ranked by direct outstanding balance" },
@@ -5129,8 +5164,6 @@
             
             if (titleElement) titleElement.textContent = t.title;
             if (subtitleElement) subtitleElement.textContent = t.subtitle;
-            if (titleElementBalances) titleElementBalances.textContent = t.title;
-            if (subtitleElementBalances) subtitleElementBalances.textContent = t.subtitle;
         }
         
         // Reset All Filters (OPTIMIZED - batch UI updates, single filter application)
@@ -5175,7 +5208,7 @@
                     "filterProductProgram", "filterExtendingUnit", "filterFacilityType",
                     "filterCommitment", "filterTeamLead", "filterUnderwriter",
                     "filterCAMaturity", "filterFacilityMaturity"
-                ];
+            ];
             filterIds.forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.value = "";
@@ -5199,7 +5232,7 @@
             });
         }
         
-        // Helper: Update region buttons UI only (no filter application)
+        // Helper: Update region buttons UI only (no filter application) - Portfolio Overview only
         function updateRegionButtonsUI(region) {
             const regions = ["All", "APAC", "EMEA", "LATAM", "NAM"];
             regions.forEach((r) => {
@@ -5208,17 +5241,12 @@
                 const inactiveClass = `${minWidth} px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900`;
                 const isActive = r.toLowerCase() === region.toLowerCase();
                 
-                // Overview tab
                 const btn = document.getElementById(`btnRegion${r}`);
                 if (btn) btn.className = isActive ? activeClass : inactiveClass;
-                
-                // Balances tab
-                const pbBtn = document.getElementById(`pb-btnRegion${r}`);
-                if (pbBtn) pbBtn.className = isActive ? activeClass : inactiveClass;
             });
         }
         
-        // Helper: Update status buttons UI only (no filter application)
+        // Helper: Update status buttons UI only (no filter application) - Portfolio Overview only
         function updateStatusButtonsUI(status) {
             const statuses = ["All", "CM", "DM"];
             statuses.forEach((s) => {
@@ -5226,17 +5254,12 @@
                 const inactiveClass = "min-w-[45px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900";
                 const isActive = s.toLowerCase() === status.toLowerCase();
                 
-                // Overview tab
                 const btn = document.getElementById(`btnStatus${s}`);
                 if (btn) btn.className = isActive ? activeClass : inactiveClass;
-                
-                // Balances tab
-                const pbBtn = document.getElementById(`pb-btnStatus${s}`);
-                if (pbBtn) pbBtn.className = isActive ? activeClass : inactiveClass;
             });
         }
         
-        // Helper: Update amount type buttons UI only (no filter application)
+        // Helper: Update amount type buttons UI only (no filter application) - Portfolio Overview only
         function updateAmountTypeButtonsUI(type) {
             const types = { 
                 Direct: { id: "direct", minWidth: "65px" },
@@ -5253,15 +5276,11 @@
                 const inactiveClass = `min-w-[${minWidth}] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900`;
                 const isActive = types[t].id === type;
                 
-                // Overview tab
                 const btn = document.getElementById(`btnAmount${t}`);
                 if (btn) btn.className = isActive ? activeClass : inactiveClass;
-                
-                // Balances tab
-                const pbBtn = document.getElementById(`pb-btnAmount${t}`);
-                if (pbBtn) pbBtn.className = isActive ? activeClass : inactiveClass;
             });
         }
+        
         
         // Export Functions
         
@@ -5665,7 +5684,7 @@
             
             if (variance > 0) {
                 // Positive variance - green
-                element.className = 'flex items-center gap-1 rounded-full bg-success-50 py-0.5 pl-2 pr-2.5 text-sm font-medium text-success-600';
+                element.className = 'flex items-center gap-1 rounded-full bg-green-100 py-0.5 pl-2 pr-2.5 text-sm font-medium text-green-600';
                 element.innerHTML = `
                     <svg class="fill-current" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" clip-rule="evenodd" d="M5.56462 1.62393C5.70193 1.47072 5.90135 1.37432 6.12329 1.37432C6.1236 1.37432 6.12391 1.37432 6.12422 1.37432C6.31631 1.37415 6.50845 1.44731 6.65505 1.59381L9.65514 4.5918C9.94814 4.88459 9.94831 5.35947 9.65552 5.65246C9.36273 5.94546 8.88785 5.94562 8.59486 5.65283L6.87329 3.93247L6.87329 10.125C6.87329 10.5392 6.53751 10.875 6.12329 10.875C5.70908 10.875 5.37329 10.5392 5.37329 10.125L5.37329 3.93578L3.65516 5.65282C3.36218 5.94562 2.8873 5.94547 2.5945 5.65248C2.3017 5.35949 2.30185 4.88462 2.59484 4.59182L5.56462 1.62393Z" fill=""></path>
@@ -5674,7 +5693,7 @@
                 `;
             } else if (variance < 0) {
                 // Negative variance - red
-                element.className = 'flex items-center gap-1 rounded-full bg-error-50 py-0.5 pl-2 pr-2.5 text-sm font-medium text-error-600';
+                element.className = 'flex items-center gap-1 rounded-full bg-red-100 py-0.5 pl-2 pr-2.5 text-sm font-medium text-red-600';
                 element.innerHTML = `
                     <svg class="fill-current" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" clip-rule="evenodd" d="M5.31462 10.3761C5.45194 10.5293 5.65136 10.6257 5.87329 10.6257C5.8736 10.6257 5.8739 10.6257 5.87421 10.6257C6.0663 10.6259 6.25845 10.5527 6.40505 10.4062L9.40514 7.4082C9.69814 7.11541 9.69831 6.64054 9.40552 6.34754C9.11273 6.05454 8.63785 6.05438 8.34486 6.34717L6.62329 8.06753L6.62329 1.875C6.62329 1.46079 6.28751 1.125 5.87329 1.125C5.45908 1.125 5.12329 1.46079 5.12329 1.875L5.12329 8.06422L3.40516 6.34719C3.11218 6.05439 2.6373 6.05454 2.3445 6.34752C2.0517 6.64051 2.05185 7.11538 2.34484 7.40818L5.31462 10.3761Z" fill=""></path>
@@ -6306,12 +6325,12 @@
         function updateCovenantMonitoringLegend(labels, series, totalCount, colors) {
             const legendElement = document.getElementById("covenantMonitoringLegend");
             if (!legendElement) return;
-            
+
             let legendHTML = "";
             for (let i = 0; i < labels.length; i++) {
                 const color = colors[i] || "#3641f5";
                 const count = series[i] || 0;
-                
+            
                 legendHTML += `
                     <div class="flex flex-col items-center gap-2">
                             <div class="flex items-center gap-2">
@@ -8334,602 +8353,6 @@
                 console.error("❌ Error creating relationship chart:", error);
                 console.error("Error details:", error.message, error.stack);
             }
-        }
-
-        // Create relationship bar chart for Balances tab (duplicate of createRelationshipChart)
-        function createRelationshipChartBalances() {
-            const startTime = performance.now();
-            const topN = parseInt(document.getElementById("topNFilterBalances").value);
-            
-            // Use amount type based on filter selection
-            let fieldName, seriesName;
-            switch (selectedAmountType) {
-                case "direct":
-                    fieldName = "Direct_OS";
-                    seriesName = "Direct OS";
-                    break;
-                case "contingent":
-                    fieldName = "Contingent_OS";
-                    seriesName = "Contingent OS";
-                    break;
-                case "pse":
-                    fieldName = "PSE_OS";
-                    seriesName = "PSE OS";
-                    break;
-                case "osuc":
-                    fieldName = "OSUC";
-                    seriesName = "OSUC";
-                    break;
-                case "unused":
-                    fieldName = "Unused_Committed";
-                    seriesName = "Undrawn Commitment";
-                    break;
-                case "tfa":
-                    fieldName = "Fac_Amount";
-                    seriesName = "Total Facility Amount";
-                    break;
-                default:
-                    fieldName = "Direct_OS";
-                    seriesName = "Direct OS";
-            }
-
-            console.log(
-                "Creating relationship chart (Balances), field:",
-                fieldName,
-                "dataLength:",
-                portfolioData.length
-            );
-            
-            // Use Map for better performance - store all exposure types
-            const relationshipData = new Map();
-            
-            for (let i = 0; i < portfolioData.length; i++) {
-                const row = portfolioData[i];
-                const relId = row.Relationship_Name || row.Relationship_ID;
-                
-                if (relId) {
-                    if (!relationshipData.has(relId)) {
-                        relationshipData.set(relId, {
-                            tfa: 0,
-                            direct: 0,
-                            contingent: 0,
-                            pse: 0,
-                            osuc: 0,
-                            unused: 0,
-                            facilityCount: 0,
-                        });
-                    }
-                    
-                    const data = relationshipData.get(relId);
-                    data.tfa += parseNumber(row.Fac_Amount || row.Facility_Amount);
-                    data.direct += parseNumber(row.Direct_OS);
-                    data.contingent += parseNumber(row.Contingent_OS);
-                    data.pse += parseNumber(row.PSE_OS);
-                    data.osuc += parseNumber(row.OSUC);
-                    data.unused += parseNumber(row.Unused_Committed);
-                    if (row.Facility_ID) data.facilityCount++;
-                }
-            }
-            
-            console.log("Total unique relationships:", relationshipData.size);
-            
-            // Get the selected field value for sorting
-            const relationshipTotals = new Map();
-            for (const [relId, data] of relationshipData.entries()) {
-                let sortValue = 0;
-                switch (selectedAmountType) {
-                    case "tfa":
-                        sortValue = data.tfa;
-                        break;
-                    case "direct":
-                        sortValue = data.direct;
-                        break;
-                    case "contingent":
-                        sortValue = data.contingent;
-                        break;
-                    case "pse":
-                        sortValue = data.pse;
-                        break;
-                    case "osuc":
-                        sortValue = data.osuc;
-                        break;
-                    case "unused":
-                        sortValue = data.unused;
-                        break;
-                    default:
-                        sortValue = data.direct;
-                }
-                relationshipTotals.set(relId, sortValue);
-            }
-            
-            // Convert to array and sort (only what we need)
-            const sorted = Array.from(relationshipTotals.entries())
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, topN);
-            
-            console.log(
-                `Chart aggregated ${portfolioData.length} rows, found ${relationshipTotals.size
-                } relationships in ${(performance.now() - startTime).toFixed(2)}ms`
-            );
-            
-            // Add index numbers (1, 2, 3, ...) before relationship names
-            const relationships = sorted.map(
-                (item, index) => `${index + 1}. ${item[0]}`
-            );
-            const amounts = sorted.map((item) => item[1]);
-            
-            // Handle empty data
-            if (relationships.length === 0) {
-                console.warn("No relationship data for chart");
-                return;
-            }
-
-            // Check if all amounts are zero
-            const totalAmount = amounts.reduce((sum, val) => sum + val, 0);
-            if (totalAmount === 0) {
-                console.warn("⚠️ All amounts are zero for selectedAmountType:", selectedAmountType);
-                const chartElement = document.querySelector("#relationshipChartBalances");
-                if (chartElement) {
-                    chartElement.innerHTML = `<div class="flex items-center justify-center h-64 text-gray-500">No ${seriesName} data available</div>`;
-                }
-                return;
-            }
-
-            // Calculate dynamic height based on number of relationships (35px per bar, min 350px)
-            const calculatedHeight = Math.max(350, relationships.length * 35);
-            
-            const options = {
-                series: [
-                    {
-                    name: seriesName,
-                        data: amounts,
-                    },
-                ],
-                colors: ["#465fff"],
-                chart: {
-                    fontFamily: "Outfit, sans-serif",
-                    type: "bar",
-                    height: calculatedHeight,
-                    toolbar: {
-                        show: false,
-                    },
-                    events: {
-                        dataPointSelection: function (event, chartContext, config) {
-                            const selectedIndex = config.dataPointIndex;
-                            const selectedRelationship = relationships[selectedIndex];
-                            console.log("Relationship clicked:", selectedRelationship);
-                            applyChartFilter(
-                                "relationship",
-                                selectedRelationship,
-                                selectedRelationship
-                            );
-                        },
-                    },
-                },
-                plotOptions: {
-                    bar: {
-                        horizontal: true,
-                        borderRadius: 5,
-                        borderRadiusApplication: "end",
-                    },
-                },
-                dataLabels: {
-                    enabled: false,
-                },
-                stroke: {
-                    show: true,
-                    width: 4,
-                    colors: ["transparent"],
-                },
-                xaxis: {
-                    categories: relationships,
-                    labels: {
-                        formatter: function (val) {
-                            return formatCurrency(val);
-                        },
-                        style: {
-                            colors: "#6B7280",
-                            fontSize: "12px",
-                            fontFamily: "Outfit, sans-serif",
-                        },
-                    },
-                    axisBorder: {
-                        show: false,
-                    },
-                    axisTicks: {
-                        show: false,
-                    },
-                },
-                yaxis: {
-                    title: false,
-                    labels: {
-                        style: {
-                            colors: "#6B7280",
-                            fontSize: "12px",
-                            fontFamily: "Outfit, sans-serif",
-                        },
-                    },
-                },
-                legend: {
-                    show: true,
-                    position: "top",
-                    horizontalAlign: "left",
-                    fontFamily: "Outfit, sans-serif",
-                    fontSize: "12px",
-                    markers: {
-                        radius: 99,
-                    },
-                },
-                grid: {
-                    yaxis: {
-                        lines: {
-                            show: false,
-                        },
-                    },
-                },
-                fill: {
-                    opacity: 1,
-                },
-                tooltip: {
-                    theme: "light",
-                    custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                        const relName = sorted[dataPointIndex][0]; // Get original name without index
-                        const data = relationshipData.get(relName);
-                        
-                        if (!data) return "";
-                        
-                        let html = `<div class="apexcharts-tooltip-custom" style="padding: 12px; min-width: 220px; background: #ffffff; color: #1f2937; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border: 1px solid #e5e7eb;">`;
-                        html += `<div style="font-weight: 600; margin-bottom: 8px; font-size: 13px; color: #1f2937;">${relName}</div>`;
-                        html += `<div style="font-size: 11px; color: #666;">`;
-                        html += `<div style="margin-bottom: 4px;"><strong>${data.facilityCount}</strong> Facilities</div>`;
-                        html += `<div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #e5e7eb;">`;
-                        html += `<div>TFA: ${formatCurrency(data.tfa)}</div>`;
-                        html += `<div>Direct: ${formatCurrency(data.direct)}</div>`;
-                        if (data.contingent > 0) {
-                            html += `<div>Contingent: ${formatCurrency(
-                                data.contingent
-                            )}</div>`;
-                        }
-                        if (data.pse > 0) {
-                            html += `<div>Presettlement Exposure: ${formatCurrency(
-                                data.pse
-                            )}</div>`;
-                        }
-                        html += `</div></div></div>`;
-                        return html;
-                    },
-                },
-            };
-
-            // Get the chart element and verify it exists
-                const chartElement = document.querySelector("#relationshipChartBalances");
-                if (!chartElement) {
-                console.error(
-                    "Relationship chart element #relationshipChartBalances not found in DOM"
-                );
-                    return;
-                }
-                
-            // Verify ApexCharts is loaded
-            if (typeof ApexCharts === "undefined") {
-                console.error("ApexCharts library not loaded");
-                return;
-            }
-            
-            try {
-                // Destroy previous instance
-                if (relationshipChartInstanceBalances) {
-                    relationshipChartInstanceBalances.destroy();
-                    relationshipChartInstanceBalances = null;
-                }
-                
-                // Clear any previous content to avoid ApexCharts errors
-                chartElement.innerHTML = "";
-                
-                // Create and render new chart
-                relationshipChartInstanceBalances = new ApexCharts(chartElement, options);
-                relationshipChartInstanceBalances.render();
-                console.log(
-                    "✅ Relationship chart (Balances) rendered successfully with",
-                    relationships.length,
-                    "relationships"
-                );
-            } catch (error) {
-                console.error("❌ Error creating relationship chart (Balances):", error);
-                console.error("Error details:", error.message, error.stack);
-            }
-        }
-
-        // Update bar chart for Balances tab
-        function updateBarChartBalances() {
-            console.log("🔄 Updating bar charts (Balances tab)");
-            createRelationshipChartBalances();
-            createROTCEChartBalances();
-        }
-
-        // Create ROTCE chart for Balances tab (duplicate of createROTCEChart)
-        function createROTCEChartBalances() {
-            console.log("📊 Creating ROTCE Performance chart (Balances)");
-            
-            // Get Top N from Top Relationships filter
-            const topNRelationships = parseInt(
-                document.getElementById("topNFilterBalances").value
-            );
-            
-            // Group ROTCE by relationship
-            const rotceByRelationship = new Map();
-            const rotceValues = [];
-            
-            portfolioData.forEach((row) => {
-                const relName = row.Relationship_Name || row.Relationship_ID;
-                const rotce = parsePercentage(row.ROTCE);
-                
-                if (relName && !isNaN(rotce)) {
-                    if (!rotceByRelationship.has(relName)) {
-                        rotceByRelationship.set(relName, []);
-                    }
-                    rotceByRelationship.get(relName).push(rotce);
-                    rotceValues.push(rotce);
-                }
-            });
-            
-            // Calculate average ROTCE per relationship
-            const relationshipROTCE = [];
-            rotceByRelationship.forEach((values, relName) => {
-                const average =
-                    values.reduce((sum, val) => sum + val, 0) / values.length;
-                relationshipROTCE.push({ name: relName, rotce: average });
-            });
-            
-            // Sort by selected amount type from Top Relationships chart to get same top N
-            // Get Top Relationships to match their order
-            const relationshipData = new Map();
-            for (const row of portfolioData) {
-                const relId = row.Relationship_Name || row.Relationship_ID;
-                if (!relId) continue;
-                
-                if (!relationshipData.has(relId)) {
-                    relationshipData.set(relId, {
-                        tfa: 0,
-                        direct: 0,
-                        contingent: 0,
-                        pse: 0,
-                        osuc: 0,
-                        unused: 0,
-                    });
-                }
-                const data = relationshipData.get(relId);
-                data.tfa += parseNumber(row.Fac_Amount || row.Facility_Amount);
-                data.direct += parseNumber(row.Direct_OS);
-                data.contingent += parseNumber(row.Contingent_OS);
-                data.pse += parseNumber(row.PSE_OS);
-                data.osuc += parseNumber(row.OSUC);
-                data.unused += parseNumber(row.Unused_Committed);
-            }
-
-            // Get the selected field value for sorting (sync with Top Relationships chart)
-            const relationshipTotals = new Map();
-            for (const [relId, data] of relationshipData.entries()) {
-                let sortValue = 0;
-                switch (selectedAmountType) {
-                    case "tfa":
-                        sortValue = data.tfa;
-                        break;
-                    case "direct":
-                        sortValue = data.direct;
-                        break;
-                    case "contingent":
-                        sortValue = data.contingent;
-                        break;
-                    case "pse":
-                        sortValue = data.pse;
-                        break;
-                    case "osuc":
-                        sortValue = data.osuc;
-                        break;
-                    case "unused":
-                        sortValue = data.unused;
-                        break;
-                    default:
-                        sortValue = data.direct;
-                }
-                relationshipTotals.set(relId, sortValue);
-            }
-
-            // Get top N relationships by selected exposure type (matching Top Relationships chart)
-            const topRelationships = Array.from(relationshipTotals.entries())
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, topNRelationships)
-                .map((entry) => entry[0]);
-            
-            // Check if we have any relationships with non-zero values
-            const hasValidRelationships = Array.from(relationshipTotals.entries())
-                .some(([relId, value]) => value > 0);
-
-            // Update subtitle
-            const subtitleEl = document.getElementById("rotceSubtitleBalances");
-            if (subtitleEl) {
-                subtitleEl.textContent = `Top ${topNRelationships} relationships ROTCE performance`;
-            }
-
-            // If no valid relationships in Top Relationships chart, don't show ROTCE
-            if (!hasValidRelationships || topRelationships.length === 0 || relationshipTotals.size === 0) {
-                console.log("⚠️ No relationships data available - skipping ROTCE chart (Balances)");
-                const chartElement = document.querySelector("#rotceChartBalances");
-                if (chartElement) {
-                    chartElement.innerHTML =
-                        '<div class="flex items-center justify-center h-full text-gray-500">No data available</div>';
-                }
-                return;
-            }
-            
-            // Filter and order ROTCE data to match top relationships
-            const filteredROTCE = topRelationships
-                .map((relName) => relationshipROTCE.find((r) => r.name === relName))
-                .filter((r) => r !== undefined);
-
-            // Add index numbers (1, 2, 3, ...) to match Top Relationships chart
-            const relationships = filteredROTCE.map(
-                (r, index) => `${index + 1}. ${r.name}`
-            );
-            const avgROTCE = filteredROTCE.map((r) => r.rotce);
-
-            // Check if all ROTCE values are zero or NaN
-            const validROTCE = avgROTCE.filter(v => !isNaN(v) && v !== 0);
-            if (validROTCE.length === 0) {
-                console.warn("⚠️ No valid ROTCE data for the selected relationships (Balances)");
-                const chartElement = document.querySelector("#rotceChartBalances");
-                if (chartElement) {
-                    chartElement.innerHTML =
-                        '<div class="flex items-center justify-center h-full text-gray-500">No ROTCE data available for these relationships</div>';
-                }
-                return;
-            }
-            
-            // Conditional colors: red if < 12%, green if >= 12%
-            const barColors = avgROTCE.map((rotce) =>
-                rotce < 12 ? "#ef4444" : "#10b981"
-            );
-            
-            // Calculate dynamic height
-            const calculatedHeight = Math.max(350, relationships.length * 35);
-            
-            // Create horizontal bar chart
-            const chartOptions = {
-                series: [
-                    {
-                        name: "Average ROTCE",
-                        data: avgROTCE,
-                    },
-                ],
-                chart: {
-                    type: "bar",
-                    height: calculatedHeight,
-                    toolbar: { show: false },
-                    fontFamily: "Outfit, sans-serif",
-                },
-                colors: barColors,
-                plotOptions: {
-                    bar: {
-                        horizontal: true,
-                        columnWidth: "70%",
-                        borderRadius: 4,
-                        distributed: true, // Enable individual bar colors
-                        dataLabels: {
-                            position: "center",
-                        },
-                    },
-                },
-                dataLabels: {
-                    enabled: true,
-                    formatter: function (val) {
-                        return val.toFixed(1) + "%";
-                    },
-                    style: {
-                        fontSize: "12px",
-                        fontFamily: "Outfit, sans-serif",
-                        colors: ["#fff"],
-                        fontWeight: "bold",
-                    },
-                },
-                annotations: {
-                    xaxis: [
-                        {
-                        x: 12,
-                            borderColor: "#f59e0b",
-                        strokeDashArray: 8,
-                        label: {
-                                borderColor: "#f59e0b",
-                            style: {
-                                    color: "#fff",
-                                    background: "#f59e0b",
-                                    fontSize: "12px",
-                                    fontFamily: "Outfit, sans-serif",
-                                    fontWeight: "bold",
-                                },
-                                text: "Target: 12%",
-                            },
-                        },
-                    ],
-                },
-                xaxis: {
-                    categories: relationships,
-                    title: {
-                        text: "ROTCE (%)",
-                        style: {
-                            color: "#6B7280",
-                            fontSize: "12px",
-                            fontFamily: "Outfit, sans-serif",
-                        },
-                    },
-                    labels: {
-                        formatter: function (val) {
-                            return val.toFixed(0) + "%";
-                        },
-                        style: {
-                            colors: "#6B7280",
-                            fontSize: "12px",
-                            fontFamily: "Outfit, sans-serif",
-                        },
-                    },
-                },
-                yaxis: {
-                    labels: {
-                        style: {
-                            colors: relationships.map(() => "#6B7280"),
-                            fontSize: "12px",
-                            fontFamily: "Outfit, sans-serif",
-                        },
-                        maxWidth: 200,
-                    },
-                },
-                grid: {
-                    borderColor: "#E5E7EB",
-                    xaxis: { lines: { show: true } },
-                    yaxis: { lines: { show: false } },
-                },
-                legend: {
-                    show: false,
-                },
-                tooltip: {
-                    theme: "light",
-                    style: {
-                        fontSize: "12px",
-                        fontFamily: "Outfit, sans-serif",
-                    },
-                    y: {
-                        formatter: function (val) {
-                            const color = val < 12 ? "Below target" : "Above target";
-                            return val.toFixed(2) + "% - " + color;
-                        },
-                    },
-                },
-            };
-
-            // Destroy existing chart instance properly
-            if (rotceChartInstanceBalances) {
-                try {
-                    rotceChartInstanceBalances.destroy();
-                } catch (e) {
-                    console.log("Error destroying ROTCE chart (Balances):", e);
-                }
-                rotceChartInstanceBalances = null;
-            }
-            
-            const chartElement = document.querySelector("#rotceChartBalances");
-            if (chartElement) {
-                chartElement.innerHTML = "";
-            }
-
-            if (relationships.length === 0) {
-                chartElement.innerHTML =
-                    '<div class="flex items-center justify-center h-full text-gray-500">No ROTCE data available</div>';
-                return;
-            }
-
-            // Create and store the chart instance
-            rotceChartInstanceBalances = new ApexCharts(chartElement, chartOptions);
-            rotceChartInstanceBalances.render();
         }
 
         // Helper function to check if any filters are active
@@ -12142,5 +11565,8 @@
         }
     </script>
 </body>
+
+</html>
+
 
 </html>

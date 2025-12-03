@@ -414,6 +414,28 @@
                 <!-- Divider -->
                 <div class="h-8 w-px bg-gray-300"></div>
 
+                <!-- Commitment Status Filter -->
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-medium text-gray-500 tracking-wider">Commitment:</span>
+                    <div class="inline-flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
+                        <button id="btnCommitmentAll" onclick="selectCommitmentFilter('all')" 
+                            class="min-w-[45px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white">
+                            All
+                        </button>
+                        <button id="btnCommitmentCommitted" onclick="selectCommitmentFilter('Committed')" 
+                            class="min-w-[85px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
+                            Committed
+                        </button>
+                        <button id="btnCommitmentUncommitted" onclick="selectCommitmentFilter('Uncommitted')" 
+                            class="min-w-[100px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
+                            Uncommitted
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Divider -->
+                <div class="h-8 w-px bg-gray-300"></div>
+
                 <!-- PSE Toggle -->
                 <div x-data="{ pseToggle: true }" class="flex items-center gap-2">
                     <span class="text-xs font-medium text-gray-500 tracking-wider">PSE:</span>
@@ -434,39 +456,6 @@
                     </label>
                 </div>
 
-                <!-- Divider -->
-                <div class="h-8 w-px bg-gray-300"></div>
-
-                <!-- Metrics By Amount Type Filter -->
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-medium text-gray-500 tracking-wider">Exposure:</span>
-                    <div class="inline-flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
-                        <button id="btnAmountDirect" onclick="selectAmountTypeFilter('direct')" 
-                            class="min-w-[65px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white">
-                            Direct
-                        </button>
-                        <button id="btnAmountContingent" onclick="selectAmountTypeFilter('contingent')" 
-                            class="min-w-[80px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
-                            Contingent
-                        </button>
-                        <button id="btnAmountPSE" onclick="selectAmountTypeFilter('pse')" 
-                            class="min-w-[50px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
-                            PSE
-                        </button>
-                        <button id="btnAmountOSUC" onclick="selectAmountTypeFilter('osuc')" 
-                            class="min-w-[60px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
-                            OSUC<sup class="text-blue-600">*</sup>
-                        </button>
-                        <button id="btnAmountUnused" onclick="selectAmountTypeFilter('unused')"
-                            class="min-w-[90px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
-                            Undrawn<sup class="text-blue-600">*</sup>
-                        </button>
-                        <button id="btnAmountTFA" onclick="selectAmountTypeFilter('tfa')" 
-                            class="min-w-[50px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
-                            TFA
-                        </button>
-                    </div>
-                </div>
             </div>
 
             <!-- Active Filters Badges -->
@@ -902,13 +891,13 @@
                 </div>
             </div>
 
-            <!-- Donut Chart: New Facilities Approved in CP by Product Program -->
+            <!-- Donut Chart: New Facilities Approved  -->
             <div class="col-span-12 xl:col-span-4">
                 <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 h-full flex flex-col">
                     <div class="flex flex-col gap-3 mb-5 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800">
-                                New Facilities Approved in CP by Product Program
+                                New Facilities Approved 
                             </h3>
                             <p class="mt-1 text-sm text-gray-500" id="newFacilitiesSubtitle">
                                 Facilities approved in reporting month
@@ -1093,7 +1082,7 @@
                                 Pipeline Deals Aging
                         </h3>
                             <p class="mt-1 text-sm text-gray-500">
-                                Deals pending origination grouped by approval age
+                                Deals pending origination grouped by approval age (NAM and LATAM only)
                             </p>
                         </div>
                         <div x-data="{openDropDown: false}" class="relative h-fit">
@@ -1156,8 +1145,8 @@
             <div class="col-span-12 xl:col-span-6">
                 <div
                     class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 sm:pt-5 h-full flex flex-col">
-                    <div class="flex flex-col gap-5 mb-6 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
+                    <div class="mb-6 relative pr-48">
+                    <div class="pr-0">
                             <h3 class="text-lg font-semibold text-gray-800" id="topRelationshipsTitle">
                                 Top Relationships by Direct OS
                             </h3>
@@ -1165,66 +1154,108 @@
                                 Largest client exposures ranked by outstanding balance
                             </p>
                     </div>
-                        <div class="flex items-center gap-2">
+                        <!-- Filters - Fixed Position at Top Right -->
+                        <div class="absolute right-0 top-0 flex items-center gap-2">
+                            <!-- Exposure Type Dropdown -->
+                            <div x-data="{openExposure: false, exposureType: 'direct', exposureLabels: {direct: 'Direct', contingent: 'Contingent', pse: 'PSE', osuc: 'OSUC', unused: 'Undrawn', tfa: 'TFA'}}" class="relative">
+                                <button @click="openExposure = !openExposure"
+                                    class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                                    <span x-text="exposureLabels[exposureType]">Direct</span>
+                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+                                <div x-show="openExposure" @click.outside="openExposure = false"
+                                    class="absolute right-0 top-full z-40 w-32 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                    <button
+                                        @click="exposureType = 'direct'; openExposure = false; selectAmountTypeFilter('direct');"
+                                        :class="exposureType === 'direct' ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                        class="flex w-full rounded-lg px-3 py-1.5 text-left text-xs font-medium transition-colors">
+                                        Direct
+                                    </button>
+                                    <button
+                                        @click="exposureType = 'contingent'; openExposure = false; selectAmountTypeFilter('contingent');"
+                                        :class="exposureType === 'contingent' ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                        class="flex w-full rounded-lg px-3 py-1.5 text-left text-xs font-medium transition-colors">
+                                        Contingent
+                                    </button>
+                                    <button
+                                        @click="exposureType = 'pse'; openExposure = false; selectAmountTypeFilter('pse');"
+                                        :class="exposureType === 'pse' ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                        class="flex w-full rounded-lg px-3 py-1.5 text-left text-xs font-medium transition-colors">
+                                        PSE
+                                    </button>
+                                    <button
+                                        @click="exposureType = 'osuc'; openExposure = false; selectAmountTypeFilter('osuc');"
+                                        :class="exposureType === 'osuc' ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                        class="flex w-full rounded-lg px-3 py-1.5 text-left text-xs font-medium transition-colors">
+                                        OSUC
+                                    </button>
+                                    <button
+                                        @click="exposureType = 'unused'; openExposure = false; selectAmountTypeFilter('unused');"
+                                        :class="exposureType === 'unused' ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                        class="flex w-full rounded-lg px-3 py-1.5 text-left text-xs font-medium transition-colors">
+                                        Undrawn
+                                    </button>
+                                    <button
+                                        @click="exposureType = 'tfa'; openExposure = false; selectAmountTypeFilter('tfa');"
+                                        :class="exposureType === 'tfa' ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                        class="flex w-full rounded-lg px-3 py-1.5 text-left text-xs font-medium transition-colors">
+                                        TFA
+                                    </button>
+                                </div>
+                            </div>
                             <!-- Top N Filter -->
                             <div x-data="{openTopN: false, topNRelationships: 10}" class="relative">
                                 <button @click="openTopN = !openTopN"
-                                    class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                                    class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
                                     <span>Top <span x-text="topNRelationships"></span></span>
-                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M19 9l-7 7-7-7" />
                                     </svg>
                                 </button>
                                 <div x-show="openTopN" @click.outside="openTopN = false"
-                                    class="absolute right-0 top-full z-40 w-32 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                    class="absolute right-0 top-full z-40 w-28 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
                                     <button
                                         @click="topNRelationships = 10; openTopN = false; document.getElementById('topNFilter').value = 10; updateBarChart();"
                                         :class="topNRelationships === 10 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
+                                        class="flex w-full rounded-lg px-3 py-1.5 text-left text-xs font-medium transition-colors">
                                         Top 10
                                     </button>
                                     <button
                                         @click="topNRelationships = 20; openTopN = false; document.getElementById('topNFilter').value = 20; updateBarChart();"
                                         :class="topNRelationships === 20 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
+                                        class="flex w-full rounded-lg px-3 py-1.5 text-left text-xs font-medium transition-colors">
                                         Top 20
                                     </button>
                                     <button
                                         @click="topNRelationships = 30; openTopN = false; document.getElementById('topNFilter').value = 30; updateBarChart();"
                                         :class="topNRelationships === 30 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
+                                        class="flex w-full rounded-lg px-3 py-1.5 text-left text-xs font-medium transition-colors">
                                         Top 30
                                     </button>
                                     <button
                                         @click="topNRelationships = 40; openTopN = false; document.getElementById('topNFilter').value = 40; updateBarChart();"
                                         :class="topNRelationships === 40 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
+                                        class="flex w-full rounded-lg px-3 py-1.5 text-left text-xs font-medium transition-colors">
                                         Top 40
                                     </button>
                                     <button
                                         @click="topNRelationships = 50; openTopN = false; document.getElementById('topNFilter').value = 50; updateBarChart();"
                                         :class="topNRelationships === 50 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
+                                        class="flex w-full rounded-lg px-3 py-1.5 text-left text-xs font-medium transition-colors">
                                         Top 50
                                     </button>
                                     <button
                                         @click="topNRelationships = 100; openTopN = false; document.getElementById('topNFilter').value = 100; updateBarChart();"
                                         :class="topNRelationships === 100 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                        class="flex w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors">
+                                        class="flex w-full rounded-lg px-3 py-1.5 text-left text-xs font-medium transition-colors">
                                         Top 100
                                     </button>
                     </div>
                             </div>
-                            <!-- Hidden select for backward compatibility with existing JavaScript -->
-                            <select id="topNFilter" style="display: none;">
-                                <option value="10" selected>Top 10</option>
-                                <option value="20">Top 20</option>
-                                <option value="30">Top 30</option>
-                                <option value="40">Top 40</option>
-                                <option value="50">Top 50</option>
-                                <option value="100">Top 100</option>
-                            </select>
+                            <!-- Three Dots Menu -->
                             <div x-data="{openDropDown: false}" class="relative">
                                 <button @click="openDropDown = !openDropDown"
                                     :class="openDropDown ? 'text-gray-700' : 'text-gray-400 hover:text-gray-700'"
@@ -1255,6 +1286,21 @@
                 </div>
                     </div>
                         </div>
+                        <!-- Hidden elements for backward compatibility with existing JavaScript -->
+                        <select id="topNFilter" style="display: none;">
+                            <option value="10" selected>Top 10</option>
+                            <option value="20">Top 20</option>
+                            <option value="30">Top 30</option>
+                            <option value="40">Top 40</option>
+                            <option value="50">Top 50</option>
+                            <option value="100">Top 100</option>
+                        </select>
+                        <button id="btnAmountDirect" style="display: none;"></button>
+                        <button id="btnAmountContingent" style="display: none;"></button>
+                        <button id="btnAmountPSE" style="display: none;"></button>
+                        <button id="btnAmountOSUC" style="display: none;"></button>
+                        <button id="btnAmountUnused" style="display: none;"></button>
+                        <button id="btnAmountTFA" style="display: none;"></button>
                     </div>
                     <div class="flex-1 w-full overflow-y-auto overflow-x-hidden custom-scrollbar"
                         style="max-height: 450px">
@@ -1435,7 +1481,7 @@
                                     <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">46-90</th>
                                     <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">&gt;90</th>
                                     <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">Total</th>
-                                    <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">Population</th>
+                                    <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">Sum</th>
                                     <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap" style="min-width: 70px;">% Total</th>
                                 </tr>
                             </thead>
@@ -1673,118 +1719,183 @@
 
         <!-- Portfolio Balances Tab Content -->
         <div x-show="activeTab === 'balances'" style="display: none;">
-        <!-- Page Header -->
-        <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-5">
-                <div class="flex items-center justify-between">
+            <!-- Logistics-Style Layout: 3 Horizontal Metric Cards + Large Chart + Side Panel -->
+            
+            <!-- Row 1: 3 Horizontal Metric Cards (Logistics Style) -->
+            <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 md:gap-6">
+                <!-- Total Notional Balance - Horizontal Card -->
+                <article class="flex items-center gap-5 rounded-2xl border border-gray-200 bg-white p-4">
+                    <div class="inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+                        <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                </div>
                     <div>
-                        <h2 class="text-xl font-semibold text-gray-900">Portfolio Balances</h2>
-                        <p class="mt-1 text-sm text-gray-500">Comprehensive breakdown of portfolio balances by category and exposure type</p>
+                        <h3 class="text-2xl font-semibold text-gray-800">$--</h3>
+                        <p class="flex items-center gap-3 text-gray-500">
+                            Total Notional Balance
+                            <span class="inline-flex items-center justify-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-sm font-medium text-green-600">+--</span>
+                        </p>
                     </div>
-                    <div class="text-right shrink-0">
-                        <p class="text-xs text-gray-400 font-medium">Last Updated</p>
-                        <p class="text-sm font-semibold text-gray-600" id="pb-reportDate">--</p>
-                    </div>
-                </div>
-                </div>
+                </article>
                 
-            <!-- Placeholder Row 1: Key Metrics -->
+                <!-- Total Committed Balance - Horizontal Card -->
+                <article class="flex items-center gap-5 rounded-2xl border border-gray-200 bg-white p-4">
+                    <div class="inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-600">
+                        <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold text-gray-800">$--</h3>
+                        <p class="flex items-center gap-3 text-gray-500">
+                            Total Committed
+                            <span class="inline-flex items-center justify-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-sm font-medium text-green-600">+--</span>
+                        </p>
+                    </div>
+                </article>
+
+                <!-- Total Outstanding - Horizontal Card -->
+                <article class="flex items-center gap-5 rounded-2xl border border-gray-200 bg-white p-4">
+                    <div class="inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-purple-100 text-purple-600">
+                        <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold text-gray-800">$--</h3>
+                        <p class="flex items-center gap-3 text-gray-500">
+                            Total Outstanding
+                            <span class="inline-flex items-center justify-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-sm font-medium text-amber-600">--% util</span>
+                        </p>
+                    </div>
+                </article>
+            </div>
+
+            <!-- Row 2: Large Chart (8) + Side Panel (4) -->
             <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
-                <!-- Total Notional Balance -->
-                <div class="col-span-12 md:col-span-6 xl:col-span-3">
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100">
-                                <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                            </div>
+                <!-- Balance Trend Chart - Large -->
+                <div class="col-span-12 xl:col-span-8">
+                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
+                        <div class="mb-5 flex items-start justify-between">
                             <div>
-                                <h3 class="text-sm font-medium text-gray-500">Total Notional Balance</h3>
-                                <p class="text-xs text-gray-400">Sum of Fac_Amount</p>
+                                <h3 class="text-lg font-semibold text-gray-800">Balance Trend Over Time</h3>
+                                <p class="mt-1 text-gray-500 text-sm">Historical trend of portfolio balances across reporting periods</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-500 hover:bg-gray-100">1M</button>
+                                <button class="rounded-lg px-3 py-1.5 text-sm font-medium bg-blue-100 text-blue-600">3M</button>
+                                <button class="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-500 hover:bg-gray-100">YTD</button>
                             </div>
                         </div>
-                        <p class="text-2xl font-bold text-gray-900 text-center">$--</p>
-                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for total facility amount</p>
+                        <div class="flex items-center justify-center h-80 bg-gray-50 rounded-lg">
+                            <div class="text-center text-gray-400">
+                                <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+                            </svg>
+                                <p class="text-sm font-medium">Area Chart Placeholder</p>
+                                <p class="text-xs mt-1">Balance trend with Notional, Committed, Outstanding lines</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Total Committed Balance -->
-                <div class="col-span-12 md:col-span-6 xl:col-span-3">
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100">
-                                <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
+                <!-- Regional Distribution - Side Panel -->
+                <div class="col-span-12 xl:col-span-4">
+                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
+                        <div class="mb-5">
+                            <h3 class="text-lg font-semibold text-gray-800">Regional Distribution</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Balance breakdown by region</p>
+                        </div>
+                        <div class="space-y-4">
+                            <!-- APAC -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="h-3 w-3 rounded-full bg-blue-500"></div>
+                                    <span class="text-sm text-gray-600">APAC</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-blue-500 rounded-full" style="width: 35%"></div>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-800 w-12 text-right">35%</span>
+                                </div>
                             </div>
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-500">Total Committed Balance</h3>
-                                <p class="text-xs text-gray-400">Committed facilities only</p>
+                            <!-- EMEA -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="h-3 w-3 rounded-full bg-green-500"></div>
+                                    <span class="text-sm text-gray-600">EMEA</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-green-500 rounded-full" style="width: 28%"></div>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-800 w-12 text-right">28%</span>
+                                </div>
+                            </div>
+                            <!-- NAM -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="h-3 w-3 rounded-full bg-purple-500"></div>
+                                    <span class="text-sm text-gray-600">NAM</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-purple-500 rounded-full" style="width: 25%"></div>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-800 w-12 text-right">25%</span>
+                                </div>
+                            </div>
+                            <!-- LATAM -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="h-3 w-3 rounded-full bg-amber-500"></div>
+                                    <span class="text-sm text-gray-600">LATAM</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-amber-500 rounded-full" style="width: 12%"></div>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-800 w-12 text-right">12%</span>
+                                </div>
                             </div>
                         </div>
-                        <p class="text-2xl font-bold text-gray-900 text-center">$--</p>
-                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for committed balance</p>
-                    </div>
-                </div>
-
-                <!-- Total Outstanding -->
-                <div class="col-span-12 md:col-span-6 xl:col-span-3">
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100">
-                                <svg class="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                        </svg>
-                            </div>
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-500">Total Outstanding</h3>
-                                <p class="text-xs text-gray-400">Direct_OS + Contingent_OS + PSE_OS</p>
+                        <div class="mt-6 pt-4 border-t border-gray-100">
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-500">Total Portfolio</span>
+                                <span class="font-semibold text-gray-800">$-- B</span>
                             </div>
                         </div>
-                        <p class="text-2xl font-bold text-gray-900 text-center">$--</p>
-                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for total outstanding</p>
                     </div>
-                </div>
-
-                <!-- Utilization Rate -->
-                <div class="col-span-12 md:col-span-6 xl:col-span-3">
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100">
-                                <svg class="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                            </svg>
-                            </div>
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-500">Utilization Rate</h3>
-                                <p class="text-xs text-gray-400">Outstanding / Notional</p>
-                        </div>
-                    </div>
-                        <p class="text-2xl font-bold text-gray-900 text-center">--%</p>
-                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for utilization percentage</p>
-                </div>
                 </div>
             </div>
             
-            <!-- Placeholder Row 2: Balance Breakdown Table -->
+            <!-- Row 3: Full Width Table -->
             <div class="mb-6">
                 <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6">
                     <div class="mb-5 flex items-start justify-between">
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-800">Balance Breakdown by Category</h3>
-                            <p class="mt-1 text-gray-500 text-sm">Product program breakdown with notional, committed, and outstanding balances</p>
-                    </div>
+                            <h3 class="text-lg font-semibold text-gray-800">Balance Breakdown by Product Program</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Detailed breakdown with notional, committed, outstanding balances and utilization</p>
+                        </div>
+                        <button class="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                            Export
+                                </button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-gray-500">
                             <thead class="text-sm text-gray-700 bg-gray-50">
                                 <tr>
-                                    <th class="px-4 py-3 text-left whitespace-nowrap">Category</th>
-                                    <th class="px-4 py-3 text-center whitespace-nowrap">Notional</th>
-                                    <th class="px-4 py-3 text-center whitespace-nowrap">Committed</th>
-                                    <th class="px-4 py-3 text-center whitespace-nowrap">Outstanding</th>
+                                    <th class="px-4 py-3 text-left whitespace-nowrap">Product Program</th>
+                                    <th class="px-4 py-3 text-right whitespace-nowrap">Notional</th>
+                                    <th class="px-4 py-3 text-right whitespace-nowrap">Committed</th>
+                                    <th class="px-4 py-3 text-right whitespace-nowrap">Outstanding</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">Utilization</th>
                                     <th class="px-4 py-3 text-center whitespace-nowrap">% of Total</th>
-                                    <th class="px-4 py-3 text-center whitespace-nowrap">WoW Change</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1793,582 +1904,637 @@
                                         <div class="flex flex-col items-center gap-2">
                                             <svg class="h-8 w-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
+                                    </svg>
                                             <p class="text-sm">Placeholder for balance breakdown by Product_Program_Name</p>
-                                            <p class="text-xs">Data will be grouped and aggregated from Portfolio_tw.xlsx</p>
-                                        </div>
+                            </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                </div>
+        </div>
+        <!-- End Portfolio Balances Tab -->
+
+        <!-- Team View Tab Content - eCommerce Style Layout -->
+        <div x-show="activeTab === 'team'" style="display: none;">
+            <!-- Row 1: Metrics (7) + Donut Chart (5) - eCommerce style -->
+            <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
+                <!-- Left Column: Stacked Metrics + Bar Chart -->
+                <div class="col-span-12 xl:col-span-7 space-y-6">
+                    <!-- 2x2 Metric Cards Grid -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- Total Team Leads -->
+                        <div class="rounded-2xl border border-gray-200 bg-white p-5">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-500">Team Leads</p>
+                                    <h3 class="text-2xl font-bold text-gray-900 mt-1">--</h3>
+                </div>
+                                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
+                                    <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-2">Unique Underwriting_Team_Lead</p>
+            </div>
+            
+                        <!-- Total Underwriters -->
+                        <div class="rounded-2xl border border-gray-200 bg-white p-5">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-500">Underwriters</p>
+                                    <h3 class="text-2xl font-bold text-gray-900 mt-1">--</h3>
+                    </div>
+                                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+                                    <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-2">Unique Lead_Underwriter</p>
+                    </div>
+                    
+                        <!-- Avg Portfolio -->
+                        <div class="rounded-2xl border border-gray-200 bg-white p-5">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-500">Avg Portfolio</p>
+                                    <h3 class="text-2xl font-bold text-gray-900 mt-1">$--</h3>
+                                </div>
+                                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-purple-100">
+                                    <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-2">Average TFA per team lead</p>
+                        </div>
+                        
+                        <!-- Total TFA -->
+                        <div class="rounded-2xl border border-gray-200 bg-white p-5">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-500">Total TFA</p>
+                                    <h3 class="text-2xl font-bold text-gray-900 mt-1">$--</h3>
+                                </div>
+                                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100">
+                                    <svg class="h-6 w-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-2">Sum of all team portfolios</p>
+                    </div>
+                </div>
+
+                    <!-- Team Performance Bar Chart -->
+                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6">
+                        <div class="mb-5 flex items-start justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800">Top Team Leads by TFA</h3>
+                                <p class="mt-1 text-gray-500 text-sm">Portfolio size comparison across team leads</p>
+                        </div>
+                        </div>
+                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+                            <div class="text-center text-gray-400">
+                                <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                <p class="text-sm font-medium">Horizontal Bar Chart Placeholder</p>
+                                <p class="text-xs mt-1">Top 10 team leads by total facility amount</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: ROTCE Donut Chart -->
+                <div class="col-span-12 xl:col-span-5">
+                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
+                        <div class="mb-5 flex items-start justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800">ROTCE Distribution</h3>
+                                <p class="mt-1 text-gray-500 text-sm">Team performance against 12% target</p>
+                            </div>
+                            <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700">
+                                Target: 12%
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg mb-5">
+                            <div class="text-center text-gray-400">
+                                <svg class="h-16 w-16 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+                                </svg>
+                                <p class="text-sm font-medium">Donut Chart Placeholder</p>
+                                <p class="text-xs mt-1">Above/Below target distribution</p>
+                            </div>
+                        </div>
+                        <!-- Legend -->
+                        <div class="flex items-center justify-center gap-6">
+                <div class="flex items-center gap-2">
+                                <div class="h-3 w-3 rounded-full bg-green-500"></div>
+                                <span class="text-sm text-gray-600">Above Target</span>
+                                <span class="text-sm font-semibold text-gray-800">--%</span>
+                    </div>
+                            <div class="flex items-center gap-2">
+                                <div class="h-3 w-3 rounded-full bg-red-500"></div>
+                                <span class="text-sm text-gray-600">Below Target</span>
+                                <span class="text-sm font-semibold text-gray-800">--%</span>
+                </div>
+            </div>
+                    </div>
+            </div>
+        </div>
+        
+            <!-- Row 2: Full Width Team Table -->
+            <div class="mb-6">
+                <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6">
+                    <div class="mb-5 flex items-start justify-between">
+                    <div>
+                            <h3 class="text-lg font-semibold text-gray-800">Portfolio by Team Lead</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Detailed breakdown by Underwriting_Team_Lead with performance metrics</p>
+                    </div>
+                        <div class="flex items-center gap-2">
+                            <input type="text" placeholder="Search team lead..." class="rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button class="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                Export
+                                    </button>
+                    </div>
+                            </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-gray-500">
+                            <thead class="text-sm text-gray-700 bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left whitespace-nowrap">Team Lead</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">Relationships</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">Facilities</th>
+                                    <th class="px-4 py-3 text-right whitespace-nowrap">Total TFA</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">Avg ROTCE</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td colspan="6" class="px-4 py-8 text-center text-gray-400">
+                                        <div class="flex flex-col items-center gap-2">
+                                            <svg class="h-8 w-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                    </svg>
+                                            <p class="text-sm">Placeholder for team portfolio breakdown</p>
+                </div>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
+                        </div>
+                    </div>
+        </div>
+        <!-- End Team View Tab -->
+
+        <!-- Top Names Tab Content - Marketing Style Layout -->
+        <div x-show="activeTab === 'topnames'" style="display: none;">
+            <!-- Row 1: Full Width Metrics (like Marketing) -->
+            <div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4 md:gap-6">
+                <!-- Total Relationships -->
+                <div class="rounded-2xl border border-gray-200 bg-white p-5">
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100">
+                            <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            </svg>
+                        </span>
+                        <div>
+                            <p class="text-sm text-gray-500">Relationships</p>
+                            <h3 class="text-xl font-bold text-gray-800">--</h3>
                     </div>
                 </div>
+            </div>
 
-            <!-- Placeholder Row 3: Charts -->
-            <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
-                <!-- Balance by Region Chart -->
-                <div class="col-span-12 xl:col-span-6">
-                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
-                        <div class="mb-5">
-                            <h3 class="text-lg font-semibold text-gray-800">Balance Distribution by Region</h3>
-                            <p class="mt-1 text-gray-500 text-sm">Regional breakdown of portfolio balances (APAC, EMEA, NAM, LATAM)</p>
+                <!-- Top 10 Concentration -->
+                <div class="rounded-2xl border border-gray-200 bg-white p-5">
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100">
+                            <svg class="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                            </svg>
+                        </span>
+                        <div>
+                            <p class="text-sm text-gray-500">Top 10 Concentration</p>
+                            <h3 class="text-xl font-bold text-gray-800">--%</h3>
                         </div>
-                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-                            <div class="text-center text-gray-400">
-                                <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
+                    </div>
+                </div>
+                
+                <!-- Total TFA -->
+                <div class="rounded-2xl border border-gray-200 bg-white p-5">
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-100">
+                            <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
-                                <p class="text-sm font-medium">Donut Chart Placeholder</p>
-                                <p class="text-xs mt-1">Regional balance distribution</p>
+                        </span>
+                        <div>
+                            <p class="text-sm text-gray-500">Total TFA</p>
+                            <h3 class="text-xl font-bold text-gray-800">$--</h3>
+                                </div>
                         </div>
-                        </div>
+                    </div>
+
+                <!-- Avg Size -->
+                <div class="rounded-2xl border border-gray-200 bg-white p-5">
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-purple-100">
+                            <svg class="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                            </svg>
+                        </span>
+                        <div>
+                            <p class="text-sm text-gray-500">Avg Size</p>
+                            <h3 class="text-xl font-bold text-gray-800">$--</h3>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Balance Trend Chart -->
-                <div class="col-span-12 xl:col-span-6">
-                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
-                        <div class="mb-5">
-                            <h3 class="text-lg font-semibold text-gray-800">Balance Trend Over Time</h3>
-                            <p class="mt-1 text-gray-500 text-sm">Historical trend of portfolio balances (requires historical data)</p>
+            <!-- Row 2: Main Content (8) + Side Panel (4) - Marketing Style -->
+            <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
+                <!-- Left: Chart + Table Stacked -->
+                <div class="col-span-12 xl:col-span-8 space-y-6">
+                    <!-- Concentration Area Chart -->
+            <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6">
+                <div class="mb-5 flex items-start justify-between">
+                    <div>
+                                <h3 class="text-lg font-semibold text-gray-800">Portfolio Concentration Trend</h3>
+                                <p class="mt-1 text-gray-500 text-sm">Top 10 relationships share over time</p>
                     </div>
+                            <div class="flex items-center gap-2">
+                                <button class="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-500 hover:bg-gray-100">Weekly</button>
+                                <button class="rounded-lg px-3 py-1.5 text-sm font-medium bg-blue-100 text-blue-600">Monthly</button>
+                                <button class="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-500 hover:bg-gray-100">Quarterly</button>
+                            </div>
+                        </div>
                         <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
                             <div class="text-center text-gray-400">
                                 <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
-                                    </svg>
-                                <p class="text-sm font-medium">Line Chart Placeholder</p>
-                                <p class="text-xs mt-1">Balance trend over reporting periods</p>
+                            </svg>
+                                <p class="text-sm font-medium">Area Chart Placeholder</p>
+                                <p class="text-xs mt-1">Concentration trend over time</p>
+                        </div>
+                    </div>
+                </div>
+
+                    <!-- Top Relationships Table -->
+                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6">
+                        <div class="mb-5 flex items-start justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800">Top Relationships</h3>
+                                <p class="mt-1 text-gray-500 text-sm">Ranked by total facility amount</p>
+                            </div>
+                            <select class="rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option>Top 10</option>
+                                <option>Top 25</option>
+                                <option>Top 50</option>
+                            </select>
+                        </div>
+                        <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-gray-500">
+                        <thead class="text-sm text-gray-700 bg-gray-50">
+                            <tr>
+                                        <th class="px-4 py-3 text-left whitespace-nowrap">#</th>
+                                        <th class="px-4 py-3 text-left whitespace-nowrap">Relationship</th>
+                                        <th class="px-4 py-3 text-right whitespace-nowrap">TFA</th>
+                                        <th class="px-4 py-3 text-center whitespace-nowrap">ROTCE</th>
+                                        <th class="px-4 py-3 text-center whitespace-nowrap">Share</th>
+                            </tr>
+                        </thead>
+                                <tbody>
+                            <tr class="border-b hover:bg-gray-50">
+                                        <td colspan="5" class="px-4 py-8 text-center text-gray-400">
+                                            <div class="flex flex-col items-center gap-2">
+                                                <svg class="h-8 w-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                                                </svg>
+                                                <p class="text-sm">Placeholder for top relationships</p>
+                                    </div>
+                                </td>
+                            </tr>
+                                </tbody>
+                            </table>
+                                    </div>
+                                    </div>
+                </div>
+                
+                <!-- Right: Stacked Side Panels (Traffic Source Style) -->
+                <div class="col-span-12 xl:col-span-4 space-y-6">
+                    <!-- Concentration Donut -->
+                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6">
+                        <div class="mb-5">
+                            <h3 class="text-lg font-semibold text-gray-800">Portfolio Breakdown</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Concentration distribution</p>
+                                    </div>
+                        <div class="flex items-center justify-center h-48 bg-gray-50 rounded-lg mb-4">
+                            <div class="text-center text-gray-400">
+                                <svg class="h-12 w-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+                                </svg>
+                                <p class="text-xs">Donut Chart</p>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between text-sm">
+                                <div class="flex items-center gap-2">
+                                    <div class="h-3 w-3 rounded-full bg-blue-500"></div>
+                                    <span class="text-gray-600">Top 10</span>
+                                </div>
+                                <span class="font-medium text-gray-800">--%</span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <div class="flex items-center gap-2">
+                                    <div class="h-3 w-3 rounded-full bg-gray-300"></div>
+                                    <span class="text-gray-600">Others</span>
+                                </div>
+                                <span class="font-medium text-gray-800">--%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Size Distribution -->
+                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6">
+                        <div class="mb-5">
+                            <h3 class="text-lg font-semibold text-gray-800">Size Distribution</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Relationships by size bucket</p>
+                                    </div>
+                        <div class="space-y-3">
+                            <!-- >$100M -->
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600">&gt;$100M</span>
+                                    <span class="font-medium text-gray-800">-- names</span>
+                                </div>
+                                <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                                    <div class="h-full bg-blue-500 rounded-full" style="width: 15%"></div>
+                                </div>
+                            </div>
+                            <!-- $50-100M -->
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600">$50-100M</span>
+                                    <span class="font-medium text-gray-800">-- names</span>
+                                </div>
+                                <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                                    <div class="h-full bg-green-500 rounded-full" style="width: 25%"></div>
+                                </div>
+                            </div>
+                            <!-- $10-50M -->
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600">$10-50M</span>
+                                    <span class="font-medium text-gray-800">-- names</span>
+                                </div>
+                                <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                                    <div class="h-full bg-purple-500 rounded-full" style="width: 40%"></div>
+                                </div>
+                            </div>
+                            <!-- <$10M -->
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600">&lt;$10M</span>
+                                    <span class="font-medium text-gray-800">-- names</span>
+                                </div>
+                                <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                                    <div class="h-full bg-amber-500 rounded-full" style="width: 55%"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- End Portfolio Balances Tab -->
+        <!-- End Top Names Tab -->
 
-        <!-- Team View Tab Content -->
-        <div x-show="activeTab === 'team'" style="display: none;">
-            <!-- Page Header -->
-            <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-5">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h2 class="text-xl font-semibold text-gray-900">Team View</h2>
-                        <p class="mt-1 text-sm text-gray-500">Portfolio breakdown by underwriting team leads and team members</p>
+        <!-- Covenants Tab Content - CRM Style Layout -->
+        <div x-show="activeTab === 'covenants'" style="display: none;">
+            <!-- Row 1: Full Width Metrics -->
+            <div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4 md:gap-6">
+                <!-- Total Covenants -->
+                <div class="rounded-2xl border border-gray-200 bg-white p-5">
+                    <div class="flex flex-col">
+                        <span class="text-sm text-gray-500">Total Covenants</span>
+                        <div class="flex items-baseline gap-2 mt-1">
+                            <h3 class="text-2xl font-bold text-gray-800">--</h3>
+                            <span class="text-xs text-gray-400">unique</span>
+                                    </div>
                     </div>
-                <div class="text-right shrink-0">
-                    <p class="text-xs text-gray-400 font-medium">Last Updated</p>
-                        <p class="text-sm font-semibold text-gray-600">--</p>
+                </div>
+                <!-- Past Due -->
+                <div class="rounded-2xl border border-red-200 bg-red-50 p-5">
+                    <div class="flex flex-col">
+                        <span class="text-sm text-red-600">Past Due</span>
+                        <div class="flex items-baseline gap-2 mt-1">
+                            <h3 class="text-2xl font-bold text-red-700">--</h3>
+                            <span class="inline-flex items-center gap-1 text-xs text-red-600">
+                                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                needs attention
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Coming Due -->
+                <div class="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+                    <div class="flex flex-col">
+                        <span class="text-sm text-amber-600">Coming Due (30d)</span>
+                        <div class="flex items-baseline gap-2 mt-1">
+                            <h3 class="text-2xl font-bold text-amber-700">--</h3>
+                            <span class="inline-flex items-center gap-1 text-xs text-amber-600">
+                                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                upcoming
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Compliance Rate -->
+                <div class="rounded-2xl border border-green-200 bg-green-50 p-5">
+                    <div class="flex flex-col">
+                        <span class="text-sm text-green-600">Compliance Rate</span>
+                        <div class="flex items-baseline gap-2 mt-1">
+                            <h3 class="text-2xl font-bold text-green-700">--%</h3>
+                            <span class="inline-flex items-center gap-1 text-xs text-green-600">
+                                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                on-time
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Placeholder Row 1: Team Metrics -->
+            <!-- Row 2: Large Chart (8) + Side Donut (4) - CRM Style -->
             <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
-                <!-- Total Teams -->
-                <div class="col-span-12 md:col-span-6 xl:col-span-3">
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100">
-                                <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                    </svg>
-                </div>
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-500">Total Team Leads</h3>
-                                <p class="text-xs text-gray-400">Unique Underwriting_Team_Lead</p>
-                    </div>
-                        </div>
-                        <p class="text-2xl font-bold text-gray-900 text-center">--</p>
-                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for team lead count</p>
-                    </div>
-                    </div>
-                    
-                <!-- Total Underwriters -->
-                <div class="col-span-12 md:col-span-6 xl:col-span-3">
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100">
-                                <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-500">Total Underwriters</h3>
-                                <p class="text-xs text-gray-400">Unique Lead_Underwriter</p>
-                            </div>
-                        </div>
-                        <p class="text-2xl font-bold text-gray-900 text-center">--</p>
-                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for underwriter count</p>
-                    </div>
-                </div>
-
-                <!-- Avg Portfolio per Team -->
-                <div class="col-span-12 md:col-span-6 xl:col-span-3">
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100">
-                                <svg class="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                                </svg>
-                        </div>
-                        <div>
-                                <h3 class="text-sm font-medium text-gray-500">Avg Portfolio per Team</h3>
-                                <p class="text-xs text-gray-400">Average TFA per team lead</p>
-                        </div>
-                                </div>
-                        <p class="text-2xl font-bold text-gray-900 text-center">$--</p>
-                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for average portfolio</p>
-                        </div>
-                </div>
-
-                <!-- Top Performing Team -->
-                <div class="col-span-12 md:col-span-6 xl:col-span-3">
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100">
-                                <svg class="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
-                                </svg>
-                        </div>
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-500">Top Performing Team</h3>
-                                <p class="text-xs text-gray-400">By ROTCE performance</p>
-                    </div>
-                        </div>
-                        <p class="text-lg font-bold text-gray-900 text-center">--</p>
-                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for top team name</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Placeholder Row 2: Team Portfolio Table -->
-        <div class="mb-6">
-            <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6">
-                <div class="mb-5 flex items-start justify-between">
-                    <div>
-                            <h3 class="text-lg font-semibold text-gray-800">Portfolio by Team Lead</h3>
-                            <p class="mt-1 text-gray-500 text-sm">Facility assignments and performance metrics by Underwriting_Team_Lead</p>
-                    </div>
-                        </div>
-                    <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-gray-500">
-                        <thead class="text-sm text-gray-700 bg-gray-50">
-                            <tr>
-                                    <th class="px-4 py-3 text-left whitespace-nowrap">Team Lead</th>
-                                    <th class="px-4 py-3 text-center whitespace-nowrap">Relationships</th>
-                                    <th class="px-4 py-3 text-center whitespace-nowrap">Facilities</th>
-                                    <th class="px-4 py-3 text-center whitespace-nowrap">Total TFA</th>
-                                    <th class="px-4 py-3 text-center whitespace-nowrap">Avg ROTCE</th>
-                                    <th class="px-4 py-3 text-center whitespace-nowrap">% of Total</th>
-                            </tr>
-                        </thead>
-                            <tbody>
-                            <tr class="border-b hover:bg-gray-50">
-                                    <td colspan="6" class="px-4 py-8 text-center text-gray-400">
-                                        <div class="flex flex-col items-center gap-2">
-                                            <svg class="h-8 w-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                            </svg>
-                                            <p class="text-sm">Placeholder for team portfolio breakdown</p>
-                                            <p class="text-xs">Data grouped by Underwriting_Team_Lead from Portfolio_tw.xlsx</p>
-                                    </div>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                                    </div>
-            </div>
-        </div>
-        
-            <!-- Placeholder Row 3: Team Charts -->
-        <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
-                <!-- Portfolio by Team Lead Chart -->
-            <div class="col-span-12 xl:col-span-6">
+                <!-- Covenant Aging Timeline -->
+                <div class="col-span-12 xl:col-span-8">
                     <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
-                        <div class="mb-5">
-                            <h3 class="text-lg font-semibold text-gray-800">Top Team Leads by TFA</h3>
-                            <p class="mt-1 text-gray-500 text-sm">Bar chart showing total facility amount by team lead</p>
-                    </div>
-                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-                            <div class="text-center text-gray-400">
-                                <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                                    </svg>
-                                <p class="text-sm font-medium">Bar Chart Placeholder</p>
-                                <p class="text-xs mt-1">Top team leads by total facility amount</p>
-                    </div>
-                            </div>
-                </div>
-                    </div>
-
-                <!-- Team ROTCE Performance Chart -->
-                <div class="col-span-12 xl:col-span-6">
-                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
-                        <div class="mb-5">
-                            <h3 class="text-lg font-semibold text-gray-800">Team ROTCE Performance</h3>
-                            <p class="mt-1 text-gray-500 text-sm">Average ROTCE performance by team lead</p>
-                        </div>
-                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-                            <div class="text-center text-gray-400">
-                                <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                                </svg>
-                                <p class="text-sm font-medium">Bar Chart Placeholder</p>
-                                <p class="text-xs mt-1">ROTCE performance with 12% target line</p>
-                    </div>
-                    </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <!-- End Team View Tab -->
-
-        <!-- Top Names Tab Content -->
-        <div x-show="activeTab === 'topnames'" style="display: none;">
-            <!-- Page Header -->
-            <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-5">
-                <div class="flex items-center justify-between">
-                        <div>
-                        <h2 class="text-xl font-semibold text-gray-900">Top Names</h2>
-                        <p class="mt-1 text-sm text-gray-500">Largest relationships and their portfolio composition</p>
-                        </div>
-                    <div class="text-right shrink-0">
-                        <p class="text-xs text-gray-400 font-medium">Last Updated</p>
-                        <p class="text-sm font-semibold text-gray-600">--</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Placeholder Row 1: Top Names Metrics -->
-            <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
-                <!-- Total Relationships -->
-                <div class="col-span-12 md:col-span-6 xl:col-span-3">
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100">
-                                <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                                    </svg>
-                                </div>
+                        <div class="mb-5 flex items-start justify-between">
                             <div>
-                                <h3 class="text-sm font-medium text-gray-500">Total Relationships</h3>
-                                <p class="text-xs text-gray-400">Unique Relationship_Name</p>
+                                <h3 class="text-lg font-semibold text-gray-800">Covenant Aging Timeline</h3>
+                                <p class="mt-1 text-gray-500 text-sm">Past due and coming due covenants by aging bucket</p>
+                                    </div>
+                            <div x-data="{ selected: 'all' }" class="flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
+                                <button @click="selected = 'all'" :class="selected === 'all' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'" class="rounded-md px-3 py-1.5 text-sm font-medium">All</button>
+                                <button @click="selected = 'pastdue'" :class="selected === 'pastdue' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'" class="rounded-md px-3 py-1.5 text-sm font-medium">Past Due</button>
+                                <button @click="selected = 'coming'" :class="selected === 'coming' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'" class="rounded-md px-3 py-1.5 text-sm font-medium">Coming</button>
                             </div>
                         </div>
-                        <p class="text-2xl font-bold text-gray-900 text-center">--</p>
-                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for relationship count</p>
-                        </div>
-                    </div>
-
-                <!-- Top 10 Concentration -->
-                <div class="col-span-12 md:col-span-6 xl:col-span-3">
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100">
-                                <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
-                                </svg>
-                        </div>
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-500">Top 10 Concentration</h3>
-                                <p class="text-xs text-gray-400">% of total portfolio</p>
-                    </div>
-                </div>
-                        <p class="text-2xl font-bold text-gray-900 text-center">--%</p>
-                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for concentration %</p>
-            </div>
-        </div>
-
-                <!-- Largest Relationship -->
-                <div class="col-span-12 md:col-span-6 xl:col-span-3">
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100">
-                                <svg class="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
-                                </svg>
-                                    </div>
-                    <div>
-                                <h3 class="text-sm font-medium text-gray-500">Largest Relationship</h3>
-                                <p class="text-xs text-gray-400">By total facility amount</p>
-                    </div>
-                        </div>
-                        <p class="text-lg font-bold text-gray-900 truncate text-center">--</p>
-                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for largest name</p>
-                    </div>
-                </div>
-
-                <!-- Avg Relationship Size -->
-                <div class="col-span-12 md:col-span-6 xl:col-span-3">
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100">
-                                <svg class="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                            </svg>
-                                    </div>
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-500">Avg Relationship Size</h3>
-                                <p class="text-xs text-gray-400">Average TFA per relationship</p>
-                            </div>
-                        </div>
-                        <p class="text-2xl font-bold text-gray-900 text-center">$--</p>
-                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for average size</p>
-                        </div>
-                    </div>
-                </div>
-
-            <!-- Placeholder Row 2: Top Relationships Table -->
-            <div class="mb-6">
-                <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6">
-                    <div class="mb-5 flex items-start justify-between">
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-800">Top Relationships</h3>
-                            <p class="mt-1 text-gray-500 text-sm">Detailed view of largest relationships with exposure breakdown</p>
-                                    </div>
-                    </div>
-                    <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-gray-500">
-                        <thead class="text-sm text-gray-700 bg-gray-50">
-                            <tr>
-                                    <th class="px-4 py-3 text-left whitespace-nowrap">Rank</th>
-                                    <th class="px-4 py-3 text-left whitespace-nowrap">Relationship Name</th>
-                                    <th class="px-4 py-3 text-center whitespace-nowrap">Facilities</th>
-                                    <th class="px-4 py-3 text-center whitespace-nowrap">TFA</th>
-                                    <th class="px-4 py-3 text-center whitespace-nowrap">Direct OS</th>
-                                    <th class="px-4 py-3 text-center whitespace-nowrap">ROTCE</th>
-                                    <th class="px-4 py-3 text-center whitespace-nowrap">% of Total</th>
-                            </tr>
-                        </thead>
-                            <tbody>
-                            <tr class="border-b hover:bg-gray-50">
-                                    <td colspan="7" class="px-4 py-8 text-center text-gray-400">
-                                        <div class="flex flex-col items-center gap-2">
-                                            <svg class="h-8 w-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
-                                            </svg>
-                                            <p class="text-sm">Placeholder for top relationships breakdown</p>
-                                            <p class="text-xs">Data grouped by Relationship_Name from Portfolio_tw.xlsx</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-            <!-- Placeholder Row 3: Charts -->
-            <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
-                <!-- Concentration Chart -->
-                <div class="col-span-12 xl:col-span-6">
-                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
-                        <div class="mb-5">
-                            <h3 class="text-lg font-semibold text-gray-800">Portfolio Concentration</h3>
-                            <p class="mt-1 text-gray-500 text-sm">Top 10 vs Rest of Portfolio distribution</p>
-                                    </div>
-                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-                            <div class="text-center text-gray-400">
-                                <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
-                    </svg>
-                                <p class="text-sm font-medium">Donut Chart Placeholder</p>
-                                <p class="text-xs mt-1">Concentration risk visualization</p>
-                </div>
-                        </div>
-                        </div>
-                    </div>
-
-                <!-- Relationship Size Distribution -->
-                <div class="col-span-12 xl:col-span-6">
-                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
-                        <div class="mb-5">
-                            <h3 class="text-lg font-semibold text-gray-800">Relationship Size Distribution</h3>
-                            <p class="mt-1 text-gray-500 text-sm">Distribution of relationships by size buckets</p>
-                                    </div>
-                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+                        <div class="flex items-center justify-center h-72 bg-gray-50 rounded-lg">
                             <div class="text-center text-gray-400">
                                 <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                 </svg>
-                                <p class="text-sm font-medium">Histogram Placeholder</p>
-                                <p class="text-xs mt-1">Size bucket distribution chart</p>
-            </div>
-        </div>
-        </div>
-            </div>
-        </div>
-            </div>
-        <!-- End Top Names Tab -->
-
-        <!-- Covenants Tab Content -->
-        <div x-show="activeTab === 'covenants'" style="display: none;">
-            <!-- Page Header -->
-            <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-5">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h2 class="text-xl font-semibold text-gray-900">Covenants Monitoring</h2>
-                        <p class="mt-1 text-sm text-gray-500">Track covenant compliance status, past due items, and upcoming due dates</p>
-                                    </div>
-                    <div class="text-right shrink-0">
-                        <p class="text-xs text-gray-400 font-medium">Last Updated</p>
-                        <p class="text-sm font-semibold text-gray-600">--</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Placeholder Row 1: Covenant Status Metrics -->
-            <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
-                <!-- Total Covenants -->
-                <div class="col-span-12 md:col-span-6 xl:col-span-3">
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100">
-                                <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                    </div>
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-500">Total Covenants</h3>
-                                <p class="text-xs text-gray-400">Unique Covenant_Number</p>
+                                <p class="text-sm font-medium">Stacked Bar Chart Placeholder</p>
+                                <p class="text-xs mt-1">Aging buckets: 1-45, 46-90, >90 days</p>
                             </div>
                         </div>
-                        <p class="text-2xl font-bold text-gray-900 text-center">--</p>
-                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for covenant count</p>
                     </div>
                 </div>
-
-                <!-- Past Due -->
-                <div class="col-span-12 md:col-span-6 xl:col-span-3">
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-red-100">
-                                <svg class="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                    </div>
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-500">Past Due</h3>
-                                <p class="text-xs text-gray-400">Covenant_Due_Date < today</p>
-                            </div>
-                        </div>
-                        <p class="text-2xl font-bold text-red-600 text-center">--</p>
-                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for past due count</p>
-                    </div>
-                </div>
-
-                <!-- Coming Due (30 Days) -->
-                <div class="col-span-12 md:col-span-6 xl:col-span-3">
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100">
-                                <svg class="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                    </div>
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-500">Coming Due (30 Days)</h3>
-                                <p class="text-xs text-gray-400">Due within next 30 days</p>
-                            </div>
-                        </div>
-                        <p class="text-2xl font-bold text-amber-600 text-center">--</p>
-                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for coming due count</p>
-                    </div>
-                </div>
-
-                <!-- Compliance Rate -->
-                <div class="col-span-12 md:col-span-6 xl:col-span-3">
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100">
-                                <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                    </div>
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-500">Compliance Rate</h3>
-                                <p class="text-xs text-gray-400">On-time / Total</p>
-                            </div>
-                        </div>
-                        <p class="text-2xl font-bold text-green-600 text-center">--%</p>
-                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for compliance %</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Placeholder Row 2: Covenant Status Charts -->
-            <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
-                <!-- Past Due Covenants Chart -->
+                
+                <!-- Status Distribution Donut -->
                 <div class="col-span-12 xl:col-span-4">
                     <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
                         <div class="mb-5">
-                            <h3 class="text-lg font-semibold text-gray-800">Past Due Covenants</h3>
-                            <p class="mt-1 text-gray-500 text-sm">Breakdown by aging bucket (1-45, 46-90, >90 days)</p>
+                            <h3 class="text-lg font-semibold text-gray-800">Status Distribution</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Current covenant status breakdown</p>
                                     </div>
-                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+                        <div class="flex items-center justify-center h-48 bg-gray-50 rounded-lg mb-4">
                             <div class="text-center text-gray-400">
-                                <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="h-12 w-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
                                 </svg>
-                                <p class="text-sm font-medium">Donut Chart Placeholder</p>
-                                <p class="text-xs mt-1">Past due aging distribution</p>
+                                <p class="text-xs">Donut Chart</p>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Covenants by Region Table -->
-                <div class="col-span-12 xl:col-span-4">
-                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
-                        <div class="mb-5">
-                            <h3 class="text-lg font-semibold text-gray-800">Covenants by Region</h3>
-                            <p class="mt-1 text-gray-500 text-sm">Regional distribution with aging breakdown</p>
-                                    </div>
-                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-                            <div class="text-center text-gray-400">
-                                <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                                </svg>
-                                <p class="text-sm font-medium">Table Placeholder</p>
-                                <p class="text-xs mt-1">Region × Aging bucket matrix</p>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between text-sm">
+                                <div class="flex items-center gap-2"><div class="h-3 w-3 rounded-full bg-red-500"></div><span class="text-gray-600">Past Due</span></div>
+                                <span class="font-medium text-gray-800">-- (--%)</span>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Coming Due Chart -->
-                <div class="col-span-12 xl:col-span-4">
-                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
-                        <div class="mb-5">
-                            <h3 class="text-lg font-semibold text-gray-800">Coming Due (Next 30 Days)</h3>
-                            <p class="mt-1 text-gray-500 text-sm">Covenants due within the next 30 days</p>
-                                    </div>
-                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-                            <div class="text-center text-gray-400">
-                                <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
-                                </svg>
-                                <p class="text-sm font-medium">Donut Chart Placeholder</p>
-                                <p class="text-xs mt-1">Coming due by region</p>
+                            <div class="flex items-center justify-between text-sm">
+                                <div class="flex items-center gap-2"><div class="h-3 w-3 rounded-full bg-amber-500"></div><span class="text-gray-600">Coming Due</span></div>
+                                <span class="font-medium text-gray-800">-- (--%)</span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <div class="flex items-center gap-2"><div class="h-3 w-3 rounded-full bg-green-500"></div><span class="text-gray-600">On Track</span></div>
+                                <span class="font-medium text-gray-800">-- (--%)</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Placeholder Row 3: Covenant Details Table -->
+            
+            <!-- Row 3: Regional Summary (6) + Upcoming Schedule (6) - CRM Style -->
+            <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
+                <!-- Regional Summary -->
+                <div class="col-span-12 xl:col-span-6">
+                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
+                        <div class="mb-5">
+                            <h3 class="text-lg font-semibold text-gray-800">Regional Summary</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Covenant status by region</p>
+                                    </div>
+                        <div class="space-y-4">
+                            <!-- Region rows with progress bars -->
+                            <div class="flex items-center gap-4">
+                                <span class="w-16 text-sm font-medium text-gray-600">APAC</span>
+                                <div class="flex-1 flex h-4 rounded-full overflow-hidden bg-gray-100">
+                                    <div class="bg-red-500" style="width: 15%"></div>
+                                    <div class="bg-amber-500" style="width: 25%"></div>
+                                    <div class="bg-green-500" style="width: 60%"></div>
+                                </div>
+                                <span class="w-12 text-right text-sm text-gray-600">--</span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="w-16 text-sm font-medium text-gray-600">EMEA</span>
+                                <div class="flex-1 flex h-4 rounded-full overflow-hidden bg-gray-100">
+                                    <div class="bg-red-500" style="width: 10%"></div>
+                                    <div class="bg-amber-500" style="width: 20%"></div>
+                                    <div class="bg-green-500" style="width: 70%"></div>
+                                </div>
+                                <span class="w-12 text-right text-sm text-gray-600">--</span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="w-16 text-sm font-medium text-gray-600">NAM</span>
+                                <div class="flex-1 flex h-4 rounded-full overflow-hidden bg-gray-100">
+                                    <div class="bg-red-500" style="width: 20%"></div>
+                                    <div class="bg-amber-500" style="width: 15%"></div>
+                                    <div class="bg-green-500" style="width: 65%"></div>
+                                </div>
+                                <span class="w-12 text-right text-sm text-gray-600">--</span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="w-16 text-sm font-medium text-gray-600">LATAM</span>
+                                <div class="flex-1 flex h-4 rounded-full overflow-hidden bg-gray-100">
+                                    <div class="bg-red-500" style="width: 5%"></div>
+                                    <div class="bg-amber-500" style="width: 30%"></div>
+                                    <div class="bg-green-500" style="width: 65%"></div>
+                                </div>
+                                <span class="w-12 text-right text-sm text-gray-600">--</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-center gap-6 text-xs">
+                            <div class="flex items-center gap-1"><div class="h-2 w-2 rounded-full bg-red-500"></div>Past Due</div>
+                            <div class="flex items-center gap-1"><div class="h-2 w-2 rounded-full bg-amber-500"></div>Coming Due</div>
+                            <div class="flex items-center gap-1"><div class="h-2 w-2 rounded-full bg-green-500"></div>On Track</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Upcoming Covenants Schedule -->
+                <div class="col-span-12 xl:col-span-6">
+                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
+                        <div class="mb-5">
+                            <h3 class="text-lg font-semibold text-gray-800">Upcoming Schedule</h3>
+                            <p class="mt-1 text-gray-500 text-sm">Covenants due in next 30 days</p>
+                                    </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-center h-40 bg-gray-50 rounded-lg">
+                                <div class="text-center text-gray-400">
+                                    <svg class="h-8 w-8 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <p class="text-sm">Calendar View Placeholder</p>
+                                    <p class="text-xs mt-1">Upcoming covenant due dates</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Row 4: Full Width Details Table -->
             <div class="mb-6">
                 <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6">
                     <div class="mb-5 flex items-start justify-between">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800">Covenant Details</h3>
-                            <p class="mt-1 text-gray-500 text-sm">Detailed view of all covenants with status and due dates</p>
+                            <p class="mt-1 text-gray-500 text-sm">Complete list of all covenants</p>
+                                    </div>
+                        <div class="flex items-center gap-2">
+                            <input type="text" placeholder="Search covenants..." class="rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <select class="rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:outline-none">
+                                <option>All Status</option>
+                                <option>Past Due</option>
+                                <option>Coming Due</option>
+                                <option>On Track</option>
+                            </select>
                         </div>
                     </div>
                     <div class="overflow-x-auto">
@@ -2377,11 +2543,11 @@
                                 <tr>
                                     <th class="px-4 py-3 text-left whitespace-nowrap">Covenant #</th>
                                     <th class="px-4 py-3 text-left whitespace-nowrap">Relationship</th>
-                                    <th class="px-4 py-3 text-left whitespace-nowrap">Region</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">Region</th>
                                     <th class="px-4 py-3 text-center whitespace-nowrap">Due Date</th>
                                     <th class="px-4 py-3 text-center whitespace-nowrap">Status</th>
-                                    <th class="px-4 py-3 text-center whitespace-nowrap">Days Past Due</th>
-                                </tr>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">Days</th>
+                            </tr>
                             </thead>
                             <tbody>
                             <tr class="border-b hover:bg-gray-50">
@@ -2391,161 +2557,262 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                             </svg>
                                             <p class="text-sm">Placeholder for covenant details</p>
-                                            <p class="text-xs">Data from Covenants_tw.xlsx</p>
                                     </div>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                </div>
+                    </div>
             </div>
         </div>
         <!-- End Covenants Tab -->
 
-        <!-- Credit Reviews (CCM) Tab Content -->
+        <!-- Credit Reviews (CCM) Tab Content - SaaS Style Layout -->
         <div x-show="activeTab === 'ccm'" style="display: none;">
-            <!-- Page Header -->
-            <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-5">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h2 class="text-xl font-semibold text-gray-900">Credit Reviews</h2>
-                        <p class="mt-1 text-sm text-gray-500">Criticized/Classified Memos and Reviews tracking by region and status</p>
-                    </div>
-                    <div class="text-right shrink-0">
-                        <p class="text-xs text-gray-400 font-medium">Last Updated</p>
-                        <p class="text-sm font-semibold text-gray-600">--</p>
-                    </div>
-            </div>
-        </div>
-
-            <!-- Placeholder Row 1: CCM Status Metrics -->
-            <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
+            <!-- Row 1: Metrics with sparklines (SaaS Style) -->
+            <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 md:gap-6">
                 <!-- Total CCMs -->
-                <div class="col-span-12 md:col-span-6 xl:col-span-3">
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100">
-                    <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                <div class="rounded-2xl border border-gray-200 bg-white p-5">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Total Reviews</p>
+                            <h3 class="text-3xl font-bold text-gray-800 mt-2">--</h3>
+                            <p class="text-xs text-gray-400 mt-1">Active CCM records</p>
+                        </div>
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100">
+                            <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
                 </div>
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-500">Total Credit Reviews</h3>
-                                <p class="text-xs text-gray-400">Active CCM records</p>
                         </div>
-                        </div>
-                        <p class="text-2xl font-bold text-gray-900 text-center">--</p>
-                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for CCM count</p>
-                    </div>
                 </div>
-
-                <!-- Past Due CCMs -->
-                <div class="col-span-12 md:col-span-6 xl:col-span-3">
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-red-100">
-                                <svg class="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-            </div>
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-500">Past Due</h3>
-                                <p class="text-xs text-gray-400">CCM_Due_Date < today</p>
-                            </div>
+                
+                <!-- Past Due -->
+                <div class="rounded-2xl border border-gray-200 bg-white p-5">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Past Due</p>
+                            <h3 class="text-3xl font-bold text-red-600 mt-2">--</h3>
+                            <p class="text-xs text-red-500 mt-1 flex items-center gap-1">
+                                <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                                Needs attention
+                            </p>
                         </div>
-                        <p class="text-2xl font-bold text-red-600 text-center">--</p>
-                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for past due count</p>
-        </div>
-        </div>
-
-                <!-- Coming Due CCMs -->
-                <div class="col-span-12 md:col-span-6 xl:col-span-3">
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100">
-                                <svg class="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-500">Coming Due</h3>
-                                <p class="text-xs text-gray-400">Within current month</p>
-                            </div>
-                        </div>
-                        <p class="text-2xl font-bold text-amber-600 text-center">--</p>
-                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for coming due count</p>
-            </div>
-        </div>
-
-                <!-- Open CCMs -->
-                <div class="col-span-12 md:col-span-6 xl:col-span-3">
-                    <div class="rounded-2xl border border-gray-200 bg-white p-5 h-full">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100">
-                                <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-500">Open</h3>
-                                <p class="text-xs text-gray-400">Future due date</p>
-                            </div>
-                        </div>
-                        <p class="text-2xl font-bold text-green-600 text-center">--</p>
-                        <p class="text-xs text-gray-400 mt-1 text-center">Placeholder for open count</p>
-            </div>
-        </div>
-            </div>
-
-            <!-- Placeholder Row 2: CCM Charts -->
-            <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
-                <!-- CCM by Region Chart -->
-                <div class="col-span-12 xl:col-span-6">
-                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
-                        <div class="mb-5">
-                            <h3 class="text-lg font-semibold text-gray-800">Credit Reviews by Region</h3>
-                            <p class="mt-1 text-gray-500 text-sm">Regional distribution of CCMs (APAC, EMEA, NAM, LATAM)</p>
-                        </div>
-                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-                            <div class="text-center text-gray-400">
-                                <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                                </svg>
-                                <p class="text-sm font-medium">Stacked Bar Chart Placeholder</p>
-                                <p class="text-xs mt-1">Past Due / Coming Due / Open by region</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CCM Status by Region Table -->
-                <div class="col-span-12 xl:col-span-6">
-                    <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6 h-full">
-                        <div class="mb-5">
-                            <h3 class="text-lg font-semibold text-gray-800">Status Summary by Region</h3>
-                            <p class="mt-1 text-gray-500 text-sm">Counts of Past Due, Coming Due, and Open by region</p>
-                        </div>
-                        <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-                            <div class="text-center text-gray-400">
-                                <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                                </svg>
-                                <p class="text-sm font-medium">Summary Table Placeholder</p>
-                                <p class="text-xs mt-1">Region × Status matrix with totals</p>
-                            </div>
-                        </div>
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100">
+                            <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
                     </div>
                 </div>
             </div>
+                
+                <!-- Coming Due -->
+                <div class="rounded-2xl border border-gray-200 bg-white p-5">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Coming Due</p>
+                            <h3 class="text-3xl font-bold text-amber-600 mt-2">--</h3>
+                            <p class="text-xs text-amber-500 mt-1">Within current month</p>
+                        </div>
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100">
+                            <svg class="h-6 w-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+        </div>
+        </div>
 
-            <!-- Placeholder Row 3: CCM Details Table -->
+                <!-- Open -->
+                <div class="rounded-2xl border border-gray-200 bg-white p-5">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-sm text-gray-500">Open</p>
+                            <h3 class="text-3xl font-bold text-green-600 mt-2">--</h3>
+                            <p class="text-xs text-green-500 mt-1">Future due dates</p>
+                        </div>
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
+                            <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+            </div>
+        </div>
+
+            <!-- Row 2: Main Content (7/8) + Side Panel (5/4) - SaaS Style -->
+            <div class="mb-6 gap-5 space-y-5 sm:gap-6 sm:space-y-6 xl:grid xl:grid-cols-12 xl:space-y-0">
+                <!-- Left: Stacked Charts -->
+                <div class="xl:col-span-7 2xl:col-span-8">
+                    <div class="space-y-5 sm:space-y-6">
+                        <!-- Two charts side by side -->
+                        <div class="grid gap-5 sm:gap-6 lg:grid-cols-2">
+                            <!-- Status Breakdown Donut -->
+                            <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6">
+                                <div class="mb-4">
+                                    <h3 class="text-lg font-semibold text-gray-800">Status Breakdown</h3>
+                                    <p class="text-sm text-gray-500">Current distribution</p>
+                                </div>
+                                <div class="flex items-center justify-center h-48 bg-gray-50 rounded-lg">
+                                    <div class="text-center text-gray-400">
+                                        <svg class="h-10 w-10 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+                                        </svg>
+                                        <p class="text-xs">Donut Chart</p>
+            </div>
+        </div>
+                            </div>
+                            
+                            <!-- Risk Rating Distribution -->
+                            <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6">
+                                <div class="mb-4">
+                                    <h3 class="text-lg font-semibold text-gray-800">Risk Rating Dist.</h3>
+                                    <p class="text-sm text-gray-500">By classification</p>
+                                </div>
+                                <div class="flex items-center justify-center h-48 bg-gray-50 rounded-lg">
+                                    <div class="text-center text-gray-400">
+                                        <svg class="h-10 w-10 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                        </svg>
+                                        <p class="text-xs">Bar Chart</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Regional Stacked Chart -->
+                        <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6">
+                            <div class="mb-5 flex items-start justify-between">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">Regional Overview</h3>
+                                    <p class="text-gray-500 text-sm">Status distribution by region</p>
+                                </div>
+                                <select class="rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:outline-none">
+                                    <option>All Regions</option>
+                                    <option>APAC</option>
+                                    <option>EMEA</option>
+                                    <option>NAM</option>
+                                    <option>LATAM</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center justify-center h-56 bg-gray-50 rounded-lg">
+                                <div class="text-center text-gray-400">
+                                    <svg class="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                    </svg>
+                                    <p class="text-sm font-medium">Grouped Bar Chart Placeholder</p>
+                                    <p class="text-xs mt-1">Past Due / Coming Due / Open by region</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right: Performance Panel (SaaS Style) -->
+                <div class="space-y-6 xl:col-span-5 2xl:col-span-4">
+                    <!-- Performance Card with Tabs -->
+                    <div class="rounded-2xl border border-gray-200 bg-white p-6">
+                        <div class="mb-6 flex justify-between">
+                            <h3 class="text-lg font-semibold text-gray-800">Performance</h3>
+                        </div>
+                        <div x-data="{selected: 'region'}">
+                            <div class="flex w-full items-center gap-0.5 rounded-lg bg-gray-100 p-0.5 mb-4">
+                                <button @click="selected = 'region'" :class="selected === 'region' ? 'shadow-sm text-gray-900 bg-white' : 'text-gray-500'" class="text-sm w-full rounded-md px-3 py-2 font-medium">By Region</button>
+                                <button @click="selected = 'approver'" :class="selected === 'approver' ? 'shadow-sm text-gray-900 bg-white' : 'text-gray-500'" class="text-sm w-full rounded-md px-3 py-2 font-medium">By Approver</button>
+                            </div>
+                            
+                            <!-- Region View -->
+                            <div x-show="selected === 'region'" class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-gray-600">APAC</span>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-32 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                            <div class="h-full bg-blue-500 rounded-full" style="width: 35%"></div>
+                                        </div>
+                                        <span class="text-sm font-medium text-gray-800 w-8 text-right">--</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-gray-600">EMEA</span>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-32 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                            <div class="h-full bg-green-500 rounded-full" style="width: 28%"></div>
+                                        </div>
+                                        <span class="text-sm font-medium text-gray-800 w-8 text-right">--</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-gray-600">NAM</span>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-32 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                            <div class="h-full bg-purple-500 rounded-full" style="width: 25%"></div>
+                                        </div>
+                                        <span class="text-sm font-medium text-gray-800 w-8 text-right">--</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-gray-600">LATAM</span>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-32 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                            <div class="h-full bg-amber-500 rounded-full" style="width: 12%"></div>
+                                        </div>
+                                        <span class="text-sm font-medium text-gray-800 w-8 text-right">--</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Approver View -->
+                            <div x-show="selected === 'approver'" class="space-y-3">
+                                <div class="flex items-center justify-center h-32 bg-gray-50 rounded-lg">
+                                    <p class="text-sm text-gray-400">Approver breakdown placeholder</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions Card -->
+                    <div class="rounded-2xl border border-gray-200 bg-white p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Summary</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                                <span class="text-sm text-gray-600">Oldest Past Due</span>
+                                <span class="text-sm font-medium text-red-600">-- days</span>
+                            </div>
+                            <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                                <span class="text-sm text-gray-600">Due This Week</span>
+                                <span class="text-sm font-medium text-amber-600">--</span>
+                            </div>
+                            <div class="flex items-center justify-between py-2">
+                                <span class="text-sm text-gray-600">Avg Days to Due</span>
+                                <span class="text-sm font-medium text-gray-800">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Row 3: Full Width Details Table -->
             <div class="mb-6">
                 <div class="rounded-2xl border border-gray-200 bg-white px-5 pb-5 pt-5 sm:px-6">
                     <div class="mb-5 flex items-start justify-between">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800">Credit Review Details</h3>
-                            <p class="mt-1 text-gray-500 text-sm">Detailed view of all credit committee memos with status and approvals</p>
+                            <p class="mt-1 text-gray-500 text-sm">Complete list of all credit committee memos</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="text" placeholder="Search..." class="rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-40">
+                            <select class="rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:outline-none">
+                                <option>All Status</option>
+                                <option>Past Due</option>
+                                <option>Coming Due</option>
+                                <option>Open</option>
+                            </select>
+                            <button class="flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                </svg>
+                                Export
+                            </button>
                         </div>
                     </div>
                     <div class="overflow-x-auto">
@@ -2553,9 +2820,9 @@
                             <thead class="text-sm text-gray-700 bg-gray-50">
                                 <tr>
                                     <th class="px-4 py-3 text-left whitespace-nowrap">Relationship</th>
-                                    <th class="px-4 py-3 text-left whitespace-nowrap">Region</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">Region</th>
                                     <th class="px-4 py-3 text-center whitespace-nowrap">Risk Rating</th>
-                                    <th class="px-4 py-3 text-center whitespace-nowrap">CCM Due Date</th>
+                                    <th class="px-4 py-3 text-center whitespace-nowrap">Due Date</th>
                                     <th class="px-4 py-3 text-center whitespace-nowrap">Status</th>
                                     <th class="px-4 py-3 text-left whitespace-nowrap">Approver</th>
                                 </tr>
@@ -2568,7 +2835,6 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                             </svg>
                                             <p class="text-sm">Placeholder for CCM details</p>
-                                            <p class="text-xs">Data from CCM_tw.xlsx</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -2578,18 +2844,17 @@
                 </div>
             </div>
 
-            <!-- Important Notes -->
-            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white">
-                <div class="flex items-center gap-3 px-5 py-4">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 shrink-0">
+            <!-- ETL Process Note -->
+            <div class="overflow-hidden rounded-xl border border-blue-100 bg-blue-50">
+                <div class="flex items-start gap-3 px-5 py-4">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100">
                         <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
                     <div class="flex-1">
-                        <h4 class="text-sm font-semibold text-gray-800 mb-1">ETL Process</h4>
-                        <p class="text-xs text-gray-600">Before loading the data, the ETL process standardizes regional files into one, filters out Credit_Classification = Pass and Loss, keeps only CM in DM/CM_Flag, then standardizes and creates one file for this dashboard to consume.</p>
+                        <h4 class="text-sm font-semibold text-blue-800 mb-1">Data ETL Process</h4>
+                        <p class="text-xs text-blue-700">Before loading, the ETL process standardizes regional files into one, filters out Credit_Classification = Pass and Loss, keeps only CM in DM/CM_Flag, then creates a standardized file for this dashboard.</p>
                     </div>
                 </div>
             </div>
@@ -2645,8 +2910,9 @@
         let selectedRegion = "all"; // all, APAC, EMEA, LATAM, NAM
         let includePSE = true; // true = include PSE, false = exclude PSE
         let selectedStatus = "all"; // all, CM, DM
+        let selectedCommitmentStatus = "all"; // all, Committed, Uncommitted
         let selectedAmountType = "direct"; // direct, contingent, pse, osuc, tfa (for metrics)
-        let selectedPeriod = "current"; // current, previous (for New Facilities Approved in CP by Product Program chart)
+        let selectedPeriod = "current"; // current, previous (for New Facilities Approved  chart)
         
         // Chart View States (for View Data filtering)
         let currentCovenantViewType = "pastDue"; // pastDue, comingDue
@@ -2849,7 +3115,13 @@
                 const covenantDataPromise = fetchCovenantsFromConfluence();
                 const ccmDataPromise = fetchCCMFromConfluence();
                 
-                // Load portfolio data (largest file)
+                // Load portfolio data (largest file) - 10% to 40%
+                showLoadingOverlay(
+                    "Fetching Portfolio data...",
+                    "Downloading portfolio file...",
+                    15
+                );
+                
                 const data = await fetchDataFromConfluence();
                 
                 if (data && data.length > 0) {
@@ -2862,12 +3134,18 @@
                     console.log(`📅 Reporting Month: ${repMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`);
                     
                     showLoadingOverlay(
-                        "Loading supplementary data...",
+                        "Portfolio data loaded",
                         `Portfolio: ${data.length.toLocaleString()} records loaded`,
-                        50
+                        40
                     );
                     
-                    // Wait for covenant data
+                    // Wait for covenant data - 40% to 50%
+                    showLoadingOverlay(
+                        "Loading Covenants data...",
+                        "Fetching covenant records...",
+                        45
+                    );
+                    
                     const covenantResult = await covenantDataPromise;
                     if (covenantResult && covenantResult.length > 0) {
                         covenantsData = covenantResult;
@@ -2878,12 +3156,18 @@
                     }
                     
                     showLoadingOverlay(
-                        "Loading CCM data...",
+                        "Covenants data loaded",
                         `Covenants: ${covenantsData.length.toLocaleString()} records`,
-                        70
+                        50
                     );
                     
-                    // Wait for CCM data
+                    // Wait for CCM data - 50% to 60%
+                    showLoadingOverlay(
+                        "Loading CCM data...",
+                        "Fetching CCM records...",
+                        55
+                    );
+                    
                     const ccmResult = await ccmDataPromise;
                     if (ccmResult && ccmResult.length > 0) {
                         ccmData = ccmResult;
@@ -2894,41 +3178,55 @@
                     }
                     
                     showLoadingOverlay(
+                        "CCM data loaded",
+                        `CCM: ${ccmData.length.toLocaleString()} records`,
+                        60
+                    );
+                    
+                    showLoadingOverlay(
                         "Initializing dashboard...",
                         "Building charts and metrics...",
-                        85
+                        70
                     );
                     
                     // Use setTimeout to allow UI to update before heavy processing
                     setTimeout(() => {
                         showLoadingOverlay(
-                            "Finalizing...",
-                            "Almost done...",
-                            95
-                        );
-                        
-                        initializeDashboard();
-                        
-                        const loadTime = ((performance.now() - loadStartTime) / 1000).toFixed(1);
-                        
-                        showLoadingOverlay(
-                            "Complete!",
-                            "Dashboard ready",
-                            100
+                            "Processing data...",
+                            "Calculating metrics...",
+                            80
                         );
                         
                         setTimeout(() => {
-                        hideLoadingOverlay();
+                            showLoadingOverlay(
+                                "Finalizing...",
+                                "Almost done...",
+                                90
+                            );
                             
-                        showNotification(
-                            "Success",
-                                `Loaded ${data.length.toLocaleString()} records in ${loadTime}s`,
-                            "success"
-                        );
-                        }, 300);
-                        
-                        console.log(`🎉 Dashboard loaded in ${loadTime}s`);
-                    }, 50);
+                            initializeDashboard();
+                            
+                            const loadTime = ((performance.now() - loadStartTime) / 1000).toFixed(1);
+                            
+                            showLoadingOverlay(
+                                "Complete!",
+                                "Dashboard ready",
+                                100
+                            );
+                            
+                            setTimeout(() => {
+                                hideLoadingOverlay();
+                                
+                                showNotification(
+                                    "Success",
+                                    `Loaded ${data.length.toLocaleString()} records in ${loadTime}s`,
+                                    "success"
+                                );
+                                
+                                console.log(`🎉 Dashboard loaded in ${loadTime}s`);
+                            }, 300);
+                        }, 50);
+                    }, 100);
                 } else {
                     console.error("No data from Confluence");
                     hideLoadingOverlay();
@@ -2974,9 +3272,16 @@
                 const blob = await response.blob();
                 console.log("Blob size:", blob.size, "bytes");
                 
-                // Parse based on file type with progress updates
-                const progressCallback = (msg) => {
-                    showLoadingOverlay("Loading Portfolio Data...", msg);
+                // Parse based on file type with progress updates (10-40% range)
+                let portfolioProgressStart = 10;
+                let portfolioProgressEnd = 40;
+                const progressCallback = (msg, percent = null) => {
+                    let finalPercent = null;
+                    if (percent !== null) {
+                        // Map the percent to the portfolio loading range (10-40%)
+                        finalPercent = portfolioProgressStart + (percent / 100) * (portfolioProgressEnd - portfolioProgressStart);
+                    }
+                    showLoadingOverlay("Loading Portfolio Data...", msg, finalPercent);
                 };
                 
                 if (CONFLUENCE_FILE_NAME.endsWith(".csv")) {
@@ -3239,13 +3544,13 @@
                 reader.onprogress = function(e) {
                     if (e.lengthComputable && progressCallback) {
                         const percent = Math.round((e.loaded / e.total) * 30);
-                        progressCallback(`Reading file... ${percent}%`);
+                        progressCallback(`Reading file... ${percent}%`, percent);
                     }
                 };
                 
                 reader.onload = function (e) {
                     try {
-                        if (progressCallback) progressCallback("Parsing Excel structure...");
+                        if (progressCallback) progressCallback("Parsing Excel structure...", 35);
                         
                         const data = new Uint8Array(e.target.result);
                         const startTime = performance.now();
@@ -3263,7 +3568,7 @@
                         const parseTime = performance.now() - startTime;
                         console.log(`Excel parsed in ${(parseTime/1000).toFixed(2)}s`);
                         
-                        if (progressCallback) progressCallback("Converting to data rows...");
+                        if (progressCallback) progressCallback("Converting to data rows...", 60);
                         
                         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                         console.log("Excel Sheet Name:", workbook.SheetNames[0]);
@@ -3278,7 +3583,7 @@
                         const convertTime = performance.now() - convertStart;
                         console.log(`Converted ${jsonData.length} rows in ${(convertTime/1000).toFixed(2)}s`);
                         
-                        if (progressCallback) progressCallback(`Filtering ${jsonData.length.toLocaleString()} rows...`);
+                        if (progressCallback) progressCallback(`Filtering ${jsonData.length.toLocaleString()} rows...`, 90);
                         
                         // Filter for rows with Facility_ID
                         const filteredData = jsonData.filter((row) => row.Facility_ID);
@@ -3289,6 +3594,8 @@
                         if (filteredData.length > 0) {
                             console.log("Sample record fields:", Object.keys(filteredData[0]));
                         }
+                        
+                        if (progressCallback) progressCallback(`Portfolio data ready (${filteredData.length.toLocaleString()} records)`, 100);
                         
                         resolve(filteredData);
                     } catch (error) {
@@ -3662,12 +3969,11 @@
         function applyFilters() {
             const startTime = performance.now();
             
-            // Get advanced filter values (excluding Region and Status which are in smart filters)
+            // Get advanced filter values (excluding Region, Status, and Commitment Status which are in smart filters)
             const filters = {
                 productProgram: document.getElementById("filterProductProgram").value,
                 extendingUnit: document.getElementById("filterExtendingUnit").value,
                 facilityType: document.getElementById("filterFacilityType").value,
-                commitment: document.getElementById("filterCommitment").value,
                 teamLead: document.getElementById("filterTeamLead").value,
                 underwriter: document.getElementById("filterUnderwriter").value,
                 caMaturity: document.getElementById("filterCAMaturity").value,
@@ -3675,7 +3981,7 @@
                     .value,
             };
 
-            // Update active filters object (including Region and Status smart filters)
+            // Update active filters object (including Region, Status, and Commitment Status smart filters)
             activeFilters = {};
             
             // Add smart filters to activeFilters
@@ -3683,6 +3989,8 @@
                 activeFilters["Region"] = selectedRegion;
             if (selectedStatus !== 'all')
                 activeFilters["Status"] = selectedStatus;
+            if (selectedCommitmentStatus !== 'all')
+                activeFilters["Commitment Status"] = selectedCommitmentStatus;
             if (!includePSE)
                 activeFilters["PSE"] = "Excluded";
             
@@ -3692,8 +4000,6 @@
                 activeFilters["Extending Unit"] = filters.extendingUnit;
             if (filters.facilityType)
                 activeFilters["Facility Type"] = filters.facilityType;
-            if (filters.commitment)
-                activeFilters["Commitment Status"] = filters.commitment;
             if (filters.teamLead) activeFilters["Team Lead"] = filters.teamLead;
             if (filters.underwriter)
                 activeFilters["Underwriter"] = filters.underwriter;
@@ -3797,6 +4103,12 @@
                     if (rowStatus !== selectedStatus.toUpperCase()) continue;
                 }
                 
+                // Commitment Status filter (Committed/Uncommitted)
+                if (selectedCommitmentStatus !== "all") {
+                    const rowCommitment = row["Committed/Uncommitted"] || "";
+                    if (rowCommitment !== selectedCommitmentStatus) continue;
+                }
+                
                 // Fast path: Check advanced filter string filters (fastest to fail)
                 if (
                     filters.productProgram &&
@@ -3811,11 +4123,6 @@
                 if (
                     filters.facilityType &&
                     row.Facility_Type !== filters.facilityType
-                )
-                    continue;
-                if (
-                    filters.commitment &&
-                    row["Committed/Uncommitted"] !== filters.commitment
                 )
                     continue;
                 if (
@@ -3974,12 +4281,11 @@
         function applyFiltersWithChartFilter() {
             const startTime = performance.now();
 
-            // Get advanced filter values (excluding Region and Status which are in smart filters)
+            // Get advanced filter values (excluding Region, Status, and Commitment Status which are in smart filters)
             const filters = {
                 productProgram: document.getElementById("filterProductProgram").value,
                 extendingUnit: document.getElementById("filterExtendingUnit").value,
                 facilityType: document.getElementById("filterFacilityType").value,
-                commitment: document.getElementById("filterCommitment").value,
                 teamLead: document.getElementById("filterTeamLead").value,
                 underwriter: document.getElementById("filterUnderwriter").value,
                 caMaturity: document.getElementById("filterCAMaturity").value,
@@ -3987,7 +4293,7 @@
                     .value,
             };
 
-            // Update active filters object (including Region and Status smart filters)
+            // Update active filters object (including Region, Status, and Commitment Status smart filters)
             activeFilters = {};
             
             // Add smart filters to activeFilters
@@ -3995,6 +4301,8 @@
                 activeFilters["Region"] = selectedRegion;
             if (selectedStatus !== 'all')
                 activeFilters["Status"] = selectedStatus;
+            if (selectedCommitmentStatus !== 'all')
+                activeFilters["Commitment Status"] = selectedCommitmentStatus;
             if (!includePSE)
                 activeFilters["PSE"] = "Excluded";
             
@@ -4004,8 +4312,6 @@
                 activeFilters["Extending Unit"] = filters.extendingUnit;
             if (filters.facilityType)
                 activeFilters["Facility Type"] = filters.facilityType;
-            if (filters.commitment)
-                activeFilters["Commitment Status"] = filters.commitment;
             if (filters.teamLead) activeFilters["Team Lead"] = filters.teamLead;
             if (filters.underwriter)
                 activeFilters["Underwriter"] = filters.underwriter;
@@ -4112,6 +4418,12 @@
                     if (rowStatus !== selectedStatus.toUpperCase()) continue;
                 }
 
+                // Commitment Status filter (Committed/Uncommitted)
+                if (selectedCommitmentStatus !== "all") {
+                    const rowCommitment = row["Committed/Uncommitted"] || "";
+                    if (rowCommitment !== selectedCommitmentStatus) continue;
+                }
+
                 // Fast path: Check advanced filter string filters (fastest to fail)
                 if (
                     filters.productProgram &&
@@ -4126,11 +4438,6 @@
                 if (
                     filters.facilityType &&
                     row.Facility_Type !== filters.facilityType
-                )
-                    continue;
-                if (
-                    filters.commitment &&
-                    row["Committed/Uncommitted"] !== filters.commitment
                 )
                     continue;
                 if (
@@ -4259,6 +4566,11 @@
                 return;
             }
             
+            if (label === "Commitment Status") {
+                selectCommitmentFilter('all');
+                return;
+            }
+            
             if (label === "PSE") {
                 // Toggle PSE back to include
                 includePSE = true;
@@ -4278,7 +4590,6 @@
                 "Product Program": "filterProductProgram",
                 "Extending Unit": "filterExtendingUnit",
                 "Facility Type": "filterFacilityType",
-                "Commitment Status": "filterCommitment",
                 "Team Lead": "filterTeamLead",
                 Underwriter: "filterUnderwriter",
                 "CAs Maturing": "filterCAMaturity",
@@ -4618,7 +4929,16 @@
                     },
                 },
                 dataLabels: {
-                    enabled: false,
+                    enabled: true,
+                    offsetY: -5,
+                    style: {
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        colors: ['#1f2937']
+                    },
+                    formatter: function(val, opts) {
+                        return val;
+                    }
                 },
                 xaxis: {
                     categories: categories,
@@ -4943,7 +5263,16 @@
                     },
                 },
                 dataLabels: {
-                    enabled: false,
+                    enabled: true,
+                    offsetY: -5,
+                    style: {
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        colors: ['#1f2937']
+                    },
+                    formatter: function(val, opts) {
+                        return val;
+                    }
                 },
                 stroke: {
                     show: true,
@@ -5121,6 +5450,20 @@
             }
         }
         
+        // Select Commitment Status Filter (Committed/Uncommitted) - optimized
+        function selectCommitmentFilter(commitment) {
+            selectedCommitmentStatus = commitment;
+            
+            // Update button styles using helper
+            updateCommitmentButtonsUI(commitment);
+            
+            // Only apply filters if not in batch reset mode
+            if (!isResettingFilters) {
+            updateFilterCount();
+            applyFilters();
+            }
+        }
+        
         // Select Amount Type Filter (Direct/Contingent/PSE/OSUC/Unused/TFA) - optimized
         function selectAmountTypeFilter(type) {
             selectedAmountType = type;
@@ -5130,6 +5473,12 @@
             
             // Update chart titles
             updateAmountTypeTitles(type);
+            
+            // Update Alpine.js dropdown state if it exists
+            const exposureDropdown = document.querySelector('[x-data*="openExposure"]');
+            if (exposureDropdown && exposureDropdown.__x) {
+                exposureDropdown.__x.$data.exposureType = type;
+            }
 
             console.log("Amount Type filter:", type);
             
@@ -5143,7 +5492,7 @@
                 createRelationshipChart();
                 createROTCEChart();
             }
-            }
+        }
         }
         
         // Helper: Update amount type chart titles
@@ -5178,6 +5527,7 @@
             selectedRegion = "all";
             includePSE = true;
             selectedStatus = "all";
+            selectedCommitmentStatus = "all";
             selectedAmountType = "direct";
             
             // Batch UI updates using requestAnimationFrame for smooth rendering
@@ -5193,6 +5543,9 @@
             
                 // Reset status buttons UI (both tabs) - UI only
                 updateStatusButtonsUI("all");
+            
+                // Reset commitment status buttons UI - UI only
+                updateCommitmentButtonsUI("all");
             
                 // Reset amount type buttons UI - UI only
                 updateAmountTypeButtonsUI("direct");
@@ -5255,6 +5608,21 @@
                 const isActive = s.toLowerCase() === status.toLowerCase();
                 
                 const btn = document.getElementById(`btnStatus${s}`);
+                if (btn) btn.className = isActive ? activeClass : inactiveClass;
+            });
+        }
+        
+        // Helper: Update commitment status buttons UI only (no filter application)
+        function updateCommitmentButtonsUI(commitment) {
+            const commitments = { All: "all", Committed: "Committed", Uncommitted: "Uncommitted" };
+            Object.keys(commitments).forEach((key) => {
+                const value = commitments[key];
+                const minWidth = key === "All" ? "45px" : key === "Committed" ? "85px" : "100px";
+                const activeClass = `min-w-[${minWidth}] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white`;
+                const inactiveClass = `min-w-[${minWidth}] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900`;
+                const isActive = value.toLowerCase() === commitment.toLowerCase();
+                
+                const btn = document.getElementById(`btnCommitment${key}`);
                 if (btn) btn.className = isActive ? activeClass : inactiveClass;
             });
         }
@@ -5915,9 +6283,25 @@
 
             // Define excluded facility types
             const excludedFacilityTypes = [
-                'Agency Clearing',
-                'Residential First Mortgage-Standard',
+                'Cash Management-DOL',
+                'Cash Management-ACH',
+                'Settlement',
+                'Overdraft Line',
                 'Collateral Monitoring Line',
+                'Outgoing TPC',
+                'Credit Card',
+                'Guaranty',
+                'Cash Management-Other',
+                'B&I Margin Loan',
+                'Cash Management-BACS',
+                'SAFE - Prime Finance',
+                'Clearing',
+                'Agency Clearing',
+                'SAFE - Financing',
+                'B&I Short Market Values',
+                'Term Loan',
+                'Residential First Mortgage-Standard',
+                'B&I Non-Purpose Loan',
                 'Unallocated'
             ];
 
@@ -6385,7 +6769,7 @@
                         <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">46-90</th>
                         <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">&gt;90</th>
                         <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">Total</th>
-                        <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">Population</th>
+                        <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">Sum</th>
                         <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap" style="min-width: 70px;">% Total</th>
                     `;
                 } else {
@@ -6393,7 +6777,7 @@
                         <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">Region</th>
                         <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">Due (30d)</th>
                         <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">Total</th>
-                        <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">Population</th>
+                        <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap">Sum</th>
                         <th class="px-2 py-2 text-xs font-semibold text-gray-700 tracking-wider text-center whitespace-nowrap" style="min-width: 70px;">% Total</th>
                     `;
                 }
@@ -7105,7 +7489,16 @@
                     },
                 },
                 dataLabels: {
-                    enabled: false,
+                    enabled: true,
+                    offsetY: -5,
+                    style: {
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        colors: ['#1f2937']
+                    },
+                    formatter: function(val, opts) {
+                        return val;
+                    }
                 },
                 xaxis: {
                     categories: categories,
@@ -7373,7 +7766,16 @@
                     },
                 },
                 dataLabels: {
-                    enabled: false,
+                    enabled: true,
+                    offsetY: -5,
+                    style: {
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        colors: ['#1f2937']
+                    },
+                    formatter: function(val, opts) {
+                        return val;
+                    }
                 },
                 xaxis: {
                     categories: categories,
@@ -7678,7 +8080,16 @@
                     },
                 },
                 dataLabels: {
-                    enabled: false,
+                    enabled: true,
+                    offsetY: -5,
+                    style: {
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        colors: ['#1f2937']
+                    },
+                    formatter: function(val, opts) {
+                        return val;
+                    }
                 },
                 xaxis: {
                     categories: categories,
@@ -8229,7 +8640,16 @@
                     },
                 },
                 dataLabels: {
-                    enabled: false,
+                    enabled: true,
+                    offsetY: -5,
+                    style: {
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        colors: ['#1f2937']
+                    },
+                    formatter: function(val, opts) {
+                        return val;
+                    }
                 },
                 stroke: {
                     show: true,
@@ -8364,6 +8784,7 @@
             if (selectedRegion !== 'all') return true;
             if (!includePSE) return true;
             if (selectedStatus !== 'all') return true;
+            if (selectedCommitmentStatus !== 'all') return true;
             
             // Check if search is active
             const searchTerm = document.getElementById('searchInput')?.value?.trim();
@@ -8426,12 +8847,12 @@
             }
         }
 
-        // Create New Facilities Approved in CP by Product Program Donut Chart from all data
+        // Create New Facilities Approved  Donut Chart from all data
         function createCreditClassificationChart() {
             const startTime = performance.now();
             
             console.log(
-                "Creating New Facilities Approved in CP by Product Program chart, dataLength:",
+                "Creating New Facilities Approved  chart, dataLength:",
                 portfolioData.length
             );
             
@@ -8665,7 +9086,16 @@
                     },
                 },
                 dataLabels: {
-                    enabled: false,
+                    enabled: true,
+                    offsetY: -5,
+                    style: {
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        colors: ['#1f2937']
+                    },
+                    formatter: function(val, opts) {
+                        return val;
+                    }
                 },
                 tooltip: {
                     enabled: true,
@@ -8783,12 +9213,12 @@
             }
         }
 
-        // Create New Facilities Approved in CP by Product Program Donut Chart from filtered data
+        // Create New Facilities Approved  Donut Chart from filtered data
         function createCreditClassificationChartFromFiltered() {
             const startTime = performance.now();
             
             console.log(
-                "Creating filtered New Facilities Approved in CP by Product Program chart, dataLength:",
+                "Creating filtered New Facilities Approved  chart, dataLength:",
                 filteredData.length
             );
             
@@ -9037,7 +9467,16 @@
                     },
                 },
                 dataLabels: {
-                    enabled: false,
+                    enabled: true,
+                    offsetY: -5,
+                    style: {
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        colors: ['#1f2937']
+                    },
+                    formatter: function(val, opts) {
+                        return val;
+                    }
                 },
                 tooltip: {
                     enabled: true,
@@ -9861,7 +10300,7 @@
                     data = getExpiringData();
                     break;
                 case "newFacilities":
-                    chartName = "New Facilities Approved in CP by Product Program";
+                    chartName = "New Facilities Approved ";
                     data = getNewFacilitiesData();
                     break;
                 case "topRelationships":
@@ -10572,7 +11011,7 @@
                 },
                 newFacilities: {
                     title:
-                        "New Facilities Approved in CP by Product Program - Methodology",
+                        "New Facilities Approved  - Methodology",
                     content: `
                         <div class="space-y-4">
                             <div>
@@ -10956,8 +11395,7 @@
                                 <p class="text-gray-600 mb-2">This table has hardcoded filters that are always applied in addition to user-selected filters:</p>
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
                                     <li><strong>Regions:</strong> Only NAM and LATAM (hardcoded)</li>
-                                    <li><strong>PSE:</strong> Always excluded (non-PSE only)</li>
-                                    <li><strong>Excluded Facility Types:</strong> Agency Clearing, Residential First Mortgage-Standard, Collateral Monitoring Line, Unallocated</li>
+                                    <li><strong>Facility Types excluded:</strong> PSE, Cash Management, Clearing, TPC, B&I</li>
                                     <li><strong>User Filters:</strong> Respects other active filters (Status, Product Program, etc.)</li>
                                 </ul>
                             </div>
@@ -11079,10 +11517,10 @@
                                     <li><strong>Status Filter:</strong> Filter by Coming_Due/Past_Due column value</li>
                                     <li><strong>Past Due:</strong> Donut chart displays all categories (<strong>1-45 Days</strong> lightest blue, <strong>46-90 Days</strong> medium blue, <strong>&gt;90 Days</strong> darkest blue) with color intensity increasing by severity. Center shows total past due count</li>
                                     <li><strong>Coming Due:</strong> Donut chart shows covenants due in the <strong>next 30 days</strong> calculated from Covenant_Due_Date, in green color. Center shows total coming due count</li>
-                                    <li><strong>Custom Legend:</strong> Side-by-side layout with percentage and count for each category, matching the exact style of "New Facilities Approved in CP by Product Program"</li>
+                                    <li><strong>Custom Legend:</strong> Side-by-side layout with percentage and count for each category, matching the exact style of "New Facilities Approved "</li>
                                     <li><strong>Date Formats:</strong> Supports multiple formats including DD/MM/YYYY, YYYY-MM-DD, and MMM DD, YYYY (e.g., Jan 15, 2024)</li>
                                     <li><strong>Toggle Views:</strong> Switch between Past Due and Coming Due using the toggle buttons. Title, subtitle, center label, and legend update dynamically</li>
-                                    <li><strong>Visual Style:</strong> Identical to "New Facilities Approved in CP by Product Program" chart - same colors, fonts, layout, legend style, and spacing</li>
+                                    <li><strong>Visual Style:</strong> Identical to "New Facilities Approved " chart - same colors, fonts, layout, legend style, and spacing</li>
                                 </ul>
                             </div>
                             

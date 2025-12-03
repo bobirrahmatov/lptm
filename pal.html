@@ -1079,10 +1079,10 @@
                     <div class="flex items-center justify-between px-5 pt-5 sm:px-6 sm:pt-6 pb-4">
                         <div>
                         <h3 class="text-lg font-semibold text-gray-800">
-                                Pipeline Deals Aging
+                                Deals Pending Closure
                         </h3>
                             <p class="mt-1 text-sm text-gray-500">
-                                Deals pending origination grouped by approval age (NAM and LATAM only)
+                                NAM and LATAM only
                             </p>
                         </div>
                         <div x-data="{openDropDown: false}" class="relative h-fit">
@@ -4930,11 +4930,14 @@
                 },
                 dataLabels: {
                     enabled: true,
-                    offsetY: -5,
+                    offsetY: -20,
                     style: {
                         fontSize: '12px',
                         fontWeight: 600,
-                        colors: ['#1f2937']
+                        colors: ['#000000']
+                    },
+                    background: {
+                        enabled: false
                     },
                     formatter: function(val, opts) {
                         return val;
@@ -5263,16 +5266,7 @@
                     },
                 },
                 dataLabels: {
-                    enabled: true,
-                    offsetY: -5,
-                    style: {
-                        fontSize: '12px',
-                        fontWeight: 600,
-                        colors: ['#1f2937']
-                    },
-                    formatter: function(val, opts) {
-                        return val;
-                    }
+                    enabled: false,
                 },
                 stroke: {
                     show: true,
@@ -6315,7 +6309,7 @@
 
             // Filter and categorize deals
             dataSource.forEach(row => {
-                // Always exclude PSE for Pipeline Deals Aging
+                // Always exclude PSE for Deals Pending Closure
                 const pseColumn = row["PSE_non-PSE"] || row.PSE_non_PSE || "";
                 const pseValue = String(pseColumn).trim().toUpperCase();
                 if (pseValue === "PSE") return;
@@ -7490,11 +7484,14 @@
                 },
                 dataLabels: {
                     enabled: true,
-                    offsetY: -5,
+                    offsetY: -20,
                     style: {
                         fontSize: '12px',
                         fontWeight: 600,
-                        colors: ['#1f2937']
+                        colors: ['#000000']
+                    },
+                    background: {
+                        enabled: false
                     },
                     formatter: function(val, opts) {
                         return val;
@@ -7767,11 +7764,14 @@
                 },
                 dataLabels: {
                     enabled: true,
-                    offsetY: -5,
+                    offsetY: -20,
                     style: {
                         fontSize: '12px',
                         fontWeight: 600,
-                        colors: ['#1f2937']
+                        colors: ['#000000']
+                    },
+                    background: {
+                        enabled: false
                     },
                     formatter: function(val, opts) {
                         return val;
@@ -8081,11 +8081,14 @@
                 },
                 dataLabels: {
                     enabled: true,
-                    offsetY: -5,
+                    offsetY: -20,
                     style: {
                         fontSize: '12px',
                         fontWeight: 600,
-                        colors: ['#1f2937']
+                        colors: ['#000000']
+                    },
+                    background: {
+                        enabled: false
                     },
                     formatter: function(val, opts) {
                         return val;
@@ -8640,16 +8643,7 @@
                     },
                 },
                 dataLabels: {
-                    enabled: true,
-                    offsetY: -5,
-                    style: {
-                        fontSize: '12px',
-                        fontWeight: 600,
-                        colors: ['#1f2937']
-                    },
-                    formatter: function(val, opts) {
-                        return val;
-                    }
+                    enabled: false,
                 },
                 stroke: {
                     show: true,
@@ -9086,16 +9080,7 @@
                     },
                 },
                 dataLabels: {
-                    enabled: true,
-                    offsetY: -5,
-                    style: {
-                        fontSize: '12px',
-                        fontWeight: 600,
-                        colors: ['#1f2937']
-                    },
-                    formatter: function(val, opts) {
-                        return val;
-                    }
+                    enabled: false,
                 },
                 tooltip: {
                     enabled: true,
@@ -9467,16 +9452,7 @@
                     },
                 },
                 dataLabels: {
-                    enabled: true,
-                    offsetY: -5,
-                    style: {
-                        fontSize: '12px',
-                        fontWeight: 600,
-                        colors: ['#1f2937']
-                    },
-                    formatter: function(val, opts) {
-                        return val;
-                    }
+                    enabled: false,
                 },
                 tooltip: {
                     enabled: true,
@@ -11336,7 +11312,7 @@
                     `,
                 },
                 pipeline: {
-                    title: "Pipeline Deals Aging - Methodology",
+                    title: "Deals Pending Closure - Methodology",
                     content: `
                         <div class="space-y-4">
                             <div>

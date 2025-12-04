@@ -1223,8 +1223,10 @@
                         const formData = new FormData();
                         formData.append('file', blob, this.confluenceConfig.ccmFileName);
                         
-                        // Build URL - append attachmentId if updating existing file
-                        const uploadUrl = `${this.confluenceConfig.baseUrl}/rest/api/content/${this.confluenceConfig.pageId}/child/attachment${attachmentId ? `/${attachmentId}` : ''}`;
+                        // Build URL - use /data endpoint for updating existing file
+                        const uploadUrl = attachmentId 
+                            ? `${this.confluenceConfig.baseUrl}/rest/api/content/${this.confluenceConfig.pageId}/child/attachment/${attachmentId}/data`
+                            : `${this.confluenceConfig.baseUrl}/rest/api/content/${this.confluenceConfig.pageId}/child/attachment`;
                         
                         console.log('Uploading CCM_tw.xlsx to Confluence:', uploadUrl);
                         console.log('Attachment ID:', attachmentId || 'New file');

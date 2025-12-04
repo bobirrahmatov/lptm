@@ -775,9 +775,78 @@
                 </div>
             </div>
 
+            <!-- Processing Result Banner -->
+            <div x-show="processingComplete" x-cloak class="mb-6">
+                <!-- Success Result -->
+                <template x-if="processingResult && processingResult.success">
+                    <div class="rounded-2xl border-2 border-success-500 bg-success-50 p-6">
+                        <div class="flex items-start gap-4">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-success-500 text-white flex-shrink-0">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-success-700 mb-2">Processing Complete!</h3>
+                                <div class="text-sm text-success-600 space-y-1">
+                                    <p x-show="processingResult.ccmRecords > 0">
+                                        <strong x-text="processingResult.ccmRecords"></strong> CCM records processed and uploaded to Confluence
+                                    </p>
+                                    <p x-show="processingResult.portfolioFiles > 0">
+                                        <strong x-text="processingResult.portfolioFiles"></strong> Portfolio file(s) processed
+                                    </p>
+                                    <p x-show="processingResult.covenantsFiles > 0">
+                                        <strong x-text="processingResult.covenantsFiles"></strong> Covenants file(s) processed
+                                    </p>
+                                </div>
+                                <div class="mt-4 flex items-center gap-3">
+                                    <a href="portfolioAnalytics.html" 
+                                        class="inline-flex items-center gap-2 rounded-lg bg-success-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-success-700 transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                        </svg>
+                                        Go to Analytics Dashboard
+                                    </a>
+                                    <button @click="processingComplete = false; processingResult = null"
+                                        class="inline-flex items-center gap-2 rounded-lg border border-success-300 bg-white px-4 py-2.5 text-sm font-medium text-success-700 hover:bg-success-50 transition-colors">
+                                        Process More Files
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Error Result -->
+                <template x-if="processingResult && !processingResult.success">
+                    <div class="rounded-2xl border-2 border-danger-500 bg-danger-50 p-6">
+                        <div class="flex items-start gap-4">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-danger-500 text-white flex-shrink-0">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-danger-700 mb-2">Processing Failed</h3>
+                                <p class="text-sm text-danger-600" x-text="processingResult.error"></p>
+                                <div class="mt-4">
+                                    <button @click="processingComplete = false; processingResult = null"
+                                        class="inline-flex items-center gap-2 rounded-lg bg-danger-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-danger-700 transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                        </svg>
+                                        Try Again
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
             <!-- Action Buttons -->
-            <div class="flex items-center justify-between py-4">
-                <button @click="clearAllFiles()"
+            <div x-show="!processingComplete" class="flex items-center justify-between py-4">
+                <button type="button" @click="clearAllFiles()"
                     class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -785,14 +854,14 @@
                     Clear All Files
                 </button>
                 <div class="flex items-center gap-3">
-                    <button @click="validateFiles()"
+                    <button type="button" @click="validateFiles()"
                         class="inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm font-medium text-brand-700 hover:bg-brand-100 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                         Validate Files
                     </button>
-                    <button @click="processAndLoad()" :disabled="!canProcess()"
+                    <button type="button" @click="processAndLoad()" :disabled="!canProcess()"
                         :class="canProcess() ? 'bg-brand-600 hover:bg-brand-700 text-white' : 'bg-gray-100 text-gray-400 cursor-not-allowed'"
                         class="inline-flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-medium transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -845,6 +914,8 @@
             return {
                 isLoading: false,
                 loadingMessage: 'Processing Files',
+                processingComplete: false,
+                processingResult: null,
                 ccmReportDate: new Date().toISOString().split('T')[0], // Default to today
                 files: {
                     portfolio: { emea: null, nam: null, apac: null },
@@ -1076,15 +1147,27 @@
                         }));
 
                         this.isLoading = false;
-                        this.showNotification('Data processed successfully! Redirecting to Analytics...', 'success');
                         
-                        // Redirect to portfolio analytics after short delay
-                        setTimeout(() => {
-                            window.location.href = 'portfolioAnalytics.html';
-                        }, 1500);
+                        // Show success message
+                        const totalRecords = allCCMData.length + 
+                            processedData.portfolio.reduce((sum, p) => sum + (p.data?.length || 0), 0) +
+                            processedData.covenants.reduce((sum, c) => sum + (c.data?.length || 0), 0);
+                        
+                        this.showNotification(`Processing complete! ${totalRecords} total records processed.`, 'success');
+                        
+                        // Set flag to show success state
+                        this.processingComplete = true;
+                        this.processingResult = {
+                            success: true,
+                            ccmRecords: allCCMData.length,
+                            portfolioFiles: processedData.portfolio.length,
+                            covenantsFiles: processedData.covenants.length
+                        };
 
                     } catch (error) {
                         this.isLoading = false;
+                        this.processingComplete = true;
+                        this.processingResult = { success: false, error: error.message };
                         this.showNotification('Error processing files: ' + error.message, 'error');
                         console.error('Processing error:', error);
                     }
@@ -1119,14 +1202,32 @@
                             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
                         });
                         
+                        // First check if attachment already exists
+                        const attachmentsUrl = `${this.confluenceConfig.baseUrl}/rest/api/content/${this.confluenceConfig.pageId}/child/attachment?filename=${encodeURIComponent(this.confluenceConfig.ccmFileName)}`;
+                        
+                        const attachmentsResponse = await fetch(attachmentsUrl, {
+                            headers: {
+                                'X-Atlassian-Token': 'no-check'
+                            }
+                        });
+                        
+                        const attachmentsData = await attachmentsResponse.json();
+                        
+                        // Get attachment ID if exists
+                        let attachmentId = null;
+                        if (attachmentsData.results && attachmentsData.results.length > 0) {
+                            attachmentId = attachmentsData.results[0].id;
+                        }
+                        
                         // Create FormData for upload
                         const formData = new FormData();
                         formData.append('file', blob, this.confluenceConfig.ccmFileName);
                         
-                        // Upload to Confluence using REST API
-                        const uploadUrl = `${this.confluenceConfig.baseUrl}/rest/api/content/${this.confluenceConfig.pageId}/child/attachment`;
+                        // Build URL - append attachmentId if updating existing file
+                        const uploadUrl = `${this.confluenceConfig.baseUrl}/rest/api/content/${this.confluenceConfig.pageId}/child/attachment${attachmentId ? `/${attachmentId}` : ''}`;
                         
                         console.log('Uploading CCM_tw.xlsx to Confluence:', uploadUrl);
+                        console.log('Attachment ID:', attachmentId || 'New file');
                         
                         const response = await fetch(uploadUrl, {
                             method: 'POST',
@@ -1139,10 +1240,6 @@
                         if (response.ok) {
                             console.log('Successfully uploaded CCM_tw.xlsx to Confluence');
                             return true;
-                        } else if (response.status === 409) {
-                            // File exists, try to update it
-                            console.log('File exists, attempting to update...');
-                            return await this.updateConfluenceAttachment(blob);
                         } else {
                             const errorText = await response.text();
                             console.error('Confluence upload failed:', response.status, errorText);
@@ -1151,59 +1248,6 @@
                     } catch (error) {
                         console.error('Error uploading to Confluence:', error);
                         // Don't fail the whole process, just log the error
-                        return false;
-                    }
-                },
-
-                // Update existing Confluence attachment
-                async updateConfluenceAttachment(blob) {
-                    try {
-                        // First, get the current attachment info
-                        const attachmentsUrl = `${this.confluenceConfig.baseUrl}/rest/api/content/${this.confluenceConfig.pageId}/child/attachment?filename=${encodeURIComponent(this.confluenceConfig.ccmFileName)}`;
-                        
-                        const infoResponse = await fetch(attachmentsUrl, {
-                            headers: {
-                                'X-Atlassian-Token': 'no-check'
-                            }
-                        });
-                        
-                        if (!infoResponse.ok) {
-                            console.error('Failed to get attachment info');
-                            return false;
-                        }
-                        
-                        const attachmentInfo = await infoResponse.json();
-                        if (!attachmentInfo.results || attachmentInfo.results.length === 0) {
-                            console.error('Attachment not found');
-                            return false;
-                        }
-                        
-                        const attachmentId = attachmentInfo.results[0].id;
-                        
-                        // Update the attachment
-                        const formData = new FormData();
-                        formData.append('file', blob, this.confluenceConfig.ccmFileName);
-                        
-                        const updateUrl = `${this.confluenceConfig.baseUrl}/rest/api/content/${this.confluenceConfig.pageId}/child/attachment/${attachmentId}/data`;
-                        
-                        const updateResponse = await fetch(updateUrl, {
-                            method: 'POST',
-                            headers: {
-                                'X-Atlassian-Token': 'no-check'
-                            },
-                            body: formData
-                        });
-                        
-                        if (updateResponse.ok) {
-                            console.log('Successfully updated CCM_tw.xlsx on Confluence');
-                            return true;
-                        } else {
-                            const errorText = await updateResponse.text();
-                            console.error('Failed to update attachment:', updateResponse.status, errorText);
-                            return false;
-                        }
-                    } catch (error) {
-                        console.error('Error updating Confluence attachment:', error);
                         return false;
                     }
                 },

@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Loader - Portfolio Analytics</title>
+    <!-- Alpine.js for reactive components -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af'
+                        },
+                        success: {
+                            50: '#f0fdf4',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857'
+                        },
+                        warning: {
+                            50: '#fffbeb',
+                            500: '#f59e0b',
+                            600: '#d97706'
+                        },
+                        danger: {
+                            50: '#fef2f2',
+                            500: '#ef4444',
+                            600: '#dc2626'
+                        }
+                    },
+                    fontFamily: {
+                        'outfit': ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- SheetJS for Excel parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+        }
+        
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+
+        /* File input styling */
+        .file-upload-zone {
+            transition: all 0.2s ease;
+        }
+        .file-upload-zone:hover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .file-upload-zone.dragover {
+            border-color: #3b82f6;
+            background-color: #dbeafe;
+        }
+
+        /* Region badge colors */
+        .badge-emea { background-color: #dbeafe; color: #1e40af; }
+        .badge-nam { background-color: #fef3c7; color: #92400e; }
+        .badge-apac { background-color: #d1fae5; color: #065f46; }
+
+        /* Notification animation */
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(100%); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .notification-animate {
+            animation: slideInRight 0.3s ease-out;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen" x-data="dataLoaderApp()">
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <!-- Loading Overlay -->
+    <div x-show="isLoading" x-cloak
+        class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-[10000] flex items-center justify-center">
+        <div class="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-5 max-w-md mx-4 w-80">
+            <div class="relative">
+                <div class="w-16 h-16 border-4 border-gray-200 border-t-brand-600 rounded-full animate-spin"></div>
+            </div>
+            <div class="text-center w-full">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2" x-text="loadingMessage">Processing Files</h3>
+                <p class="text-sm text-brand-600 font-medium">Please wait...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 mb-2">Data Loader</h1>
+                    <p class="text-gray-500">Upload regional data files to consolidate portfolio, covenants, and CCM data</p>
+                </div>
+                <a href="portfolioAnalytics.html" 
+                    class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    Go to Analytics
+                </a>
+            </div>
+        </div>
+
+        <!-- Status Overview Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <!-- Portfolio Data Status -->
+            <div class="rounded-xl border border-gray-200 bg-white p-4">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50 text-brand-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Portfolio Data</p>
+                        <p class="text-lg font-semibold text-gray-900" x-text="getFileCount('portfolio') + '/3 files'"></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Covenants Status -->
+            <div class="rounded-xl border border-gray-200 bg-white p-4">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-success-50 text-success-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Covenants</p>
+                        <p class="text-lg font-semibold text-gray-900" x-text="getFileCount('covenants') + '/3 files'"></p>
+                    </div>
+                </div>
+            </div>
+            <!-- CCMs Status -->
+            <div class="rounded-xl border border-gray-200 bg-white p-4">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-warning-50 text-warning-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Credit Reviews</p>
+                        <p class="text-lg font-semibold text-gray-900" x-text="getFileCount('ccm') + '/3 files'"></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Mapping Status -->
+            <div class="rounded-xl border border-gray-200 bg-white p-4">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50 text-purple-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Product Mapping</p>
+                        <p class="text-lg font-semibold text-gray-900" x-text="files.mapping ? 'Uploaded' : 'Not uploaded'"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="space-y-6">
+            
+            <!-- Section 1: Portfolio Data -->
+            <div class="rounded-2xl border border-gray-200 bg-white overflow-hidden">
+                <div class="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-brand-50 to-white">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-500 text-white">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">Portfolio Data</h3>
+                            <p class="text-sm text-gray-500">Regional Credit Platform consolidated files</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- EMEA - RAR7 Combined -->
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2">
+                                <span class="badge-emea px-2.5 py-1 rounded-md text-xs font-semibold">EMEA</span>
+                                <span class="text-sm font-medium text-gray-700">RAR7 Combined File</span>
+                            </div>
+                            <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
+                                @click="$refs.portfolioEmea.click()"
+                                @dragover.prevent="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragleave.prevent="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
+                                @drop.prevent="handleDrop($event, 'portfolio', 'emea')">
+                                <input type="file" x-ref="portfolioEmea" class="hidden" accept=".xlsx,.xls" 
+                                    @change="handleFileSelect($event, 'portfolio', 'emea')">
+                                <template x-if="!files.portfolio.emea">
+                                    <div>
+                                        <div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-gray-500">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                            </svg>
+                                        </div>
+                                        <p class="text-sm text-gray-600 font-medium">Drop file or click to upload</p>
+                                        <p class="text-xs text-gray-400 mt-1">Excel files only (.xlsx, .xls)</p>
+                                    </div>
+                                </template>
+                                <template x-if="files.portfolio.emea">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-success-50 text-success-500">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                            </div>
+                                            <div class="text-left">
+                                                <p class="text-sm font-medium text-gray-700 truncate max-w-[140px]" x-text="files.portfolio.emea.name"></p>
+                                                <p class="text-xs text-gray-400" x-text="formatFileSize(files.portfolio.emea.size)"></p>
+                                            </div>
+                                        </div>
+                                        <button @click.stop="removeFile('portfolio', 'emea')" class="p-1 rounded hover:bg-gray-200">
+                                            <svg class="w-4 h-4 text-gray-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- NAM - BO Export -->
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2">
+                                <span class="badge-nam px-2.5 py-1 rounded-md text-xs font-semibold">NAM</span>
+                                <span class="text-sm font-medium text-gray-700">BO Export</span>
+                            </div>
+                            <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
+                                @click="$refs.portfolioNam.click()"
+                                @dragover.prevent="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragleave.prevent="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
+                                @drop.prevent="handleDrop($event, 'portfolio', 'nam')">
+                                <input type="file" x-ref="portfolioNam" class="hidden" accept=".xlsx,.xls" 
+                                    @change="handleFileSelect($event, 'portfolio', 'nam')">
+                                <template x-if="!files.portfolio.nam">
+                                    <div>
+                                        <div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-gray-500">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                            </svg>
+                                        </div>
+                                        <p class="text-sm text-gray-600 font-medium">Drop file or click to upload</p>
+                                        <p class="text-xs text-gray-400 mt-1">Excel files only (.xlsx, .xls)</p>
+                                    </div>
+                                </template>
+                                <template x-if="files.portfolio.nam">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-success-50 text-success-500">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                            </div>
+                                            <div class="text-left">
+                                                <p class="text-sm font-medium text-gray-700 truncate max-w-[140px]" x-text="files.portfolio.nam.name"></p>
+                                                <p class="text-xs text-gray-400" x-text="formatFileSize(files.portfolio.nam.size)"></p>
+                                            </div>
+                                        </div>
+                                        <button @click.stop="removeFile('portfolio', 'nam')" class="p-1 rounded hover:bg-gray-200">
+                                            <svg class="w-4 h-4 text-gray-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- APAC - eOASIS -->
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2">
+                                <span class="badge-apac px-2.5 py-1 rounded-md text-xs font-semibold">APAC</span>
+                                <span class="text-sm font-medium text-gray-700">eOASIS File</span>
+                            </div>
+                            <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
+                                @click="$refs.portfolioApac.click()"
+                                @dragover.prevent="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragleave.prevent="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
+                                @drop.prevent="handleDrop($event, 'portfolio', 'apac')">
+                                <input type="file" x-ref="portfolioApac" class="hidden" accept=".xlsx,.xls" 
+                                    @change="handleFileSelect($event, 'portfolio', 'apac')">
+                                <template x-if="!files.portfolio.apac">
+                                    <div>
+                                        <div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-gray-500">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                            </svg>
+                                        </div>
+                                        <p class="text-sm text-gray-600 font-medium">Drop file or click to upload</p>
+                                        <p class="text-xs text-gray-400 mt-1">Excel files only (.xlsx, .xls)</p>
+                                    </div>
+                                </template>
+                                <template x-if="files.portfolio.apac">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-success-50 text-success-500">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                            </div>
+                                            <div class="text-left">
+                                                <p class="text-sm font-medium text-gray-700 truncate max-w-[140px]" x-text="files.portfolio.apac.name"></p>
+                                                <p class="text-xs text-gray-400" x-text="formatFileSize(files.portfolio.apac.size)"></p>
+                                            </div>
+                                        </div>
+                                        <button @click.stop="removeFile('portfolio', 'apac')" class="p-1 rounded hover:bg-gray-200">
+                                            <svg class="w-4 h-4 text-gray-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Covenants Data -->
+            <div class="rounded-2xl border border-gray-200 bg-white overflow-hidden">
+                <div class="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-success-50 to-white">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-success-500 text-white">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">Covenants Data</h3>
+                            <p class="text-sm text-gray-500">Regional covenant tracking files</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- EMEA Covenants -->
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2">
+                                <span class="badge-emea px-2.5 py-1 rounded-md text-xs font-semibold">EMEA</span>
+                                <span class="text-sm font-medium text-gray-700">Covenants File</span>
+                            </div>
+                            <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
+                                @click="$refs.covenantsEmea.click()"
+                                @dragover.prevent="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragleave.prevent="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
+                                @drop.prevent="handleDrop($event, 'covenants', 'emea')">
+                                <input type="file" x-ref="covenantsEmea" class="hidden" accept=".xlsx,.xls" 
+                                    @change="handleFileSelect($event, 'covenants', 'emea')">
+                                <template x-if="!files.covenants.emea">
+                                    <div>
+                                        <div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-gray-500">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                            </svg>
+                                        </div>
+                                        <p class="text-sm text-gray-600 font-medium">Drop file or click to upload</p>
+                                        <p class="text-xs text-gray-400 mt-1">Excel files only (.xlsx, .xls)</p>
+                                    </div>
+                                </template>
+                                <template x-if="files.covenants.emea">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-success-50 text-success-500">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                            </div>
+                                            <div class="text-left">
+                                                <p class="text-sm font-medium text-gray-700 truncate max-w-[140px]" x-text="files.covenants.emea.name"></p>
+                                                <p class="text-xs text-gray-400" x-text="formatFileSize(files.covenants.emea.size)"></p>
+                                            </div>
+                                        </div>
+                                        <button @click.stop="removeFile('covenants', 'emea')" class="p-1 rounded hover:bg-gray-200">
+                                            <svg class="w-4 h-4 text-gray-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- NAM Covenants -->
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2">
+                                <span class="badge-nam px-2.5 py-1 rounded-md text-xs font-semibold">NAM</span>
+                                <span class="text-sm font-medium text-gray-700">Covenants File</span>
+                            </div>
+                            <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
+                                @click="$refs.covenantsNam.click()"
+                                @dragover.prevent="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragleave.prevent="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
+                                @drop.prevent="handleDrop($event, 'covenants', 'nam')">
+                                <input type="file" x-ref="covenantsNam" class="hidden" accept=".xlsx,.xls" 
+                                    @change="handleFileSelect($event, 'covenants', 'nam')">
+                                <template x-if="!files.covenants.nam">
+                                    <div>
+                                        <div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-gray-500">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                            </svg>
+                                        </div>
+                                        <p class="text-sm text-gray-600 font-medium">Drop file or click to upload</p>
+                                        <p class="text-xs text-gray-400 mt-1">Excel files only (.xlsx, .xls)</p>
+                                    </div>
+                                </template>
+                                <template x-if="files.covenants.nam">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-success-50 text-success-500">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                            </div>
+                                            <div class="text-left">
+                                                <p class="text-sm font-medium text-gray-700 truncate max-w-[140px]" x-text="files.covenants.nam.name"></p>
+                                                <p class="text-xs text-gray-400" x-text="formatFileSize(files.covenants.nam.size)"></p>
+                                            </div>
+                                        </div>
+                                        <button @click.stop="removeFile('covenants', 'nam')" class="p-1 rounded hover:bg-gray-200">
+                                            <svg class="w-4 h-4 text-gray-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- APAC Covenants -->
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2">
+                                <span class="badge-apac px-2.5 py-1 rounded-md text-xs font-semibold">APAC</span>
+                                <span class="text-sm font-medium text-gray-700">Covenants File</span>
+                            </div>
+                            <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
+                                @click="$refs.covenantsApac.click()"
+                                @dragover.prevent="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragleave.prevent="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
+                                @drop.prevent="handleDrop($event, 'covenants', 'apac')">
+                                <input type="file" x-ref="covenantsApac" class="hidden" accept=".xlsx,.xls" 
+                                    @change="handleFileSelect($event, 'covenants', 'apac')">
+                                <template x-if="!files.covenants.apac">
+                                    <div>
+                                        <div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-gray-500">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                            </svg>
+                                        </div>
+                                        <p class="text-sm text-gray-600 font-medium">Drop file or click to upload</p>
+                                        <p class="text-xs text-gray-400 mt-1">Excel files only (.xlsx, .xls)</p>
+                                    </div>
+                                </template>
+                                <template x-if="files.covenants.apac">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-success-50 text-success-500">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                            </div>
+                                            <div class="text-left">
+                                                <p class="text-sm font-medium text-gray-700 truncate max-w-[140px]" x-text="files.covenants.apac.name"></p>
+                                                <p class="text-xs text-gray-400" x-text="formatFileSize(files.covenants.apac.size)"></p>
+                                            </div>
+                                        </div>
+                                        <button @click.stop="removeFile('covenants', 'apac')" class="p-1 rounded hover:bg-gray-200">
+                                            <svg class="w-4 h-4 text-gray-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: CCM Data -->
+            <div class="rounded-2xl border border-gray-200 bg-white overflow-hidden">
+                <div class="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-warning-50 to-white">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-warning-500 text-white">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Credit Reviews (CCM)</h3>
+                                <p class="text-sm text-gray-500">Regional credit committee meeting files</p>
+                            </div>
+                        </div>
+                        <!-- Report Date Selection -->
+                        <div class="flex items-center gap-3">
+                            <label class="text-sm font-medium text-gray-700">Report Date:</label>
+                            <input
+                                type="date"
+                                x-model="ccmReportDate"
+                                class="h-10 w-44 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-warning-500 focus:ring-2 focus:ring-warning-500/20 focus:outline-none"
+                            />
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- EMEA CCM -->
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2">
+                                <span class="badge-emea px-2.5 py-1 rounded-md text-xs font-semibold">EMEA</span>
+                                <span class="text-sm font-medium text-gray-700">CCM File</span>
+                            </div>
+                            <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
+                                @click="$refs.ccmEmea.click()"
+                                @dragover.prevent="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragleave.prevent="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
+                                @drop.prevent="handleDrop($event, 'ccm', 'emea')">
+                                <input type="file" x-ref="ccmEmea" class="hidden" accept=".xlsx,.xls" 
+                                    @change="handleFileSelect($event, 'ccm', 'emea')">
+                                <template x-if="!files.ccm.emea">
+                                    <div>
+                                        <div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-gray-500">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                            </svg>
+                                        </div>
+                                        <p class="text-sm text-gray-600 font-medium">Drop file or click to upload</p>
+                                        <p class="text-xs text-gray-400 mt-1">Excel files only (.xlsx, .xls)</p>
+                                    </div>
+                                </template>
+                                <template x-if="files.ccm.emea">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-success-50 text-success-500">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                            </div>
+                                            <div class="text-left">
+                                                <p class="text-sm font-medium text-gray-700 truncate max-w-[140px]" x-text="files.ccm.emea.name"></p>
+                                                <p class="text-xs text-gray-400" x-text="formatFileSize(files.ccm.emea.size)"></p>
+                                            </div>
+                                        </div>
+                                        <button @click.stop="removeFile('ccm', 'emea')" class="p-1 rounded hover:bg-gray-200">
+                                            <svg class="w-4 h-4 text-gray-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- NAM CCM -->
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2">
+                                <span class="badge-nam px-2.5 py-1 rounded-md text-xs font-semibold">NAM</span>
+                                <span class="text-sm font-medium text-gray-700">CCM File</span>
+                            </div>
+                            <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
+                                @click="$refs.ccmNam.click()"
+                                @dragover.prevent="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragleave.prevent="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
+                                @drop.prevent="handleDrop($event, 'ccm', 'nam')">
+                                <input type="file" x-ref="ccmNam" class="hidden" accept=".xlsx,.xls" 
+                                    @change="handleFileSelect($event, 'ccm', 'nam')">
+                                <template x-if="!files.ccm.nam">
+                                    <div>
+                                        <div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-gray-500">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                            </svg>
+                                        </div>
+                                        <p class="text-sm text-gray-600 font-medium">Drop file or click to upload</p>
+                                        <p class="text-xs text-gray-400 mt-1">Excel files only (.xlsx, .xls)</p>
+                                    </div>
+                                </template>
+                                <template x-if="files.ccm.nam">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-success-50 text-success-500">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                            </div>
+                                            <div class="text-left">
+                                                <p class="text-sm font-medium text-gray-700 truncate max-w-[140px]" x-text="files.ccm.nam.name"></p>
+                                                <p class="text-xs text-gray-400" x-text="formatFileSize(files.ccm.nam.size)"></p>
+                                            </div>
+                                        </div>
+                                        <button @click.stop="removeFile('ccm', 'nam')" class="p-1 rounded hover:bg-gray-200">
+                                            <svg class="w-4 h-4 text-gray-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- APAC CCM -->
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2">
+                                <span class="badge-apac px-2.5 py-1 rounded-md text-xs font-semibold">APAC</span>
+                                <span class="text-sm font-medium text-gray-700">CCM File</span>
+                            </div>
+                            <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
+                                @click="$refs.ccmApac.click()"
+                                @dragover.prevent="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragleave.prevent="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
+                                @drop.prevent="handleDrop($event, 'ccm', 'apac')">
+                                <input type="file" x-ref="ccmApac" class="hidden" accept=".xlsx,.xls" 
+                                    @change="handleFileSelect($event, 'ccm', 'apac')">
+                                <template x-if="!files.ccm.apac">
+                                    <div>
+                                        <div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-gray-500">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                            </svg>
+                                        </div>
+                                        <p class="text-sm text-gray-600 font-medium">Drop file or click to upload</p>
+                                        <p class="text-xs text-gray-400 mt-1">Excel files only (.xlsx, .xls)</p>
+                                    </div>
+                                </template>
+                                <template x-if="files.ccm.apac">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-success-50 text-success-500">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                            </div>
+                                            <div class="text-left">
+                                                <p class="text-sm font-medium text-gray-700 truncate max-w-[140px]" x-text="files.ccm.apac.name"></p>
+                                                <p class="text-xs text-gray-400" x-text="formatFileSize(files.ccm.apac.size)"></p>
+                                            </div>
+                                        </div>
+                                        <button @click.stop="removeFile('ccm', 'apac')" class="p-1 rounded hover:bg-gray-200">
+                                            <svg class="w-4 h-4 text-gray-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: Product Mapping -->
+            <div class="rounded-2xl border border-gray-200 bg-white overflow-hidden">
+                <div class="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-white">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500 text-white">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Product Mapping</h3>
+                                <p class="text-sm text-gray-500">Master mapping file for product classifications</p>
+                            </div>
+                        </div>
+                        <!-- Download Button -->
+                        <button @click="downloadMappingTemplate()"
+                            class="inline-flex items-center gap-2 rounded-lg border border-purple-200 bg-purple-50 px-4 py-2.5 text-sm font-medium text-purple-700 hover:bg-purple-100 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            Download Latest Template
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="max-w-lg">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-purple-100 text-purple-700">GLOBAL</span>
+                                <span class="text-sm font-medium text-gray-700">Product_Mapping.xlsx</span>
+                            </div>
+                            <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-6 text-center cursor-pointer"
+                                @click="$refs.mappingFile.click()"
+                                @dragover.prevent="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragleave.prevent="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
+                                @drop.prevent="handleMappingDrop($event)">
+                                <input type="file" x-ref="mappingFile" class="hidden" accept=".xlsx,.xls" 
+                                    @change="handleMappingSelect($event)">
+                                <template x-if="!files.mapping">
+                                    <div>
+                                        <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-purple-100 text-purple-500">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                            </svg>
+                                        </div>
+                                        <p class="text-sm text-gray-600 font-medium">Drop Product_Mapping.xlsx or click to upload</p>
+                                        <p class="text-xs text-gray-400 mt-1">This file contains product classification mappings</p>
+                                    </div>
+                                </template>
+                                <template x-if="files.mapping">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-success-50 text-success-500">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                            </div>
+                                            <div class="text-left">
+                                                <p class="text-sm font-medium text-gray-700" x-text="files.mapping.name"></p>
+                                                <p class="text-xs text-gray-400" x-text="formatFileSize(files.mapping.size)"></p>
+                                            </div>
+                                        </div>
+                                        <button @click.stop="files.mapping = null" class="p-1.5 rounded hover:bg-gray-200">
+                                            <svg class="w-5 h-5 text-gray-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center justify-between py-4">
+                <button @click="clearAllFiles()"
+                    class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    Clear All Files
+                </button>
+                <div class="flex items-center gap-3">
+                    <button @click="validateFiles()"
+                        class="inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm font-medium text-brand-700 hover:bg-brand-100 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Validate Files
+                    </button>
+                    <button @click="processAndLoad()" :disabled="!canProcess()"
+                        :class="canProcess() ? 'bg-brand-600 hover:bg-brand-700 text-white' : 'bg-gray-100 text-gray-400 cursor-not-allowed'"
+                        class="inline-flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-medium transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                        </svg>
+                        Process & Load Data
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Info -->
+        <div class="mt-8 space-y-4">
+            <!-- Confluence Upload Info -->
+            <div class="rounded-xl bg-blue-50 border border-blue-200 p-4">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                    <div class="text-sm text-blue-800">
+                        <p class="font-medium mb-1">Confluence Integration</p>
+                        <p class="text-xs text-blue-600">Consolidated CCM data will be automatically uploaded to Confluence as <strong>CCM_tw.xlsx</strong> when processed.</p>
+                        <p class="text-xs text-blue-600 mt-1">Target: Page ID <span class="font-mono bg-blue-100 px-1 rounded" x-text="confluenceConfig.pageId"></span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Sources Info -->
+            <div class="rounded-xl bg-gray-100 p-4">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-gray-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div class="text-sm text-gray-600">
+                        <p class="font-medium text-gray-700 mb-1">File Sources Information</p>
+                        <ul class="space-y-1 text-xs">
+                            <li><strong>Portfolio Data:</strong> Regional Credit Platform exports - EMEA (RAR7 Combined), NAM (BO Export), APAC (eOASIS)</li>
+                            <li><strong>Covenants:</strong> Regional covenant tracking systems</li>
+                            <li><strong>Credit Reviews (CCM):</strong> NAM (Open CCM tab), APAC (Past Due + All Coming Due CCMs), EMEA (Past Due + Coming Due + Open CCM)</li>
+                            <li><strong>Product Mapping:</strong> Master classification file - download latest version before uploading custom mappings</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function dataLoaderApp() {
+            return {
+                isLoading: false,
+                loadingMessage: 'Processing Files',
+                ccmReportDate: new Date().toISOString().split('T')[0], // Default to today
+                files: {
+                    portfolio: { emea: null, nam: null, apac: null },
+                    covenants: { emea: null, nam: null, apac: null },
+                    ccm: { emea: null, nam: null, apac: null },
+                    mapping: null
+                },
+                
+                // Confluence Configuration (same as portfolioAnalytics.html)
+                confluenceConfig: {
+                    pageId: '3229979875',
+                    baseUrl: 'https://cedt-confluence.nam.nsroot.net/confluence',
+                    ccmFileName: 'CCM_tw.xlsx',
+                    portfolioFileName: 'Portfolio_tw.xlsx',
+                    covenantsFileName: 'Covenants_tw.xlsx'
+                },
+                
+                // Download URL for mapping template
+                mappingDownloadUrl: 'Product_Mapping.xlsx',
+
+                handleFileSelect(event, category, region) {
+                    const file = event.target.files[0];
+                    if (file && this.isValidExcel(file)) {
+                        this.files[category][region] = file;
+                        this.showNotification(`${region.toUpperCase()} file uploaded successfully`, 'success');
+                    } else if (file) {
+                        this.showNotification('Please select a valid Excel file (.xlsx, .xls)', 'error');
+                    }
+                    event.target.value = '';
+                },
+
+                handleDrop(event, category, region) {
+                    event.target.closest('.file-upload-zone').classList.remove('dragover');
+                    const file = event.dataTransfer.files[0];
+                    if (file && this.isValidExcel(file)) {
+                        this.files[category][region] = file;
+                        this.showNotification(`${region.toUpperCase()} file uploaded successfully`, 'success');
+                    } else if (file) {
+                        this.showNotification('Please select a valid Excel file (.xlsx, .xls)', 'error');
+                    }
+                },
+
+                handleMappingSelect(event) {
+                    const file = event.target.files[0];
+                    if (file && this.isValidExcel(file)) {
+                        this.files.mapping = file;
+                        this.showNotification('Product mapping file uploaded successfully', 'success');
+                    } else if (file) {
+                        this.showNotification('Please select a valid Excel file (.xlsx, .xls)', 'error');
+                    }
+                    event.target.value = '';
+                },
+
+                handleMappingDrop(event) {
+                    event.target.closest('.file-upload-zone').classList.remove('dragover');
+                    const file = event.dataTransfer.files[0];
+                    if (file && this.isValidExcel(file)) {
+                        this.files.mapping = file;
+                        this.showNotification('Product mapping file uploaded successfully', 'success');
+                    } else if (file) {
+                        this.showNotification('Please select a valid Excel file (.xlsx, .xls)', 'error');
+                    }
+                },
+
+                isValidExcel(file) {
+                    const validTypes = [
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        'application/vnd.ms-excel'
+                    ];
+                    const validExtensions = ['.xlsx', '.xls'];
+                    const hasValidType = validTypes.includes(file.type);
+                    const hasValidExtension = validExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
+                    return hasValidType || hasValidExtension;
+                },
+
+                removeFile(category, region) {
+                    this.files[category][region] = null;
+                    this.showNotification(`${region.toUpperCase()} file removed`, 'info');
+                },
+
+                getFileCount(category) {
+                    if (category === 'mapping') {
+                        return this.files.mapping ? 1 : 0;
+                    }
+                    return Object.values(this.files[category]).filter(f => f !== null).length;
+                },
+
+                formatFileSize(bytes) {
+                    if (bytes === 0) return '0 Bytes';
+                    const k = 1024;
+                    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                    const i = Math.floor(Math.log(bytes) / Math.log(k));
+                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                },
+
+                downloadMappingTemplate() {
+                    // Download the mapping template file
+                    this.showNotification('Downloading Product_Mapping.xlsx template...', 'info');
+                    
+                    const link = document.createElement('a');
+                    link.href = this.mappingDownloadUrl;
+                    link.download = 'Product_Mapping.xlsx';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                },
+
+                clearAllFiles() {
+                    this.files = {
+                        portfolio: { emea: null, nam: null, apac: null },
+                        covenants: { emea: null, nam: null, apac: null },
+                        ccm: { emea: null, nam: null, apac: null },
+                        mapping: null
+                    };
+                    this.showNotification('All files cleared', 'info');
+                },
+
+                canProcess() {
+                    // At least one file from each category should be uploaded
+                    const hasPortfolio = this.getFileCount('portfolio') > 0;
+                    const hasCovenants = this.getFileCount('covenants') > 0;
+                    const hasCCM = this.getFileCount('ccm') > 0;
+                    return hasPortfolio || hasCovenants || hasCCM;
+                },
+
+                async validateFiles() {
+                    this.isLoading = true;
+                    this.loadingMessage = 'Validating Files...';
+                    
+                    // Simulate validation
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    const issues = [];
+                    
+                    // Check for missing regional files
+                    const categories = ['portfolio', 'covenants', 'ccm'];
+                    categories.forEach(cat => {
+                        const count = this.getFileCount(cat);
+                        if (count > 0 && count < 3) {
+                            issues.push(`${cat.charAt(0).toUpperCase() + cat.slice(1)}: Only ${count}/3 regional files uploaded`);
+                        }
+                    });
+
+                    this.isLoading = false;
+
+                    if (issues.length > 0) {
+                        this.showNotification('Validation warnings: ' + issues.join('; '), 'warning');
+                    } else if (this.canProcess()) {
+                        this.showNotification('All files validated successfully!', 'success');
+                    } else {
+                        this.showNotification('Please upload at least one file to validate', 'info');
+                    }
+                },
+
+                async processAndLoad() {
+                    if (!this.canProcess()) return;
+                    
+                    this.isLoading = true;
+                    this.loadingMessage = 'Processing Files...';
+                    
+                    try {
+                        // Process each category
+                        const processedData = {
+                            portfolio: [],
+                            covenants: [],
+                            ccm: [],
+                            mapping: null
+                        };
+
+                        // Process portfolio files
+                        for (const [region, file] of Object.entries(this.files.portfolio)) {
+                            if (file) {
+                                this.loadingMessage = `Processing Portfolio ${region.toUpperCase()}...`;
+                                const data = await this.readExcelFile(file);
+                                processedData.portfolio.push({ region, data });
+                            }
+                        }
+
+                        // Process covenants files
+                        for (const [region, file] of Object.entries(this.files.covenants)) {
+                            if (file) {
+                                this.loadingMessage = `Processing Covenants ${region.toUpperCase()}...`;
+                                const data = await this.readExcelFile(file);
+                                processedData.covenants.push({ region, data });
+                            }
+                        }
+
+                        // Process CCM files with ETL logic
+                        let allCCMData = [];
+                        for (const [region, file] of Object.entries(this.files.ccm)) {
+                            if (file) {
+                                this.loadingMessage = `Processing CCM ${region.toUpperCase()} with ETL...`;
+                                const data = await this.processCCMFile(file, region);
+                                allCCMData = [...allCCMData, ...data];
+                                processedData.ccm.push({ region, data, rowCount: data.length });
+                            }
+                        }
+                        // Store consolidated CCM data
+                        processedData.ccmConsolidated = allCCMData;
+
+                        // Upload consolidated CCM file to Confluence if we have CCM data
+                        if (allCCMData.length > 0) {
+                            this.loadingMessage = 'Uploading CCM_tw.xlsx to Confluence...';
+                            const uploadSuccess = await this.uploadCCMToConfluence(allCCMData);
+                            if (uploadSuccess) {
+                                this.showNotification(`CCM_tw.xlsx uploaded to Confluence (${allCCMData.length} records)`, 'success');
+                            } else {
+                                this.showNotification('CCM processed but Confluence upload failed - data saved locally', 'warning');
+                            }
+                        }
+
+                        // Process mapping file
+                        if (this.files.mapping) {
+                            this.loadingMessage = 'Processing Product Mapping...';
+                            processedData.mapping = await this.readExcelFile(this.files.mapping);
+                        }
+
+                        // Store processed data for use in portfolioAnalytics.html
+                        localStorage.setItem('portfolioLoaderData', JSON.stringify({
+                            timestamp: new Date().toISOString(),
+                            ccmReportDate: this.ccmReportDate,
+                            files: {
+                                portfolio: Object.keys(this.files.portfolio).filter(k => this.files.portfolio[k]),
+                                covenants: Object.keys(this.files.covenants).filter(k => this.files.covenants[k]),
+                                ccm: Object.keys(this.files.ccm).filter(k => this.files.ccm[k]),
+                                mapping: this.files.mapping ? true : false
+                            },
+                            data: processedData
+                        }));
+
+                        this.isLoading = false;
+                        this.showNotification('Data processed successfully! Redirecting to Analytics...', 'success');
+                        
+                        // Redirect to portfolio analytics after short delay
+                        setTimeout(() => {
+                            window.location.href = 'portfolioAnalytics.html';
+                        }, 1500);
+
+                    } catch (error) {
+                        this.isLoading = false;
+                        this.showNotification('Error processing files: ' + error.message, 'error');
+                        console.error('Processing error:', error);
+                    }
+                },
+
+                // Upload consolidated CCM data to Confluence as CCM_tw.xlsx
+                async uploadCCMToConfluence(ccmData) {
+                    try {
+                        // Convert data to Excel workbook
+                        const workbook = XLSX.utils.book_new();
+                        const worksheet = XLSX.utils.json_to_sheet(ccmData);
+                        
+                        // Set column widths for better readability
+                        worksheet['!cols'] = [
+                            { wch: 12 },  // Report_Date
+                            { wch: 8 },   // Region
+                            { wch: 15 },  // Relationship_ID
+                            { wch: 30 },  // Client_Name
+                            { wch: 15 },  // Classification
+                            { wch: 12 },  // Frequency
+                            { wch: 20 },  // Underwriter
+                            { wch: 18 },  // Next_CCM_Month_End
+                            { wch: 20 },  // Next_CCM_Approval_Date
+                            { wch: 12 }   // CCM_Status
+                        ];
+                        
+                        XLSX.utils.book_append_sheet(workbook, worksheet, 'CCM Data');
+                        
+                        // Convert to binary
+                        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                        const blob = new Blob([excelBuffer], { 
+                            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+                        });
+                        
+                        // Create FormData for upload
+                        const formData = new FormData();
+                        formData.append('file', blob, this.confluenceConfig.ccmFileName);
+                        
+                        // Upload to Confluence using REST API
+                        const uploadUrl = `${this.confluenceConfig.baseUrl}/rest/api/content/${this.confluenceConfig.pageId}/child/attachment`;
+                        
+                        console.log('Uploading CCM_tw.xlsx to Confluence:', uploadUrl);
+                        
+                        const response = await fetch(uploadUrl, {
+                            method: 'POST',
+                            headers: {
+                                'X-Atlassian-Token': 'no-check'
+                            },
+                            body: formData
+                        });
+                        
+                        if (response.ok) {
+                            console.log('Successfully uploaded CCM_tw.xlsx to Confluence');
+                            return true;
+                        } else if (response.status === 409) {
+                            // File exists, try to update it
+                            console.log('File exists, attempting to update...');
+                            return await this.updateConfluenceAttachment(blob);
+                        } else {
+                            const errorText = await response.text();
+                            console.error('Confluence upload failed:', response.status, errorText);
+                            return false;
+                        }
+                    } catch (error) {
+                        console.error('Error uploading to Confluence:', error);
+                        // Don't fail the whole process, just log the error
+                        return false;
+                    }
+                },
+
+                // Update existing Confluence attachment
+                async updateConfluenceAttachment(blob) {
+                    try {
+                        // First, get the current attachment info
+                        const attachmentsUrl = `${this.confluenceConfig.baseUrl}/rest/api/content/${this.confluenceConfig.pageId}/child/attachment?filename=${encodeURIComponent(this.confluenceConfig.ccmFileName)}`;
+                        
+                        const infoResponse = await fetch(attachmentsUrl, {
+                            headers: {
+                                'X-Atlassian-Token': 'no-check'
+                            }
+                        });
+                        
+                        if (!infoResponse.ok) {
+                            console.error('Failed to get attachment info');
+                            return false;
+                        }
+                        
+                        const attachmentInfo = await infoResponse.json();
+                        if (!attachmentInfo.results || attachmentInfo.results.length === 0) {
+                            console.error('Attachment not found');
+                            return false;
+                        }
+                        
+                        const attachmentId = attachmentInfo.results[0].id;
+                        
+                        // Update the attachment
+                        const formData = new FormData();
+                        formData.append('file', blob, this.confluenceConfig.ccmFileName);
+                        
+                        const updateUrl = `${this.confluenceConfig.baseUrl}/rest/api/content/${this.confluenceConfig.pageId}/child/attachment/${attachmentId}/data`;
+                        
+                        const updateResponse = await fetch(updateUrl, {
+                            method: 'POST',
+                            headers: {
+                                'X-Atlassian-Token': 'no-check'
+                            },
+                            body: formData
+                        });
+                        
+                        if (updateResponse.ok) {
+                            console.log('Successfully updated CCM_tw.xlsx on Confluence');
+                            return true;
+                        } else {
+                            const errorText = await updateResponse.text();
+                            console.error('Failed to update attachment:', updateResponse.status, errorText);
+                            return false;
+                        }
+                    } catch (error) {
+                        console.error('Error updating Confluence attachment:', error);
+                        return false;
+                    }
+                },
+
+                // Download consolidated CCM as Excel file locally (fallback)
+                downloadCCMLocally(ccmData) {
+                    const workbook = XLSX.utils.book_new();
+                    const worksheet = XLSX.utils.json_to_sheet(ccmData);
+                    XLSX.utils.book_append_sheet(workbook, worksheet, 'CCM Data');
+                    
+                    // Generate filename with date
+                    const dateStr = this.ccmReportDate.replace(/-/g, '');
+                    const filename = `CCM_tw_${dateStr}.xlsx`;
+                    
+                    XLSX.writeFile(workbook, filename);
+                    this.showNotification(`Downloaded ${filename}`, 'success');
+                },
+
+                // Read Excel file and return workbook for multi-sheet access
+                readExcelWorkbook(file) {
+                    return new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            try {
+                                const data = new Uint8Array(e.target.result);
+                                const workbook = XLSX.read(data, { type: 'array' });
+                                resolve(workbook);
+                            } catch (error) {
+                                reject(error);
+                            }
+                        };
+                        reader.onerror = reject;
+                        reader.readAsArrayBuffer(file);
+                    });
+                },
+
+                // Read first sheet of Excel file (for backward compatibility)
+                readExcelFile(file) {
+                    return new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            try {
+                                const data = new Uint8Array(e.target.result);
+                                const workbook = XLSX.read(data, { type: 'array' });
+                                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                                const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                                resolve(jsonData);
+                            } catch (error) {
+                                reject(error);
+                            }
+                        };
+                        reader.onerror = reject;
+                        reader.readAsArrayBuffer(file);
+                    });
+                },
+
+                // Get sheet data by name (case-insensitive partial match)
+                getSheetData(workbook, sheetNamePattern) {
+                    const sheetName = workbook.SheetNames.find(name => 
+                        name.toLowerCase().includes(sheetNamePattern.toLowerCase())
+                    );
+                    if (sheetName) {
+                        return XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+                    }
+                    return [];
+                },
+
+                // Check if row contains "Nothing to Report" or "NIL" values
+                isEmptyReport(row) {
+                    const values = Object.values(row).map(v => 
+                        String(v || '').toLowerCase().trim()
+                    );
+                    return values.some(v => 
+                        v === 'nil' || 
+                        v === 'nothing to report' || 
+                        v.includes('nothing to report') ||
+                        v === 'n/a' ||
+                        v === 'na'
+                    );
+                },
+
+                // Process CCM file based on region with ETL logic
+                async processCCMFile(file, region) {
+                    const workbook = await this.readExcelWorkbook(file);
+                    let rawData = [];
+                    
+                    // Define which sheets to read based on region
+                    if (region === 'nam') {
+                        // NAM: Read "Open CCM" tab only
+                        rawData = this.getSheetData(workbook, 'Open CCM');
+                    } else if (region === 'apac') {
+                        // APAC: Read "Past Due" and "All Coming Due CCMs" tabs
+                        const pastDue = this.getSheetData(workbook, 'Past Due');
+                        const comingDue = this.getSheetData(workbook, 'Coming Due') || 
+                                          this.getSheetData(workbook, 'All Coming Due');
+                        rawData = [...pastDue, ...comingDue];
+                    } else if (region === 'emea') {
+                        // EMEA: Read "Past Due", "Coming Due", "Open CCM" tabs
+                        const pastDue = this.getSheetData(workbook, 'Past Due');
+                        const comingDue = this.getSheetData(workbook, 'Coming Due');
+                        const openCCM = this.getSheetData(workbook, 'Open CCM');
+                        rawData = [...pastDue, ...comingDue, ...openCCM];
+                    }
+
+                    // Transform data to standard format
+                    const transformedData = rawData
+                        .filter(row => !this.isEmptyReport(row)) // Filter out empty/NIL reports
+                        .filter(row => Object.keys(row).length > 0) // Filter empty rows
+                        .map(row => this.mapCCMRow(row, region));
+
+                    return transformedData;
+                },
+
+                // Map CCM row to standard output format based on region
+                mapCCMRow(row, region) {
+                    const mappedRow = {
+                        Report_Date: this.ccmReportDate,
+                        Region: region.toUpperCase(),
+                        Relationship_ID: '',
+                        Client_Name: '',
+                        Classification: '',
+                        Frequency: '',
+                        Underwriter: '',
+                        Next_CCM_Month_End: '',
+                        Next_CCM_Approval_Date: '',
+                        CCM_Status: ''
+                    };
+
+                    if (region === 'nam') {
+                        // NAM column mapping
+                        mappedRow.Region = row['Region'] || 'NAM';
+                        mappedRow.Relationship_ID = row['CARE ID'] || '';
+                        mappedRow.Client_Name = row['Client Name'] || '';
+                        mappedRow.Classification = row['Classification'] || '';
+                        mappedRow.Frequency = row['Frequency'] || '';
+                        mappedRow.Underwriter = row['Underwriter'] || '';
+                        mappedRow.Next_CCM_Month_End = this.formatDate(row['Next CCM Month End']);
+                        mappedRow.Next_CCM_Approval_Date = this.formatDate(row['Next CCM Approval Date']);
+                        mappedRow.CCM_Status = this.determineCCMStatus(row);
+                    } else if (region === 'apac') {
+                        // APAC column mapping
+                        mappedRow.Region = row['Region'] || 'APAC';
+                        mappedRow.Relationship_ID = row['CARE ID'] || '';
+                        mappedRow.Client_Name = row['Client Name'] || '';
+                        mappedRow.Classification = row['Classification'] || '';
+                        mappedRow.Frequency = row['Frequency'] || '';
+                        // APAC uses "Specialist" instead of "Underwriter"
+                        mappedRow.Underwriter = row['Specialist'] || row['Underwriter'] || '';
+                        mappedRow.Next_CCM_Month_End = this.formatDate(row['Next CCM Month End']);
+                        mappedRow.Next_CCM_Approval_Date = this.formatDate(row['Next CCM Approval Date']);
+                        mappedRow.CCM_Status = this.determineCCMStatus(row);
+                    } else if (region === 'emea') {
+                        // EMEA column mapping - No Region column, fill with "EMEA"
+                        mappedRow.Region = 'EMEA';
+                        // EMEA uses "Relationship ID" instead of "CARE ID"
+                        mappedRow.Relationship_ID = row['Relationship ID'] || '';
+                        // EMEA uses "CA ID" which we map to Client_Name
+                        mappedRow.Client_Name = row['CA ID'] || row['Client Name'] || '';
+                        mappedRow.Classification = row['Classification'] || '';
+                        mappedRow.Frequency = row['Frequency'] || '';
+                        // EMEA uses "Originator" as Team Leader, but we need Underwriter
+                        mappedRow.Underwriter = row['Underwriter'] || '';
+                        mappedRow.Next_CCM_Month_End = this.formatDate(row['Next CCM Month End']);
+                        mappedRow.Next_CCM_Approval_Date = this.formatDate(row['Next CCM Approval Date']);
+                        // EMEA has "Booked Elsewhere Facility?" column
+                        mappedRow.CCM_Status = this.determineCCMStatus(row);
+                    }
+
+                    return mappedRow;
+                },
+
+                // Format date to consistent format
+                formatDate(dateValue) {
+                    if (!dateValue) return '';
+                    
+                    // If it's already a string date, return as is
+                    if (typeof dateValue === 'string') {
+                        return dateValue;
+                    }
+                    
+                    // If it's an Excel serial date number
+                    if (typeof dateValue === 'number') {
+                        const date = new Date((dateValue - 25569) * 86400 * 1000);
+                        return date.toISOString().split('T')[0];
+                    }
+                    
+                    // If it's a Date object
+                    if (dateValue instanceof Date) {
+                        return dateValue.toISOString().split('T')[0];
+                    }
+                    
+                    return String(dateValue);
+                },
+
+                // Determine CCM status based on Next_CCM_Approval_Date vs Report_Date
+                determineCCMStatus(row) {
+                    const approvalDate = row['Next CCM Approval Date'];
+                    const reportDate = new Date(this.ccmReportDate);
+                    
+                    if (!approvalDate) {
+                        return 'Open';
+                    }
+                    
+                    const nextApprovalDate = this.parseDate(approvalDate);
+                    if (!nextApprovalDate) {
+                        return 'Open';
+                    }
+                    
+                    // Get year and month for comparison
+                    const reportYear = reportDate.getFullYear();
+                    const reportMonth = reportDate.getMonth();
+                    const approvalYear = nextApprovalDate.getFullYear();
+                    const approvalMonth = nextApprovalDate.getMonth();
+                    
+                    // Past Due: Next_CCM_Approval_Date is before the Report_Date month
+                    if (approvalYear < reportYear || 
+                        (approvalYear === reportYear && approvalMonth < reportMonth)) {
+                        return 'Past Due';
+                    }
+                    
+                    // Coming Due: Next_CCM_Approval_Date is in the same month as Report_Date
+                    if (approvalYear === reportYear && approvalMonth === reportMonth) {
+                        return 'Coming Due';
+                    }
+                    
+                    // Open: Next_CCM_Approval_Date is in the future (after Report_Date month)
+                    return 'Open';
+                },
+
+                // Parse date from various formats
+                parseDate(dateValue) {
+                    if (!dateValue) return null;
+                    
+                    if (typeof dateValue === 'number') {
+                        return new Date((dateValue - 25569) * 86400 * 1000);
+                    }
+                    
+                    if (dateValue instanceof Date) {
+                        return dateValue;
+                    }
+                    
+                    const parsed = new Date(dateValue);
+                    return isNaN(parsed.getTime()) ? null : parsed;
+                },
+
+                showNotification(message, type = 'info') {
+                    const container = document.getElementById('notificationContainer');
+                    const colors = {
+                        success: 'bg-success-500',
+                        error: 'bg-danger-500',
+                        warning: 'bg-warning-500',
+                        info: 'bg-brand-500'
+                    };
+                    const icons = {
+                        success: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>',
+                        error: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>',
+                        warning: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>',
+                        info: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
+                    };
+
+                    const notification = document.createElement('div');
+                    notification.className = `notification-animate flex items-center gap-3 rounded-lg ${colors[type]} px-4 py-3 text-white shadow-lg max-w-sm`;
+                    notification.innerHTML = `
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">${icons[type]}</svg>
+                        <span class="text-sm font-medium">${message}</span>
+                    `;
+                    
+                    container.appendChild(notification);
+                    
+                    setTimeout(() => {
+                        notification.style.opacity = '0';
+                        notification.style.transition = 'opacity 0.3s ease-out';
+                        setTimeout(() => notification.remove(), 300);
+                    }, 4000);
+                }
+            };
+        }
+    </script>
+</body>
+
+</html>
+

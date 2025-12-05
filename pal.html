@@ -165,7 +165,7 @@
                     <span id="loadingPercent">0%</span>
                 </div>
                 <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div id="loadingProgressBar" class="h-full bg-blue-600 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    <div id="loadingProgressBar" class="h-full bg-blue-600 rounded-full" style="width: 0%"></div>
                 </div>
                 <p class="text-xs text-gray-400 mt-2 text-center">
                     Large files may take a moment to process
@@ -463,6 +463,11 @@
                 style="display: none">
                 <!-- Badges will be dynamically added here -->
             </div>
+            
+            <!-- Footnote -->
+            <p class="text-xs text-gray-400 mt-4 pt-3 border-t border-gray-100">
+                <span class="italic">Note:</span> OSUC and Outstanding balances are from regional credit platforms.
+            </p>
         </div>
 
         <!-- Advanced Filters Modal -->
@@ -945,7 +950,7 @@
                         </div>
                     </div>
                     <div class="flex flex-col items-center justify-center gap-8 xl:flex-row flex-1">
-                        <div id="creditClassificationChart" class="chartDarkStyle"></div>
+                        <div id="creditClassificationChart" class="chartDarkStyle" style="min-height: 280px; min-width: 280px;"></div>
                         <div id="creditClassificationLegend"
                             class="flex flex-col items-start gap-6 sm:flex-row xl:flex-col">
                             <!-- Legend items will be dynamically generated -->
@@ -1148,10 +1153,10 @@
                     <div class="mb-6 relative pr-48">
                     <div class="pr-0">
                             <h3 class="text-lg font-semibold text-gray-800" id="topRelationshipsTitle">
-                                Top Relationships by Direct OS
+                                Top Relationships
                             </h3>
                             <p class="mt-1 text-gray-500 text-sm" id="topRelationshipsSubtitle">
-                                Largest client exposures ranked by outstanding balance
+                                Top relationships by exposure type - Direct OS
                             </p>
                     </div>
                         <!-- Filters - Fixed Position at Top Right -->
@@ -1355,7 +1360,7 @@
                     <!-- ROTCE Chart -->
                     <div class="flex-1 w-full overflow-y-auto overflow-x-hidden custom-scrollbar"
                         style="max-height: 450px">
-                        <div id="rotceChart" class="-ml-5 pl-2">
+                        <div id="rotceChart" class="-ml-5 pl-2" style="min-height: 280px;">
                             <!-- Chart will be rendered here -->
                         </div>
                     </div>
@@ -3009,14 +3014,35 @@
             // Load data from Confluence attachment
             loadDataFromCSV();
             
-            // Initialize charts with dummy data
+            // Initialize charts - show loading/no-data state immediately
             setTimeout(() => {
+                // Show initial no-data messages for charts that depend on portfolio data
+                const chartInits = [
+                    { id: '#facilityTrendChart', name: 'CAs & Facilities Expiring' },
+                    { id: '#creditClassificationChart', name: 'New Facilities Approved' },
+                    { id: '#relationshipChart', name: 'Top Relationships' },
+                    { id: '#rotceChart', name: 'ROTCE Performance' }
+                ];
+                
+                chartInits.forEach(({ id, name }) => {
+                    const el = document.querySelector(id);
+                    if (el) {
+                        // Check if element has no actual chart content (just comments or whitespace)
+                        const hasChart = el.querySelector('.apexcharts-canvas');
+                        const hasNoDataMsg = el.querySelector('div[style*="flex"]');
+                        if (!hasChart && !hasNoDataMsg) {
+                            el.innerHTML = generateNoDataMessage(name);
+                        }
+                    }
+                });
+                
+                // Initialize covenant and CCM charts
                 populateCovenantMonitoringData();
                 createCovenantMonitoringChart('pastDue');
                 updateCovenantRegionalTable('pastDue');
                 calculateCCMStats();
                 createCCMRegionalChart();
-            }, 500);
+            }, 100);
             
             // Setup search functionality with debouncing (increased for large datasets)
             document
@@ -3204,7 +3230,7 @@
                                 90
                             );
                             
-                            initializeDashboard();
+                        initializeDashboard();
                             
                             const loadTime = ((performance.now() - loadStartTime) / 1000).toFixed(1);
                             
@@ -3215,13 +3241,13 @@
                             );
                             
                             setTimeout(() => {
-                                hideLoadingOverlay();
+                        hideLoadingOverlay();
                                 
-                                showNotification(
-                                    "Success",
+                        showNotification(
+                            "Success",
                                     `Loaded ${data.length.toLocaleString()} records in ${loadTime}s`,
-                                    "success"
-                                );
+                            "success"
+                        );
                                 
                                 console.log(`🎉 Dashboard loaded in ${loadTime}s`);
                             }, 300);
@@ -3278,8 +3304,8 @@
                 const progressCallback = (msg, percent = null) => {
                     let finalPercent = null;
                     if (percent !== null) {
-                        // Map the percent to the portfolio loading range (10-40%)
-                        finalPercent = portfolioProgressStart + (percent / 100) * (portfolioProgressEnd - portfolioProgressStart);
+                        // Map the percent to the portfolio loading range (15-40%)
+                        finalPercent = Math.round(portfolioProgressStart + (percent / 100) * (portfolioProgressEnd - portfolioProgressStart));
                     }
                     showLoadingOverlay("Loading Portfolio Data...", msg, finalPercent);
                 };
@@ -3544,7 +3570,7 @@
                 reader.onprogress = function(e) {
                     if (e.lengthComputable && progressCallback) {
                         const percent = Math.round((e.loaded / e.total) * 30);
-                        progressCallback(`Reading file... ${percent}%`, percent);
+                        progressCallback(`Reading file...`, percent);
                     }
                 };
                 
@@ -3852,6 +3878,30 @@
             createCreditClassificationChart();
             createROTCEChart();
             console.timeEnd("Create Charts");
+            
+            // Ensure no charts are left blank - show no-data message as fallback
+            setTimeout(() => {
+                const chartChecks = [
+                    { id: '#facilityTrendChart', name: 'CAs & Facilities Expiring' },
+                    { id: '#creditClassificationChart', name: 'New Facilities Approved' },
+                    { id: '#relationshipChart', name: 'Top Relationships' },
+                    { id: '#rotceChart', name: 'ROTCE Performance' }
+                ];
+                
+                chartChecks.forEach(({ id, name }) => {
+                    const el = document.querySelector(id);
+                    if (el) {
+                        const hasChart = el.querySelector('.apexcharts-canvas');
+                        const hasNoDataMsg = el.innerHTML.includes('No data available');
+                        
+                        // If no chart and no existing no-data message, show no-data message
+                        if (!hasChart && !hasNoDataMsg) {
+                            console.log(`⚠️ Chart ${name} is blank, showing no-data message`);
+                            el.innerHTML = generateNoDataMessage(name);
+                        }
+                    }
+                });
+            }, 200);
             
             // Step 6: Filter and render table (only first page)
             console.time("Filter and Render Table");
@@ -4926,6 +4976,9 @@
                         columnWidth: "55%",
                         borderRadius: 8,
                         borderRadiusApplication: "end",
+                        dataLabels: {
+                            position: 'top',
+                        },
                     },
                 },
                 dataLabels: {
@@ -4987,9 +5040,14 @@
                     },
                 },
                 grid: {
-                    yaxis: {
+                    xaxis: {
                         lines: {
                             show: true,
+                        },
+                    },
+                    yaxis: {
+                        lines: {
+                            show: false,
                         },
                     },
                 },
@@ -5211,7 +5269,7 @@
                 console.warn("No filtered relationship data for chart");
                 const chartElement = document.querySelector("#relationshipChart");
                 if (chartElement) {
-                    chartElement.innerHTML = '<div class="flex items-center justify-center h-64 text-gray-500">No data available for the selected filters</div>';
+                    chartElement.innerHTML = generateNoDataMessage('Top Relationships');
                 }
                 return;
             }
@@ -5222,7 +5280,7 @@
                 console.warn("⚠️ All amounts are zero for selectedAmountType:", selectedAmountType);
                 const chartElement = document.querySelector("#relationshipChart");
                 if (chartElement) {
-                    chartElement.innerHTML = `<div class="flex items-center justify-center h-64 text-gray-500">No ${seriesName} data available for the selected filters</div>`;
+                    chartElement.innerHTML = generateNoDataMessage('Top Relationships');
                 }
                 return;
             }
@@ -5263,10 +5321,26 @@
                         horizontal: true,
                         borderRadius: 5,
                         borderRadiusApplication: "end",
+                        dataLabels: {
+                            position: 'top',
+                        },
                     },
                 },
                 dataLabels: {
-                    enabled: false,
+                    enabled: true,
+                    textAnchor: 'start',
+                    offsetX: 5,
+                    style: {
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        colors: ['#000000']
+                    },
+                    background: {
+                        enabled: false
+                    },
+                    formatter: function(val) {
+                        return formatCurrency(val);
+                    }
                 },
                 stroke: {
                     show: true,
@@ -5313,6 +5387,11 @@
                     },
                 },
                 grid: {
+                    xaxis: {
+                        lines: {
+                            show: true,
+                        },
+                    },
                     yaxis: {
                         lines: {
                             show: false,
@@ -5494,19 +5573,19 @@
             const titleElement = document.getElementById("topRelationshipsTitle");
             const subtitleElement = document.getElementById("topRelationshipsSubtitle");
             
-            const titles = {
-                direct: { title: "Top Relationships by Direct OS", subtitle: "Largest client exposures ranked by direct outstanding balance" },
-                contingent: { title: "Top Relationships by Contingent OS", subtitle: "Largest client exposures ranked by contingent outstanding balance" },
-                pse: { title: "Top Relationships by Presettlement Exposure", subtitle: "Largest client exposures ranked by presettlement exposure outstanding balance" },
-                osuc: { title: "Top Relationships by OSUC", subtitle: "Largest client exposures ranked by outstandings under commitment" },
-                unused: { title: "Top Relationships by Undrawn Commitment", subtitle: "Largest client exposures ranked by unused commitment available to draw" },
-                tfa: { title: "Top Relationships by Total Facility Amount", subtitle: "Largest client exposures ranked by total committed facility amounts" }
+            const exposureNames = {
+                direct: "Direct OS",
+                contingent: "Contingent OS",
+                pse: "Presettlement Exposure",
+                osuc: "OSUC",
+                unused: "Undrawn Commitment",
+                tfa: "Total Facility Amount"
             };
             
-            const t = titles[type] || titles.direct;
+            const exposureName = exposureNames[type] || exposureNames.direct;
             
-            if (titleElement) titleElement.textContent = t.title;
-            if (subtitleElement) subtitleElement.textContent = t.subtitle;
+            if (titleElement) titleElement.textContent = "Top Relationships";
+            if (subtitleElement) subtitleElement.textContent = `Top relationships by exposure type - ${exposureName}`;
         }
         
         // Reset All Filters (OPTIMIZED - batch UI updates, single filter application)
@@ -6301,10 +6380,10 @@
 
             // Define aging buckets (in days) - Always show these 4 rows
             const buckets = [
-                { label: '30 days', min: 0, max: 30, count: 0, facilities: new Set(), tfa: 0 },
-                { label: '60 days', min: 31, max: 60, count: 0, facilities: new Set(), tfa: 0 },
-                { label: '90 days', min: 61, max: 90, count: 0, facilities: new Set(), tfa: 0 },
-                { label: 'Over 90 days', min: 91, max: Infinity, count: 0, facilities: new Set(), tfa: 0 }
+                { label: '0-30 Days', min: 0, max: 30, count: 0, facilities: new Set(), tfa: 0 },
+                { label: '31-60 Days', min: 31, max: 60, count: 0, facilities: new Set(), tfa: 0 },
+                { label: '61-90 Days', min: 61, max: 90, count: 0, facilities: new Set(), tfa: 0 },
+                { label: '>90 Days', min: 91, max: Infinity, count: 0, facilities: new Set(), tfa: 0 }
             ];
 
             // Filter and categorize deals
@@ -6590,6 +6669,23 @@
                     colors = [];
                 }
                 totalCount = data.count;
+            }
+
+            // Handle empty data - show no data message
+            if (series.length === 0 || totalCount === 0) {
+                console.log("⚠️ No covenant data available for", viewType);
+                // Destroy existing chart if it exists
+                if (covenantMonitoringChartInstance) {
+                    covenantMonitoringChartInstance.destroy();
+                    covenantMonitoringChartInstance = null;
+                }
+                chartElement.innerHTML = generateNoDataMessage(isPastDue ? 'Past Due Covenants' : 'Coming Due Covenants');
+                // Clear the legend
+                const legendElement = document.getElementById("covenantMonitoringLegend");
+                if (legendElement) {
+                    legendElement.innerHTML = '';
+                }
+                return;
             }
 
             const options = {
@@ -7027,9 +7123,19 @@
                 return total > 0;
             });
             
-            // If no regions have data, show a message or use all regions with zeros
+            // If no regions have data, show no data message
             if (regions.length === 0) {
                 console.log('No CCM data available for any region');
+                // Destroy existing chart if it exists
+                if (ccmRegionalChartInstance) {
+                    ccmRegionalChartInstance.destroy();
+                    ccmRegionalChartInstance = null;
+                }
+                const ccmChartEl = document.querySelector("#ccmRegionalChart");
+                if (ccmChartEl) {
+                    ccmChartEl.innerHTML = generateNoDataMessage('Criticized/Classified Memos & Reviews');
+                }
+                return;
             }
             
             // Prepare series data from currentCCMData (only for regions with data)
@@ -7202,9 +7308,9 @@
 
             ccmData.forEach(row => {
                 const region = String(row.Region || "").trim().toUpperCase();
-                const ccmDueDate = parseDate(row.CCM_Due_Date);
+                const ccmApprovalDate = parseDate(row.Next_CCM_Approval_Date);
                 
-                if (!ccmDueDate || !region) return;
+                if (!ccmApprovalDate || !region) return;
                 
                 // Ensure region is valid
                 if (!['APAC', 'EMEA', 'NAM', 'LATAM'].includes(region)) return;
@@ -7212,15 +7318,15 @@
                 // Apply region filter if active
                 if (selectedRegion !== 'all' && region !== selectedRegion.toUpperCase()) return;
 
-                // Categorize based on CCM_Due_Date relative to reporting month
-                if (ccmDueDate < referenceDate) {
-                    // Past Due: CCM_Due_Date is before reporting date
+                // Categorize based on Next_CCM_Approval_Date relative to reporting month
+                if (ccmApprovalDate < referenceDate) {
+                    // Past Due: Next_CCM_Approval_Date is before reporting date
                     stats.pastDue[region]++;
-                } else if (ccmDueDate >= reportingMonthStart && ccmDueDate <= reportingMonthEnd) {
-                    // Coming Due: CCM_Due_Date is within reporting month
+                } else if (ccmApprovalDate >= reportingMonthStart && ccmApprovalDate <= reportingMonthEnd) {
+                    // Coming Due: Next_CCM_Approval_Date is within reporting month
                     stats.comingDue[region]++;
-                } else if (ccmDueDate > reportingMonthEnd) {
-                    // Open: CCM_Due_Date is in future but not in reporting month
+                } else if (ccmApprovalDate > reportingMonthEnd) {
+                    // Open: Next_CCM_Approval_Date is in future but not in reporting month
                     stats.open[region]++;
                 }
             });
@@ -7330,6 +7436,73 @@
             }
 
             return 0;
+        }
+        
+        // Get active filters text for display in no-data messages
+        function getActiveFiltersText() {
+            const filters = [];
+            const addedFilters = new Set(); // Track to avoid duplicates
+            
+            // Smart filters
+            if (selectedRegion !== 'all') {
+                const key = `Region: ${selectedRegion}`;
+                filters.push(key);
+                addedFilters.add(key.toLowerCase());
+            }
+            if (!includePSE) {
+                filters.push('PSE: Excluded');
+            }
+            if (selectedStatus !== 'all') {
+                filters.push(`Status: ${selectedStatus}`);
+            }
+            if (selectedCommitmentStatus !== 'all') {
+                filters.push(`Commitment: ${selectedCommitmentStatus}`);
+            }
+            
+            // Advanced filters
+            Object.entries(activeFilters).forEach(([label, value]) => {
+                const key = `${label}: ${value}`;
+                if (!addedFilters.has(key.toLowerCase())) {
+                    filters.push(key);
+                    addedFilters.add(key.toLowerCase());
+                }
+            });
+            
+            // Search term
+            const searchTerm = document.getElementById('searchInput')?.value?.trim();
+            if (searchTerm && searchTerm.length > 0) {
+                filters.push(`Search: "${searchTerm}"`);
+            }
+            
+            // Chart filter (avoid duplicates)
+            if (chartFilter.active) {
+                const chartFilterKey = `${chartFilter.type}: ${chartFilter.value}`;
+                if (!addedFilters.has(chartFilterKey.toLowerCase())) {
+                    filters.push(chartFilterKey);
+                }
+            }
+            
+            return filters;
+        }
+        
+        // Generate consistent "no data" HTML message with active filters
+        function generateNoDataMessage(chartTitle = '') {
+            const filters = getActiveFiltersText();
+            
+            let html = '<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; min-width: 200px; min-height: 280px; height: 100%; text-align: center; padding: 1.5rem; box-sizing: border-box;">';
+            html += '<svg style="width: 48px; height: 48px; margin-bottom: 12px;" fill="none" stroke="#d1d5db" viewBox="0 0 24 24">';
+            html += '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>';
+            html += '</svg>';
+            html += '<p style="font-size: 14px; font-weight: 500; color: #4b5563; margin: 0 0 4px 0;">No data available' + (chartTitle ? ' for ' + chartTitle : '') + '</p>';
+            
+            if (filters.length > 0) {
+                html += '<p style="font-size: 12px; color: #9ca3af; max-width: 280px; margin: 0;">Applied filters: ' + filters.join(', ') + '</p>';
+            } else {
+                html += '<p style="font-size: 12px; color: #9ca3af; margin: 0;">No filters applied</p>';
+            }
+            
+            html += '</div>';
+            return html;
         }
         
         // Format currency with M/B notation
@@ -7480,6 +7653,9 @@
                         columnWidth: "55%",
                         borderRadius: 8,
                         borderRadiusApplication: "end",
+                        dataLabels: {
+                            position: 'top',
+                        },
                     },
                 },
                 dataLabels: {
@@ -7541,9 +7717,14 @@
                     },
                 },
                 grid: {
-                    yaxis: {
+                    xaxis: {
                         lines: {
                             show: true,
+                        },
+                    },
+                    yaxis: {
+                        lines: {
+                            show: false,
                         },
                     },
                 },
@@ -7605,6 +7786,16 @@
         // Create combined chart for CAs Coming Due & Facilities Expiring
         function createFacilityTrendChart() {
             console.log("📊 Creating CAs Coming Due & Facilities Expiring chart");
+            
+            // Check if we have data
+            if (!portfolioData || portfolioData.length === 0) {
+                console.log("⚠️ No portfolio data available for CAs & Facilities Expiring chart");
+                const chartElement = document.querySelector("#facilityTrendChart");
+                if (chartElement) {
+                    chartElement.innerHTML = generateNoDataMessage('CAs & Facilities Expiring');
+                }
+                return;
+            }
             
             // Get the current reporting month from the data
             const today = new Date();
@@ -7725,7 +7916,7 @@
                 console.log("⚠️ No expiration data available");
                 const chartElement = document.querySelector("#facilityTrendChart");
                 if (chartElement) {
-                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No upcoming expirations in the next 3 months</div>';
+                    chartElement.innerHTML = generateNoDataMessage('CAs & Facilities Expiring');
                 }
                 return;
             }
@@ -7760,6 +7951,9 @@
                         columnWidth: "55%",
                         borderRadius: 8,
                         borderRadiusApplication: "end",
+                        dataLabels: {
+                            position: 'top',
+                        },
                     },
                 },
                 dataLabels: {
@@ -7900,6 +8094,7 @@
             // Verify ApexCharts is loaded
             if (typeof ApexCharts === "undefined") {
                 console.error("ApexCharts library not loaded");
+                chartElement.innerHTML = generateNoDataMessage('CAs & Facilities Expiring');
                 return;
             }
             
@@ -7919,6 +8114,7 @@
                 console.log("✅ Facility trend chart rendered successfully");
             } catch (error) {
                 console.error("❌ Error rendering facility trend chart:", error);
+                chartElement.innerHTML = generateNoDataMessage('CAs & Facilities Expiring');
             }
         }
 
@@ -7927,6 +8123,16 @@
             console.log(
                 "📊 Creating filtered CAs Coming Due & Facilities Expiring chart"
             );
+            
+            // Check if we have filtered data
+            if (!filteredData || filteredData.length === 0) {
+                console.log("⚠️ No filtered data available for CAs & Facilities Expiring chart");
+                const chartElement = document.querySelector("#facilityTrendChart");
+                if (chartElement) {
+                    chartElement.innerHTML = generateNoDataMessage('CAs & Facilities Expiring');
+                }
+                return;
+            }
             
             // Get the current reporting month from the data
             const today = new Date();
@@ -8042,7 +8248,7 @@
                 console.log("⚠️ No expiration data available for filtered results");
                 const chartElement = document.querySelector("#facilityTrendChart");
                 if (chartElement) {
-                    chartElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">No upcoming expirations in the next 3 months</div>';
+                    chartElement.innerHTML = generateNoDataMessage('CAs & Facilities Expiring');
                 }
                 return;
             }
@@ -8077,6 +8283,9 @@
                         columnWidth: "55%",
                         borderRadius: 8,
                         borderRadiusApplication: "end",
+                        dataLabels: {
+                            position: 'top',
+                        },
                     },
                 },
                 dataLabels: {
@@ -8213,6 +8422,7 @@
             
             if (typeof ApexCharts === "undefined") {
                 console.error("ApexCharts library not loaded");
+                chartElement.innerHTML = generateNoDataMessage('CAs & Facilities Expiring');
                 return;
             }
             
@@ -8232,6 +8442,7 @@
                     "❌ Error rendering filtered facility trend chart:",
                     error
                 );
+                chartElement.innerHTML = generateNoDataMessage('CAs & Facilities Expiring');
             }
         }
 
@@ -8599,7 +8810,7 @@
                 console.warn("⚠️ All amounts are zero for selectedAmountType:", selectedAmountType);
                 const chartElement = document.querySelector("#relationshipChart");
                 if (chartElement) {
-                    chartElement.innerHTML = `<div class="flex items-center justify-center h-64 text-gray-500">No ${seriesName} data available</div>`;
+                    chartElement.innerHTML = generateNoDataMessage('Top Relationships');
                 }
                 return;
             }
@@ -8640,10 +8851,26 @@
                         horizontal: true,
                         borderRadius: 5,
                         borderRadiusApplication: "end",
+                        dataLabels: {
+                            position: 'top',
+                        },
                     },
                 },
                 dataLabels: {
-                    enabled: false,
+                    enabled: true,
+                    textAnchor: 'start',
+                    offsetX: 5,
+                    style: {
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        colors: ['#000000']
+                    },
+                    background: {
+                        enabled: false
+                    },
+                    formatter: function(val) {
+                        return formatCurrency(val);
+                    }
                 },
                 stroke: {
                     show: true,
@@ -8690,6 +8917,11 @@
                     },
                 },
                 grid: {
+                    xaxis: {
+                        lines: {
+                            show: true,
+                        },
+                    },
                     yaxis: {
                         lines: {
                             show: false,
@@ -8850,6 +9082,16 @@
                 portfolioData.length
             );
             
+            // Check if we have data
+            if (!portfolioData || portfolioData.length === 0) {
+                console.log("⚠️ No portfolio data available for New Facilities Approved chart");
+                const chartElement = document.querySelector("#creditClassificationChart");
+                if (chartElement) {
+                    chartElement.innerHTML = generateNoDataMessage('New Facilities Approved');
+                }
+                return;
+            }
+            
             // Find the most recent Report_Date to determine "last month"
             let mostRecentReportDate = null;
             for (let i = 0; i < portfolioData.length; i++) {
@@ -8864,6 +9106,10 @@
             
             if (!mostRecentReportDate) {
                 console.warn("No valid Report_Date found");
+                const chartElement = document.querySelector("#creditClassificationChart");
+                if (chartElement) {
+                    chartElement.innerHTML = generateNoDataMessage('New Facilities Approved');
+                }
                 return;
             }
             
@@ -8997,7 +9243,7 @@
                     "#creditClassificationChart"
                 );
                 if (chartElement) {
-                    chartElement.innerHTML = `<div class="flex items-center justify-center h-full text-gray-500">No new facilities in ${periodLabel}</div>`;
+                    chartElement.innerHTML = generateNoDataMessage(`New Facilities (${periodLabel})`);
                 }
                 // Update chart subtitle even when no data
                 const subtitleElement = document.getElementById(
@@ -9150,6 +9396,7 @@
             // Verify ApexCharts is loaded
             if (typeof ApexCharts === "undefined") {
                 console.error("ApexCharts library not loaded");
+                chartElement.innerHTML = generateNoDataMessage('New Facilities Approved');
                 return;
             }
             
@@ -9195,6 +9442,7 @@
                     "❌ Error creating credit classification chart:",
                     error
                 );
+                chartElement.innerHTML = generateNoDataMessage('New Facilities Approved');
             }
         }
 
@@ -9206,6 +9454,16 @@
                 "Creating filtered New Facilities Approved  chart, dataLength:",
                 filteredData.length
             );
+            
+            // Check if we have filtered data
+            if (!filteredData || filteredData.length === 0) {
+                console.log("⚠️ No filtered data available for New Facilities Approved chart");
+                const chartElement = document.querySelector("#creditClassificationChart");
+                if (chartElement) {
+                    chartElement.innerHTML = generateNoDataMessage('New Facilities Approved');
+                }
+                return;
+            }
             
             // Find the most recent Report_Date to determine "last month"
             let mostRecentReportDate = null;
@@ -9225,8 +9483,7 @@
                     "#creditClassificationChart"
                 );
                 if (chartElement) {
-                    chartElement.innerHTML =
-                        '<div class="flex items-center justify-center h-full text-gray-500">No report date available</div>';
+                    chartElement.innerHTML = generateNoDataMessage('New Facilities Approved');
                 }
                 return;
             }
@@ -9369,7 +9626,7 @@
                     "#creditClassificationChart"
                 );
                 if (chartElement) {
-                    chartElement.innerHTML = `<div class="flex items-center justify-center h-full text-gray-500">No new facilities in ${periodLabel}</div>`;
+                    chartElement.innerHTML = generateNoDataMessage(`New Facilities (${periodLabel})`);
                 }
                 // Update chart subtitle even when no data
                 const subtitleElement = document.getElementById(
@@ -9520,6 +9777,7 @@
             
             if (typeof ApexCharts === "undefined") {
                 console.error("ApexCharts library not loaded");
+                chartElement.innerHTML = generateNoDataMessage('New Facilities Approved');
                 return;
             }
             
@@ -9562,6 +9820,7 @@
                     "❌ Error creating credit classification chart (filtered):",
                     error
                 );
+                chartElement.innerHTML = generateNoDataMessage('New Facilities Approved');
             }
         }
 
@@ -9596,7 +9855,7 @@
                                 </p>
                                 <div class="w-1 h-1 bg-gray-400 rounded-full"></div>
                                 <p class="text-gray-500 text-theme-sm">
-                                    ${counts[i]} Facilities
+                                    ${counts[i]}
                                 </p>
                             </div>
                         </div>
@@ -9614,6 +9873,17 @@
         // Create ROTCE chart (initial load)
         function createROTCEChart() {
             console.log("📊 Creating ROTCE Performance chart");
+            
+            const chartElement = document.querySelector("#rotceChart");
+            
+            // Check if we have portfolio data
+            if (!portfolioData || portfolioData.length === 0) {
+                console.log("⚠️ No portfolio data available for ROTCE chart");
+                if (chartElement) {
+                    chartElement.innerHTML = generateNoDataMessage('ROTCE Performance');
+                }
+                return;
+            }
             
             // Get Top N from Top Relationships filter
             const topNRelationships = parseInt(
@@ -9725,8 +9995,7 @@
                 console.log("⚠️ No relationships data available - skipping ROTCE chart (non-filtered)");
                 const chartElement = document.querySelector("#rotceChart");
                 if (chartElement) {
-                    chartElement.innerHTML =
-                        '<div class="flex items-center justify-center h-full text-gray-500">No data available</div>';
+                    chartElement.innerHTML = generateNoDataMessage('ROTCE Performance');
                 }
                 return;
             }
@@ -9755,8 +10024,7 @@
                 console.warn("⚠️ No valid ROTCE data for the selected relationships");
                 const chartElement = document.querySelector("#rotceChart");
                 if (chartElement) {
-                    chartElement.innerHTML =
-                        '<div class="flex items-center justify-center h-full text-gray-500">No ROTCE data available for these relationships</div>';
+                    chartElement.innerHTML = generateNoDataMessage('ROTCE Performance');
                 }
                 return;
             }
@@ -9891,25 +10159,42 @@
                 rotceChartInstance = null;
             }
             
-            const chartElement = document.querySelector("#rotceChart");
+            // Use the chartElement from the top of the function
             if (chartElement) {
                 chartElement.innerHTML = "";
             }
 
             if (relationships.length === 0) {
-                chartElement.innerHTML =
-                    '<div class="flex items-center justify-center h-full text-gray-500">No ROTCE data available</div>';
+                chartElement.innerHTML = generateNoDataMessage('ROTCE Performance');
                 return;
             }
 
             // Create and store the chart instance
-            rotceChartInstance = new ApexCharts(chartElement, chartOptions);
-            rotceChartInstance.render();
+            try {
+                rotceChartInstance = new ApexCharts(chartElement, chartOptions);
+                rotceChartInstance.render();
+                console.log("✅ ROTCE chart rendered successfully");
+            } catch (error) {
+                console.error("❌ Error rendering ROTCE chart:", error);
+                chartElement.innerHTML = generateNoDataMessage('ROTCE Performance');
+            }
         }
 
         // Create ROTCE chart from filtered data
         function createROTCEChartFromFiltered() {
             console.log("📊 Creating filtered ROTCE Performance chart");
+
+            const chartElement = document.querySelector("#rotceChart");
+            
+            // Check if we have data
+            const dataSource = filteredData.length > 0 ? filteredData : portfolioData;
+            if (!dataSource || dataSource.length === 0) {
+                console.log("⚠️ No data available for filtered ROTCE chart");
+                if (chartElement) {
+                    chartElement.innerHTML = generateNoDataMessage('ROTCE Performance');
+                }
+                return;
+            }
 
             // Get Top N from Top Relationships filter (synced)
             const topN = parseInt(document.getElementById("topNFilter").value);
@@ -9917,9 +10202,6 @@
             // Group ROTCE by relationship from filtered data
             const rotceByRelationship = new Map();
             const rotceValues = [];
-            
-            const dataSource =
-                filteredData.length > 0 ? filteredData : portfolioData;
             
             dataSource.forEach((row) => {
                 const relName = row.Relationship_Name || row.Relationship_ID;
@@ -10020,7 +10302,7 @@
                 rotceChartInstance = null;
             }
             
-            const chartElement = document.querySelector("#rotceChart");
+            // Use the chartElement from the top of the function
             if (chartElement) {
                 chartElement.innerHTML = "";
             }
@@ -10035,8 +10317,7 @@
             if (!hasValidRelationships || topRelationships.length === 0 || relationshipTotals.size === 0) {
                 console.log("⚠️ No relationships data available - skipping ROTCE chart (filtered)");
                 if (chartElement) {
-                    chartElement.innerHTML =
-                        '<div class="flex items-center justify-center h-full text-gray-500">No data available for the selected filters</div>';
+                    chartElement.innerHTML = generateNoDataMessage('ROTCE Performance');
                 }
                 return;
             }
@@ -10060,8 +10341,7 @@
             console.log("DEBUG ROTCE (filtered) - filteredROTCE:", filteredROTCE);
             
             if (relationships.length === 0) {
-                chartElement.innerHTML =
-                    '<div class="flex items-center justify-center h-full text-gray-500">No ROTCE data available</div>';
+                chartElement.innerHTML = generateNoDataMessage('ROTCE Performance');
                 return;
             }
 
@@ -10069,8 +10349,7 @@
             const validROTCE = avgROTCE.filter(v => !isNaN(v) && v !== 0);
             if (validROTCE.length === 0) {
                 console.warn("⚠️ No valid ROTCE data for the selected relationships");
-                chartElement.innerHTML =
-                    '<div class="flex items-center justify-center h-full text-gray-500">No ROTCE data available for these relationships</div>';
+                chartElement.innerHTML = generateNoDataMessage('ROTCE Performance');
                 return;
             }
             
@@ -10195,8 +10474,14 @@
             };
             
             // Create and store the chart instance
+            try {
             rotceChartInstance = new ApexCharts(chartElement, chartOptions);
             rotceChartInstance.render();
+                console.log("✅ Filtered ROTCE chart rendered successfully");
+            } catch (error) {
+                console.error("❌ Error rendering filtered ROTCE chart:", error);
+                chartElement.innerHTML = generateNoDataMessage('ROTCE Performance');
+            }
         }
 
         // Filter data based on search (works with existing filters)
@@ -10744,13 +11029,14 @@
                 return true;
             }).map((row) => {
                 // Add computed status for display based on reporting month
-                const ccmDueDate = parseDate(row.CCM_Due_Date);
-                let computedStatus = 'Unknown';
+                const ccmApprovalDate = parseDate(row.Next_CCM_Approval_Date);
+                let computedStatus = row.CCM_Status || 'Unknown';
                 
-                if (ccmDueDate) {
-                    if (ccmDueDate < referenceDate) {
+                // If CCM_Status is not available, compute it from Next_CCM_Approval_Date
+                if (!row.CCM_Status && ccmApprovalDate) {
+                    if (ccmApprovalDate < referenceDate) {
                         computedStatus = 'Past Due';
-                    } else if (ccmDueDate >= reportingMonthStart && ccmDueDate <= reportingMonthEnd) {
+                    } else if (ccmApprovalDate >= reportingMonthStart && ccmApprovalDate <= reportingMonthEnd) {
                         computedStatus = 'Coming Due';
                     } else {
                         computedStatus = 'Open';
@@ -11335,10 +11621,10 @@
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
                                     <li><strong>Inclusion Criteria:</strong> Facilities where Origination_Date is empty/null AND Facility_First_Approval_Date year matches current year AND PSE_non-PSE is not "PSE" (non-PSE only) AND Region is NAM or LATAM only</li>
                                     <li><strong>Aging Calculation:</strong> Days Since Approval = Today's Date - Facility_First_Approval_Date</li>
-                                    <li><strong>30 days:</strong> 0-30 days since first approval</li>
-                                    <li><strong>60 days:</strong> 31-60 days since first approval</li>
-                                    <li><strong>90 days:</strong> 61-90 days since first approval</li>
-                                    <li><strong>Over 90 days:</strong> 91+ days since first approval</li>
+                                    <li><strong>0-30 Days:</strong> 0-30 days since first approval</li>
+                                    <li><strong>31-60 Days:</strong> 31-60 days since first approval</li>
+                                    <li><strong>61-90 Days:</strong> 61-90 days since first approval</li>
+                                    <li><strong>>90 Days:</strong> 91+ days since first approval</li>
                                     <li><strong>Count:</strong> Number of unique Facility_IDs in each bucket</li>
                                     <li><strong>Total TFA:</strong> Sum of Fac_Amount for facilities in each bucket</li>
                                 </ul>
@@ -11383,7 +11669,7 @@
                                     </svg>
                                     <div>
                                         <p class="font-semibold text-blue-900 text-sm">Note:</p>
-                                        <p class="text-blue-800 text-sm">All 4 aging buckets (30, 60, 90, Over 90 days) are always displayed. Buckets with zero facilities will show a count of 0. Only NAM and LATAM regions are included in this analysis.</p>
+                                        <p class="text-blue-800 text-sm">All 4 aging buckets (0-30, 31-60, 61-90, >90 Days) are always displayed. Buckets with zero facilities will show a count of 0. Only NAM and LATAM regions are included in this analysis.</p>
                                     </div>
                                 </div>
                             </div>
@@ -11718,9 +12004,9 @@
                                 </div>
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
                                     <li><strong>Data Source:</strong> CCM_tw.xlsx file (after ETL processing)</li>
-                                    <li><strong>Past Due:</strong> CCMs where <code class="bg-gray-100 px-1 rounded">CCM_Due_Date</code> is before today's date</li>
-                                    <li><strong>Coming Due:</strong> CCMs where <code class="bg-gray-100 px-1 rounded">CCM_Due_Date</code> falls within the current month</li>
-                                    <li><strong>Open:</strong> CCMs where <code class="bg-gray-100 px-1 rounded">CCM_Due_Date</code> is in the future but not within the current month</li>
+                                    <li><strong>Past Due:</strong> CCMs where <code class="bg-gray-100 px-1 rounded">Next_CCM_Approval_Date</code> is before the reporting month</li>
+                                    <li><strong>Coming Due:</strong> CCMs where <code class="bg-gray-100 px-1 rounded">Next_CCM_Approval_Date</code> falls within the reporting month</li>
+                                    <li><strong>Open:</strong> CCMs where <code class="bg-gray-100 px-1 rounded">Next_CCM_Approval_Date</code> is after the reporting month</li>
                                     <li><strong>Regional Grouping:</strong> Aggregated by Region (APAC, EMEA, NAM, LATAM)</li>
                                     <li><strong>Visual Style:</strong> Vertical stacked bar chart with blue color gradient (Past Due: darkest, Coming Due: medium, Open: lightest)</li>
                                 </ul>
@@ -11740,10 +12026,13 @@
                                     <li><code class="bg-gray-100 px-1 rounded">CAID</code> - Credit Agreement ID</li>
                                     <li><code class="bg-gray-100 px-1 rounded">DM/CM_Flag</code> - Designates if record is CM (Credit Memo)</li>
                                     <li><code class="bg-gray-100 px-1 rounded">Credit_Classification</code> - Classification status (filtered for non-Pass/Loss)</li>
-                                    <li><code class="bg-gray-100 px-1 rounded">CCM_Due_Date</code> - When the CCM review is due</li>
-                                    <li><code class="bg-gray-100 px-1 rounded">CCM_Final_Approval_Date</code> - When CCM was approved</li>
-                                    <li><code class="bg-gray-100 px-1 rounded">Next_CCM_Due_Date</code> - Next scheduled review date</li>
-                                    <li><code class="bg-gray-100 px-1 rounded">CCM_Approver_Name</code> - Who approved the CCM</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Next_CCM_Approval_Date</code> - When the CCM review is due</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Next_CCM_Month_End</code> - Month end date for the CCM</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">CCM_Status</code> - Calculated status (Past Due, Coming Due, Open)</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Client_Name</code> - Client name</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Classification</code> - Credit classification</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Frequency</code> - Review frequency</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Underwriter</code> - Assigned underwriter</li>
                                 </ul>
                             </div>
                             
@@ -11979,8 +12268,5 @@
         }
     </script>
 </body>
-
-</html>
-
 
 </html>

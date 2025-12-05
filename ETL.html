@@ -3551,11 +3551,10 @@
                     baseUrl: 'https://cedt-confluence.nam.nsroot.net/confluence',
                     ccmFileName: 'CCM_tw.xlsx',
                     portfolioFileName: 'Portfolio_tw.xlsx',
-                    covenantsFileName: 'Covenants_tw.xlsx'
+                    covenantsFileName: 'Covenants_tw.xlsx',
+                    mappingFileName: 'Product_Mapping.xlsx',
+                    regionsMappingFileName: 'Regions_Mapping.xlsx'
                 },
-                
-                // Download URL for mapping template
-                mappingDownloadUrl: 'Product_Mapping.xlsx',
 
                 handleFileSelect(event, category, region) {
                     const file = event.target.files[0];
@@ -3706,19 +3705,35 @@
                             mapping: null
                         };
 
-                        // Load PSE mapping data first if mapping file exists
+                        // Load PSE mapping data from Confluence or uploaded file
                         let pseMappingData = null;
+                        this.loadingMessage = 'Loading Product Mapping...';
+                        
+                        // First try to use uploaded mapping file, then fall back to Confluence
                         if (this.files.mapping) {
-                            this.loadingMessage = 'Loading Product Mapping...';
                             pseMappingData = await this.loadPSEMappingData(this.files.mapping);
+                        } else {
+                            // Fetch from Confluence attachments
+                            const mappingWorkbook = await this.fetchMappingFromConfluence();
+                            if (mappingWorkbook) {
+                                pseMappingData = await this.loadPSEMappingData(mappingWorkbook);
+                            }
                         }
+                        
+                        if (!pseMappingData || (pseMappingData.facilityTypes.length === 0 && pseMappingData.categoryMapping.length === 0)) {
+                            console.log('Product_Mapping.xlsx not found - PSE and Category mapping will be skipped');
+                        }
+
+                        // Fetch Regions mapping for NAM
+                        this.loadingMessage = 'Loading Regions Mapping...';
+                        const regionsMapping = await this.fetchRegionsMappingFromConfluence();
 
                         // Process portfolio files with ETL logic
                         let allPortfolioData = [];
                         for (const [region, file] of Object.entries(this.files.portfolio)) {
                             if (file) {
                                 this.loadingMessage = `Processing Portfolio ${region.toUpperCase()} with ETL...`;
-                                const data = await this.processPortfolioFile(file, region, pseMappingData);
+                                const data = await this.processPortfolioFile(file, region, pseMappingData, regionsMapping);
                                 allPortfolioData = [...allPortfolioData, ...data];
                                 processedData.portfolio.push({ region, data, rowCount: data.length });
                             }
@@ -3862,9 +3877,10 @@
                 // Upload consolidated CCM data to Confluence as CCM_tw.xlsx
                 async uploadCCMToConfluence(ccmData) {
                     try {
-                        // Convert data to Excel workbook
+                        // Optimize and convert data to Excel workbook
+                        const optimizedData = this.optimizeDataForExcel(ccmData);
                         const workbook = XLSX.utils.book_new();
-                        const worksheet = XLSX.utils.json_to_sheet(ccmData);
+                        const worksheet = XLSX.utils.json_to_sheet(optimizedData);
                         
                         // Set column widths for better readability
                         worksheet['!cols'] = [
@@ -3882,11 +3898,12 @@
                         
                         XLSX.utils.book_append_sheet(workbook, worksheet, 'CCM Data');
                         
-                        // Convert to binary with compression enabled for smaller file size
+                        // Convert to binary with maximum compression
                         const excelBuffer = XLSX.write(workbook, { 
                             bookType: 'xlsx', 
                             type: 'array',
-                            compression: true  // Enable ZIP compression
+                            compression: true,
+                            bookSST: false  // Disable shared string table for smaller size
                         });
                         const blob = new Blob([excelBuffer], { 
                             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
@@ -3967,9 +3984,10 @@
                 // Upload consolidated Covenants data to Confluence as Covenants_tw.xlsx
                 async uploadCovenantsToConfluence(covenantsData) {
                     try {
-                        // Convert data to Excel workbook
+                        // Optimize and convert data to Excel workbook
+                        const optimizedData = this.optimizeDataForExcel(covenantsData);
                         const workbook = XLSX.utils.book_new();
-                        const worksheet = XLSX.utils.json_to_sheet(covenantsData);
+                        const worksheet = XLSX.utils.json_to_sheet(optimizedData);
                         
                         // Set column widths for better readability
                         worksheet['!cols'] = [
@@ -4003,11 +4021,12 @@
                         
                         XLSX.utils.book_append_sheet(workbook, worksheet, 'Covenants Data');
                         
-                        // Convert to binary with compression enabled for smaller file size
+                        // Convert to binary with maximum compression
                         const excelBuffer = XLSX.write(workbook, { 
                             bookType: 'xlsx', 
                             type: 'array',
-                            compression: true  // Enable ZIP compression
+                            compression: true,
+                            bookSST: false  // Disable shared string table for smaller size
                         });
                         const blob = new Blob([excelBuffer], { 
                             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
@@ -4139,14 +4158,143 @@
 
                 // ==================== PORTFOLIO ETL FUNCTIONS ====================
 
-                // Load PSE mapping data from Product_Mapping.xlsx
-                async loadPSEMappingData(mappingFile) {
+                // Fetch Product_Mapping.xlsx from Confluence attachments
+                async fetchMappingFromConfluence() {
                     try {
-                        const workbook = await this.readExcelWorkbook(mappingFile);
+                        const attachmentUrl = `${this.confluenceConfig.baseUrl}/rest/api/content/${this.confluenceConfig.pageId}/child/attachment?filename=${encodeURIComponent(this.confluenceConfig.mappingFileName)}`;
                         
-                        console.log('Product_Mapping.xlsx sheets found:', workbook.SheetNames);
+                        const response = await fetch(attachmentUrl, {
+                            headers: { 'X-Atlassian-Token': 'no-check' }
+                        });
                         
-                        // Load PSE tab for PSE/non-PSE determination
+                        if (!response.ok) {
+                            console.log('Product_Mapping.xlsx not found in attachments');
+                            return null;
+                        }
+                        
+                        const data = await response.json();
+                        
+                        if (!data.results || data.results.length === 0) {
+                            console.log('Product_Mapping.xlsx not found in attachments');
+                            return null;
+                        }
+                        
+                        // Get the download URL for the attachment
+                        const downloadUrl = `${this.confluenceConfig.baseUrl}${data.results[0]._links.download}`;
+                        
+                        // Fetch the actual file
+                        const fileResponse = await fetch(downloadUrl, {
+                            headers: { 'X-Atlassian-Token': 'no-check' }
+                        });
+                        
+                        if (!fileResponse.ok) {
+                            console.log('Failed to download Product_Mapping.xlsx');
+                            return null;
+                        }
+                        
+                        const arrayBuffer = await fileResponse.arrayBuffer();
+                        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                        
+                        console.log('Product_Mapping.xlsx loaded from Confluence');
+                        return workbook;
+                    } catch (error) {
+                        console.log('Product_Mapping.xlsx not available:', error.message);
+                        return null;
+                    }
+                },
+
+                // Fetch Regions_Mapping.xlsx from Confluence attachments
+                async fetchRegionsMappingFromConfluence() {
+                    try {
+                        const attachmentUrl = `${this.confluenceConfig.baseUrl}/rest/api/content/${this.confluenceConfig.pageId}/child/attachment?filename=${encodeURIComponent(this.confluenceConfig.regionsMappingFileName)}`;
+                        
+                        const response = await fetch(attachmentUrl, {
+                            headers: { 'X-Atlassian-Token': 'no-check' }
+                        });
+                        
+                        if (!response.ok) {
+                            console.log('Regions_Mapping.xlsx not found in attachments');
+                            return {};
+                        }
+                        
+                        const data = await response.json();
+                        
+                        if (!data.results || data.results.length === 0) {
+                            console.log('Regions_Mapping.xlsx not found in attachments');
+                            return {};
+                        }
+                        
+                        const downloadUrl = `${this.confluenceConfig.baseUrl}${data.results[0]._links.download}`;
+                        
+                        const fileResponse = await fetch(downloadUrl, {
+                            headers: { 'X-Atlassian-Token': 'no-check' }
+                        });
+                        
+                        if (!fileResponse.ok) {
+                            console.log('Failed to download Regions_Mapping.xlsx');
+                            return {};
+                        }
+                        
+                        const arrayBuffer = await fileResponse.arrayBuffer();
+                        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                        
+                        // Get first sheet data
+                        const sheetName = workbook.SheetNames[0];
+                        const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+                        
+                        // Build Control Unit to Region mapping
+                        const regionsMapping = {};
+                        sheetData.forEach(row => {
+                            const controlUnit = String(row['Control Unit'] || row['Control_Unit'] || row['ControlUnit'] || '').trim();
+                            const region = String(row['Region'] || row['region'] || row['REGION'] || '').trim();
+                            if (controlUnit && region) {
+                                regionsMapping[controlUnit.toUpperCase()] = region;
+                            }
+                        });
+                        
+                        console.log('Regions_Mapping.xlsx loaded from Confluence');
+                        return regionsMapping;
+                    } catch (error) {
+                        console.log('Regions_Mapping.xlsx not available:', error.message);
+                        return {};
+                    }
+                },
+
+                // Lookup region for NAM based on Control Unit
+                lookupNAMRegion(controlUnit, regionsMapping) {
+                    if (!regionsMapping || !controlUnit) {
+                        return 'NAM';
+                    }
+                    
+                    const controlUnitStr = String(controlUnit).trim().toUpperCase();
+                    const mappedRegion = regionsMapping[controlUnitStr];
+                    
+                    if (mappedRegion) {
+                        // If region is IPB, treat as NAM
+                        if (mappedRegion.toUpperCase() === 'IPB') {
+                            return 'NAM';
+                        }
+                        return mappedRegion;
+                    }
+                    
+                    return 'NAM';
+                },
+
+                // Load PSE mapping data from workbook
+                async loadPSEMappingData(mappingFileOrWorkbook) {
+                    try {
+                        let workbook;
+                        
+                        // Check if it's already a workbook object or a File
+                        if (mappingFileOrWorkbook && mappingFileOrWorkbook.SheetNames) {
+                            workbook = mappingFileOrWorkbook;
+                        } else if (mappingFileOrWorkbook) {
+                            workbook = await this.readExcelWorkbook(mappingFileOrWorkbook);
+                        } else {
+                            return { facilityTypes: [], productPrograms: [], categoryMapping: [] };
+                        }
+                        
+                        // Load PSE tab
                         const pseSheet = workbook.SheetNames.find(name => 
                             name.toLowerCase() === 'pse' || name.toLowerCase().includes('pse')
                         );
@@ -4157,12 +4305,6 @@
                         if (pseSheet) {
                             const pseData = XLSX.utils.sheet_to_json(workbook.Sheets[pseSheet]);
                             
-                            // Log column names for debugging
-                            if (pseData.length > 0) {
-                                console.log('PSE tab columns found:', Object.keys(pseData[0]));
-                            }
-                            
-                            // Try multiple possible column names for Facility Type
                             pseFacilityTypes = [...new Set(pseData
                                 .map(row => {
                                     const val = row['Facility_Type'] || row['Facility Type'] || row['FacilityType'] || 
@@ -4172,7 +4314,6 @@
                                 .filter(v => v)
                             )];
                             
-                            // Try multiple possible column names for Product Program
                             pseProductPrograms = [...new Set(pseData
                                 .map(row => {
                                     const val = row['Product_Program'] || row['Product Program'] || row['ProductProgram'] ||
@@ -4181,18 +4322,9 @@
                                 })
                                 .filter(v => v)
                             )];
-                            
-                            console.log('PSE Mapping loaded:', { 
-                                facilityTypes: pseFacilityTypes.length, 
-                                productPrograms: pseProductPrograms.length,
-                                sampleFacilityTypes: pseFacilityTypes.slice(0, 5),
-                                sampleProductPrograms: pseProductPrograms.slice(0, 5)
-                            });
-                        } else {
-                            console.warn('PSE sheet not found in mapping file. Available sheets:', workbook.SheetNames);
                         }
                         
-                        // Load Category tab for Product_Program and Product_Sub_Program mapping
+                        // Load Category tab
                         const categorySheet = workbook.SheetNames.find(name => 
                             name.toLowerCase() === 'category' || name.toLowerCase().includes('category')
                         );
@@ -4202,43 +4334,24 @@
                         if (categorySheet) {
                             const categoryData = XLSX.utils.sheet_to_json(workbook.Sheets[categorySheet]);
                             
-                            // Log column names for debugging
-                            if (categoryData.length > 0) {
-                                console.log('Category tab columns found:', Object.keys(categoryData[0]));
-                            }
-                            
-                            // Build category mapping array with flexible column name matching
                             categoryMapping = categoryData.map(row => {
-                                // Find Region column
                                 const region = String(row['Region'] || row['region'] || row['REGION'] || '').trim().toUpperCase();
-                                
-                                // Find Primary_Key column - try many variations
                                 const primaryKey = String(
                                     row['Primary_Key'] || row['PrimaryKey'] || row['Primary Key'] || 
                                     row['primary_key'] || row['PRIMARY_KEY'] || row['Key'] || ''
                                 ).trim();
-                                
-                                // Find Category column
-                                const category = String(
-                                    row['Category'] || row['category'] || row['CATEGORY'] || ''
-                                ).trim();
-                                
-                                // Find Sub_Category column
+                                const category = String(row['Category'] || row['category'] || row['CATEGORY'] || '').trim();
                                 const subCategory = String(
                                     row['Sub_Category'] || row['SubCategory'] || row['Sub Category'] || 
                                     row['sub_category'] || row['SUB_CATEGORY'] || row['Subcategory'] || ''
                                 ).trim();
                                 
                                 return { region, primaryKey, category, subCategory };
-                            }).filter(row => row.primaryKey); // Filter out empty primary keys
-                            
-                            console.log('Category Mapping loaded:', categoryMapping.length, 'entries');
-                            if (categoryMapping.length > 0) {
-                                console.log('Sample category mapping:', categoryMapping.slice(0, 3));
-                            }
-                        } else {
-                            console.warn('Category sheet not found in mapping file. Available sheets:', workbook.SheetNames);
+                            }).filter(row => row.primaryKey);
                         }
+                        
+                        const hasData = pseFacilityTypes.length > 0 || pseProductPrograms.length > 0 || categoryMapping.length > 0;
+                        console.log(hasData ? 'Product_Mapping.xlsx loaded successfully' : 'Product_Mapping.xlsx has no mapping data');
                         
                         return { 
                             facilityTypes: pseFacilityTypes, 
@@ -4246,7 +4359,7 @@
                             categoryMapping: categoryMapping
                         };
                     } catch (error) {
-                        console.error('Error loading mapping data:', error);
+                        console.log('Error loading Product_Mapping.xlsx:', error.message);
                         return { facilityTypes: [], productPrograms: [], categoryMapping: [] };
                     }
                 },
@@ -4254,11 +4367,6 @@
                 // Lookup Product_Program and Product_Sub_Program from Category mapping
                 lookupCategoryMapping(primaryKeyValue, region, mappingData) {
                     if (!mappingData || !mappingData.categoryMapping || !primaryKeyValue) {
-                        console.log('Category lookup skipped - missing data:', { 
-                            hasMappingData: !!mappingData, 
-                            hasCategoryMapping: !!(mappingData && mappingData.categoryMapping),
-                            primaryKeyValue 
-                        });
                         return { productProgram: '', productSubProgram: '' };
                     }
                     
@@ -4294,20 +4402,12 @@
                         };
                     }
                     
-                    // Log when no match found (only first few to avoid spam)
-                    if (!this._categoryMissCount) this._categoryMissCount = 0;
-                    if (this._categoryMissCount < 5) {
-                        console.log(`Category mapping not found for: "${keyStr}" (${region})`);
-                        this._categoryMissCount++;
-                    }
-                    
                     return { productProgram: '', productSubProgram: '' };
                 },
 
                 // Determine PSE or non-PSE based on mapping data
                 determinePSE(facilityType, productProgram, region, pseMappingData) {
                     if (!pseMappingData) {
-                        console.log('PSE lookup skipped - no mapping data');
                         return 'non-PSE';
                     }
                     
@@ -4330,21 +4430,38 @@
                         return 'PSE';
                     }
                     
-                    // Log when no match found (only first few to avoid spam)
-                    if (!this._pseMissCount) this._pseMissCount = 0;
-                    if (this._pseMissCount < 5) {
-                        console.log(`PSE mapping not found for: Facility="${facilityTypeStr}", Product="${productProgramStr}" (${region})`);
-                        this._pseMissCount++;
-                    }
-                    
                     return 'non-PSE';
                 },
 
                 // Upload consolidated Portfolio data to Confluence
+                // Optimize data for smaller Excel file size
+                optimizeDataForExcel(data) {
+                    return data.map(row => {
+                        const optimizedRow = {};
+                        for (const [key, value] of Object.entries(row)) {
+                            if (value === null || value === undefined) {
+                                optimizedRow[key] = '';
+                            } else if (typeof value === 'string') {
+                                // Trim and remove excessive whitespace
+                                optimizedRow[key] = value.trim();
+                            } else if (typeof value === 'number') {
+                                // Round to avoid floating point precision issues
+                                optimizedRow[key] = Math.round(value * 100) / 100;
+                            } else {
+                                optimizedRow[key] = value;
+                            }
+                        }
+                        return optimizedRow;
+                    });
+                },
+
                 async uploadPortfolioToConfluence(portfolioData) {
                     try {
+                        // Optimize data for smaller file size
+                        const optimizedData = this.optimizeDataForExcel(portfolioData);
+                        
                         const workbook = XLSX.utils.book_new();
-                        const worksheet = XLSX.utils.json_to_sheet(portfolioData);
+                        const worksheet = XLSX.utils.json_to_sheet(optimizedData);
                         
                         // Set column widths
                         worksheet['!cols'] = [
@@ -4385,11 +4502,12 @@
                         
                         XLSX.utils.book_append_sheet(workbook, worksheet, 'Portfolio Data');
                         
-                        // Convert to binary with compression enabled for smaller file size
+                        // Convert to binary with maximum compression
                         const excelBuffer = XLSX.write(workbook, { 
                             bookType: 'xlsx', 
                             type: 'array',
-                            compression: true  // Enable ZIP compression
+                            compression: true,
+                            bookSST: false  // Disable shared string table for smaller size
                         });
                         const blob = new Blob([excelBuffer], { 
                             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
@@ -4442,7 +4560,7 @@
                 },
 
                 // Process Portfolio file with ETL logic
-                async processPortfolioFile(file, region, pseMappingData) {
+                async processPortfolioFile(file, region, pseMappingData, regionsMapping = {}) {
                     const workbook = await this.readExcelWorkbook(file);
                     const firstSheetName = workbook.SheetNames[0];
                     const sheet = workbook.Sheets[firstSheetName];
@@ -4454,10 +4572,8 @@
                     if (region === 'nam') {
                         // Read starting from row 4 (0-indexed = 3) where headers are
                         rawData = XLSX.utils.sheet_to_json(sheet, { range: 3 });
-                        console.log(`Portfolio NAM - First sheet: ${firstSheetName}, rows: ${rawData.length} (headers from row 4)`);
                     } else {
                         rawData = XLSX.utils.sheet_to_json(sheet);
-                        console.log(`Portfolio ${region.toUpperCase()} - First sheet: ${firstSheetName}, rows: ${rawData.length}`);
                     }
 
                     let transformedData = [];
@@ -4473,7 +4589,7 @@
                         transformedData = rawData
                             .filter(row => !this.isExcludedRiskCategory(row)) // Filter OUT Clearing, Notation, Settlement
                             .filter(row => Object.keys(row).length > 1) // Filter out rows with only empty column A
-                            .map(row => this.mapPortfolioRowNAM(row, pseMappingData));
+                            .map(row => this.mapPortfolioRowNAM(row, pseMappingData, regionsMapping));
                     }
 
                     return transformedData;
@@ -4631,17 +4747,22 @@
                 },
 
                 // Map NAM Portfolio row
-                mapPortfolioRowNAM(row, pseMappingData) {
+                mapPortfolioRowNAM(row, pseMappingData, regionsMapping = {}) {
                     const facilityType = row['Facility Type'] || '';
                     const productProgram = row['Product Program'] || row['Product Program Name'] || '';
                     const committedFlag = String(row['Committed / Uncommitted Flag'] || row['Committed/Uncommitted Flag'] || '').toLowerCase();
+                    const controlUnit = row['Control Unit'] || '';
                     
                     // NAM uses Product Program as Primary_Key for category lookup
                     const categoryLookup = this.lookupCategoryMapping(productProgram, 'nam', pseMappingData);
                     
+                    // Lookup region based on Control Unit from Regions_Mapping.xlsx
+                    // If region is IPB, treat as NAM; otherwise use the mapped region
+                    const mappedRegion = this.lookupNAMRegion(controlUnit, regionsMapping);
+                    
                     return {
                         Report_Date: this.formatDateSafe(row['As Of Date']),
-                        Region: 'NAM',
+                        Region: mappedRegion,
                         Facility_ID: row['Facility ID'] || '',
                         Parent_Facility_ID: row['GFRN'] || '',
                         Product_Program: categoryLookup.productProgram,
@@ -5041,9 +5162,10 @@
                     };
                     
                     try {
-                        // Create workbook
+                        // Optimize data and create workbook
+                        const optimizedData = this.optimizeDataForExcel(data);
                         const workbook = XLSX.utils.book_new();
-                        const worksheet = XLSX.utils.json_to_sheet(data);
+                        const worksheet = XLSX.utils.json_to_sheet(optimizedData);
                         
                         // Set column widths based on data type
                         if (type === 'ccm') {
@@ -5065,11 +5187,12 @@
                         
                         XLSX.utils.book_append_sheet(workbook, worksheet, sheetNames[type]);
                         
-                        // Generate and download with compression enabled for smaller file size
+                        // Generate and download with maximum compression
                         const excelBuffer = XLSX.write(workbook, { 
                             bookType: 'xlsx', 
                             type: 'array',
-                            compression: true  // Enable ZIP compression
+                            compression: true,
+                            bookSST: false  // Disable shared string table for smaller size
                         });
                         const blob = new Blob([excelBuffer], { 
                             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 

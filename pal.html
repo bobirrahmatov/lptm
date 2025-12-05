@@ -4764,8 +4764,8 @@
                 // Total Outstanding from Total_OS column
                 totalOutstanding += parseNumber(row.Total_OS);
                 
-                const rel = row.Relationship_Name || row.Relationship_ID;
-                if (rel) relationships.add(rel);
+                // Use Relationship_ID for unique count (not Relationship_Name which may have duplicates)
+                if (row.Relationship_ID) relationships.add(row.Relationship_ID);
                 
                 if (row.Facility_ID) facilities.add(row.Facility_ID);
             }
@@ -5869,8 +5869,8 @@
                 // Total Outstanding from Total_OS column
                 totalOutstanding += parseNumber(row.Total_OS);
                 
-                const rel = row.Relationship_Name || row.Relationship_ID;
-                if (rel) relationships.add(rel);
+                // Use Relationship_ID for unique count (not Relationship_Name which may have duplicates)
+                if (row.Relationship_ID) relationships.add(row.Relationship_ID);
                 
                 if (row.Facility_ID) facilities.add(row.Facility_ID);
             }

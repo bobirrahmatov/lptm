@@ -103,6 +103,84 @@
         .notification-animate {
             animation: slideInRight 0.3s ease-out;
         }
+
+        /* ETL Flow animations */
+        @keyframes flowDash {
+            0% { stroke-dashoffset: 20; }
+            100% { stroke-dashoffset: 0; }
+        }
+        @keyframes flowPulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        @keyframes dotMove {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(4px); }
+            100% { transform: translateY(0); }
+        }
+        .flow-line {
+            stroke-dasharray: 6, 4;
+            animation: flowDash 0.8s linear infinite;
+        }
+        .flow-dot {
+            animation: flowPulse 1.5s ease-in-out infinite;
+        }
+        .connector-dot {
+            animation: dotMove 1s ease-in-out infinite;
+        }
+
+        /* Flow card hover effects */
+        .flow-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .flow-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Vertical connector line */
+        .connector-vertical {
+            width: 2px;
+            background: repeating-linear-gradient(
+                to bottom,
+                #9ca3af 0px,
+                #9ca3af 6px,
+                transparent 6px,
+                transparent 10px
+            );
+            background-size: 2px 10px;
+            animation: flowVertical 0.8s linear infinite;
+        }
+        @keyframes flowVertical {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 10px; }
+        }
+
+        /* Horizontal connector */
+        .connector-horizontal {
+            height: 2px;
+            background: repeating-linear-gradient(
+                to right,
+                #9ca3af 0px,
+                #9ca3af 6px,
+                transparent 6px,
+                transparent 10px
+            );
+            background-size: 10px 2px;
+            animation: flowHorizontal 0.8s linear infinite;
+        }
+        @keyframes flowHorizontal {
+            0% { background-position: 0 0; }
+            100% { background-position: 10px 0; }
+        }
+
+        /* Gradient text for ETL labels */
+        .etl-label {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
     </style>
 </head>
 
@@ -124,9 +202,9 @@
         </div>
     </div>
 
-    <div class="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
+    <div class="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto" x-data="{ activeTab: 'upload' }">
         <!-- Page Header -->
-        <div class="mb-8">
+        <div class="mb-6">
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900 mb-2">Data Loader</h1>
@@ -141,6 +219,35 @@
                 </a>
             </div>
         </div>
+
+        <!-- Tab Navigation -->
+        <div class="mb-6">
+            <div class="border-b border-gray-200">
+                <nav class="-mb-px flex space-x-2 overflow-x-auto custom-scrollbar">
+                    <button
+                        class="inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors duration-200 ease-in-out whitespace-nowrap"
+                        :class="activeTab === 'upload' ? 'text-brand-600 border-brand-600' : 'bg-transparent text-gray-500 border-transparent hover:text-gray-700'"
+                        @click="activeTab = 'upload'">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                        </svg>
+                        Data Upload
+                    </button>
+                    <button
+                        class="inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors duration-200 ease-in-out whitespace-nowrap"
+                        :class="activeTab === 'etl' ? 'text-brand-600 border-brand-600' : 'bg-transparent text-gray-500 border-transparent hover:text-gray-700'"
+                        @click="activeTab = 'etl'">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        ETL Flow
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Data Upload Tab -->
+        <div x-show="activeTab === 'upload'">
 
         <!-- Status Overview Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -883,7 +990,12 @@
                     </svg>
                     <div class="text-sm text-blue-800">
                         <p class="font-medium mb-1">Confluence Integration</p>
-                        <p class="text-xs text-blue-600">Consolidated CCM data will be automatically uploaded to Confluence as <strong>CCM_tw.xlsx</strong> when processed.</p>
+                        <p class="text-xs text-blue-600">Consolidated data will be automatically uploaded to Confluence when processed:</p>
+                        <ul class="text-xs text-blue-600 mt-1 space-y-0.5">
+                            <li>• <strong>Portfolio_tw.xlsx</strong> - Portfolio data</li>
+                            <li>• <strong>Covenants_tw.xlsx</strong> - Covenants data</li>
+                            <li>• <strong>CCM_tw.xlsx</strong> - Credit Reviews data</li>
+                        </ul>
                         <p class="text-xs text-blue-600 mt-1">Target: Page ID <span class="font-mono bg-blue-100 px-1 rounded" x-text="confluenceConfig.pageId"></span></p>
                     </div>
                 </div>
@@ -899,7 +1011,7 @@
                         <p class="font-medium text-gray-700 mb-1">File Sources Information</p>
                         <ul class="space-y-1 text-xs">
                             <li><strong>Portfolio Data:</strong> Regional Credit Platform exports - EMEA (RAR7 Combined), NAM (BO Export), APAC (eOASIS)</li>
-                            <li><strong>Covenants:</strong> Regional covenant tracking systems</li>
+                            <li><strong>Covenants:</strong> New Covenants Module from Credit Platform (1st sheet from each region)</li>
                             <li><strong>Credit Reviews (CCM):</strong> NAM (Open CCM tab), APAC (Past Due + All Coming Due CCMs), EMEA (Past Due + Coming Due + Open CCM)</li>
                             <li><strong>Product Mapping:</strong> Master classification file - download latest version before uploading custom mappings</li>
                         </ul>
@@ -907,6 +1019,1184 @@
                 </div>
             </div>
         </div>
+        </div>
+        <!-- End Data Upload Tab -->
+
+        <!-- ETL Flow Tab -->
+        <div x-show="activeTab === 'etl'" x-data="{ selectedFlow: 'ccm', flowDropdownOpen: false }">
+            <!-- ETL Header with Dropdown -->
+            <div class="mb-6">
+                <div class="rounded-2xl border border-gray-200 bg-white p-6">
+                    <div class="flex items-center justify-between flex-wrap gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-900">ETL Data Flow</h2>
+                                <p class="text-sm text-gray-500">Extract, Transform, Load process for regional data consolidation</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Flow Selector Dropdown -->
+                        <div class="relative inline-block" x-data="{ open: false }">
+                            <button @click="open = !open"
+                                class="inline-flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-all min-w-[220px] justify-between">
+                                <div class="flex items-center gap-2">
+                                    <template x-if="selectedFlow === 'ccm'">
+                                        <div class="flex items-center gap-2">
+                                            <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-warning-500 text-white">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                </svg>
+                                            </span>
+                                            <span>CCM (Credit Reviews)</span>
+                                        </div>
+                                    </template>
+                                    <template x-if="selectedFlow === 'portfolio'">
+                                        <div class="flex items-center gap-2">
+                                            <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-500 text-white">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                            </span>
+                                            <span>Portfolio Data</span>
+                                        </div>
+                                    </template>
+                                    <template x-if="selectedFlow === 'covenants'">
+                                        <div class="flex items-center gap-2">
+                                            <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-success-500 text-white">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                            </span>
+                                            <span>Covenants</span>
+                                        </div>
+                                    </template>
+                                </div>
+                                <svg class="w-5 h-5 text-gray-400 transition-transform duration-200" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div x-show="open" @click.outside="open = false" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                                class="absolute right-0 top-full z-50 mt-2 w-full min-w-[260px] rounded-xl border border-gray-200 bg-white p-2 shadow-lg">
+                                <ul class="flex flex-col gap-1">
+                                    <li>
+                                        <button @click="selectedFlow = 'ccm'; open = false"
+                                            class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
+                                            :class="selectedFlow === 'ccm' ? 'bg-warning-50 text-warning-700' : 'text-gray-700 hover:bg-gray-100'">
+                                            <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-warning-500 text-white">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                </svg>
+                                            </span>
+                                            CCM (Credit Reviews)
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button @click="selectedFlow = 'portfolio'; open = false"
+                                            class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
+                                            :class="selectedFlow === 'portfolio' ? 'bg-brand-50 text-brand-700' : 'text-gray-700 hover:bg-gray-100'">
+                                            <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-500 text-white">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                            </span>
+                                            Portfolio Data
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button @click="selectedFlow = 'covenants'; open = false"
+                                            class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
+                                            :class="selectedFlow === 'covenants' ? 'bg-success-50 text-success-700' : 'text-gray-700 hover:bg-gray-100'">
+                                            <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-success-500 text-white">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                            </span>
+                                            Covenants
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== CCM ETL FLOW ==================== -->
+            <div x-show="selectedFlow === 'ccm'" class="space-y-6">
+                <!-- Visual Process Flow -->
+                <div class="rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white overflow-hidden">
+                    <div class="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-warning-50 to-transparent">
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-warning-500 text-white shadow-lg shadow-warning-500/30">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">CCM (Credit Reviews) ETL Process</h3>
+                                <p class="text-sm text-gray-500">Consolidating regional CCM files into CCM_tw.xlsx</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-6 overflow-x-auto">
+                        <!-- Connected Flow Diagram -->
+                        <div class="flex flex-col items-center">
+                            <!-- Row 1: Source Files -->
+                            <div class="flex justify-center gap-8">
+                                <!-- NAM Source -->
+                                <div class="flow-card w-48 rounded-2xl border-2 border-yellow-200 bg-white p-4 shadow-sm hover:border-yellow-300">
+                                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Source</div>
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="px-2 py-1 rounded-lg text-xs font-bold bg-yellow-100 text-yellow-800">NAM</span>
+                                        <span class="text-sm font-semibold text-gray-800">CCM File</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-xs text-gray-600">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>
+                                        <span class="font-mono bg-yellow-50 px-1.5 py-0.5 rounded">Open CCM</span>
+                                    </div>
+                                </div>
+                                <!-- APAC Source -->
+                                <div class="flow-card w-48 rounded-2xl border-2 border-green-200 bg-white p-4 shadow-sm hover:border-green-300">
+                                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Source</div>
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="px-2 py-1 rounded-lg text-xs font-bold bg-green-100 text-green-800">APAC</span>
+                                        <span class="text-sm font-semibold text-gray-800">CCM File</span>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-2 text-xs text-gray-600">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
+                                            <span class="font-mono bg-green-50 px-1.5 py-0.5 rounded">Past Due</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-xs text-gray-600">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
+                                            <span class="font-mono bg-green-50 px-1.5 py-0.5 rounded text-[10px]">All Coming Due CCMs</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- EMEA Source -->
+                                <div class="flow-card w-48 rounded-2xl border-2 border-blue-200 bg-white p-4 shadow-sm hover:border-blue-300">
+                                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Source</div>
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="px-2 py-1 rounded-lg text-xs font-bold bg-blue-100 text-blue-800">EMEA</span>
+                                        <span class="text-sm font-semibold text-gray-800">CCM File</span>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-2 text-xs text-gray-600">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                                            <span class="font-mono bg-blue-50 px-1.5 py-0.5 rounded">Past Due</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-xs text-gray-600">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                                            <span class="font-mono bg-blue-50 px-1.5 py-0.5 rounded">Coming Due</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-xs text-gray-600">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                                            <span class="font-mono bg-blue-50 px-1.5 py-0.5 rounded">Open CCM</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Connector: 3 sources merging down -->
+                            <div class="relative w-full flex justify-center" style="height: 50px;">
+                                <svg class="absolute" width="500" height="50" style="left: 50%; transform: translateX(-50%);">
+                                    <!-- Left line down and right -->
+                                    <path d="M 75 0 L 75 25 L 250 25" class="flow-line" stroke="#9ca3af" stroke-width="2" fill="none"/>
+                                    <!-- Center line down -->
+                                    <path d="M 250 0 L 250 25" class="flow-line" stroke="#9ca3af" stroke-width="2" fill="none"/>
+                                    <!-- Right line down and left -->
+                                    <path d="M 425 0 L 425 25 L 250 25" class="flow-line" stroke="#9ca3af" stroke-width="2" fill="none"/>
+                                    <!-- Down from merge point -->
+                                    <path d="M 250 25 L 250 50" class="flow-line" stroke="#9ca3af" stroke-width="2" fill="none"/>
+                                    <!-- Merge dot -->
+                                    <circle cx="250" cy="25" r="5" class="flow-dot" fill="#6b7280"/>
+                                </svg>
+                            </div>
+
+                            <!-- Row 2: Extract Step -->
+                            <div class="flow-card rounded-2xl border-2 border-blue-300 bg-gradient-to-br from-blue-50 to-blue-100 p-5 shadow-lg w-80">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500 text-white font-bold shadow">E</div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-blue-900">EXTRACT</h4>
+                                        <p class="text-xs text-blue-600">Read Excel Sheets</p>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-600">Parse uploaded Excel files and read data from specified tabs for each region</p>
+                            </div>
+
+                            <!-- Connector: Down arrow -->
+                            <div class="flex flex-col items-center py-1">
+                                <div class="connector-vertical h-8"></div>
+                                <div class="connector-dot w-2 h-2 rounded-full bg-gray-500"></div>
+                            </div>
+
+                            <!-- Row 3: Transform Steps - Row 1 -->
+                            <div class="flex justify-center gap-4">
+                                <!-- Column Mapping -->
+                                <div class="flow-card w-48 rounded-2xl border-2 border-purple-300 bg-gradient-to-br from-purple-50 to-purple-100 p-3 shadow-lg">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-purple-500 text-white font-bold text-xs shadow">T1</div>
+                                        <h4 class="text-xs font-bold text-purple-900">Column Mapping</h4>
+                                    </div>
+                                    <ul class="text-[10px] text-gray-600 space-y-0.5">
+                                        <li class="flex items-center gap-1">
+                                            <span class="w-1 h-1 rounded-full bg-purple-400"></span>
+                                            Map regional columns
+                                        </li>
+                                        <li class="flex items-center gap-1">
+                                            <span class="w-1 h-1 rounded-full bg-purple-400"></span>
+                                            APAC: Specialist → UW
+                                        </li>
+                                        <li class="flex items-center gap-1">
+                                            <span class="w-1 h-1 rounded-full bg-purple-400"></span>
+                                            EMEA: Auto-fill Region
+                                        </li>
+                                    </ul>
+                                </div>
+                                <!-- Date Formatting -->
+                                <div class="flow-card w-48 rounded-2xl border-2 border-cyan-300 bg-gradient-to-br from-cyan-50 to-cyan-100 p-3 shadow-lg">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-500 text-white font-bold text-xs shadow">T2</div>
+                                        <h4 class="text-xs font-bold text-cyan-900">Date Format</h4>
+                                    </div>
+                                    <p class="text-[10px] text-gray-600 mb-1.5">Standardize to:</p>
+                                    <div class="flex items-center justify-center gap-1 mb-1.5">
+                                        <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white border border-cyan-200 text-cyan-700 font-semibold">DD/MM/YYYY</span>
+                                    </div>
+                                    <div class="text-[9px] text-gray-500 space-y-0.5">
+                                        <div class="flex items-center gap-1">
+                                            <span class="text-cyan-500">←</span>
+                                            <span class="font-mono">DD-MMM-YYYY</span>
+                                        </div>
+                                        <div class="flex items-center gap-1">
+                                            <span class="text-cyan-500">←</span>
+                                            <span class="font-mono">MM/DD/YYYY</span>
+                                        </div>
+                                        <div class="flex items-center gap-1">
+                                            <span class="text-cyan-500">←</span>
+                                            <span class="font-mono">YYYY-MM-DD</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Status Calculation -->
+                                <div class="flow-card w-48 rounded-2xl border-2 border-orange-300 bg-gradient-to-br from-orange-50 to-orange-100 p-3 shadow-lg">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-500 text-white font-bold text-xs shadow">T3</div>
+                                        <h4 class="text-xs font-bold text-orange-900">Status Calc</h4>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="px-1 py-0.5 rounded text-[9px] font-semibold bg-red-100 text-red-700">Past Due</span>
+                                            <span class="text-[9px] text-gray-600">Before</span>
+                                        </div>
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="px-1 py-0.5 rounded text-[9px] font-semibold bg-yellow-100 text-yellow-700">Coming Due</span>
+                                            <span class="text-[9px] text-gray-600">Same</span>
+                                        </div>
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="px-1 py-0.5 rounded text-[9px] font-semibold bg-green-100 text-green-700">Open</span>
+                                            <span class="text-[9px] text-gray-600">After</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Filter -->
+                                <div class="flow-card w-48 rounded-2xl border-2 border-red-300 bg-gradient-to-br from-red-50 to-red-100 p-3 shadow-lg">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-red-500 text-white font-bold text-xs shadow">T4</div>
+                                        <h4 class="text-xs font-bold text-red-900">Filter Rows</h4>
+                                    </div>
+                                    <p class="text-[10px] text-gray-600 mb-1">Exclude rows with:</p>
+                                    <div class="flex flex-wrap gap-1">
+                                        <span class="px-1 py-0.5 rounded text-[9px] font-mono bg-white border border-red-200 text-red-600">Nothing to Report</span>
+                                        <span class="px-1 py-0.5 rounded text-[9px] font-mono bg-white border border-red-200 text-red-600">NIL</span>
+                                        <span class="px-1 py-0.5 rounded text-[9px] font-mono bg-white border border-red-200 text-red-600">N/A</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Connector: 4 transforms merging down -->
+                            <div class="relative w-full flex justify-center" style="height: 50px;">
+                                <svg class="absolute" width="650" height="50" style="left: 50%; transform: translateX(-50%);">
+                                    <!-- Box 1 (leftmost) down and right -->
+                                    <path d="M 85 0 L 85 25 L 325 25" class="flow-line" stroke="#9ca3af" stroke-width="2" fill="none"/>
+                                    <!-- Box 2 down and right -->
+                                    <path d="M 230 0 L 230 25 L 325 25" class="flow-line" stroke="#9ca3af" stroke-width="2" fill="none"/>
+                                    <!-- Box 3 down and left -->
+                                    <path d="M 420 0 L 420 25 L 325 25" class="flow-line" stroke="#9ca3af" stroke-width="2" fill="none"/>
+                                    <!-- Box 4 (rightmost) down and left -->
+                                    <path d="M 565 0 L 565 25 L 325 25" class="flow-line" stroke="#9ca3af" stroke-width="2" fill="none"/>
+                                    <!-- Down from merge point -->
+                                    <path d="M 325 25 L 325 50" class="flow-line" stroke="#9ca3af" stroke-width="2" fill="none"/>
+                                    <!-- Merge dot -->
+                                    <circle cx="325" cy="25" r="5" class="flow-dot" fill="#6b7280"/>
+                                </svg>
+                            </div>
+
+                            <!-- Row 4: Load Step -->
+                            <div class="flow-card rounded-2xl border-2 border-green-300 bg-gradient-to-br from-green-50 to-green-100 p-5 shadow-lg w-80">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500 text-white font-bold shadow">L</div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-green-900">LOAD</h4>
+                                        <p class="text-xs text-green-600">Upload to Confluence</p>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-600">Merge all regional data and upload consolidated <span class="font-mono font-semibold">CCM_tw.xlsx</span></p>
+                            </div>
+
+                            <!-- Connector: Down arrow with arrowhead -->
+                            <div class="flex flex-col items-center py-1">
+                                <div class="connector-vertical h-6"></div>
+                                <svg class="w-4 h-4 text-gray-500 connector-dot" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 16l-6-6h12l-6 6z"/>
+                                </svg>
+                            </div>
+
+                            <!-- Row 5: Output -->
+                            <div class="flow-card rounded-2xl border-2 border-brand-300 bg-white p-5 shadow-xl">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-lg">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-gray-900">CCM_tw.xlsx</h4>
+                                        <p class="text-xs text-gray-500">Consolidated Credit Reviews</p>
+                                        <p class="text-xs text-brand-600 font-medium mt-1">Page ID: <span class="font-mono" x-text="$root.confluenceConfig?.pageId || '3229979875'"></span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column Mapping Table -->
+                <div class="rounded-2xl border border-gray-200 bg-white overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+                        <h3 class="text-base font-semibold text-gray-900">Column Mapping Reference</h3>
+                    </div>
+                    <div class="p-6 overflow-x-auto">
+                        <table class="min-w-full text-xs">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="px-3 py-2.5 text-left font-semibold text-gray-700 border-b">Output Column</th>
+                                    <th class="px-3 py-2.5 text-left font-semibold text-yellow-700 border-b bg-yellow-50">NAM Source</th>
+                                    <th class="px-3 py-2.5 text-left font-semibold text-green-700 border-b bg-green-50">APAC Source</th>
+                                    <th class="px-3 py-2.5 text-left font-semibold text-blue-700 border-b bg-blue-50">EMEA Source</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono font-medium">Report_Date</td>
+                                    <td class="px-3 py-2 text-gray-600" colspan="3"><em class="text-brand-600">← Selected from Date Picker</em></td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono font-medium">Region</td>
+                                    <td class="px-3 py-2 font-mono text-yellow-700">Region</td>
+                                    <td class="px-3 py-2 font-mono text-green-700">Region</td>
+                                    <td class="px-3 py-2 text-blue-700"><em>Auto-fill "EMEA"</em></td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono font-medium">Relationship_ID</td>
+                                    <td class="px-3 py-2 font-mono text-yellow-700">CARE ID</td>
+                                    <td class="px-3 py-2 font-mono text-green-700">CARE ID</td>
+                                    <td class="px-3 py-2 font-mono text-blue-700">Relationship ID</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono font-medium">Client_Name</td>
+                                    <td class="px-3 py-2 font-mono text-yellow-700">Client Name</td>
+                                    <td class="px-3 py-2 font-mono text-green-700">Client Name</td>
+                                    <td class="px-3 py-2 font-mono text-blue-700">CA ID</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono font-medium">Classification</td>
+                                    <td class="px-3 py-2 font-mono text-yellow-700">Classification</td>
+                                    <td class="px-3 py-2 font-mono text-green-700">Classification</td>
+                                    <td class="px-3 py-2 font-mono text-blue-700">Classification</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono font-medium">Frequency</td>
+                                    <td class="px-3 py-2 font-mono text-yellow-700">Frequency</td>
+                                    <td class="px-3 py-2 font-mono text-green-700">Frequency</td>
+                                    <td class="px-3 py-2 font-mono text-blue-700">Frequency</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono font-medium">Underwriter</td>
+                                    <td class="px-3 py-2 font-mono text-yellow-700">Underwriter</td>
+                                    <td class="px-3 py-2 font-mono text-green-700">Specialist <span class="text-gray-400">→</span></td>
+                                    <td class="px-3 py-2 font-mono text-blue-700">Underwriter</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 bg-cyan-50/50">
+                                    <td class="px-3 py-2 font-mono font-medium">Next_CCM_Month_End</td>
+                                    <td class="px-3 py-2 font-mono text-yellow-700">Next CCM Month End <span class="text-cyan-600 text-[10px]">→ DD/MM/YYYY</span></td>
+                                    <td class="px-3 py-2 font-mono text-green-700">Next CCM Month End <span class="text-cyan-600 text-[10px]">→ DD/MM/YYYY</span></td>
+                                    <td class="px-3 py-2 font-mono text-blue-700">Next CCM Month End <span class="text-cyan-600 text-[10px]">→ DD/MM/YYYY</span></td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 bg-cyan-50/50">
+                                    <td class="px-3 py-2 font-mono font-medium">Next_CCM_Approval_Date</td>
+                                    <td class="px-3 py-2 font-mono text-yellow-700">Next CCM Approval Date <span class="text-cyan-600 text-[10px]">→ DD/MM/YYYY</span></td>
+                                    <td class="px-3 py-2 font-mono text-green-700">Next CCM Approval Date <span class="text-cyan-600 text-[10px]">→ DD/MM/YYYY</span></td>
+                                    <td class="px-3 py-2 font-mono text-blue-700">Next CCM Approval Date <span class="text-cyan-600 text-[10px]">→ DD/MM/YYYY</span></td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono font-medium">CCM_Status</td>
+                                    <td class="px-3 py-2 text-gray-600" colspan="3"><em class="text-brand-600">← Calculated based on dates</em></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <!-- Date Formatting Note -->
+                        <div class="mt-4 p-4 rounded-xl bg-cyan-50 border border-cyan-200">
+                            <div class="flex items-start gap-3">
+                                <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500 text-white flex-shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-cyan-900 mb-1">Date Formatting (T2)</h4>
+                                    <p class="text-xs text-cyan-700 mb-2">All date columns are automatically standardized to <span class="font-mono font-semibold bg-white px-1.5 py-0.5 rounded border border-cyan-300">DD/MM/YYYY</span> format.</p>
+                                    <div class="text-xs text-cyan-600">
+                                        <span class="font-medium">Supported input formats:</span>
+                                        <span class="font-mono ml-1">DD-MMM-YYYY</span> • 
+                                        <span class="font-mono">MM/DD/YYYY</span> • 
+                                        <span class="font-mono">MMM-DD-YYYY</span> • 
+                                        <span class="font-mono">YYYY-MM-DD</span> • 
+                                        <span class="font-mono">Excel serial dates</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End CCM ETL Flow -->
+
+            <!-- ==================== PORTFOLIO DATA ETL FLOW ==================== -->
+            <div x-show="selectedFlow === 'portfolio'" class="space-y-6">
+                <div class="rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white overflow-hidden">
+                    <div class="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-brand-50 to-transparent">
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-500 text-white shadow-lg shadow-brand-500/30">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Portfolio Data ETL Process</h3>
+                                <p class="text-sm text-gray-500">Consolidating regional portfolio files into Portfolio_tw.xlsx</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-6 overflow-x-auto">
+                        <!-- Connected Flow Diagram for Portfolio -->
+                        <div class="flex flex-col items-center">
+                            <!-- Row 1: Source Files + PSE Mapping -->
+                            <div class="flex justify-center gap-6">
+                                <!-- EMEA Source -->
+                                <div class="flow-card w-44 rounded-2xl border-2 border-blue-200 bg-white p-3 shadow-sm hover:border-blue-300">
+                                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Source</div>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="px-2 py-0.5 rounded-lg text-xs font-bold bg-blue-100 text-blue-800">EMEA</span>
+                                        <span class="text-sm font-semibold text-gray-800">Portfolio</span>
+                                    </div>
+                                    <p class="text-[10px] text-gray-500">Filter: Fac ID ≠ empty</p>
+                                </div>
+                                <!-- APAC Source -->
+                                <div class="flow-card w-44 rounded-2xl border-2 border-green-200 bg-white p-3 shadow-sm hover:border-green-300">
+                                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Source</div>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="px-2 py-0.5 rounded-lg text-xs font-bold bg-green-100 text-green-800">APAC</span>
+                                        <span class="text-sm font-semibold text-gray-800">Portfolio</span>
+                                    </div>
+                                    <p class="text-[10px] text-gray-500">All rows, C/U status</p>
+                                </div>
+                                <!-- NAM Source -->
+                                <div class="flow-card w-44 rounded-2xl border-2 border-yellow-200 bg-white p-3 shadow-sm hover:border-yellow-300">
+                                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Source</div>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="px-2 py-0.5 rounded-lg text-xs font-bold bg-yellow-100 text-yellow-800">NAM</span>
+                                        <span class="text-sm font-semibold text-gray-800">Portfolio</span>
+                                    </div>
+                                    <p class="text-[10px] text-gray-500">Filter OUT Risk Cat</p>
+                                </div>
+                                <!-- PSE Mapping -->
+                                <div class="flow-card w-44 rounded-2xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-white p-3 shadow-sm">
+                                    <div class="text-xs font-semibold text-purple-500 uppercase tracking-wider mb-2">Mapping</div>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                        <span class="text-xs font-semibold text-gray-700">Product_Mapping</span>
+                                    </div>
+                                    <p class="text-[10px] text-gray-500">PSE tab lookup</p>
+                                </div>
+                            </div>
+
+                            <!-- Connector: 4 sources merging down -->
+                            <div class="relative w-full flex justify-center" style="height: 50px;">
+                                <svg class="absolute" width="650" height="50" style="left: 50%; transform: translateX(-50%);">
+                                    <path d="M 88 0 L 88 25 L 325 25" class="flow-line" stroke="#9ca3af" stroke-width="2" fill="none"/>
+                                    <path d="M 213 0 L 213 25 L 325 25" class="flow-line" stroke="#9ca3af" stroke-width="2" fill="none"/>
+                                    <path d="M 437 0 L 437 25 L 325 25" class="flow-line" stroke="#9ca3af" stroke-width="2" fill="none"/>
+                                    <path d="M 562 0 L 562 25 L 325 25" class="flow-line" stroke="#a855f7" stroke-width="2" fill="none"/>
+                                    <path d="M 325 25 L 325 50" class="flow-line" stroke="#9ca3af" stroke-width="2" fill="none"/>
+                                    <circle cx="325" cy="25" r="5" class="flow-dot" fill="#6b7280"/>
+                                </svg>
+                            </div>
+
+                            <!-- Row 2: Extract Step -->
+                            <div class="flow-card rounded-2xl border-2 border-blue-300 bg-gradient-to-br from-blue-50 to-blue-100 p-4 shadow-lg w-80">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500 text-white font-bold shadow">E</div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-blue-900">EXTRACT</h4>
+                                        <p class="text-xs text-blue-600">Read 1st sheet + PSE Mapping</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Connector -->
+                            <div class="flex flex-col items-center py-1">
+                                <div class="connector-vertical h-6"></div>
+                                <div class="connector-dot w-2 h-2 rounded-full bg-gray-500"></div>
+                            </div>
+
+                            <!-- Row 3: Transform Steps -->
+                            <div class="flex justify-center gap-3 flex-wrap">
+                                <div class="flow-card w-36 rounded-2xl border-2 border-purple-300 bg-gradient-to-br from-purple-50 to-purple-100 p-2.5 shadow-lg">
+                                    <div class="flex items-center gap-1.5 mb-1">
+                                        <div class="flex h-6 w-6 items-center justify-center rounded-lg bg-purple-500 text-white font-bold text-[10px]">T1</div>
+                                        <h4 class="text-[11px] font-bold text-purple-900">Column Map</h4>
+                                    </div>
+                                    <p class="text-[9px] text-gray-600">Map 30+ columns</p>
+                                </div>
+                                <div class="flow-card w-36 rounded-2xl border-2 border-cyan-300 bg-gradient-to-br from-cyan-50 to-cyan-100 p-2.5 shadow-lg">
+                                    <div class="flex items-center gap-1.5 mb-1">
+                                        <div class="flex h-6 w-6 items-center justify-center rounded-lg bg-cyan-500 text-white font-bold text-[10px]">T2</div>
+                                        <h4 class="text-[11px] font-bold text-cyan-900">Date Format</h4>
+                                    </div>
+                                    <p class="text-[9px] text-gray-600">DD/MM/YYYY</p>
+                                </div>
+                                <div class="flow-card w-36 rounded-2xl border-2 border-orange-300 bg-gradient-to-br from-orange-50 to-orange-100 p-2.5 shadow-lg">
+                                    <div class="flex items-center gap-1.5 mb-1">
+                                        <div class="flex h-6 w-6 items-center justify-center rounded-lg bg-orange-500 text-white font-bold text-[10px]">T3</div>
+                                        <h4 class="text-[11px] font-bold text-orange-900">Committed</h4>
+                                    </div>
+                                    <p class="text-[9px] text-gray-600">YES/NO, C/U</p>
+                                </div>
+                                <div class="flow-card w-36 rounded-2xl border-2 border-pink-300 bg-gradient-to-br from-pink-50 to-pink-100 p-2.5 shadow-lg">
+                                    <div class="flex items-center gap-1.5 mb-1">
+                                        <div class="flex h-6 w-6 items-center justify-center rounded-lg bg-pink-500 text-white font-bold text-[10px]">T4</div>
+                                        <h4 class="text-[11px] font-bold text-pink-900">PSE Lookup</h4>
+                                    </div>
+                                    <p class="text-[9px] text-gray-600">PSE/non-PSE</p>
+                                </div>
+                                <div class="flow-card w-36 rounded-2xl border-2 border-red-300 bg-gradient-to-br from-red-50 to-red-100 p-2.5 shadow-lg">
+                                    <div class="flex items-center gap-1.5 mb-1">
+                                        <div class="flex h-6 w-6 items-center justify-center rounded-lg bg-red-500 text-white font-bold text-[10px]">T5</div>
+                                        <h4 class="text-[11px] font-bold text-red-900">Filter</h4>
+                                    </div>
+                                    <p class="text-[9px] text-gray-600">Region rules</p>
+                                </div>
+                            </div>
+
+                            <!-- Connector -->
+                            <div class="flex flex-col items-center py-1">
+                                <div class="connector-vertical h-6"></div>
+                                <div class="connector-dot w-2 h-2 rounded-full bg-gray-500"></div>
+                            </div>
+
+                            <!-- Row 4: Calculate -->
+                            <div class="flow-card rounded-2xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-amber-100 p-4 shadow-lg w-80">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500 text-white font-bold shadow">C</div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-amber-900">CALCULATE</h4>
+                                        <p class="text-xs text-amber-600">OSUC, Total_OS, Unused, Undrawn</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Connector -->
+                            <div class="flex flex-col items-center py-1">
+                                <div class="connector-vertical h-6"></div>
+                                <div class="connector-dot w-2 h-2 rounded-full bg-gray-500"></div>
+                            </div>
+
+                            <!-- Row 5: Load -->
+                            <div class="flow-card rounded-2xl border-2 border-green-300 bg-gradient-to-br from-green-50 to-green-100 p-5 shadow-lg w-80">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500 text-white font-bold shadow">L</div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-green-900">LOAD</h4>
+                                        <p class="text-xs text-green-600">Upload to Confluence</p>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-600">Merge all regional portfolio data and upload <span class="font-mono font-semibold">Portfolio_tw.xlsx</span></p>
+                            </div>
+
+                            <!-- Connector: Down arrow with arrowhead -->
+                            <div class="flex flex-col items-center py-1">
+                                <div class="connector-vertical h-6"></div>
+                                <svg class="w-4 h-4 text-gray-500 connector-dot" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 16l-6-6h12l-6 6z"/>
+                                </svg>
+                            </div>
+
+                            <!-- Output -->
+                            <div class="flow-card rounded-2xl border-2 border-brand-300 bg-white p-5 shadow-xl">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-lg">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-gray-900">Portfolio_tw.xlsx</h4>
+                                        <p class="text-xs text-gray-500">Consolidated Portfolio Data</p>
+                                        <p class="text-xs text-brand-600 font-medium mt-1">Available in Analytics Dashboard</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Regional Transformations Details -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- EMEA Transformations -->
+                    <div class="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="px-2 py-1 rounded-lg text-xs font-bold bg-blue-500 text-white">EMEA</span>
+                            <h4 class="text-sm font-semibold text-gray-800">Specific Rules</h4>
+                        </div>
+                        <ul class="text-xs text-gray-600 space-y-1.5">
+                            <li class="flex items-start gap-2">
+                                <span class="w-1 h-1 rounded-full bg-blue-400 mt-1.5 flex-shrink-0"></span>
+                                <span><strong>Filter:</strong> Only rows where <code class="bg-blue-100 px-1 rounded text-[10px]">Fac ID</code> is not empty</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="w-1 h-1 rounded-full bg-blue-400 mt-1.5 flex-shrink-0"></span>
+                                <span><strong>Committed:</strong> Commited Facility YES → Committed, NO → Uncommitted</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="w-1 h-1 rounded-full bg-blue-400 mt-1.5 flex-shrink-0"></span>
+                                <span><strong>Team Lead:</strong> SIMPSON HARRY, PALMER KRISTOPHER, KADELI IRIDA, GRAEME-WILSON DOM → Kristopher Palmer, else Ponniah Raj</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="w-1 h-1 rounded-full bg-blue-400 mt-1.5 flex-shrink-0"></span>
+                                <span><strong>PSE:</strong> Facility Type in PSE tab → PSE, else non-PSE</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- APAC Transformations -->
+                    <div class="rounded-2xl border border-green-200 bg-gradient-to-br from-green-50 to-white p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="px-2 py-1 rounded-lg text-xs font-bold bg-green-500 text-white">APAC</span>
+                            <h4 class="text-sm font-semibold text-gray-800">Specific Rules</h4>
+                        </div>
+                        <ul class="text-xs text-gray-600 space-y-1.5">
+                            <li class="flex items-start gap-2">
+                                <span class="w-1 h-1 rounded-full bg-green-400 mt-1.5 flex-shrink-0"></span>
+                                <span><strong>Filter:</strong> Bring all rows (no filtering)</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="w-1 h-1 rounded-full bg-green-400 mt-1.5 flex-shrink-0"></span>
+                                <span><strong>Committed:</strong> Legal Status C → Committed, U → Uncommitted</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="w-1 h-1 rounded-full bg-green-400 mt-1.5 flex-shrink-0"></span>
+                                <span><strong>PSE:</strong> Facility Type in PSE tab → PSE, else non-PSE</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="w-1 h-1 rounded-full bg-green-400 mt-1.5 flex-shrink-0"></span>
+                                <span><strong>Dates:</strong> DD/MM/YYYY, invalid text (DEMAND) → null</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- NAM Transformations -->
+                    <div class="rounded-2xl border border-yellow-200 bg-gradient-to-br from-yellow-50 to-white p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="px-2 py-1 rounded-lg text-xs font-bold bg-yellow-500 text-white">NAM</span>
+                            <h4 class="text-sm font-semibold text-gray-800">Specific Rules</h4>
+                        </div>
+                        <ul class="text-xs text-gray-600 space-y-1.5">
+                            <li class="flex items-start gap-2">
+                                <span class="w-1 h-1 rounded-full bg-yellow-400 mt-1.5 flex-shrink-0"></span>
+                                <span><strong>Filter OUT:</strong> Risk Category = Clearing, Notation, Settlement</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="w-1 h-1 rounded-full bg-yellow-400 mt-1.5 flex-shrink-0"></span>
+                                <span><strong>PSE:</strong> Product Program OR Facility Type in PSE tab → PSE, else non-PSE</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="w-1 h-1 rounded-full bg-yellow-400 mt-1.5 flex-shrink-0"></span>
+                                <span><strong>Dates:</strong> DD/MM/YYYY, invalid text → null</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Post-Merge Calculations -->
+                <div class="rounded-2xl border border-amber-200 bg-white overflow-hidden">
+                    <div class="px-6 py-4 border-b border-amber-100 bg-amber-50">
+                        <h3 class="text-base font-semibold text-amber-900">Post-Merge Calculations</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- EMEA & APAC Calculations -->
+                            <div class="rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-4">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <span class="px-2 py-1 rounded-lg text-xs font-bold bg-blue-100 text-blue-800">EMEA</span>
+                                    <span class="px-2 py-1 rounded-lg text-xs font-bold bg-green-100 text-green-800">APAC</span>
+                                </div>
+                                <div class="space-y-2 text-xs">
+                                    <div class="bg-white rounded-lg p-2 border">
+                                        <span class="font-semibold">OSUC =</span> If Committed → Fac_Amount, else Direct_OS + Contingent_OS + PSE_OS
+                                    </div>
+                                    <div class="bg-white rounded-lg p-2 border">
+                                        <span class="font-semibold">Total_OS =</span> Direct_OS + Contingent_OS + PSE_OS
+                                    </div>
+                                    <div class="bg-white rounded-lg p-2 border">
+                                        <span class="font-semibold">Total_Unused_Exposure =</span> If Committed → Fac - (D+C+P), else 0
+                                    </div>
+                                    <div class="bg-white rounded-lg p-2 border">
+                                        <span class="font-semibold">Total_Undrawn =</span> Fac_Amount - (Direct_OS + Contingent_OS + PSE_OS)
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- NAM Calculations -->
+                            <div class="rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-4">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <span class="px-2 py-1 rounded-lg text-xs font-bold bg-yellow-100 text-yellow-800">NAM</span>
+                                </div>
+                                <div class="space-y-2 text-xs">
+                                    <div class="bg-white rounded-lg p-2 border">
+                                        <span class="font-semibold">Total_OS =</span> Direct_OS + Contingent_OS + PSE_OS
+                                    </div>
+                                    <div class="bg-white rounded-lg p-2 border">
+                                        <span class="font-semibold">Total_Undrawn =</span> Fac_Amount - (Direct_OS + Contingent_OS + PSE_OS)
+                                    </div>
+                                </div>
+                                <p class="text-[10px] text-gray-500 mt-3 italic">Note: OSUC and Total_Unused_Exposure use source values for NAM</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End Portfolio Data ETL Flow -->
+
+            <!-- ==================== COVENANTS ETL FLOW ==================== -->
+            <div x-show="selectedFlow === 'covenants'" class="space-y-6">
+                <div class="rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white overflow-hidden">
+                    <div class="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-success-50 to-transparent">
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-success-500 text-white shadow-lg shadow-success-500/30">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Covenants ETL Process</h3>
+                                <p class="text-sm text-gray-500">Consolidating regional covenants files into Covenants_tw.xlsx</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-6 overflow-x-auto">
+                        <!-- Connected Flow Diagram for Covenants -->
+                        <div class="flex flex-col items-center">
+                            <!-- Row 1: Source Files -->
+                            <div class="flex justify-center gap-8">
+                                <!-- NAM Source -->
+                                <div class="flow-card w-48 rounded-2xl border-2 border-yellow-200 bg-white p-4 shadow-sm hover:border-yellow-300">
+                                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Source</div>
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="px-2 py-1 rounded-lg text-xs font-bold bg-yellow-100 text-yellow-800">NAM</span>
+                                        <span class="text-sm font-semibold text-gray-800">Covenants</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-xs text-gray-600">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>
+                                        <span class="font-mono bg-yellow-50 px-1.5 py-0.5 rounded text-[10px]">1st Sheet (always)</span>
+                                    </div>
+                                </div>
+                                <!-- APAC Source -->
+                                <div class="flow-card w-48 rounded-2xl border-2 border-green-200 bg-white p-4 shadow-sm hover:border-green-300">
+                                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Source</div>
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="px-2 py-1 rounded-lg text-xs font-bold bg-green-100 text-green-800">APAC</span>
+                                        <span class="text-sm font-semibold text-gray-800">Covenants</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-xs text-gray-600">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
+                                        <span class="font-mono bg-green-50 px-1.5 py-0.5 rounded text-[10px]">1st Sheet (always)</span>
+                                    </div>
+                                </div>
+                                <!-- EMEA Source -->
+                                <div class="flow-card w-48 rounded-2xl border-2 border-blue-200 bg-white p-4 shadow-sm hover:border-blue-300">
+                                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Source</div>
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="px-2 py-1 rounded-lg text-xs font-bold bg-blue-100 text-blue-800">EMEA</span>
+                                        <span class="text-sm font-semibold text-gray-800">Covenants</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-xs text-gray-600">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                                        <span class="font-mono bg-blue-50 px-1.5 py-0.5 rounded text-[10px]">1st Sheet (always)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Connector: 3 sources merging down -->
+                            <div class="relative w-full flex justify-center" style="height: 50px;">
+                                <svg class="absolute" width="500" height="50" style="left: 50%; transform: translateX(-50%);">
+                                    <path d="M 75 0 L 75 25 L 250 25" class="flow-line" stroke="#9ca3af" stroke-width="2" fill="none"/>
+                                    <path d="M 250 0 L 250 25" class="flow-line" stroke="#9ca3af" stroke-width="2" fill="none"/>
+                                    <path d="M 425 0 L 425 25 L 250 25" class="flow-line" stroke="#9ca3af" stroke-width="2" fill="none"/>
+                                    <path d="M 250 25 L 250 50" class="flow-line" stroke="#9ca3af" stroke-width="2" fill="none"/>
+                                    <circle cx="250" cy="25" r="5" class="flow-dot" fill="#6b7280"/>
+                                </svg>
+                            </div>
+
+                            <!-- Row 2: Extract Step -->
+                            <div class="flow-card rounded-2xl border-2 border-blue-300 bg-gradient-to-br from-blue-50 to-blue-100 p-5 shadow-lg w-80">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500 text-white font-bold shadow">E</div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-blue-900">EXTRACT</h4>
+                                        <p class="text-xs text-blue-600">Read First Sheet</p>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-600">Read covenant data from <span class="font-semibold">first sheet</span> of each regional Excel file (New Covenants Module export)</p>
+                            </div>
+
+                            <!-- Connector: Down arrow -->
+                            <div class="flex flex-col items-center py-1">
+                                <div class="connector-vertical h-8"></div>
+                                <div class="connector-dot w-2 h-2 rounded-full bg-gray-500"></div>
+                            </div>
+
+                            <!-- Row 3: Transform Steps -->
+                            <div class="flex justify-center gap-4">
+                                <!-- Column Mapping -->
+                                <div class="flow-card w-48 rounded-2xl border-2 border-purple-300 bg-gradient-to-br from-purple-50 to-purple-100 p-3 shadow-lg">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-purple-500 text-white font-bold text-xs shadow">T1</div>
+                                        <h4 class="text-xs font-bold text-purple-900">Column Mapping</h4>
+                                    </div>
+                                    <ul class="text-[10px] text-gray-600 space-y-0.5">
+                                        <li class="flex items-center gap-1">
+                                            <span class="w-1 h-1 rounded-full bg-purple-400"></span>
+                                            Map 26 columns
+                                        </li>
+                                        <li class="flex items-center gap-1">
+                                            <span class="w-1 h-1 rounded-full bg-purple-400"></span>
+                                            As Of Date → Report_Date
+                                        </li>
+                                        <li class="flex items-center gap-1">
+                                            <span class="w-1 h-1 rounded-full bg-purple-400"></span>
+                                            Standardize names
+                                        </li>
+                                    </ul>
+                                </div>
+                                <!-- Date Formatting -->
+                                <div class="flow-card w-48 rounded-2xl border-2 border-cyan-300 bg-gradient-to-br from-cyan-50 to-cyan-100 p-3 shadow-lg">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-500 text-white font-bold text-xs shadow">T2</div>
+                                        <h4 class="text-xs font-bold text-cyan-900">Date Format</h4>
+                                    </div>
+                                    <p class="text-[10px] text-gray-600 mb-1">Standardize to:</p>
+                                    <div class="flex items-center justify-center mb-1">
+                                        <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white border border-cyan-200 text-cyan-700 font-semibold">DD/MM/YYYY</span>
+                                    </div>
+                                    <div class="text-[9px] text-gray-500">
+                                        Covenant Due Date, Deferred Date, 45 Days Past Due
+                                    </div>
+                                </div>
+                                <!-- Status Normalization -->
+                                <div class="flow-card w-48 rounded-2xl border-2 border-orange-300 bg-gradient-to-br from-orange-50 to-orange-100 p-3 shadow-lg">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-500 text-white font-bold text-xs shadow">T3</div>
+                                        <h4 class="text-xs font-bold text-orange-900">Status Norm</h4>
+                                    </div>
+                                    <p class="text-[10px] text-gray-600 mb-1">Normalize values:</p>
+                                    <div class="space-y-1 text-[9px]">
+                                        <div class="flex items-center gap-1">
+                                            <span class="font-mono bg-white px-1 rounded border border-orange-200 text-orange-600">Past_Due</span>
+                                            <span class="text-gray-400">→</span>
+                                            <span class="font-semibold text-orange-700">Past Due</span>
+                                        </div>
+                                        <div class="flex items-center gap-1">
+                                            <span class="font-mono bg-white px-1 rounded border border-orange-200 text-orange-600">Coming_Due</span>
+                                            <span class="text-gray-400">→</span>
+                                            <span class="font-semibold text-orange-700">Coming Due</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Filter -->
+                                <div class="flow-card w-48 rounded-2xl border-2 border-red-300 bg-gradient-to-br from-red-50 to-red-100 p-3 shadow-lg">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-red-500 text-white font-bold text-xs shadow">T4</div>
+                                        <h4 class="text-xs font-bold text-red-900">Filter Rows</h4>
+                                    </div>
+                                    <p class="text-[10px] text-gray-600 mb-1">Remove rows where:</p>
+                                    <div class="flex flex-wrap gap-1">
+                                        <span class="px-1 py-0.5 rounded text-[9px] font-mono bg-white border border-red-200 text-red-600">Internal Cov*</span>
+                                    </div>
+                                    <p class="text-[9px] text-gray-500 mt-1">in Covenant Description</p>
+                                </div>
+                            </div>
+
+                            <!-- Connector: 4 transforms merging down -->
+                            <div class="relative w-full flex justify-center" style="height: 50px;">
+                                <svg class="absolute" width="650" height="50" style="left: 50%; transform: translateX(-50%);">
+                                    <path d="M 85 0 L 85 25 L 325 25" class="flow-line" stroke="#9ca3af" stroke-width="2" fill="none"/>
+                                    <path d="M 230 0 L 230 25 L 325 25" class="flow-line" stroke="#9ca3af" stroke-width="2" fill="none"/>
+                                    <path d="M 420 0 L 420 25 L 325 25" class="flow-line" stroke="#9ca3af" stroke-width="2" fill="none"/>
+                                    <path d="M 565 0 L 565 25 L 325 25" class="flow-line" stroke="#9ca3af" stroke-width="2" fill="none"/>
+                                    <path d="M 325 25 L 325 50" class="flow-line" stroke="#9ca3af" stroke-width="2" fill="none"/>
+                                    <circle cx="325" cy="25" r="5" class="flow-dot" fill="#6b7280"/>
+                                </svg>
+                            </div>
+
+                            <!-- Row 4: Load Step -->
+                            <div class="flow-card rounded-2xl border-2 border-green-300 bg-gradient-to-br from-green-50 to-green-100 p-5 shadow-lg w-80">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500 text-white font-bold shadow">L</div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-green-900">LOAD</h4>
+                                        <p class="text-xs text-green-600">Upload to Confluence</p>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-600">Merge all regional covenants data and upload <span class="font-mono font-semibold">Covenants_tw.xlsx</span></p>
+                            </div>
+
+                            <!-- Connector: Down arrow with arrowhead -->
+                            <div class="flex flex-col items-center py-1">
+                                <div class="connector-vertical h-6"></div>
+                                <svg class="w-4 h-4 text-gray-500 connector-dot" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 16l-6-6h12l-6 6z"/>
+                                </svg>
+                            </div>
+
+                            <!-- Output -->
+                            <div class="flow-card rounded-2xl border-2 border-success-300 bg-white p-5 shadow-xl">
+                                <div class="flex items-center gap-4">
+                                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-success-500 to-success-700 text-white shadow-lg">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-gray-900">Covenants_tw.xlsx</h4>
+                                        <p class="text-xs text-gray-500">Consolidated Covenants Data (26 columns)</p>
+                                        <p class="text-xs text-success-600 font-medium mt-1">Page ID: <span class="font-mono" x-text="$root.confluenceConfig?.pageId || '3229979875'"></span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column Mapping Table -->
+                <div class="rounded-2xl border border-gray-200 bg-white overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+                        <h3 class="text-base font-semibold text-gray-900">Column Mapping Reference</h3>
+                    </div>
+                    <div class="p-6 overflow-x-auto">
+                        <table class="min-w-full text-xs">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="px-3 py-2.5 text-left font-semibold text-gray-700 border-b">Source Column (Reports)</th>
+                                    <th class="px-3 py-2.5 text-left font-semibold text-success-700 border-b bg-success-50">Output Column (Covenants_tw.xlsx)</th>
+                                    <th class="px-3 py-2.5 text-left font-semibold text-gray-600 border-b">Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <tr class="hover:bg-gray-50 bg-cyan-50/50">
+                                    <td class="px-3 py-2 font-mono">As Of Date</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">Report_Date</td>
+                                    <td class="px-3 py-2 text-cyan-600 text-[10px]">→ DD/MM/YYYY</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono">Region</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">Region</td>
+                                    <td class="px-3 py-2 text-gray-500 text-[10px]">-</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono">Originating Unit</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">Origination_Unit</td>
+                                    <td class="px-3 py-2 text-gray-500 text-[10px]">-</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono">Investment Finance Underwriting Team Lead</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">Underwriting_Team_Lead</td>
+                                    <td class="px-3 py-2 text-gray-500 text-[10px]">-</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono">Investment Finance Lead Underwriter</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">Lead_Underwriter</td>
+                                    <td class="px-3 py-2 text-gray-500 text-[10px]">-</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono">Investment Finance Product Underwriter</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">Product_Underwriter</td>
+                                    <td class="px-3 py-2 text-gray-500 text-[10px]">-</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono">OU Expense Code</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">OU_Expense_Code</td>
+                                    <td class="px-3 py-2 text-gray-500 text-[10px]">-</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono">CU Expense Code</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">CU_Expense_Code</td>
+                                    <td class="px-3 py-2 text-gray-500 text-[10px]">-</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono">Relationship ID</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">Relationship_ID</td>
+                                    <td class="px-3 py-2 text-gray-500 text-[10px]">-</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono">Relationship Name</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">Relationship_Name</td>
+                                    <td class="px-3 py-2 text-gray-500 text-[10px]">-</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono">Borrowers Name</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">Borrowers_Name</td>
+                                    <td class="px-3 py-2 text-gray-500 text-[10px]">-</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono">CA Number</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">CA_Number</td>
+                                    <td class="px-3 py-2 text-gray-500 text-[10px]">-</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono">Facility Number</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">Facility_Number</td>
+                                    <td class="px-3 py-2 text-gray-500 text-[10px]">-</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono">Product Program Name</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">Product_Program_Name</td>
+                                    <td class="px-3 py-2 text-gray-500 text-[10px]">-</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono">Facility Type</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">Facility_Type</td>
+                                    <td class="px-3 py-2 text-gray-500 text-[10px]">-</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono">Covenant Number</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">Covenant_Number</td>
+                                    <td class="px-3 py-2 text-gray-500 text-[10px]">-</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono">Periodicity / Frequency</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">Periodic_Frequency</td>
+                                    <td class="px-3 py-2 text-gray-500 text-[10px]">-</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 bg-cyan-50/50">
+                                    <td class="px-3 py-2 font-mono">Covenant Due Date</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">Covenant_Due_Date</td>
+                                    <td class="px-3 py-2 text-cyan-600 text-[10px]">→ DD/MM/YYYY</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 bg-cyan-50/50">
+                                    <td class="px-3 py-2 font-mono">Covenant Deferred Date</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">Covenant_Deferred_Date</td>
+                                    <td class="px-3 py-2 text-cyan-600 text-[10px]">→ DD/MM/YYYY</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono">No of Days Past Due</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">Days_Past_Due</td>
+                                    <td class="px-3 py-2 text-gray-500 text-[10px]">-</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 bg-orange-50/50">
+                                    <td class="px-3 py-2 font-mono">Coming Due / Past Due</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">Coming_Due_Past_Due</td>
+                                    <td class="px-3 py-2 text-orange-600 text-[10px]">Remove underscores (Past_Due → Past Due)</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono">Past Due Category</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">Past_Due_Category</td>
+                                    <td class="px-3 py-2 text-gray-500 text-[10px]">-</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 bg-red-50/50">
+                                    <td class="px-3 py-2 font-mono">Covenant Description</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">Covenant_Description</td>
+                                    <td class="px-3 py-2 text-red-600 text-[10px]">Filter: Remove "Internal Cov*" rows</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono">Covenant Remarks</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">Covenant_Remarks</td>
+                                    <td class="px-3 py-2 text-gray-500 text-[10px]">-</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 bg-cyan-50/50">
+                                    <td class="px-3 py-2 font-mono">45 Days Past Due Date</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">45_Days_Past_Due_Date</td>
+                                    <td class="px-3 py-2 text-cyan-600 text-[10px]">→ DD/MM/YYYY</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-3 py-2 font-mono">Control Unit</td>
+                                    <td class="px-3 py-2 font-mono text-success-700">Control_Unit</td>
+                                    <td class="px-3 py-2 text-gray-500 text-[10px]">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <!-- Transformation Notes -->
+                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Date Formatting Note -->
+                            <div class="p-4 rounded-xl bg-cyan-50 border border-cyan-200">
+                                <div class="flex items-start gap-3">
+                                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500 text-white flex-shrink-0">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-cyan-900 mb-1">Date Formatting (T2)</h4>
+                                        <p class="text-xs text-cyan-700">All date columns standardized to <span class="font-mono font-semibold bg-white px-1.5 py-0.5 rounded border border-cyan-300">DD/MM/YYYY</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Filter Note -->
+                            <div class="p-4 rounded-xl bg-red-50 border border-red-200">
+                                <div class="flex items-start gap-3">
+                                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500 text-white flex-shrink-0">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-red-900 mb-1">Row Filtering (T4)</h4>
+                                        <p class="text-xs text-red-700">Rows where <span class="font-mono font-semibold">Covenant Description</span> starts with <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-red-300">"Internal Cov"</span> are removed</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End Covenants ETL Flow -->
+
+        </div>
+        <!-- End ETL Flow Tab -->
+
     </div>
 
     <script>
@@ -1085,21 +2375,65 @@
                             mapping: null
                         };
 
-                        // Process portfolio files
+                        // Load PSE mapping data first if mapping file exists
+                        let pseMappingData = null;
+                        if (this.files.mapping) {
+                            this.loadingMessage = 'Loading Product Mapping...';
+                            pseMappingData = await this.loadPSEMappingData(this.files.mapping);
+                        }
+
+                        // Process portfolio files with ETL logic
+                        let allPortfolioData = [];
                         for (const [region, file] of Object.entries(this.files.portfolio)) {
                             if (file) {
-                                this.loadingMessage = `Processing Portfolio ${region.toUpperCase()}...`;
-                                const data = await this.readExcelFile(file);
-                                processedData.portfolio.push({ region, data });
+                                this.loadingMessage = `Processing Portfolio ${region.toUpperCase()} with ETL...`;
+                                const data = await this.processPortfolioFile(file, region, pseMappingData);
+                                allPortfolioData = [...allPortfolioData, ...data];
+                                processedData.portfolio.push({ region, data, rowCount: data.length });
                             }
                         }
 
-                        // Process covenants files
+                        // Apply post-merge calculations
+                        if (allPortfolioData.length > 0) {
+                            this.loadingMessage = 'Applying Portfolio calculations...';
+                            allPortfolioData = this.applyPortfolioCalculations(allPortfolioData);
+                        }
+
+                        // Store consolidated Portfolio data
+                        processedData.portfolioConsolidated = allPortfolioData;
+
+                        // Upload consolidated Portfolio file to Confluence if we have data
+                        if (allPortfolioData.length > 0) {
+                            this.loadingMessage = 'Uploading Portfolio_tw.xlsx to Confluence...';
+                            const uploadSuccess = await this.uploadPortfolioToConfluence(allPortfolioData);
+                            if (uploadSuccess) {
+                                this.showNotification(`Portfolio_tw.xlsx uploaded to Confluence (${allPortfolioData.length} records)`, 'success');
+                            } else {
+                                this.showNotification('Portfolio processed but Confluence upload failed - data saved locally', 'warning');
+                            }
+                        }
+
+                        // Process covenants files with ETL logic
+                        let allCovenantsData = [];
                         for (const [region, file] of Object.entries(this.files.covenants)) {
                             if (file) {
-                                this.loadingMessage = `Processing Covenants ${region.toUpperCase()}...`;
-                                const data = await this.readExcelFile(file);
-                                processedData.covenants.push({ region, data });
+                                this.loadingMessage = `Processing Covenants ${region.toUpperCase()} with ETL...`;
+                                const data = await this.processCovenantFile(file, region);
+                                allCovenantsData = [...allCovenantsData, ...data];
+                                processedData.covenants.push({ region, data, rowCount: data.length });
+                            }
+                        }
+                        // Store consolidated Covenants data
+                        processedData.covenantsConsolidated = allCovenantsData;
+
+                        // Upload consolidated Covenants file to Confluence if we have data
+                        if (allCovenantsData.length > 0) {
+                            this.loadingMessage = 'Uploading Covenants_tw.xlsx to Confluence...';
+                            const uploadSuccess = await this.uploadCovenantsToConfluence(allCovenantsData);
+                            if (uploadSuccess) {
+                                this.showNotification(`Covenants_tw.xlsx uploaded to Confluence (${allCovenantsData.length} records)`, 'success');
+                            } else {
+                                this.showNotification('Covenants processed but Confluence upload failed - data saved locally', 'warning');
                             }
                         }
 
@@ -1149,9 +2483,7 @@
                         this.isLoading = false;
                         
                         // Show success message
-                        const totalRecords = allCCMData.length + 
-                            processedData.portfolio.reduce((sum, p) => sum + (p.data?.length || 0), 0) +
-                            processedData.covenants.reduce((sum, c) => sum + (c.data?.length || 0), 0);
+                        const totalRecords = allCCMData.length + allCovenantsData.length + allPortfolioData.length;
                         
                         this.showNotification(`Processing complete! ${totalRecords} total records processed.`, 'success');
                         
@@ -1159,9 +2491,9 @@
                         this.processingComplete = true;
                         this.processingResult = {
                             success: true,
-                            ccmRecords: allCCMData.length,
-                            portfolioFiles: processedData.portfolio.length,
-                            covenantsFiles: processedData.covenants.length
+                            portfolioRecords: allPortfolioData.length,
+                            covenantsRecords: allCovenantsData.length,
+                            ccmRecords: allCCMData.length
                         };
 
                     } catch (error) {
@@ -1268,6 +2600,571 @@
                     this.showNotification(`Downloaded ${filename}`, 'success');
                 },
 
+                // ==================== COVENANTS ETL FUNCTIONS ====================
+                
+                // Upload consolidated Covenants data to Confluence as Covenants_tw.xlsx
+                async uploadCovenantsToConfluence(covenantsData) {
+                    try {
+                        // Convert data to Excel workbook
+                        const workbook = XLSX.utils.book_new();
+                        const worksheet = XLSX.utils.json_to_sheet(covenantsData);
+                        
+                        // Set column widths for better readability
+                        worksheet['!cols'] = [
+                            { wch: 12 },  // Report_Date
+                            { wch: 8 },   // Region
+                            { wch: 18 },  // Origination_Unit
+                            { wch: 22 },  // Underwriting_Team_Lead
+                            { wch: 20 },  // Lead_Underwriter
+                            { wch: 20 },  // Product_Underwriter
+                            { wch: 15 },  // OU_Expense_Code
+                            { wch: 15 },  // CU_Expense_Code
+                            { wch: 15 },  // Relationship_ID
+                            { wch: 25 },  // Relationship_Name
+                            { wch: 25 },  // Borrowers_Name
+                            { wch: 12 },  // CA_Number
+                            { wch: 15 },  // Facility_Number
+                            { wch: 25 },  // Product_Program_Name
+                            { wch: 15 },  // Facility_Type
+                            { wch: 15 },  // Covenant_Number
+                            { wch: 18 },  // Periodic_Frequency
+                            { wch: 15 },  // Covenant_Due_Date
+                            { wch: 18 },  // Covenant_Deferred_Date
+                            { wch: 12 },  // Days_Past_Due
+                            { wch: 18 },  // Coming_Due_Past_Due
+                            { wch: 18 },  // Past_Due_Category
+                            { wch: 40 },  // Covenant_Description
+                            { wch: 30 },  // Covenant_Remarks
+                            { wch: 18 },  // 45_Days_Past_Due_Date
+                            { wch: 15 }   // Control_Unit
+                        ];
+                        
+                        XLSX.utils.book_append_sheet(workbook, worksheet, 'Covenants Data');
+                        
+                        // Convert to binary
+                        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                        const blob = new Blob([excelBuffer], { 
+                            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+                        });
+                        
+                        // First check if attachment already exists
+                        const attachmentsUrl = `${this.confluenceConfig.baseUrl}/rest/api/content/${this.confluenceConfig.pageId}/child/attachment?filename=${encodeURIComponent(this.confluenceConfig.covenantsFileName)}`;
+                        
+                        const attachmentsResponse = await fetch(attachmentsUrl, {
+                            headers: {
+                                'X-Atlassian-Token': 'no-check'
+                            }
+                        });
+                        
+                        const attachmentsData = await attachmentsResponse.json();
+                        
+                        // Get attachment ID if exists
+                        let attachmentId = null;
+                        if (attachmentsData.results && attachmentsData.results.length > 0) {
+                            attachmentId = attachmentsData.results[0].id;
+                        }
+                        
+                        // Create FormData for upload
+                        const formData = new FormData();
+                        formData.append('file', blob, this.confluenceConfig.covenantsFileName);
+                        
+                        // Build URL - use /data endpoint for updating existing file
+                        const uploadUrl = attachmentId 
+                            ? `${this.confluenceConfig.baseUrl}/rest/api/content/${this.confluenceConfig.pageId}/child/attachment/${attachmentId}/data`
+                            : `${this.confluenceConfig.baseUrl}/rest/api/content/${this.confluenceConfig.pageId}/child/attachment`;
+                        
+                        console.log('Uploading Covenants_tw.xlsx to Confluence:', uploadUrl);
+                        console.log('Attachment ID:', attachmentId || 'New file');
+                        
+                        const response = await fetch(uploadUrl, {
+                            method: 'POST',
+                            headers: {
+                                'X-Atlassian-Token': 'no-check'
+                            },
+                            body: formData
+                        });
+                        
+                        if (response.ok) {
+                            console.log('Successfully uploaded Covenants_tw.xlsx to Confluence');
+                            return true;
+                        } else {
+                            const errorText = await response.text();
+                            console.error('Confluence upload failed:', response.status, errorText);
+                            return false;
+                        }
+                    } catch (error) {
+                        console.error('Error uploading Covenants to Confluence:', error);
+                        return false;
+                    }
+                },
+
+                // Process Covenant file with ETL logic
+                async processCovenantFile(file, region) {
+                    const workbook = await this.readExcelWorkbook(file);
+                    
+                    // Always read from first sheet
+                    const firstSheetName = workbook.SheetNames[0];
+                    const rawData = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName]);
+                    
+                    console.log(`Covenants ${region.toUpperCase()} - First sheet: ${firstSheetName}, rows: ${rawData.length}`);
+
+                    // Transform data to standard format
+                    const transformedData = rawData
+                        .filter(row => !this.isInternalCovenant(row)) // Filter out Internal Cov* rows
+                        .filter(row => Object.keys(row).length > 0) // Filter empty rows
+                        .map(row => this.mapCovenantRow(row, region));
+
+                    return transformedData;
+                },
+
+                // Check if row is an internal covenant (starts with "Internal Cov")
+                isInternalCovenant(row) {
+                    const description = row['Covenant Description'] || row['CovenantDescription'] || '';
+                    return String(description).trim().toLowerCase().startsWith('internal cov');
+                },
+
+                // Normalize Coming Due/Past Due values (remove underscores)
+                normalizeComingDuePastDue(value) {
+                    if (!value) return '';
+                    const str = String(value).trim();
+                    // Convert "Past_Due" to "Past Due" and "Coming_Due" to "Coming Due"
+                    return str
+                        .replace(/Past_Due/gi, 'Past Due')
+                        .replace(/Coming_Due/gi, 'Coming Due');
+                },
+
+                // Map Covenant row to standard output format
+                mapCovenantRow(row, region) {
+                    return {
+                        Report_Date: this.formatDate(row['As Of Date'] || row['AsOfDate'] || ''),
+                        Region: row['Region'] || region.toUpperCase(),
+                        Origination_Unit: row['Originating Unit'] || row['OriginatingUnit'] || '',
+                        Underwriting_Team_Lead: row['Investment Finance Underwriting Team Lead'] || row['InvestmentFinanceUnderwritingTeamLead'] || '',
+                        Lead_Underwriter: row['Investment Finance Lead Underwriter'] || row['InvestmentFinanceLeadUnderwriter'] || '',
+                        Product_Underwriter: row['Investment Finance Product Underwriter'] || row['InvestmentFinanceProductUnderwriter'] || '',
+                        OU_Expense_Code: row['OU Expense Code'] || row['OUExpenseCode'] || '',
+                        CU_Expense_Code: row['CU Expense Code'] || row['CUExpenseCode'] || '',
+                        Relationship_ID: row['Relationship ID'] || row['RelationshipID'] || '',
+                        Relationship_Name: row['Relationship Name'] || row['RelationshipName'] || '',
+                        Borrowers_Name: row['Borrowers Name'] || row['BorrowersName'] || '',
+                        CA_Number: row['CA Number'] || row['CANumber'] || '',
+                        Facility_Number: row['Facility Number'] || row['FacilityNumber'] || '',
+                        Product_Program_Name: row['Product Program Name'] || row['ProductProgramName'] || '',
+                        Facility_Type: row['Facility Type'] || row['FacilityType'] || '',
+                        Covenant_Number: row['Covenant Number'] || row['CovenantNumber'] || '',
+                        Periodic_Frequency: row['Periodicity / Frequency'] || row['Periodicity/Frequency'] || row['PeriodicityFrequency'] || '',
+                        Covenant_Due_Date: this.formatDate(row['Covenant Due Date'] || row['CovenantDueDate'] || ''),
+                        Covenant_Deferred_Date: this.formatDate(row['Covenant Deferred Date'] || row['CovenantDeferredDate'] || ''),
+                        Days_Past_Due: row['No of Days Past Due'] || row['NoofDaysPastDue'] || row['DaysPastDue'] || '',
+                        Coming_Due_Past_Due: this.normalizeComingDuePastDue(row['Coming Due / Past Due'] || row['ComingDue/PastDue'] || row['ComingDuePastDue'] || ''),
+                        Past_Due_Category: row['Past Due Category'] || row['PastDueCategory'] || '',
+                        Covenant_Description: row['Covenant Description'] || row['CovenantDescription'] || '',
+                        Covenant_Remarks: row['Covenant Remarks'] || row['CovenantRemarks'] || '',
+                        '45_Days_Past_Due_Date': this.formatDate(row['45 Days Past Due Date'] || row['45DaysPastDueDate'] || ''),
+                        Control_Unit: row['Control Unit'] || row['ControlUnit'] || ''
+                    };
+                },
+
+                // ==================== END COVENANTS ETL FUNCTIONS ====================
+
+                // ==================== PORTFOLIO ETL FUNCTIONS ====================
+
+                // Load PSE mapping data from Product_Mapping.xlsx
+                async loadPSEMappingData(mappingFile) {
+                    try {
+                        const workbook = await this.readExcelWorkbook(mappingFile);
+                        const pseSheet = workbook.SheetNames.find(name => 
+                            name.toLowerCase().includes('pse')
+                        );
+                        
+                        if (!pseSheet) {
+                            console.warn('PSE sheet not found in mapping file');
+                            return { facilityTypes: [], productPrograms: [] };
+                        }
+                        
+                        const pseData = XLSX.utils.sheet_to_json(workbook.Sheets[pseSheet]);
+                        
+                        // Extract unique Facility_Type and Product_Program values
+                        const facilityTypes = [...new Set(pseData
+                            .map(row => String(row['Facility_Type'] || row['Facility Type'] || '').trim())
+                            .filter(v => v)
+                        )];
+                        
+                        const productPrograms = [...new Set(pseData
+                            .map(row => String(row['Product_Program'] || row['Product Program'] || '').trim())
+                            .filter(v => v)
+                        )];
+                        
+                        console.log('PSE Mapping loaded:', { facilityTypes: facilityTypes.length, productPrograms: productPrograms.length });
+                        return { facilityTypes, productPrograms };
+                    } catch (error) {
+                        console.error('Error loading PSE mapping:', error);
+                        return { facilityTypes: [], productPrograms: [] };
+                    }
+                },
+
+                // Determine PSE or non-PSE based on mapping data
+                determinePSE(facilityType, productProgram, region, pseMappingData) {
+                    if (!pseMappingData) return 'non-PSE';
+                    
+                    const facilityTypeStr = String(facilityType || '').trim();
+                    const productProgramStr = String(productProgram || '').trim();
+                    
+                    // For NAM: check both Product Program and Facility Type
+                    if (region === 'nam') {
+                        if (productProgramStr && pseMappingData.productPrograms.some(p => 
+                            p.toLowerCase() === productProgramStr.toLowerCase()
+                        )) {
+                            return 'PSE';
+                        }
+                    }
+                    
+                    // For all regions: check Facility Type
+                    if (facilityTypeStr && pseMappingData.facilityTypes.some(f => 
+                        f.toLowerCase() === facilityTypeStr.toLowerCase()
+                    )) {
+                        return 'PSE';
+                    }
+                    
+                    return 'non-PSE';
+                },
+
+                // Upload consolidated Portfolio data to Confluence
+                async uploadPortfolioToConfluence(portfolioData) {
+                    try {
+                        const workbook = XLSX.utils.book_new();
+                        const worksheet = XLSX.utils.json_to_sheet(portfolioData);
+                        
+                        // Set column widths
+                        worksheet['!cols'] = [
+                            { wch: 12 },  // Report_Date
+                            { wch: 8 },   // Region
+                            { wch: 15 },  // Facility_ID
+                            { wch: 18 },  // Parent_Facility_ID
+                            { wch: 20 },  // Product_Program
+                            { wch: 20 },  // Product_Sub_Program
+                            { wch: 15 },  // Management_Status
+                            { wch: 18 },  // Facility_Type
+                            { wch: 18 },  // Committed_Uncommitted
+                            { wch: 15 },  // Risk_Category
+                            { wch: 15 },  // Relationship_ID
+                            { wch: 25 },  // Relationship_Name
+                            { wch: 12 },  // CAID
+                            { wch: 22 },  // Lead_Underwriter
+                            { wch: 22 },  // Underwriting_Team_Lead
+                            { wch: 15 },  // Control_Unit
+                            { wch: 15 },  // Fac_Amount
+                            { wch: 15 },  // Direct_OS
+                            { wch: 15 },  // Contingent_OS
+                            { wch: 15 },  // PSE_OS
+                            { wch: 18 },  // Total_Comm_Exposure
+                            { wch: 15 },  // Maturity_Date
+                            { wch: 22 },  // Product_Underwriter
+                            { wch: 18 },  // CA_Expiration_Date
+                            { wch: 18 },  // Credit_Classification
+                            { wch: 12 },  // PSE_non_PSE
+                            { wch: 20 },  // Facility_First_Approval_Date
+                            { wch: 15 },  // Origination_Date
+                            { wch: 15 },  // OSUC
+                            { wch: 15 },  // Total_OS
+                            { wch: 18 },  // Total_Unused_Exposure
+                            { wch: 15 },  // Total_Undrawn
+                            { wch: 12 }   // ROTCE
+                        ];
+                        
+                        XLSX.utils.book_append_sheet(workbook, worksheet, 'Portfolio Data');
+                        
+                        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                        const blob = new Blob([excelBuffer], { 
+                            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+                        });
+                        
+                        const attachmentsUrl = `${this.confluenceConfig.baseUrl}/rest/api/content/${this.confluenceConfig.pageId}/child/attachment?filename=${encodeURIComponent(this.confluenceConfig.portfolioFileName)}`;
+                        
+                        const attachmentsResponse = await fetch(attachmentsUrl, {
+                            headers: { 'X-Atlassian-Token': 'no-check' }
+                        });
+                        
+                        const attachmentsData = await attachmentsResponse.json();
+                        
+                        let attachmentId = null;
+                        if (attachmentsData.results && attachmentsData.results.length > 0) {
+                            attachmentId = attachmentsData.results[0].id;
+                        }
+                        
+                        const formData = new FormData();
+                        formData.append('file', blob, this.confluenceConfig.portfolioFileName);
+                        
+                        const uploadUrl = attachmentId 
+                            ? `${this.confluenceConfig.baseUrl}/rest/api/content/${this.confluenceConfig.pageId}/child/attachment/${attachmentId}/data`
+                            : `${this.confluenceConfig.baseUrl}/rest/api/content/${this.confluenceConfig.pageId}/child/attachment`;
+                        
+                        console.log('Uploading Portfolio_tw.xlsx to Confluence:', uploadUrl);
+                        
+                        const response = await fetch(uploadUrl, {
+                            method: 'POST',
+                            headers: { 'X-Atlassian-Token': 'no-check' },
+                            body: formData
+                        });
+                        
+                        if (response.ok) {
+                            console.log('Successfully uploaded Portfolio_tw.xlsx to Confluence');
+                            return true;
+                        } else {
+                            const errorText = await response.text();
+                            console.error('Confluence upload failed:', response.status, errorText);
+                            return false;
+                        }
+                    } catch (error) {
+                        console.error('Error uploading Portfolio to Confluence:', error);
+                        return false;
+                    }
+                },
+
+                // Process Portfolio file with ETL logic
+                async processPortfolioFile(file, region, pseMappingData) {
+                    const workbook = await this.readExcelWorkbook(file);
+                    const firstSheetName = workbook.SheetNames[0];
+                    const rawData = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName]);
+                    
+                    console.log(`Portfolio ${region.toUpperCase()} - First sheet: ${firstSheetName}, rows: ${rawData.length}`);
+
+                    let transformedData = [];
+
+                    if (region === 'emea') {
+                        transformedData = rawData
+                            .filter(row => this.hasValidFacID(row)) // Filter: Fac ID not null/empty
+                            .map(row => this.mapPortfolioRowEMEA(row, pseMappingData));
+                    } else if (region === 'apac') {
+                        transformedData = rawData
+                            .map(row => this.mapPortfolioRowAPAC(row, pseMappingData));
+                    } else if (region === 'nam') {
+                        transformedData = rawData
+                            .filter(row => !this.isExcludedRiskCategory(row)) // Filter OUT Clearing, Notation, Settlement
+                            .map(row => this.mapPortfolioRowNAM(row, pseMappingData));
+                    }
+
+                    return transformedData;
+                },
+
+                // Check if Fac ID is valid (not null/empty) - for EMEA filter
+                hasValidFacID(row) {
+                    const facId = row['Fac ID'] || row['FacID'] || row['Facility ID'] || '';
+                    return String(facId).trim() !== '';
+                },
+
+                // Check if Risk Category should be excluded - for NAM filter
+                isExcludedRiskCategory(row) {
+                    const riskCategory = String(row['Risk Category'] || '').trim().toLowerCase();
+                    const excludedCategories = ['clearing', 'notation', 'settlement'];
+                    return excludedCategories.includes(riskCategory);
+                },
+
+                // Determine Underwriting Team Lead for EMEA
+                getEMEAUnderwritingTeamLead(leadUnderwriter) {
+                    const kristopherPalmerTeam = [
+                        'simpson harry', 'palmer kristopher', 'kadeli irida', 'graeme-wilson dom'
+                    ];
+                    const leadUW = String(leadUnderwriter || '').trim().toLowerCase();
+                    
+                    if (kristopherPalmerTeam.some(name => leadUW.includes(name) || name.includes(leadUW))) {
+                        return 'Kristopher Palmer';
+                    }
+                    return 'Ponniah Raj';
+                },
+
+                // Format date with handling for invalid values like DEMAND
+                formatDateSafe(dateValue) {
+                    if (!dateValue) return '';
+                    
+                    const str = String(dateValue).trim().toUpperCase();
+                    
+                    // Check for known invalid date texts
+                    const invalidTexts = ['DEMAND', 'ON DEMAND', 'N/A', 'TBD', 'TBC', '-', 'OPEN'];
+                    if (invalidTexts.some(t => str.includes(t))) {
+                        return '';
+                    }
+                    
+                    // Try to format the date
+                    const formatted = this.formatDate(dateValue);
+                    
+                    // If formatDate returned the original string (couldn't parse), return empty
+                    if (formatted === String(dateValue)) {
+                        // Check if it looks like a valid date format
+                        if (!/\d/.test(formatted)) {
+                            return '';
+                        }
+                    }
+                    
+                    return formatted;
+                },
+
+                // Parse numeric value safely
+                parseNumeric(value) {
+                    if (value === null || value === undefined || value === '') return 0;
+                    const num = parseFloat(String(value).replace(/[,$]/g, ''));
+                    return isNaN(num) ? 0 : num;
+                },
+
+                // Map EMEA Portfolio row
+                mapPortfolioRowEMEA(row, pseMappingData) {
+                    const facilityType = row['Facility Type'] || '';
+                    const leadUnderwriter = row['Investment Finance Lead Underwriter'] || '';
+                    const committedFacility = String(row['Commited Facility'] || row['Committed Facility'] || '').toUpperCase();
+                    
+                    return {
+                        Report_Date: this.formatDate(row['As Of Date'] || ''),
+                        Region: 'EMEA',
+                        Facility_ID: row['Fac ID'] || '',
+                        Parent_Facility_ID: row['Parent Facility ID'] || '',
+                        Product_Program: '',
+                        Product_Sub_Program: '',
+                        Management_Status: row['DM/CM Flag'] || '',
+                        Facility_Type: facilityType,
+                        Committed_Uncommitted: committedFacility === 'YES' ? 'Committed' : 'Uncommitted',
+                        Risk_Category: '',
+                        Relationship_ID: row['Relationship ID'] || '',
+                        Relationship_Name: row['EG Title'] || '',
+                        CAID: row['CA ID'] || '',
+                        Lead_Underwriter: leadUnderwriter,
+                        Underwriting_Team_Lead: this.getEMEAUnderwritingTeamLead(leadUnderwriter),
+                        Control_Unit: row['Control Unit'] || '',
+                        Fac_Amount: this.parseNumeric(row['Approved Line Amount']),
+                        Direct_OS: this.parseNumeric(row['Total Direct OS']),
+                        Contingent_OS: this.parseNumeric(row['Total Cont OS']),
+                        PSE_OS: this.parseNumeric(row['Total FX / Derivatives OS']),
+                        Total_Comm_Exposure: 0,
+                        Maturity_Date: this.formatDateSafe(row['Facility Maturity Date']),
+                        Product_Underwriter: leadUnderwriter,
+                        CA_Expiration_Date: this.formatDateSafe(row['CA Maturity Date']),
+                        Credit_Classification: row['Credit Classification'] || '',
+                        PSE_non_PSE: this.determinePSE(facilityType, '', 'emea', pseMappingData),
+                        Facility_First_Approval_Date: this.formatDateSafe(row['Facility First Approval Date']),
+                        Origination_Date: this.formatDateSafe(row['Origination Date']),
+                        OSUC: 0,
+                        Total_OS: 0,
+                        Total_Unused_Exposure: 0,
+                        Total_Undrawn: 0,
+                        ROTCE: ''
+                    };
+                },
+
+                // Map APAC Portfolio row
+                mapPortfolioRowAPAC(row, pseMappingData) {
+                    const facilityType = row['Facility Type'] || '';
+                    const legalStatus = String(row['Legal Status'] || '').toUpperCase();
+                    
+                    return {
+                        Report_Date: this.formatDateSafe(row['Position Date']),
+                        Region: 'APAC',
+                        Facility_ID: row['Facility Id'] || row['Facility ID'] || '',
+                        Parent_Facility_ID: row['Facility Id'] || row['Facility ID'] || '',
+                        Product_Program: '',
+                        Product_Sub_Program: '',
+                        Management_Status: row['Management status'] || row['Management Status'] || '',
+                        Facility_Type: facilityType,
+                        Committed_Uncommitted: legalStatus === 'C' ? 'Committed' : 'Uncommitted',
+                        Risk_Category: row['Risk Category'] || '',
+                        Relationship_ID: row['Relationship Id'] || row['Relationship ID'] || '',
+                        Relationship_Name: '',
+                        CAID: row['CA No.'] || row['CA No'] || '',
+                        Lead_Underwriter: row['Investment Finance Lead Underwriter Name'] || '',
+                        Underwriting_Team_Lead: row['Team Lead'] || '',
+                        Control_Unit: row['Control unit'] || row['Control Unit'] || '',
+                        Fac_Amount: this.parseNumeric(row['TFA (USD)'] || row['TFA(USD)']),
+                        Direct_OS: this.parseNumeric(row['Direct (USD)'] || row['Direct(USD)']),
+                        Contingent_OS: this.parseNumeric(row['Contingent (USD)'] || row['Contingent(USD)']),
+                        PSE_OS: this.parseNumeric(row['PSE (USD)'] || row['PSE(USD)']),
+                        Total_Comm_Exposure: 0,
+                        Maturity_Date: this.formatDateSafe(row['Mainline Maturity Date']),
+                        Product_Underwriter: row['Investment Finance Lead Underwriter Name'] || '',
+                        CA_Expiration_Date: this.formatDateSafe(row['CA Expiration Date']),
+                        Credit_Classification: row['Classification'] || '',
+                        PSE_non_PSE: this.determinePSE(facilityType, '', 'apac', pseMappingData),
+                        Facility_First_Approval_Date: '',
+                        Origination_Date: this.formatDateSafe(row['Original Origination Date']),
+                        OSUC: 0,
+                        Total_OS: 0,
+                        Total_Unused_Exposure: 0,
+                        Total_Undrawn: 0,
+                        ROTCE: ''
+                    };
+                },
+
+                // Map NAM Portfolio row
+                mapPortfolioRowNAM(row, pseMappingData) {
+                    const facilityType = row['Facility Type'] || '';
+                    const productProgram = row['Product Program'] || row['Product Program Name'] || '';
+                    const committedFlag = String(row['Committed / Uncommitted Flag'] || row['Committed/Uncommitted Flag'] || '').toLowerCase();
+                    
+                    return {
+                        Report_Date: this.formatDateSafe(row['As Of Date']),
+                        Region: 'NAM',
+                        Facility_ID: row['Facility ID'] || '',
+                        Parent_Facility_ID: row['GFRN'] || '',
+                        Product_Program: productProgram,
+                        Product_Sub_Program: '',
+                        Management_Status: row['Management Status'] || '',
+                        Facility_Type: facilityType,
+                        Committed_Uncommitted: committedFlag.includes('uncommitted') ? 'Uncommitted' : 'Committed',
+                        Risk_Category: row['Risk Category'] || '',
+                        Relationship_ID: row['CARE Relationship ID'] || row['Relationship ID'] || '',
+                        Relationship_Name: row['Relationship Short Name'] || '',
+                        CAID: row['CA ID'] || '',
+                        Lead_Underwriter: row['Investment Finance Underwriting Team Lead'] || '',
+                        Underwriting_Team_Lead: row['Investment Finance Lead Underwriter'] || '',
+                        Control_Unit: row['Control Unit'] || '',
+                        Fac_Amount: this.parseNumeric(row['Facility Amount']),
+                        Direct_OS: this.parseNumeric(row['Direct O/S (Fac Lvl)'] || row['Direct O/S']),
+                        Contingent_OS: this.parseNumeric(row['Contingent O/S (Fac Lvl)'] || row['Contingent O/S']),
+                        PSE_OS: this.parseNumeric(row['PSE O/S (Fac Lvl)'] || row['PSE O/S']),
+                        Total_Comm_Exposure: this.parseNumeric(row['Total Comm Exposure (Fac Lvl)'] || row['Total Comm Exposure']),
+                        Maturity_Date: this.formatDateSafe(row['Maturity Date Or Demand'] || row['Maturity Date']),
+                        Product_Underwriter: row['Investment Finance Product Underwriter'] || '',
+                        CA_Expiration_Date: this.formatDateSafe(row['CA Expiration Date']),
+                        Credit_Classification: row['Credit Classification'] || '',
+                        PSE_non_PSE: this.determinePSE(facilityType, productProgram, 'nam', pseMappingData),
+                        Facility_First_Approval_Date: this.formatDateSafe(row['Facility Approval Date']),
+                        Origination_Date: this.formatDateSafe(row['Origination Date']),
+                        OSUC: this.parseNumeric(row['Total Comm Exposure (Fac Lvl)'] || row['OSUC']),
+                        Total_OS: 0,
+                        Total_Unused_Exposure: this.parseNumeric(row['Unused Commitment (Fac Lvl)'] || row['Unused Commitment']),
+                        Total_Undrawn: 0,
+                        ROTCE: ''
+                    };
+                },
+
+                // Apply post-merge calculations for Portfolio data
+                applyPortfolioCalculations(portfolioData) {
+                    return portfolioData.map(row => {
+                        const facAmount = this.parseNumeric(row.Fac_Amount);
+                        const directOS = this.parseNumeric(row.Direct_OS);
+                        const contingentOS = this.parseNumeric(row.Contingent_OS);
+                        const pseOS = this.parseNumeric(row.PSE_OS);
+                        const isCommitted = row.Committed_Uncommitted === 'Committed';
+                        const isNAM = row.Region === 'NAM';
+
+                        // Total_OS = Direct_OS + Contingent_OS + PSE_OS (for all regions)
+                        row.Total_OS = directOS + contingentOS + pseOS;
+
+                        // Total_Undrawn = Fac_Amount - (Direct_OS + Contingent_OS + PSE_OS) (for all regions)
+                        row.Total_Undrawn = facAmount - (directOS + contingentOS + pseOS);
+
+                        // For EMEA and APAC only
+                        if (!isNAM) {
+                            // OSUC = If Committed → Fac_Amount, If Uncommitted → Direct_OS + Contingent_OS + PSE_OS
+                            row.OSUC = isCommitted ? facAmount : (directOS + contingentOS + pseOS);
+
+                            // Total_Unused_Exposure = If Committed → Fac_Amount - (Direct_OS + Contingent_OS + PSE_OS), If Uncommitted → 0
+                            row.Total_Unused_Exposure = isCommitted ? (facAmount - (directOS + contingentOS + pseOS)) : 0;
+                        }
+
+                        return row;
+                    });
+                },
+
+                // ==================== END PORTFOLIO ETL FUNCTIONS ====================
+
                 // Read Excel file and return workbook for multi-sheet access
                 readExcelWorkbook(file) {
                     return new Promise((resolve, reject) => {
@@ -1343,9 +3240,10 @@
                     } else if (region === 'apac') {
                         // APAC: Read "Past Due" and "All Coming Due CCMs" tabs
                         const pastDue = this.getSheetData(workbook, 'Past Due');
-                        const comingDue = this.getSheetData(workbook, 'Coming Due') || 
-                                          this.getSheetData(workbook, 'All Coming Due');
-                        rawData = [...pastDue, ...comingDue];
+                        const allComingDue = this.getSheetData(workbook, 'All Coming Due CCMs');
+                        console.log('APAC - Past Due rows:', pastDue.length);
+                        console.log('APAC - All Coming Due CCMs rows:', allComingDue.length);
+                        rawData = [...pastDue, ...allComingDue];
                     } else if (region === 'emea') {
                         // EMEA: Read "Past Due", "Coming Due", "Open CCM" tabs
                         const pastDue = this.getSheetData(workbook, 'Past Due');
@@ -1421,26 +3319,117 @@
                     return mappedRow;
                 },
 
-                // Format date to consistent format
+                // Format date to consistent DD/MM/YYYY format
+                // Handles: DD-MMM-YYYY, MM-DD-YYYY, MMM-DD-YYYY, YYYY-MM-DD, DD/MM/YYYY, MM/DD/YYYY, Excel serial numbers
                 formatDate(dateValue) {
                     if (!dateValue) return '';
                     
-                    // If it's already a string date, return as is
-                    if (typeof dateValue === 'string') {
-                        return dateValue;
-                    }
+                    let date = null;
                     
+                    // Month name mapping
+                    const monthNames = {
+                        'jan': 0, 'january': 0,
+                        'feb': 1, 'february': 1,
+                        'mar': 2, 'march': 2,
+                        'apr': 3, 'april': 3,
+                        'may': 4,
+                        'jun': 5, 'june': 5,
+                        'jul': 6, 'july': 6,
+                        'aug': 7, 'august': 7,
+                        'sep': 8, 'sept': 8, 'september': 8,
+                        'oct': 9, 'october': 9,
+                        'nov': 10, 'november': 10,
+                        'dec': 11, 'december': 11
+                    };
+
                     // If it's an Excel serial date number
                     if (typeof dateValue === 'number') {
-                        const date = new Date((dateValue - 25569) * 86400 * 1000);
-                        return date.toISOString().split('T')[0];
+                        date = new Date((dateValue - 25569) * 86400 * 1000);
                     }
-                    
                     // If it's a Date object
-                    if (dateValue instanceof Date) {
-                        return dateValue.toISOString().split('T')[0];
+                    else if (dateValue instanceof Date) {
+                        date = dateValue;
+                    }
+                    // If it's a string, parse various formats
+                    else if (typeof dateValue === 'string') {
+                        const str = dateValue.trim();
+                        
+                        // Try DD-MMM-YYYY or DD/MMM/YYYY (e.g., 15-Jan-2024, 15/Jan/2024)
+                        let match = str.match(/^(\d{1,2})[-\/]([A-Za-z]{3,9})[-\/](\d{2,4})$/);
+                        if (match) {
+                            const day = parseInt(match[1]);
+                            const month = monthNames[match[2].toLowerCase()];
+                            let year = parseInt(match[3]);
+                            if (year < 100) year += 2000;
+                            if (month !== undefined) {
+                                date = new Date(year, month, day);
+                            }
+                        }
+                        
+                        // Try MMM-DD-YYYY or MMM/DD/YYYY (e.g., Jan-15-2024, Jan/15/2024)
+                        if (!date) {
+                            match = str.match(/^([A-Za-z]{3,9})[-\/](\d{1,2})[-\/](\d{2,4})$/);
+                            if (match) {
+                                const month = monthNames[match[1].toLowerCase()];
+                                const day = parseInt(match[2]);
+                                let year = parseInt(match[3]);
+                                if (year < 100) year += 2000;
+                                if (month !== undefined) {
+                                    date = new Date(year, month, day);
+                                }
+                            }
+                        }
+                        
+                        // Try YYYY-MM-DD (ISO format)
+                        if (!date) {
+                            match = str.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/);
+                            if (match) {
+                                date = new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]));
+                            }
+                        }
+                        
+                        // Try MM-DD-YYYY or MM/DD/YYYY (American format - assume if first number > 12, it's DD/MM)
+                        if (!date) {
+                            match = str.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{2,4})$/);
+                            if (match) {
+                                let first = parseInt(match[1]);
+                                let second = parseInt(match[2]);
+                                let year = parseInt(match[3]);
+                                if (year < 100) year += 2000;
+                                
+                                // If first number > 12, it must be DD/MM/YYYY
+                                if (first > 12) {
+                                    date = new Date(year, second - 1, first);
+                                }
+                                // If second number > 12, it must be MM/DD/YYYY
+                                else if (second > 12) {
+                                    date = new Date(year, first - 1, second);
+                                }
+                                // Ambiguous - assume DD/MM/YYYY (European format)
+                                else {
+                                    date = new Date(year, second - 1, first);
+                                }
+                            }
+                        }
+                        
+                        // Try native Date parsing as last resort
+                        if (!date) {
+                            const parsed = new Date(str);
+                            if (!isNaN(parsed.getTime())) {
+                                date = parsed;
+                            }
+                        }
                     }
                     
+                    // Format to DD/MM/YYYY
+                    if (date && !isNaN(date.getTime())) {
+                        const day = String(date.getDate()).padStart(2, '0');
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const year = date.getFullYear();
+                        return `${day}/${month}/${year}`;
+                    }
+                    
+                    // Return original value if parsing failed
                     return String(dateValue);
                 },
 

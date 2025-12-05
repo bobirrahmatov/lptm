@@ -6279,7 +6279,6 @@
             
             dataSource.forEach(row => {
                 const programName = String(row.Product_Program_Name || "").trim();
-                const covenantNumber = String(row.Covenant_Number || "").trim();
                 
                 // Skip if no program name
                 if (!programName || programName === "") return;
@@ -6287,21 +6286,19 @@
                 // Initialize program if not exists
                 if (!programData[programName]) {
                     programData[programName] = {
-                        covenants: new Set()
+                        count: 0
                     };
                 }
                 
-                // Add covenant number (unique)
-                if (covenantNumber) {
-                    programData[programName].covenants.add(covenantNumber);
-                }
+                // Count all rows (no unique filtering)
+                programData[programName].count++;
             });
 
             // Convert to array and sort by covenant count (descending)
             const sortedPrograms = Object.entries(programData)
                 .map(([name, data]) => ({
                     name: name,
-                    count: data.covenants.size
+                    count: data.count
                 }))
                 .sort((a, b) => b.count - a.count);
 
@@ -6519,76 +6516,40 @@
             let pastDueTotalAll = 0;  // Total including 1-45 days (for breakdown)
             let pastDueTotalGauge = 0; // Total for gauge (46-90 + >90 only)
             let comingDueTotal = 0;
-            const processedCovenants = new Set();
             
             dataSource.forEach(row => {
-                const covenantNumber = String(row.Covenant_Number || "").trim();
-                const status = String(row['Coming_Due/Past_Due'] || row.Coming_Due_Past_Due || "").trim().toLowerCase();
+                // Use exact field names from dataLoader export
+                const status = String(row.Coming_Due_Past_Due || "").trim().toLowerCase();
                 const daysPastDue = parseInt(row.Days_Past_Due || 0);
                 const pastDueCategory = String(row.Past_Due_Category || "").trim();
                 const region = String(row.Region || "").trim().toUpperCase();
                 
-                // Skip if no covenant number or already processed
-                if (!covenantNumber || processedCovenants.has(covenantNumber)) return;
-                
                 // Apply region filter if active
                 if (selectedRegion !== 'all' && region !== selectedRegion.toUpperCase()) return;
                 
-                processedCovenants.add(covenantNumber);
-                
-                // Process Past Due covenants - count ALL for breakdown, but only 46+ for gauge
-                if (status.includes('past due') || status === 'past due') {
+                // Process Past Due covenants using Coming_Due_Past_Due and Past_Due_Category from dataLoader
+                if (status === 'past due') {
                     pastDueTotalAll++;
                     
-                    if (pastDueCategory) {
-                        // Use Past_Due_Category if available
-                        if (pastDueCategory.includes('>90') || pastDueCategory.includes('90+')) {
-                            pastDueBuckets['>90 Days'].count++;
-                            pastDueGaugeBuckets['>90 Days'].count++;
-                            pastDueTotalGauge++;
-                        } else if (pastDueCategory.includes('46') || pastDueCategory.includes('61')) {
-                            pastDueBuckets['46-90 Days'].count++;
-                            pastDueGaugeBuckets['46-90 Days'].count++;
-                            pastDueTotalGauge++;
-                        } else {
-                            // 1-45 days - only in breakdown, not in gauge
-                            pastDueBuckets['1-45 Days'].count++;
-                        }
-                    } else if (daysPastDue > 0) {
-                        // Fallback to Days_Past_Due
-                        if (daysPastDue > 90) {
-                            pastDueBuckets['>90 Days'].count++;
-                            pastDueGaugeBuckets['>90 Days'].count++;
-                            pastDueTotalGauge++;
-                        } else if (daysPastDue >= 46) {
-                            pastDueBuckets['46-90 Days'].count++;
-                            pastDueGaugeBuckets['46-90 Days'].count++;
-                            pastDueTotalGauge++;
-                        } else {
-                            // 1-45 days - only in breakdown, not in gauge
-                            pastDueBuckets['1-45 Days'].count++;
-                        }
+                    // Use Days_Past_Due from dataLoader for bucketing
+                    if (daysPastDue > 90) {
+                        pastDueBuckets['>90 Days'].count++;
+                        pastDueGaugeBuckets['>90 Days'].count++;
+                        pastDueTotalGauge++;
+                    } else if (daysPastDue >= 46) {
+                        pastDueBuckets['46-90 Days'].count++;
+                        pastDueGaugeBuckets['46-90 Days'].count++;
+                        pastDueTotalGauge++;
                     } else {
-                        // Default to 1-45 Days
+                        // 1-45 days - only in breakdown, not in gauge
                         pastDueBuckets['1-45 Days'].count++;
                     }
                 }
                 
-                // Process Coming Due covenants - only show next 30 days
-                if (status.includes('coming due') || status === 'coming due') {
-                    // Calculate days until due using Covenant_Due_Date
-                    const covenantDueDate = parseDate(row.Covenant_Due_Date);
-                    if (covenantDueDate) {
-                        const today = new Date();
-                        today.setHours(0, 0, 0, 0);
-                        const daysUntilDue = Math.ceil((covenantDueDate - today) / (1000 * 60 * 60 * 24));
-                        
-                        // Only count covenants due in the next 30 days
-                        if (daysUntilDue >= 0 && daysUntilDue <= 30) {
-                            comingDueBuckets['Next 30 Days'].count++;
-                            comingDueTotal++;
-                        }
-                    }
+                // Process Coming Due covenants
+                if (status === 'coming due') {
+                    comingDueBuckets['Next 30 Days'].count++;
+                    comingDueTotal++;
                 }
             });
             
@@ -6880,7 +6841,7 @@
             
             const regions = ['APAC', 'EMEA', 'NAM', 'LATAM'];
             const regionalData = {};
-            const regionPopulation = {}; // Total unique covenants per region (no status filter)
+            const regionPopulation = {}; // Total covenants per region (no status filter)
             
             regions.forEach(region => {
                 regionalData[region] = {
@@ -6894,82 +6855,51 @@
                 regionPopulation[region] = 0;
             });
             
-            // FIRST PASS: Count total unique Covenant_Numbers per region (Population - no status filter)
-            const populationCovenants = new Set();
+            // FIRST PASS: Count total covenants per region (Population - no status filter)
             let totalPopulation = 0;
             
             dataSource.forEach(row => {
-                const covenantNumber = String(row.Covenant_Number || "").trim();
                 const region = String(row.Region || "").trim().toUpperCase();
                 
-                if (!covenantNumber || populationCovenants.has(covenantNumber)) return;
                 if (!regions.includes(region)) return;
                 
                 // Apply region filter if active
                 if (selectedRegion !== 'all' && region !== selectedRegion.toUpperCase()) return;
                 
-                populationCovenants.add(covenantNumber);
                 regionPopulation[region]++;
                 totalPopulation++;
             });
             
-            // SECOND PASS: Count by status categories (Past Due, Coming Due)
-            const processedCovenants = new Set();
-            
+            // SECOND PASS: Count by status categories using dataLoader fields
             dataSource.forEach(row => {
-                const covenantNumber = String(row.Covenant_Number || "").trim();
-                const status = String(row['Coming_Due/Past_Due'] || row.Coming_Due_Past_Due || "").trim().toLowerCase();
+                // Use exact field names from dataLoader export
+                const status = String(row.Coming_Due_Past_Due || "").trim().toLowerCase();
                 const region = String(row.Region || "").trim().toUpperCase();
                 const daysPastDue = parseInt(row.Days_Past_Due || 0);
-                const pastDueCategory = String(row.Past_Due_Category || "").trim();
-                const covenantDueDate = parseDate(row.Covenant_Due_Date);
                 
-                if (!covenantNumber || processedCovenants.has(covenantNumber)) return;
                 if (!regions.includes(region)) return;
                 
                 // Apply region filter if active
                 if (selectedRegion !== 'all' && region !== selectedRegion.toUpperCase()) return;
                 
-                processedCovenants.add(covenantNumber);
-                
-                // For Past Due covenants
-                if (status.includes('past due') || status === 'past due') {
-                    if (pastDueCategory) {
-                        if (pastDueCategory.includes('>90') || pastDueCategory.includes('90+')) {
-                            regionalData[region]['>90']++;
-                        } else if (pastDueCategory.includes('61') || pastDueCategory.includes('61-90')) {
-                            regionalData[region]['61-90']++;
-                        } else if (pastDueCategory.includes('46') || pastDueCategory.includes('46-60')) {
-                            regionalData[region]['46-60']++;
-                        } else if (pastDueCategory.includes('31') || pastDueCategory.includes('31-45')) {
-                            regionalData[region]['31-45']++;
-                        } else if (pastDueCategory.includes('1-30') || pastDueCategory.includes('1-15') || pastDueCategory.includes('16-30')) {
-                            regionalData[region]['1-30']++;
-                        } else {
-                            // Default to 1-30 for any other past due
-                            regionalData[region]['1-30']++;
-                        }
-                    } else if (daysPastDue > 0) {
-                        if (daysPastDue > 90) {
-                            regionalData[region]['>90']++;
-                        } else if (daysPastDue >= 61) {
-                            regionalData[region]['61-90']++;
-                        } else if (daysPastDue >= 46) {
-                            regionalData[region]['46-60']++;
-                        } else if (daysPastDue >= 31) {
-                            regionalData[region]['31-45']++;
-                        } else {
-                            regionalData[region]['1-30']++;
-                        }
+                // For Past Due covenants - use Days_Past_Due from dataLoader for bucketing
+                if (status === 'past due') {
+                    if (daysPastDue > 90) {
+                        regionalData[region]['>90']++;
+                    } else if (daysPastDue >= 61) {
+                        regionalData[region]['61-90']++;
+                    } else if (daysPastDue >= 46) {
+                        regionalData[region]['46-60']++;
+                    } else if (daysPastDue >= 31) {
+                        regionalData[region]['31-45']++;
+                    } else {
+                        regionalData[region]['1-30']++;
                     }
                 }
                 
-                // For Coming Due covenants
-                if (covenantDueDate && (status.includes('coming due') || status === 'coming due')) {
-                    const daysUntilDue = Math.ceil((covenantDueDate - today) / (1000 * 60 * 60 * 24));
-                    if (daysUntilDue >= 0 && daysUntilDue <= 30) {
-                        regionalData[region]['comingDue']++;
-                    }
+                // For Coming Due covenants - Coming_Due_Past_Due = "Coming Due" means it's coming due
+                if (status === 'coming due') {
+                    regionalData[region]['comingDue']++;
                 }
             });
             
@@ -7308,9 +7238,10 @@
 
             ccmData.forEach(row => {
                 const region = String(row.Region || "").trim().toUpperCase();
-                const ccmApprovalDate = parseDate(row.Next_CCM_Approval_Date);
+                // Use CCM_Status from dataLoader export if available
+                const ccmStatus = String(row.CCM_Status || "").trim().toLowerCase();
                 
-                if (!ccmApprovalDate || !region) return;
+                if (!region) return;
                 
                 // Ensure region is valid
                 if (!['APAC', 'EMEA', 'NAM', 'LATAM'].includes(region)) return;
@@ -7318,15 +7249,12 @@
                 // Apply region filter if active
                 if (selectedRegion !== 'all' && region !== selectedRegion.toUpperCase()) return;
 
-                // Categorize based on Next_CCM_Approval_Date relative to reporting month
-                if (ccmApprovalDate < referenceDate) {
-                    // Past Due: Next_CCM_Approval_Date is before reporting date
+                // Use CCM_Status from dataLoader (already calculated based on Next_CCM_Approval_Date)
+                if (ccmStatus === 'past due') {
                     stats.pastDue[region]++;
-                } else if (ccmApprovalDate >= reportingMonthStart && ccmApprovalDate <= reportingMonthEnd) {
-                    // Coming Due: Next_CCM_Approval_Date is within reporting month
+                } else if (ccmStatus === 'coming due') {
                     stats.comingDue[region]++;
-                } else if (ccmApprovalDate > reportingMonthEnd) {
-                    // Open: Next_CCM_Approval_Date is in future but not in reporting month
+                } else if (ccmStatus === 'open') {
                     stats.open[region]++;
                 }
             });
@@ -10171,8 +10099,8 @@
 
             // Create and store the chart instance
             try {
-                rotceChartInstance = new ApexCharts(chartElement, chartOptions);
-                rotceChartInstance.render();
+            rotceChartInstance = new ApexCharts(chartElement, chartOptions);
+            rotceChartInstance.render();
                 console.log("✅ ROTCE chart rendered successfully");
             } catch (error) {
                 console.error("❌ Error rendering ROTCE chart:", error);
@@ -10897,24 +10825,17 @@
             
             console.log("getCovenantsByProgramData - using", covenantsData.length > 0 ? "covenant data" : "portfolio data");
             
-            const processedCovenants = new Set();
-            
             // Filter for rows that have covenant data and apply region filter
             const result = dataSource.filter((row) => {
                 const programName = String(row.Product_Program_Name || "").trim();
-                const covenantNumber = String(row.Covenant_Number || "").trim();
                 const region = String(row.Region || "").trim().toUpperCase();
                 
-                // Skip if no program name or covenant number
-                if (programName === "" || covenantNumber === "") return false;
-                
-                // Skip duplicates
-                if (processedCovenants.has(covenantNumber)) return false;
+                // Skip if no program name
+                if (programName === "") return false;
                 
                 // Apply region filter if active
                 if (selectedRegion !== 'all' && region !== selectedRegion.toUpperCase()) return false;
                 
-                processedCovenants.add(covenantNumber);
                 return true;
             });
             
@@ -10929,37 +10850,22 @@
             
             console.log("getCovenantMonitoringData - using", covenantsData.length > 0 ? "covenant data" : "portfolio data", "view:", currentCovenantViewType);
             
-            const processedCovenants = new Set();
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            
-            // Filter for rows based on current view type
+            // Filter for rows based on current view type using exact dataLoader field names
             const result = dataSource.filter((row) => {
-                const covenantNumber = String(row.Covenant_Number || "").trim();
-                const status = String(row['Coming_Due/Past_Due'] || row.Coming_Due_Past_Due || "").trim().toLowerCase();
+                // Use exact field name from dataLoader: Coming_Due_Past_Due
+                const status = String(row.Coming_Due_Past_Due || "").trim().toLowerCase();
                 const region = String(row.Region || "").trim().toUpperCase();
-                const covenantDueDate = parseDate(row.Covenant_Due_Date);
-                
-                // Skip empty covenant numbers or duplicates
-                if (covenantNumber === "" || processedCovenants.has(covenantNumber)) return false;
                 
                 // Apply region filter if active
                 if (selectedRegion !== 'all' && region !== selectedRegion.toUpperCase()) return false;
                 
-                // Apply view type filter
+                // Apply view type filter using Coming_Due_Past_Due from dataLoader
                 if (currentCovenantViewType === 'pastDue') {
-                    // Past Due: status contains "past due"
-                    if (!status.includes('past due') && status !== 'past due') return false;
+                    if (status !== 'past due') return false;
                 } else if (currentCovenantViewType === 'comingDue') {
-                    // Coming Due: status contains "coming due" AND due within next 30 days
-                    if (!status.includes('coming due') && status !== 'coming due') return false;
-                    if (covenantDueDate) {
-                        const daysUntilDue = Math.ceil((covenantDueDate - today) / (1000 * 60 * 60 * 24));
-                        if (daysUntilDue < 0 || daysUntilDue > 30) return false;
-                    }
+                    if (status !== 'coming due') return false;
                 }
                 
-                processedCovenants.add(covenantNumber);
                 return true;
             });
             
@@ -10973,36 +10879,22 @@
             
             console.log("getCovenantRegionalData - view:", currentCovenantViewType);
             
-            const processedCovenants = new Set();
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            
-            // Filter based on current view type
+            // Filter based on current view type using exact dataLoader field names
             const result = dataSource.filter((row) => {
-                const covenantNumber = String(row.Covenant_Number || "").trim();
-                const status = String(row['Coming_Due/Past_Due'] || row.Coming_Due_Past_Due || "").trim().toLowerCase();
+                // Use exact field name from dataLoader: Coming_Due_Past_Due
+                const status = String(row.Coming_Due_Past_Due || "").trim().toLowerCase();
                 const region = String(row.Region || "").trim().toUpperCase();
-                const covenantDueDate = parseDate(row.Covenant_Due_Date);
-                
-                if (covenantNumber === "" || processedCovenants.has(covenantNumber)) return false;
                 
                 // Apply region filter if active
                 if (selectedRegion !== 'all' && region !== selectedRegion.toUpperCase()) return false;
                 
-                // Apply view type filter
+                // Apply view type filter using Coming_Due_Past_Due from dataLoader
                 if (currentCovenantViewType === 'pastDue') {
-                    // Past Due: status contains "past due"
-                    if (!status.includes('past due') && status !== 'past due') return false;
+                    if (status !== 'past due') return false;
                 } else if (currentCovenantViewType === 'comingDue') {
-                    // Coming Due: status contains "coming due" AND due within next 30 days
-                    if (!status.includes('coming due') && status !== 'coming due') return false;
-                    if (covenantDueDate) {
-                        const daysUntilDue = Math.ceil((covenantDueDate - today) / (1000 * 60 * 60 * 24));
-                        if (daysUntilDue < 0 || daysUntilDue > 30) return false;
-                    }
+                    if (status !== 'coming due') return false;
                 }
                 
-                processedCovenants.add(covenantNumber);
                 return true;
             });
             
@@ -11014,12 +10906,7 @@
         function getCCMFilteredData() {
             if (!ccmData || ccmData.length === 0) return [];
             
-            // Use reporting month instead of actual current date
-            const { monthStart: reportingMonthStart, monthEnd: reportingMonthEnd, reportingMonth: repMonth } = getReportingMonthRange();
-            const referenceDate = new Date(repMonth);
-            referenceDate.setHours(0, 0, 0, 0);
-            
-            // Filter CCM data based on region filter and add status classification
+            // Filter CCM data based on region filter and use CCM_Status from dataLoader
             const result = ccmData.filter((row) => {
                 const region = String(row.Region || "").trim().toUpperCase();
                 
@@ -11028,24 +10915,10 @@
                 
                 return true;
             }).map((row) => {
-                // Add computed status for display based on reporting month
-                const ccmApprovalDate = parseDate(row.Next_CCM_Approval_Date);
-                let computedStatus = row.CCM_Status || 'Unknown';
-                
-                // If CCM_Status is not available, compute it from Next_CCM_Approval_Date
-                if (!row.CCM_Status && ccmApprovalDate) {
-                    if (ccmApprovalDate < referenceDate) {
-                        computedStatus = 'Past Due';
-                    } else if (ccmApprovalDate >= reportingMonthStart && ccmApprovalDate <= reportingMonthEnd) {
-                        computedStatus = 'Coming Due';
-                    } else {
-                        computedStatus = 'Open';
-                    }
-                }
-                
+                // Use CCM_Status from dataLoader export directly
                 return {
                     ...row,
-                    Computed_CCM_Status: computedStatus
+                    Computed_CCM_Status: row.CCM_Status || 'Unknown'
                 };
             });
             
@@ -11699,7 +11572,7 @@
                                 </div>
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
                                     <li><strong>Grouping:</strong> Data is grouped by Product_Program_Name from the covenant data file</li>
-                                    <li><strong>Number of Covenants:</strong> Count of unique Covenant_Number values for each Product Program</li>
+                                    <li><strong>Number of Covenants:</strong> Count of all covenant records for each Product Program</li>
                                     <li><strong>Sorting:</strong> Programs are sorted by covenant count in descending order (highest first)</li>
                                     <li><strong>Totals Row:</strong> Bottom row shows aggregate count across all programs</li>
                                 </ul>
@@ -11714,7 +11587,7 @@
                                 </div>
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
                                     <li><code class="bg-gray-100 px-1 rounded">Product_Program_Name</code> - Product program classification for grouping</li>
-                                    <li><code class="bg-gray-100 px-1 rounded">Covenant_Number</code> - Unique covenant identifier for counting</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Covenant_Number</code> - Covenant identifier</li>
                                 </ul>
                             </div>
                             
@@ -11776,7 +11649,7 @@
                                 </div>
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
                                     <li><strong>Data Source:</strong> Covenants_tw.xlsx file</li>
-                                    <li><strong>Status Filter:</strong> Filter by Coming_Due/Past_Due column value</li>
+                                    <li><strong>Status Filter:</strong> Filter by Coming_Due_Past_Due column value</li>
                                     <li><strong>Past Due:</strong> Donut chart displays all categories (<strong>1-45 Days</strong> lightest blue, <strong>46-90 Days</strong> medium blue, <strong>&gt;90 Days</strong> darkest blue) with color intensity increasing by severity. Center shows total past due count</li>
                                     <li><strong>Coming Due:</strong> Donut chart shows covenants due in the <strong>next 30 days</strong> calculated from Covenant_Due_Date, in green color. Center shows total coming due count</li>
                                     <li><strong>Custom Legend:</strong> Side-by-side layout with percentage and count for each category, matching the exact style of "New Facilities Approved "</li>
@@ -11809,7 +11682,7 @@
                                     <h5 class="font-semibold text-gray-900">Key Columns Used:</h5>
                                 </div>
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
-                                    <li><code class="bg-gray-100 px-1 rounded">Coming_Due/Past_Due</code> - Status indicator ("Past Due" or "Coming Due")</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Coming_Due_Past_Due</code> - Status indicator ("Past Due" or "Coming Due")</li>
                                     <li><code class="bg-gray-100 px-1 rounded">Past_Due_Category</code> - Aging classification for past due items</li>
                                     <li><code class="bg-gray-100 px-1 rounded">Covenant_Number</code> - Unique covenant identifier</li>
                                     <li><code class="bg-gray-100 px-1 rounded">Covenant_Due_Date</code> - Deadline for covenant compliance</li>
@@ -11871,7 +11744,7 @@
                                     </svg>
                                     <h5 class="font-semibold text-gray-900">What This Table Shows:</h5>
                                 </div>
-                                <p class="text-gray-600">Regional breakdown of past due covenants across time buckets (1-45 Days, 46-90 Days, >90 Days) with percentage of total and coming due covenants (next 30 days). Shows both Past Due and Coming Due regional distribution with visual progress bars for percentage comparison. Dynamically updates based on the Past Due/Coming Due toggle selection. Counts are based on unique Covenant_Number values.</p>
+                                <p class="text-gray-600">Regional breakdown of past due covenants across time buckets (1-45 Days, 46-90 Days, >90 Days) with percentage of total and coming due covenants (next 30 days). Shows both Past Due and Coming Due regional distribution with visual progress bars for percentage comparison. Dynamically updates based on the Past Due/Coming Due toggle selection.</p>
                             </div>
                             
                             <div>
@@ -11900,7 +11773,7 @@
                                     <h5 class="font-semibold text-gray-900">Calculation Logic:</h5>
                                 </div>
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
-                                    <li><strong>Data Source:</strong> Covenants_tw.xlsx file (unique Covenant_Number)</li>
+                                    <li><strong>Data Source:</strong> Covenants_tw.xlsx file</li>
                                     <li><strong>Past Due View:</strong>
                                         <ul class="list-circle list-inside ml-6 mt-1">
                                             <li>1-45 Days: 1-30 Days + 31-45 Days past due covenants</li>
@@ -11931,7 +11804,7 @@
                                 </div>
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
                                     <li><code class="bg-gray-100 px-1 rounded">Region</code> - Geographic region classification</li>
-                                    <li><code class="bg-gray-100 px-1 rounded">Coming_Due/Past_Due</code> - Status indicator</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Coming_Due_Past_Due</code> - Status indicator</li>
                                     <li><code class="bg-gray-100 px-1 rounded">Past_Due_Category</code> - Time bucket classification</li>
                                     <li><code class="bg-gray-100 px-1 rounded">Days_Past_Due</code> - Number of days overdue</li>
                                     <li><code class="bg-gray-100 px-1 rounded">Covenant_Due_Date</code> - Deadline for compliance</li>

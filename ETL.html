@@ -3882,8 +3882,12 @@
                         
                         XLSX.utils.book_append_sheet(workbook, worksheet, 'CCM Data');
                         
-                        // Convert to binary
-                        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                        // Convert to binary with compression enabled for smaller file size
+                        const excelBuffer = XLSX.write(workbook, { 
+                            bookType: 'xlsx', 
+                            type: 'array',
+                            compression: true  // Enable ZIP compression
+                        });
                         const blob = new Blob([excelBuffer], { 
                             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
                         });
@@ -3999,8 +4003,12 @@
                         
                         XLSX.utils.book_append_sheet(workbook, worksheet, 'Covenants Data');
                         
-                        // Convert to binary
-                        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                        // Convert to binary with compression enabled for smaller file size
+                        const excelBuffer = XLSX.write(workbook, { 
+                            bookType: 'xlsx', 
+                            type: 'array',
+                            compression: true  // Enable ZIP compression
+                        });
                         const blob = new Blob([excelBuffer], { 
                             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
                         });
@@ -4136,9 +4144,11 @@
                     try {
                         const workbook = await this.readExcelWorkbook(mappingFile);
                         
+                        console.log('Product_Mapping.xlsx sheets found:', workbook.SheetNames);
+                        
                         // Load PSE tab for PSE/non-PSE determination
                         const pseSheet = workbook.SheetNames.find(name => 
-                            name.toLowerCase().includes('pse')
+                            name.toLowerCase() === 'pse' || name.toLowerCase().includes('pse')
                         );
                         
                         let pseFacilityTypes = [];
@@ -4147,24 +4157,44 @@
                         if (pseSheet) {
                             const pseData = XLSX.utils.sheet_to_json(workbook.Sheets[pseSheet]);
                             
+                            // Log column names for debugging
+                            if (pseData.length > 0) {
+                                console.log('PSE tab columns found:', Object.keys(pseData[0]));
+                            }
+                            
+                            // Try multiple possible column names for Facility Type
                             pseFacilityTypes = [...new Set(pseData
-                                .map(row => String(row['Facility_Type'] || row['Facility Type'] || '').trim())
+                                .map(row => {
+                                    const val = row['Facility_Type'] || row['Facility Type'] || row['FacilityType'] || 
+                                               row['facility_type'] || row['FACILITY_TYPE'] || '';
+                                    return String(val).trim();
+                                })
                                 .filter(v => v)
                             )];
                             
+                            // Try multiple possible column names for Product Program
                             pseProductPrograms = [...new Set(pseData
-                                .map(row => String(row['Product_Program'] || row['Product Program'] || '').trim())
+                                .map(row => {
+                                    const val = row['Product_Program'] || row['Product Program'] || row['ProductProgram'] ||
+                                               row['product_program'] || row['PRODUCT_PROGRAM'] || '';
+                                    return String(val).trim();
+                                })
                                 .filter(v => v)
                             )];
                             
-                            console.log('PSE Mapping loaded:', { facilityTypes: pseFacilityTypes.length, productPrograms: pseProductPrograms.length });
+                            console.log('PSE Mapping loaded:', { 
+                                facilityTypes: pseFacilityTypes.length, 
+                                productPrograms: pseProductPrograms.length,
+                                sampleFacilityTypes: pseFacilityTypes.slice(0, 5),
+                                sampleProductPrograms: pseProductPrograms.slice(0, 5)
+                            });
                         } else {
-                            console.warn('PSE sheet not found in mapping file');
+                            console.warn('PSE sheet not found in mapping file. Available sheets:', workbook.SheetNames);
                         }
                         
                         // Load Category tab for Product_Program and Product_Sub_Program mapping
                         const categorySheet = workbook.SheetNames.find(name => 
-                            name.toLowerCase().includes('category')
+                            name.toLowerCase() === 'category' || name.toLowerCase().includes('category')
                         );
                         
                         let categoryMapping = [];
@@ -4172,17 +4202,42 @@
                         if (categorySheet) {
                             const categoryData = XLSX.utils.sheet_to_json(workbook.Sheets[categorySheet]);
                             
-                            // Build category mapping array with Primary_Key, Category, Sub_Category
-                            categoryMapping = categoryData.map(row => ({
-                                region: String(row['Region'] || '').trim().toUpperCase(),
-                                primaryKey: String(row['Primary_Key'] || row['PrimaryKey'] || '').trim(),
-                                category: String(row['Category'] || '').trim(),
-                                subCategory: String(row['Sub_Category'] || row['SubCategory'] || row['Sub Category'] || '').trim()
-                            })).filter(row => row.primaryKey); // Filter out empty primary keys
+                            // Log column names for debugging
+                            if (categoryData.length > 0) {
+                                console.log('Category tab columns found:', Object.keys(categoryData[0]));
+                            }
+                            
+                            // Build category mapping array with flexible column name matching
+                            categoryMapping = categoryData.map(row => {
+                                // Find Region column
+                                const region = String(row['Region'] || row['region'] || row['REGION'] || '').trim().toUpperCase();
+                                
+                                // Find Primary_Key column - try many variations
+                                const primaryKey = String(
+                                    row['Primary_Key'] || row['PrimaryKey'] || row['Primary Key'] || 
+                                    row['primary_key'] || row['PRIMARY_KEY'] || row['Key'] || ''
+                                ).trim();
+                                
+                                // Find Category column
+                                const category = String(
+                                    row['Category'] || row['category'] || row['CATEGORY'] || ''
+                                ).trim();
+                                
+                                // Find Sub_Category column
+                                const subCategory = String(
+                                    row['Sub_Category'] || row['SubCategory'] || row['Sub Category'] || 
+                                    row['sub_category'] || row['SUB_CATEGORY'] || row['Subcategory'] || ''
+                                ).trim();
+                                
+                                return { region, primaryKey, category, subCategory };
+                            }).filter(row => row.primaryKey); // Filter out empty primary keys
                             
                             console.log('Category Mapping loaded:', categoryMapping.length, 'entries');
+                            if (categoryMapping.length > 0) {
+                                console.log('Sample category mapping:', categoryMapping.slice(0, 3));
+                            }
                         } else {
-                            console.warn('Category sheet not found in mapping file');
+                            console.warn('Category sheet not found in mapping file. Available sheets:', workbook.SheetNames);
                         }
                         
                         return { 
@@ -4199,22 +4254,36 @@
                 // Lookup Product_Program and Product_Sub_Program from Category mapping
                 lookupCategoryMapping(primaryKeyValue, region, mappingData) {
                     if (!mappingData || !mappingData.categoryMapping || !primaryKeyValue) {
+                        console.log('Category lookup skipped - missing data:', { 
+                            hasMappingData: !!mappingData, 
+                            hasCategoryMapping: !!(mappingData && mappingData.categoryMapping),
+                            primaryKeyValue 
+                        });
                         return { productProgram: '', productSubProgram: '' };
                     }
                     
-                    const keyStr = String(primaryKeyValue).trim().toLowerCase();
+                    const keyStr = String(primaryKeyValue).trim();
+                    const keyStrLower = keyStr.toLowerCase();
                     const regionStr = region.toUpperCase();
                     
                     // First try to find exact match with region
                     let match = mappingData.categoryMapping.find(m => 
-                        m.primaryKey.toLowerCase() === keyStr && 
+                        m.primaryKey.toLowerCase() === keyStrLower && 
                         (m.region === regionStr || m.region === '' || !m.region)
                     );
                     
                     // If no match with region, try without region filter
                     if (!match) {
                         match = mappingData.categoryMapping.find(m => 
-                            m.primaryKey.toLowerCase() === keyStr
+                            m.primaryKey.toLowerCase() === keyStrLower
+                        );
+                    }
+                    
+                    // Try partial match if exact match not found
+                    if (!match) {
+                        match = mappingData.categoryMapping.find(m => 
+                            m.primaryKey.toLowerCase().includes(keyStrLower) || 
+                            keyStrLower.includes(m.primaryKey.toLowerCase())
                         );
                     }
                     
@@ -4225,19 +4294,29 @@
                         };
                     }
                     
+                    // Log when no match found (only first few to avoid spam)
+                    if (!this._categoryMissCount) this._categoryMissCount = 0;
+                    if (this._categoryMissCount < 5) {
+                        console.log(`Category mapping not found for: "${keyStr}" (${region})`);
+                        this._categoryMissCount++;
+                    }
+                    
                     return { productProgram: '', productSubProgram: '' };
                 },
 
                 // Determine PSE or non-PSE based on mapping data
                 determinePSE(facilityType, productProgram, region, pseMappingData) {
-                    if (!pseMappingData) return 'non-PSE';
+                    if (!pseMappingData) {
+                        console.log('PSE lookup skipped - no mapping data');
+                        return 'non-PSE';
+                    }
                     
                     const facilityTypeStr = String(facilityType || '').trim();
                     const productProgramStr = String(productProgram || '').trim();
                     
                     // For NAM: check both Product Program and Facility Type
                     if (region === 'nam') {
-                        if (productProgramStr && pseMappingData.productPrograms.some(p => 
+                        if (productProgramStr && pseMappingData.productPrograms && pseMappingData.productPrograms.some(p => 
                             p.toLowerCase() === productProgramStr.toLowerCase()
                         )) {
                             return 'PSE';
@@ -4245,10 +4324,17 @@
                     }
                     
                     // For all regions: check Facility Type
-                    if (facilityTypeStr && pseMappingData.facilityTypes.some(f => 
+                    if (facilityTypeStr && pseMappingData.facilityTypes && pseMappingData.facilityTypes.some(f => 
                         f.toLowerCase() === facilityTypeStr.toLowerCase()
                     )) {
                         return 'PSE';
+                    }
+                    
+                    // Log when no match found (only first few to avoid spam)
+                    if (!this._pseMissCount) this._pseMissCount = 0;
+                    if (this._pseMissCount < 5) {
+                        console.log(`PSE mapping not found for: Facility="${facilityTypeStr}", Product="${productProgramStr}" (${region})`);
+                        this._pseMissCount++;
                     }
                     
                     return 'non-PSE';
@@ -4299,7 +4385,12 @@
                         
                         XLSX.utils.book_append_sheet(workbook, worksheet, 'Portfolio Data');
                         
-                        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                        // Convert to binary with compression enabled for smaller file size
+                        const excelBuffer = XLSX.write(workbook, { 
+                            bookType: 'xlsx', 
+                            type: 'array',
+                            compression: true  // Enable ZIP compression
+                        });
                         const blob = new Blob([excelBuffer], { 
                             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
                         });
@@ -4974,8 +5065,12 @@
                         
                         XLSX.utils.book_append_sheet(workbook, worksheet, sheetNames[type]);
                         
-                        // Generate and download
-                        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                        // Generate and download with compression enabled for smaller file size
+                        const excelBuffer = XLSX.write(workbook, { 
+                            bookType: 'xlsx', 
+                            type: 'array',
+                            compression: true  // Enable ZIP compression
+                        });
                         const blob = new Blob([excelBuffer], { 
                             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
                         });

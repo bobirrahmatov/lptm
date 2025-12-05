@@ -1027,16 +1027,56 @@
                             <div class="flex-1">
                                 <h3 class="text-lg font-semibold text-brand-700 mb-2">Processing Complete!</h3>
                                 <div class="text-sm text-brand-600 space-y-1">
+                                    <p x-show="processingResult.portfolioRecords > 0">
+                                        <strong x-text="processingResult.portfolioRecords"></strong> Portfolio records processed
+                                        <span x-show="processingResult.portfolioUploaded" class="text-brand-500">✓ Uploaded</span>
+                                        <span x-show="!processingResult.portfolioUploaded" class="text-gray-500">(Download available)</span>
+                                    </p>
+                                    <p x-show="processingResult.covenantsRecords > 0">
+                                        <strong x-text="processingResult.covenantsRecords"></strong> Covenants records processed
+                                        <span x-show="processingResult.covenantsUploaded" class="text-brand-500">✓ Uploaded</span>
+                                        <span x-show="!processingResult.covenantsUploaded" class="text-gray-500">(Download available)</span>
+                                    </p>
                                     <p x-show="processingResult.ccmRecords > 0">
-                                        <strong x-text="processingResult.ccmRecords"></strong> CCM records processed and uploaded to Portfolio Analytics
-                                    </p>
-                                    <p x-show="processingResult.portfolioFiles > 0">
-                                        <strong x-text="processingResult.portfolioFiles"></strong> Portfolio file(s) processed
-                                    </p>
-                                    <p x-show="processingResult.covenantsFiles > 0">
-                                        <strong x-text="processingResult.covenantsFiles"></strong> Covenants file(s) processed
+                                        <strong x-text="processingResult.ccmRecords"></strong> CCM records processed
+                                        <span x-show="processingResult.ccmUploaded" class="text-brand-500">✓ Uploaded</span>
+                                        <span x-show="!processingResult.ccmUploaded" class="text-gray-500">(Download available)</span>
                                     </p>
                                 </div>
+                                
+                                <!-- Download Buttons -->
+                                <div class="mt-4 p-4 bg-white rounded-xl border border-brand-200">
+                                    <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                        </svg>
+                                        Download Processed Files
+                                    </h4>
+                                    <div class="flex flex-wrap gap-2">
+                                        <button x-show="processingResult.portfolioRecords > 0" @click="downloadFile('portfolio')"
+                                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                                            <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                            </svg>
+                                            Portfolio_tw.xlsx
+                                        </button>
+                                        <button x-show="processingResult.covenantsRecords > 0" @click="downloadFile('covenants')"
+                                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                                            <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                            </svg>
+                                            Covenants_tw.xlsx
+                                        </button>
+                                        <button x-show="processingResult.ccmRecords > 0" @click="downloadFile('ccm')"
+                                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                                            <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                            </svg>
+                                            CCM_tw.xlsx
+                                        </button>
+                                    </div>
+                                </div>
+                                
                                 <div class="mt-4 flex items-center gap-3">
                                     <a href="portfolioAnalytics.html" 
                                         class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 transition-colors">
@@ -1057,19 +1097,19 @@
 
                 <!-- Error Result -->
                 <template x-if="processingResult && !processingResult.success">
-                    <div class="rounded-2xl border-2 border-danger-500 bg-danger-50 p-6">
+                    <div class="rounded-2xl border-2 border-gray-400 bg-gray-50 p-6">
                         <div class="flex items-start gap-4">
-                            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-danger-500 text-white flex-shrink-0">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-gray-500 text-white flex-shrink-0">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
                             </div>
                             <div class="flex-1">
-                                <h3 class="text-lg font-semibold text-danger-700 mb-2">Processing Failed</h3>
-                                <p class="text-sm text-danger-600" x-text="processingResult.error"></p>
+                                <h3 class="text-lg font-semibold text-gray-700 mb-2">Processing Failed</h3>
+                                <p class="text-sm text-gray-600" x-text="processingResult.error"></p>
                                 <div class="mt-4">
                                     <button @click="processingComplete = false; processingResult = null"
-                                        class="inline-flex items-center gap-2 rounded-lg bg-danger-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-danger-700 transition-colors">
+                                        class="inline-flex items-center gap-2 rounded-lg bg-gray-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-700 transition-colors">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                                         </svg>
@@ -3492,6 +3532,12 @@
                 processingComplete: false,
                 processingResult: null,
                 ccmReportDate: new Date().toISOString().split('T')[0], // Default to today
+                // Store processed data for download
+                processedDataCache: {
+                    portfolio: null,
+                    covenants: null,
+                    ccm: null
+                },
                 files: {
                     portfolio: { emea: null, nam: null, apac: null },
                     covenants: { emea: null, nam: null, apac: null },
@@ -3687,14 +3733,19 @@
                         // Store consolidated Portfolio data
                         processedData.portfolioConsolidated = allPortfolioData;
 
+                        // Track upload status for each file type
+                        let portfolioUploadSuccess = false;
+                        let covenantsUploadSuccess = false;
+                        let ccmUploadSuccess = false;
+
                         // Upload consolidated Portfolio file to Confluence if we have data
                         if (allPortfolioData.length > 0) {
                             this.loadingMessage = 'Uploading Portfolio_tw.xlsx to Portfolio Analytics...';
-                            const uploadSuccess = await this.uploadPortfolioToConfluence(allPortfolioData);
-                            if (uploadSuccess) {
+                            portfolioUploadSuccess = await this.uploadPortfolioToConfluence(allPortfolioData);
+                            if (portfolioUploadSuccess) {
                                 this.showNotification(`Portfolio_tw.xlsx uploaded to Portfolio Analytics (${allPortfolioData.length} records)`, 'success');
                             } else {
-                                this.showNotification('Portfolio processed but upload failed - data saved locally', 'warning');
+                                this.showNotification('Portfolio processed - use Download button to save file', 'warning');
                             }
                         }
 
@@ -3714,11 +3765,11 @@
                         // Upload consolidated Covenants file to Confluence if we have data
                         if (allCovenantsData.length > 0) {
                             this.loadingMessage = 'Uploading Covenants_tw.xlsx to Portfolio Analytics...';
-                            const uploadSuccess = await this.uploadCovenantsToConfluence(allCovenantsData);
-                            if (uploadSuccess) {
+                            covenantsUploadSuccess = await this.uploadCovenantsToConfluence(allCovenantsData);
+                            if (covenantsUploadSuccess) {
                                 this.showNotification(`Covenants_tw.xlsx uploaded to Portfolio Analytics (${allCovenantsData.length} records)`, 'success');
                             } else {
-                                this.showNotification('Covenants processed but upload failed - data saved locally', 'warning');
+                                this.showNotification('Covenants processed - use Download button to save file', 'warning');
                             }
                         }
 
@@ -3738,11 +3789,11 @@
                         // Upload consolidated CCM file to Confluence if we have CCM data
                         if (allCCMData.length > 0) {
                             this.loadingMessage = 'Uploading CCM_tw.xlsx to Portfolio Analytics...';
-                            const uploadSuccess = await this.uploadCCMToConfluence(allCCMData);
-                            if (uploadSuccess) {
+                            ccmUploadSuccess = await this.uploadCCMToConfluence(allCCMData);
+                            if (ccmUploadSuccess) {
                                 this.showNotification(`CCM_tw.xlsx uploaded to Portfolio Analytics (${allCCMData.length} records)`, 'success');
                             } else {
-                                this.showNotification('CCM processed but upload failed - data saved locally', 'warning');
+                                this.showNotification('CCM processed - use Download button to save file', 'warning');
                             }
                         }
 
@@ -3752,8 +3803,14 @@
                             processedData.mapping = await this.readExcelFile(this.files.mapping);
                         }
 
+                        // Store processed data for manual download
+                        this.processedDataCache = {
+                            portfolio: allPortfolioData.length > 0 ? allPortfolioData : null,
+                            covenants: allCovenantsData.length > 0 ? allCovenantsData : null,
+                            ccm: allCCMData.length > 0 ? allCCMData : null
+                        };
+                        
                         // Store only metadata (not full data) to avoid localStorage quota issues
-                        // Full data is already uploaded to Confluence - portfolioAnalytics.html fetches from there
                         try {
                             localStorage.setItem('portfolioLoaderData', JSON.stringify({
                                 timestamp: new Date().toISOString(),
@@ -3769,12 +3826,9 @@
                                     covenants: allCovenantsData.length,
                                     ccm: allCCMData.length
                                 }
-                                // Note: Full data is NOT stored here to avoid quota limits
-                                // Data is uploaded directly to Confluence
                             }));
                         } catch (storageError) {
                             console.warn('localStorage quota exceeded, skipping local storage:', storageError);
-                            // Continue processing - data is already uploaded to Confluence
                         }
 
                         this.isLoading = false;
@@ -3790,7 +3844,10 @@
                             success: true,
                             portfolioRecords: allPortfolioData.length,
                             covenantsRecords: allCovenantsData.length,
-                            ccmRecords: allCCMData.length
+                            ccmRecords: allCCMData.length,
+                            portfolioUploaded: portfolioUploadSuccess,
+                            covenantsUploaded: covenantsUploadSuccess,
+                            ccmUploaded: ccmUploadSuccess
                         };
 
                     } catch (error) {
@@ -3873,7 +3930,11 @@
                             return true;
                         } else {
                             const errorText = await response.text();
-                            console.error('Confluence upload failed:', response.status, errorText);
+                            if (response.status === 413) {
+                                console.warn('CCM file too large for Confluence upload (413). Use manual download instead.');
+                            } else {
+                                console.error('Confluence upload failed:', response.status, errorText);
+                            }
                             return false;
                         }
                     } catch (error) {
@@ -3986,7 +4047,11 @@
                             return true;
                         } else {
                             const errorText = await response.text();
-                            console.error('Confluence upload failed:', response.status, errorText);
+                            if (response.status === 413) {
+                                console.warn('Covenants file too large for Confluence upload (413). Use manual download instead.');
+                            } else {
+                                console.error('Confluence upload failed:', response.status, errorText);
+                            }
                             return false;
                         }
                     } catch (error) {
@@ -4272,7 +4337,11 @@
                             return true;
                         } else {
                             const errorText = await response.text();
-                            console.error('Confluence upload failed:', response.status, errorText);
+                            if (response.status === 413) {
+                                console.warn('Portfolio file too large for Confluence upload (413). Use manual download instead.');
+                            } else {
+                                console.error('Confluence upload failed:', response.status, errorText);
+                            }
                             return false;
                         }
                     } catch (error) {
@@ -4866,11 +4935,73 @@
                     return isNaN(parsed.getTime()) ? null : parsed;
                 },
 
+                // Download processed file
+                downloadFile(type) {
+                    const data = this.processedDataCache[type];
+                    if (!data || data.length === 0) {
+                        this.showNotification('No data available for download', 'warning');
+                        return;
+                    }
+                    
+                    const fileNames = {
+                        portfolio: 'Portfolio_tw.xlsx',
+                        covenants: 'Covenants_tw.xlsx',
+                        ccm: 'CCM_tw.xlsx'
+                    };
+                    
+                    try {
+                        // Create workbook
+                        const workbook = XLSX.utils.book_new();
+                        const worksheet = XLSX.utils.json_to_sheet(data);
+                        
+                        // Set column widths based on data type
+                        if (type === 'ccm') {
+                            worksheet['!cols'] = [
+                                { wch: 12 }, { wch: 8 }, { wch: 15 }, { wch: 30 }, { wch: 15 },
+                                { wch: 12 }, { wch: 20 }, { wch: 18 }, { wch: 20 }, { wch: 12 }
+                            ];
+                        } else if (type === 'covenants') {
+                            worksheet['!cols'] = Array(26).fill({ wch: 15 });
+                        } else {
+                            worksheet['!cols'] = Array(33).fill({ wch: 15 });
+                        }
+                        
+                        const sheetNames = {
+                            portfolio: 'Portfolio Data',
+                            covenants: 'Covenants Data',
+                            ccm: 'CCM Data'
+                        };
+                        
+                        XLSX.utils.book_append_sheet(workbook, worksheet, sheetNames[type]);
+                        
+                        // Generate and download
+                        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                        const blob = new Blob([excelBuffer], { 
+                            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+                        });
+                        
+                        // Create download link
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = fileNames[type];
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(url);
+                        
+                        this.showNotification(`${fileNames[type]} downloaded successfully`, 'success');
+                    } catch (error) {
+                        console.error('Download error:', error);
+                        this.showNotification('Failed to download file: ' + error.message, 'error');
+                    }
+                },
+
                 showNotification(message, type = 'info') {
                     const container = document.getElementById('notificationContainer');
                     const colors = {
                         success: 'bg-brand-500',
-                        error: 'bg-danger-500',
+                        error: 'bg-gray-600',
                         warning: 'bg-brand-500',
                         info: 'bg-brand-500'
                     };

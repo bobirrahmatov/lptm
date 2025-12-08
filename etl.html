@@ -4031,7 +4031,7 @@
                         for (const [region, file] of Object.entries(this.files.covenants)) {
                             if (file) {
                                 this.loadingMessage = `Processing Covenants ${region.toUpperCase()} with ETL...`;
-                                const data = await this.processCovenantFile(file, region);
+                                const data = await this.processCovenantFile(file, region, regionsMapping);
                                 allCovenantsData = [...allCovenantsData, ...data];
                                 processedData.covenants.push({ region, data, rowCount: data.length });
                             }
@@ -4572,7 +4572,7 @@
                 },
 
                 // Process Covenant file with ETL logic
-                async processCovenantFile(file, region) {
+                async processCovenantFile(file, region, regionsMapping = {}) {
                     const workbook = await this.readExcelWorkbook(file);
                     
                     // Always read from first sheet
@@ -4585,7 +4585,8 @@
                     const transformedData = rawData
                         .filter(row => !this.isInternalCovenant(row)) // Filter out Internal Cov* rows
                         .filter(row => Object.keys(row).length > 0) // Filter empty rows
-                        .map(row => this.mapCovenantRow(row, region));
+                        .map(row => this.mapCovenantRow(row, region, regionsMapping))
+                        .filter(row => row !== null); // Filter out SARG entries (returns null)
 
                     return transformedData;
                 },
@@ -4636,11 +4637,24 @@
                 },
 
                 // Map Covenant row to standard output format
-                mapCovenantRow(row, region) {
+                mapCovenantRow(row, region, regionsMapping = {}) {
+                    // Get Origination_Unit from source data
+                    const originationUnit = row['Originating Unit'] || row['OriginatingUnit'] || '';
+                    
+                    // Check if this is a SARG entry (should be excluded)
+                    const originationUnitUpper = String(originationUnit).trim().toUpperCase();
+                    if (originationUnitUpper === 'SARG') {
+                        return null; // Will be filtered out
+                    }
+                    
+                    // Lookup region based on Origination_Unit from Regions_Mapping.xlsx
+                    // Only applies to NAM and LATAM regions
+                    const mappedRegion = this.lookupRegionByOriginationUnit(originationUnit, region, regionsMapping);
+                    
                     return {
                         Report_Date: this.formatDate(row['As Of Date'] || row['AsOfDate'] || ''),
-                        Region: row['Region'] || region.toUpperCase(),
-                        Origination_Unit: row['Originating Unit'] || row['OriginatingUnit'] || '',
+                        Region: mappedRegion,
+                        Origination_Unit: originationUnit,
                         Underwriting_Team_Lead: this.normalizeUnderwriterName(row['Investment Finance Underwriting Team Lead'] || row['InvestmentFinanceUnderwritingTeamLead']),
                         Lead_Underwriter: this.normalizeUnderwriterName(row['Investment Finance Lead Underwriter'] || row['InvestmentFinanceLeadUnderwriter']),
                         Product_Underwriter: this.normalizeUnderwriterName(row['Investment Finance Product Underwriter'] || row['InvestmentFinanceProductUnderwriter']),
@@ -4791,6 +4805,39 @@
                     }
                     
                     return 'NAM';
+                },
+
+                // Lookup region based on Origination_Unit for Covenants data
+                // Only applies mapping for NAM and LATAM regions
+                lookupRegionByOriginationUnit(originationUnit, defaultRegion, regionsMapping) {
+                    const defaultRegionUpper = defaultRegion.toUpperCase();
+                    
+                    // Only apply Origination_Unit mapping for NAM and LATAM
+                    // EMEA and APAC should just use their file region
+                    if (defaultRegionUpper !== 'NAM' && defaultRegionUpper !== 'LATAM') {
+                        return defaultRegionUpper;
+                    }
+                    
+                    // If no regionsMapping or no originationUnit, use default region
+                    if (!regionsMapping || !originationUnit) {
+                        return defaultRegionUpper;
+                    }
+                    
+                    // Normalize the origination unit for lookup
+                    const originationUnitStr = String(originationUnit).trim().toUpperCase();
+                    const mappedRegion = regionsMapping[originationUnitStr];
+                    
+                    if (mappedRegion) {
+                        const mappedRegionUpper = mappedRegion.toUpperCase();
+                        // If region is IPB, treat as NAM
+                        if (mappedRegionUpper === 'IPB') {
+                            return 'NAM';
+                        }
+                        return mappedRegionUpper;
+                    }
+                    
+                    // If no mapping found, use default region from file
+                    return defaultRegionUpper;
                 },
 
                 // Load PSE mapping data from workbook

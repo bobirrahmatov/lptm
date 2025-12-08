@@ -2076,7 +2076,7 @@
                 <!-- Portfolio Column Mapping Table -->
                 <div class="rounded-2xl border border-gray-200 bg-white overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-100 bg-brand-50">
-                        <h3 class="text-base font-semibold text-gray-900">Column Mapping Reference (Portfolio_tw.xlsx - 33 columns)</h3>
+                        <h3 class="text-base font-semibold text-gray-900">Column Mapping Reference (Portfolio_tw.xlsx - 34 columns)</h3>
                     </div>
                     <div class="p-4 overflow-x-auto">
                         <table class="min-w-full text-[10px]">
@@ -2256,6 +2256,12 @@
                                     <td class="px-2 py-1 font-mono text-blue-700">Origination Date <span class="text-cyan-500">→ DD/MM/YYYY</span></td>
                                     <td class="px-2 py-1 font-mono text-brand-600">Original Origination Date <span class="text-cyan-500">(dd-MMM-YY) → DD/MM/YYYY</span></td>
                                     <td class="px-2 py-1 font-mono text-gray-600">Origination Date <span class="text-cyan-500">→ DD/MM/YYYY</span></td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 bg-green-50/30">
+                                    <td class="px-2 py-1 font-mono font-medium">CA_Review</td>
+                                    <td class="px-2 py-1 font-mono text-blue-700">CA Review Y/N <span class="text-green-500">(YES/Y→Yes, NO/N→No)</span></td>
+                                    <td class="px-2 py-1 font-mono text-gray-400">-</td>
+                                    <td class="px-2 py-1 font-mono text-gray-400">-</td>
                                 </tr>
                                 <tr class="hover:bg-gray-50 bg-blue-50/30">
                                     <td class="px-2 py-1 font-mono font-medium">OSUC</td>
@@ -5053,6 +5059,7 @@
                             { wch: 12 },  // PSE_non_PSE
                             { wch: 20 },  // Facility_First_Approval_Date
                             { wch: 15 },  // Origination_Date
+                            { wch: 12 },  // CA_Review
                             { wch: 15 },  // OSUC
                             { wch: 15 },  // Total_OS
                             { wch: 18 },  // Total_Unused_Exposure
@@ -5360,6 +5367,11 @@
                     const reportDate = row['As Of Date'] || row['AsOfDate'] || row['Report Date'] || 
                                        row['ReportDate'] || row['Position Date'] || '';
                     
+                    // Normalize CA Review Y/N to "Yes" or "No" (EMEA only)
+                    const caReviewRaw = String(row['CA Review Y/N'] || row['CA Review'] || row['CAReview'] || '').toUpperCase();
+                    const caReview = caReviewRaw === 'YES' || caReviewRaw === 'Y' ? 'Yes' : 
+                                     caReviewRaw === 'NO' || caReviewRaw === 'N' ? 'No' : '';
+                    
                     return {
                         Report_Date: this.formatDateSafe(reportDate),
                         Region: 'EMEA',
@@ -5389,6 +5401,7 @@
                         PSE_non_PSE: this.determinePSE(facilityType, '', 'emea', pseMappingData),
                         Facility_First_Approval_Date: this.formatDateSafe(row['Facility First Approval Date']),
                         Origination_Date: this.formatDateSafe(row['Origination Date']),
+                        CA_Review: caReview,
                         OSUC: 0,
                         Total_OS: 0,
                         Total_Unused_Exposure: 0,
@@ -5440,6 +5453,7 @@
                         PSE_non_PSE: this.determinePSE(facilityType, '', 'apac', pseMappingData),
                         Facility_First_Approval_Date: '',
                         Origination_Date: this.formatDateSafe(row['Original Origination Date']),
+                        CA_Review: '',
                         OSUC: 0,
                         Total_OS: 0,
                         Total_Unused_Exposure: 0,
@@ -5501,6 +5515,7 @@
                             this.getColumnValue(row, ['Origination Date', 'OriginationDate', 'Origination_Date',
                             'Original Origination Date', 'Orig Date'])
                         ),
+                        CA_Review: '',
                         OSUC: this.parseNumeric(row['Total Comm Exposure (Fac Lvl)'] || row['OSUC']),
                         Total_OS: 0,
                         Total_Unused_Exposure: this.parseNumeric(row['Unused Commitment (Fac Lvl)'] || row['Unused Commitment']),

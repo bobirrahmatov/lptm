@@ -7984,6 +7984,63 @@
             }
         }
 
+        // Helper: Check if a date is the last business day of the month
+        function checkIfLastBusinessDayOfMonth(date) {
+            const testDate = new Date(date);
+            const year = testDate.getFullYear();
+            const month = testDate.getMonth();
+            
+            // Get the last day of the month
+            const lastDayOfMonth = new Date(year, month + 1, 0);
+            
+            // Find the last business day (skip weekends going backwards)
+            let lastBusinessDay = new Date(lastDayOfMonth);
+            while (lastBusinessDay.getDay() === 0 || lastBusinessDay.getDay() === 6) {
+                lastBusinessDay.setDate(lastBusinessDay.getDate() - 1);
+            }
+            
+            // Compare dates (ignore time)
+            testDate.setHours(0, 0, 0, 0);
+            lastBusinessDay.setHours(0, 0, 0, 0);
+            
+            return testDate.getTime() === lastBusinessDay.getTime();
+        }
+
+        // Helper: Get weekend dates after the report date in the same month
+        function getWeekendDatesAfterReportDate(reportDate) {
+            const excludedDates = [];
+            const year = reportDate.getFullYear();
+            const month = reportDate.getMonth();
+            const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
+            
+            // Check dates after report date until end of month
+            for (let day = reportDate.getDate() + 1; day <= lastDayOfMonth; day++) {
+                const checkDate = new Date(year, month, day);
+                const dayOfWeek = checkDate.getDay();
+                
+                // If it's Saturday (6) or Sunday (0), add to excluded list
+                if (dayOfWeek === 0 || dayOfWeek === 6) {
+                    excludedDates.push(new Date(checkDate));
+                }
+            }
+            
+            return excludedDates;
+        }
+
+        // Helper: Check if a date is in the excluded weekend dates list
+        function isDateInExcludedList(dateToCheck, excludedDates) {
+            if (!excludedDates || excludedDates.length === 0) return false;
+            
+            const checkTime = new Date(dateToCheck);
+            checkTime.setHours(0, 0, 0, 0);
+            
+            return excludedDates.some(excludedDate => {
+                const excludedTime = new Date(excludedDate);
+                excludedTime.setHours(0, 0, 0, 0);
+                return checkTime.getTime() === excludedTime.getTime();
+            });
+        }
+
         // Create combined chart for CAs Coming Due & Facilities Expiring
         function createFacilityTrendChart() {
             console.log("📊 Creating CAs Coming Due & Facilities Expiring chart");
@@ -8009,17 +8066,25 @@
             const maxReportDate = new Date(Math.max(...reportDates));
             maxReportDate.setHours(0, 0, 0, 0);
             
+            // Check if report date is last business day of the month
+            const isLastBusinessDay = checkIfLastBusinessDayOfMonth(maxReportDate);
+            
+            // Get excluded weekend dates (if report date is last business day AND there are weekends after it)
+            const excludedWeekendDates = isLastBusinessDay ? getWeekendDatesAfterReportDate(maxReportDate) : [];
+            
             // Generate next 3 months starting from report date
+            // ONLY skip current month if there are actual weekend dates to exclude
+            const startMonthOffset = (excludedWeekendDates.length > 0) ? 1 : 0;
             const next3Months = [];
             for (let i = 0; i < 3; i++) {
                 const date = new Date(maxReportDate);
-                date.setMonth(date.getMonth() + i);
+                date.setMonth(date.getMonth() + startMonthOffset + i);
                 const year = date.getFullYear();
                 const month = String(date.getMonth() + 1).padStart(2, "0");
                 next3Months.push(`${year}-${month}`);
             }
             
-            console.log("Next 3 months starting from report date:", next3Months, "Report Date:", maxReportDate);
+            console.log("Next 3 months starting from report date:", next3Months, "Report Date:", maxReportDate, "Is Last Business Day:", isLastBusinessDay, "Excluded Weekend Dates:", excludedWeekendDates, "Has Excluded Dates:", excludedWeekendDates.length > 0);
             
             // Group by month-year for both CAs and Facilities
             const monthlyData = {};
@@ -8035,7 +8100,8 @@
                 };
             });
             
-            // Collect CAs Coming Due (only future dates from report date, exclude DM, exclude weekends, EMEA requires CA_Review = "Yes" and uses Relationship_ID)
+            // Collect CAs Coming Due (only future dates from report date, exclude DM, EMEA requires CA_Review = "Yes" and uses Relationship_ID)
+            // Exclude weekend dates if report date is last business day of month
             portfolioData.forEach((row) => {
                 const caExpirationDate = row.CA_Expiration_Date;
                 const caid = row.CAID;
@@ -8046,10 +8112,9 @@
                 if (caExpirationDate && managementStatus !== "DM") {
                     const dateObj = parseDate(caExpirationDate);
                     if (dateObj && dateObj >= maxReportDate) {
-                        // Exclude weekends (Saturday = 6, Sunday = 0)
-                        const dayOfWeek = dateObj.getDay();
-                        if (dayOfWeek === 0 || dayOfWeek === 6) {
-                            return; // Skip weekend dates
+                        // Skip if this date is in the excluded weekend dates
+                        if (isDateInExcludedList(dateObj, excludedWeekendDates)) {
+                            return;
                         }
                         
                         // Only future dates (coming due from report date)
@@ -8097,7 +8162,8 @@
                 }
             });
             
-            // Collect Facilities Expiring (only future dates from report date, exclude DM, exclude weekends)
+            // Collect Facilities Expiring (only future dates from report date, exclude DM)
+            // Exclude weekend dates if report date is last business day of month
             portfolioData.forEach((row) => {
                 const maturityDate = row.Maturity_Date;
                 const facilityId = row.Facility_ID;
@@ -8106,10 +8172,9 @@
                 if (maturityDate && facilityId && managementStatus !== "DM") {
                     const dateObj = parseDate(maturityDate);
                     if (dateObj && dateObj >= maxReportDate) {
-                        // Exclude weekends (Saturday = 6, Sunday = 0)
-                        const dayOfWeek = dateObj.getDay();
-                        if (dayOfWeek === 0 || dayOfWeek === 6) {
-                            return; // Skip weekend dates
+                        // Skip if this date is in the excluded weekend dates
+                        if (isDateInExcludedList(dateObj, excludedWeekendDates)) {
+                            return;
                         }
                         
                         // Only future dates (expiring from report date)
@@ -8390,11 +8455,19 @@
             const maxReportDate = new Date(Math.max(...reportDates));
             maxReportDate.setHours(0, 0, 0, 0);
             
+            // Check if report date is last business day of the month
+            const isLastBusinessDay = checkIfLastBusinessDayOfMonth(maxReportDate);
+            
+            // Get excluded weekend dates (if report date is last business day AND there are weekends after it)
+            const excludedWeekendDates = isLastBusinessDay ? getWeekendDatesAfterReportDate(maxReportDate) : [];
+            
             // Generate next 3 months starting from report date
+            // ONLY skip current month if there are actual weekend dates to exclude
+            const startMonthOffset = (excludedWeekendDates.length > 0) ? 1 : 0;
             const next3Months = [];
             for (let i = 0; i < 3; i++) {
                 const date = new Date(maxReportDate);
-                date.setMonth(date.getMonth() + i);
+                date.setMonth(date.getMonth() + startMonthOffset + i);
                 const year = date.getFullYear();
                 const month = String(date.getMonth() + 1).padStart(2, "0");
                 next3Months.push(`${year}-${month}`);
@@ -8414,7 +8487,8 @@
                 };
             });
             
-            // Collect CAs Coming Due (only future dates from report date, exclude DM, exclude weekends, EMEA requires CA_Review = "Yes" and uses Relationship_ID)
+            // Collect CAs Coming Due (only future dates from report date, exclude DM, EMEA requires CA_Review = "Yes" and uses Relationship_ID)
+            // Exclude weekend dates if report date is last business day of month
             filteredData.forEach((row) => {
                 const caExpirationDate = row.CA_Expiration_Date;
                 const caid = row.CAID;
@@ -8425,10 +8499,9 @@
                 if (caExpirationDate && managementStatus !== "DM") {
                     const dateObj = parseDate(caExpirationDate);
                     if (dateObj && dateObj >= maxReportDate) {
-                        // Exclude weekends (Saturday = 6, Sunday = 0)
-                        const dayOfWeek = dateObj.getDay();
-                        if (dayOfWeek === 0 || dayOfWeek === 6) {
-                            return; // Skip weekend dates
+                        // Skip if this date is in the excluded weekend dates
+                        if (isDateInExcludedList(dateObj, excludedWeekendDates)) {
+                            return;
                         }
                         
                         // Only future dates (coming due from report date)
@@ -8476,7 +8549,8 @@
                 }
             });
             
-            // Collect Facilities Expiring (only future dates from report date, exclude DM, exclude weekends)
+            // Collect Facilities Expiring (only future dates from report date, exclude DM)
+            // Exclude weekend dates if report date is last business day of month
             filteredData.forEach((row) => {
                 const maturityDate = row.Maturity_Date;
                 const facilityId = row.Facility_ID;
@@ -8485,10 +8559,9 @@
                 if (maturityDate && facilityId && managementStatus !== "DM") {
                     const dateObj = parseDate(maturityDate);
                     if (dateObj && dateObj >= maxReportDate) {
-                        // Exclude weekends (Saturday = 6, Sunday = 0)
-                        const dayOfWeek = dateObj.getDay();
-                        if (dayOfWeek === 0 || dayOfWeek === 6) {
-                            return; // Skip weekend dates
+                        // Skip if this date is in the excluded weekend dates
+                        if (isDateInExcludedList(dateObj, excludedWeekendDates)) {
+                            return;
                         }
                         
                         // Only future dates (expiring from report date)
@@ -11723,7 +11796,7 @@
             return names[selectedAmountType] || "Direct OS";
         }
 
-        // Get expiring data (CAs & Facilities expiring in next 3 months, excludes DM, excludes weekends, EMEA CAs require CA_Review = "Yes")
+        // Get expiring data (CAs & Facilities expiring in next 3 months, excludes DM, EMEA CAs require CA_Review = "Yes")
         function getExpiringData() {
             const dataSource =
                 filteredData.length > 0 ? filteredData : portfolioData;
@@ -11754,25 +11827,12 @@
                 const caExpiry = parseDate(row.CA_Expiration_Date);
                 const maturityDate = parseDate(row.Maturity_Date);
 
-                // Check CA expiring (exclude weekends)
-                let caExpiring = false;
-                if (caExpiry && caExpiry >= maxReportDate && caExpiry <= threeMonthsLater) {
-                    const dayOfWeek = caExpiry.getDay();
-                    // Only include if not Saturday (6) or Sunday (0)
-                    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-                        caExpiring = true;
-                    }
-                }
-                
-                // Check facility expiring (exclude weekends)
-                let facilityExpiring = false;
-                if (maturityDate && maturityDate >= maxReportDate && maturityDate <= threeMonthsLater) {
-                    const dayOfWeek = maturityDate.getDay();
-                    // Only include if not Saturday (6) or Sunday (0)
-                    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-                        facilityExpiring = true;
-                    }
-                }
+                const caExpiring =
+                    caExpiry && caExpiry >= maxReportDate && caExpiry <= threeMonthsLater;
+                const facilityExpiring =
+                    maturityDate &&
+                    maturityDate >= maxReportDate &&
+                    maturityDate <= threeMonthsLater;
 
                 // For CA expiring in EMEA, require CA_Review = "Yes"
                 if (caExpiring && region === "EMEA" && caReview !== "Yes") {
@@ -12941,13 +13001,13 @@
                                     <h5 class="font-semibold text-gray-900">Calculation Logic:</h5>
                                 </div>
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
-                                    <li><strong>CAs Expiring:</strong> Count unique CA_IDs where CA_Expiration_Date is within 90 days from the report date (excludes DM, excludes weekends - Saturday/Sunday). For EMEA region only, count unique Relationship_IDs (instead of CA_IDs) and requires CA_Review = "Yes".</li>
-                                    <li><strong>Facilities Expiring:</strong> Count Facility_IDs where Maturity_Date is within 90 days from the report date (excludes DM, excludes weekends - Saturday/Sunday)</li>
+                                    <li><strong>CAs Expiring:</strong> Count unique CA_IDs where CA_Expiration_Date is within 90 days from the report date (excludes DM). For EMEA region only, count unique Relationship_IDs (instead of CA_IDs) and requires CA_Review = "Yes".</li>
+                                    <li><strong>Facilities Expiring:</strong> Count Facility_IDs where Maturity_Date is within 90 days from the report date (excludes DM)</li>
                                     <li><strong>CAs Expired:</strong> Count unique CA_IDs where CA_Expiration_Date fell within the current reporting month (excludes DM). For EMEA region only, count unique Relationship_IDs instead of unique CA_IDs.</li>
                                     <li><strong>Facilities Expired:</strong> Count Facility_IDs where Maturity_Date fell within the current reporting month (excludes DM)</li>
                                     <li><strong>Amounts:</strong> Sum of Fac_Amount for respective CAs/facilities</li>
                                     <li><strong>Report Date Reference:</strong> All date comparisons (expiring/expired) are based on the report date from the data, not today's date</li>
-                                    <li><strong>Weekend Exclusion:</strong> CAs and Facilities expiring on Saturdays or Sundays are excluded from expiring counts</li>
+                                    <li><strong>Weekend Exclusion Logic:</strong> If the report date is the last business day of the month AND there are weekend dates (Saturday/Sunday) after the report date within the same month, any CA/Facility expiring on those weekend dates are excluded, and the chart shows the next 3 complete months starting from the following month. If the last business day has no weekend dates after it (e.g., Dec 31st on a weekday), the current month is included normally.</li>
                                 </ul>
                             </div>
                             

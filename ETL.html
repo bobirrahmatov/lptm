@@ -140,10 +140,6 @@
             border-color: #3b82f6;
             background-color: #eff6ff;
         }
-        .file-upload-zone.dragover {
-            border-color: #3b82f6;
-            background-color: #dbeafe;
-        }
 
         /* Region badge colors - TailAdmin blue theme */
         .badge-emea { background-color: #ecf3ff; color: #465fff; }
@@ -297,44 +293,6 @@
     </style>
     
     <!-- Block Confluence drag-drop interception -->
-    <script>
-        (function() {
-            // Block Confluence's drag-drop handlers from capturing file drops
-            // This runs immediately to set up event listeners before Confluence's handlers
-            
-            function blockConfluenceDragDrop(e) {
-                // Only block if we're over a file-upload-zone
-                const uploadZone = e.target.closest('.file-upload-zone');
-                if (uploadZone) {
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
-                }
-            }
-            
-            // Use capture phase to intercept before Confluence's handlers
-            document.addEventListener('dragenter', blockConfluenceDragDrop, true);
-            document.addEventListener('dragover', blockConfluenceDragDrop, true);
-            document.addEventListener('dragleave', blockConfluenceDragDrop, true);
-            document.addEventListener('drop', blockConfluenceDragDrop, true);
-            
-            // Also block on the whole page when dragging (prevents accidental drops outside zones)
-            document.addEventListener('dragover', function(e) {
-                // Prevent default to stop browser from navigating to the file
-                if (e.dataTransfer && e.dataTransfer.types.includes('Files')) {
-                    e.preventDefault();
-                }
-            }, false);
-            
-            document.addEventListener('drop', function(e) {
-                // Prevent default drop behavior unless over an upload zone
-                const uploadZone = e.target.closest('.file-upload-zone');
-                if (!uploadZone && e.dataTransfer && e.dataTransfer.types.includes('Files')) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
-            }, false);
-        })();
-    </script>
 </head>
 
 <body class="bg-gray-50 min-h-screen" x-data="dataLoaderApp()">
@@ -507,12 +465,7 @@
                                 <span class="text-sm font-medium text-gray-700">RAR7 Combined File</span>
                             </div>
                             <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
-                                @click="$refs.portfolioEmea.click()"
-                                @dragenter.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragover.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragleave.prevent.stop="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
-                                @drop.prevent.stop="handleDrop($event, 'portfolio', 'emea')"
-                                @dragend.prevent.stop>
+                                @click="$refs.portfolioEmea.click()">
                                 <input type="file" x-ref="portfolioEmea" class="hidden" accept=".xlsx,.xls" 
                                     @change="handleFileSelect($event, 'portfolio', 'emea')">
                                 <template x-if="!files.portfolio.emea">
@@ -556,12 +509,7 @@
                                 <span class="text-sm font-medium text-gray-700">BO Export</span>
                             </div>
                             <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
-                                @click="$refs.portfolioNam.click()"
-                                @dragenter.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragover.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragleave.prevent.stop="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
-                                @drop.prevent.stop="handleDrop($event, 'portfolio', 'nam')"
-                                @dragend.prevent.stop>
+                                @click="$refs.portfolioNam.click()">
                                 <input type="file" x-ref="portfolioNam" class="hidden" accept=".xlsx,.xls" 
                                     @change="handleFileSelect($event, 'portfolio', 'nam')">
                                 <template x-if="!files.portfolio.nam">
@@ -605,12 +553,7 @@
                                 <span class="text-sm font-medium text-gray-700">eOASIS File</span>
                             </div>
                             <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
-                                @click="$refs.portfolioApac.click()"
-                                @dragenter.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragover.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragleave.prevent.stop="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
-                                @drop.prevent.stop="handleDrop($event, 'portfolio', 'apac')"
-                                @dragend.prevent.stop>
+                                @click="$refs.portfolioApac.click()">
                                 <input type="file" x-ref="portfolioApac" class="hidden" accept=".xlsx,.xls" 
                                     @change="handleFileSelect($event, 'portfolio', 'apac')">
                                 <template x-if="!files.portfolio.apac">
@@ -674,12 +617,7 @@
                                 <span class="text-sm font-medium text-gray-700">Covenants File</span>
                             </div>
                             <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
-                                @click="$refs.covenantsEmea.click()"
-                                @dragenter.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragover.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragleave.prevent.stop="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
-                                @drop.prevent.stop="handleDrop($event, 'covenants', 'emea')"
-                                @dragend.prevent.stop>
+                                @click="$refs.covenantsEmea.click()">
                                 <input type="file" x-ref="covenantsEmea" class="hidden" accept=".xlsx,.xls" 
                                     @change="handleFileSelect($event, 'covenants', 'emea')">
                                 <template x-if="!files.covenants.emea">
@@ -723,12 +661,7 @@
                                 <span class="text-sm font-medium text-gray-700">Covenants File</span>
                             </div>
                             <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
-                                @click="$refs.covenantsNam.click()"
-                                @dragenter.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragover.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragleave.prevent.stop="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
-                                @drop.prevent.stop="handleDrop($event, 'covenants', 'nam')"
-                                @dragend.prevent.stop>
+                                @click="$refs.covenantsNam.click()">
                                 <input type="file" x-ref="covenantsNam" class="hidden" accept=".xlsx,.xls" 
                                     @change="handleFileSelect($event, 'covenants', 'nam')">
                                 <template x-if="!files.covenants.nam">
@@ -772,12 +705,7 @@
                                 <span class="text-sm font-medium text-gray-700">Covenants File</span>
                             </div>
                             <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
-                                @click="$refs.covenantsApac.click()"
-                                @dragenter.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragover.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragleave.prevent.stop="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
-                                @drop.prevent.stop="handleDrop($event, 'covenants', 'apac')"
-                                @dragend.prevent.stop>
+                                @click="$refs.covenantsApac.click()">
                                 <input type="file" x-ref="covenantsApac" class="hidden" accept=".xlsx,.xls" 
                                     @change="handleFileSelect($event, 'covenants', 'apac')">
                                 <template x-if="!files.covenants.apac">
@@ -852,12 +780,7 @@
                                 <span class="text-sm font-medium text-gray-700">CCM File</span>
                             </div>
                             <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
-                                @click="$refs.ccmEmea.click()"
-                                @dragenter.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragover.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragleave.prevent.stop="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
-                                @drop.prevent.stop="handleDrop($event, 'ccm', 'emea')"
-                                @dragend.prevent.stop>
+                                @click="$refs.ccmEmea.click()">
                                 <input type="file" x-ref="ccmEmea" class="hidden" accept=".xlsx,.xls" 
                                     @change="handleFileSelect($event, 'ccm', 'emea')">
                                 <template x-if="!files.ccm.emea">
@@ -901,12 +824,7 @@
                                 <span class="text-sm font-medium text-gray-700">CCM File</span>
                             </div>
                             <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
-                                @click="$refs.ccmNam.click()"
-                                @dragenter.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragover.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragleave.prevent.stop="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
-                                @drop.prevent.stop="handleDrop($event, 'ccm', 'nam')"
-                                @dragend.prevent.stop>
+                                @click="$refs.ccmNam.click()">
                                 <input type="file" x-ref="ccmNam" class="hidden" accept=".xlsx,.xls" 
                                     @change="handleFileSelect($event, 'ccm', 'nam')">
                                 <template x-if="!files.ccm.nam">
@@ -950,12 +868,7 @@
                                 <span class="text-sm font-medium text-gray-700">CCM File</span>
                             </div>
                             <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
-                                @click="$refs.ccmApac.click()"
-                                @dragenter.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragover.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragleave.prevent.stop="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
-                                @drop.prevent.stop="handleDrop($event, 'ccm', 'apac')"
-                                @dragend.prevent.stop>
+                                @click="$refs.ccmApac.click()">
                                 <input type="file" x-ref="ccmApac" class="hidden" accept=".xlsx,.xls" 
                                     @change="handleFileSelect($event, 'ccm', 'apac')">
                                 <template x-if="!files.ccm.apac">
@@ -1018,12 +931,7 @@
                                 <span class="text-sm font-medium text-gray-700">ROTCE Report</span>
                             </div>
                             <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
-                                @click="$refs.rotceFile.click()"
-                                @dragenter.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragover.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragleave.prevent.stop="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
-                                @drop.prevent.stop="handleDrop($event, 'rotce', 'global')"
-                                @dragend.prevent.stop>
+                                @click="$refs.rotceFile.click()">
                                 <input type="file" x-ref="rotceFile" class="hidden" accept=".xlsx,.xls" 
                                     @change="handleFileSelect($event, 'rotce', 'global')">
                                 <template x-if="!files.rotce.global">
@@ -1099,12 +1007,7 @@
                                 <span class="text-sm font-medium text-gray-700">Product_Mapping.xlsx</span>
                             </div>
                             <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-6 text-center cursor-pointer"
-                                @click="$refs.mappingFile.click()"
-                                @dragenter.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragover.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragleave.prevent.stop="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
-                                @drop.prevent.stop="handleMappingDrop($event)"
-                                @dragend.prevent.stop>
+                                @click="$refs.mappingFile.click()">
                                 <input type="file" x-ref="mappingFile" class="hidden" accept=".xlsx,.xls" 
                                     @change="handleMappingSelect($event)">
                                 <template x-if="!files.mapping">
@@ -2525,9 +2428,9 @@
                                             <span class="font-semibold text-orange-700">Past Due</span>
                                         </div>
                                         <div class="flex items-center gap-1">
-                                            <span class="font-mono bg-white px-1 rounded border border-orange-200 text-orange-600">Coming_Due</span>
+                                            <span class="font-mono bg-white px-1 rounded border border-orange-200 text-orange-600">1 to 30</span>
                                             <span class="text-gray-400">→</span>
-                                            <span class="font-semibold text-orange-700">Coming Due</span>
+                                            <span class="font-semibold text-orange-700">0-30 Days</span>
                                         </div>
                                     </div>
                                 </div>
@@ -2721,7 +2624,7 @@
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-3 py-2 font-mono">Past Due Category</td>
                                     <td class="px-3 py-2 font-mono text-brand-700">Past_Due_Category</td>
-                                    <td class="px-3 py-2 text-gray-500 text-[10px]">-</td>
+                                    <td class="px-3 py-2 text-orange-600 text-[10px]">Normalize format: "1 to 30 Days" → "0-30 Days"</td>
                                 </tr>
                                 <tr class="hover:bg-gray-50 bg-red-50/50">
                                     <td class="px-3 py-2 font-mono">Covenant Description</td>
@@ -2759,6 +2662,20 @@
                                     <div>
                                         <h4 class="text-sm font-semibold text-cyan-900 mb-1">Date Formatting (T2)</h4>
                                         <p class="text-xs text-cyan-700">All date columns standardized to <span class="font-mono font-semibold bg-white px-1.5 py-0.5 rounded border border-cyan-300">DD/MM/YYYY</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Status Normalization Note -->
+                            <div class="p-4 rounded-xl bg-orange-50 border border-orange-200">
+                                <div class="flex items-start gap-3">
+                                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500 text-white flex-shrink-0">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-orange-900 mb-1">Status Normalization (T3)</h4>
+                                        <p class="text-xs text-orange-700"><span class="font-mono font-semibold">Past_Due_Category</span> values normalized: <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-orange-300">"1 to 30 Days"</span> → <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-orange-300">"0-30 Days"</span></p>
                                     </div>
                                 </div>
                             </div>
@@ -3820,17 +3737,6 @@
                     event.target.value = '';
                 },
 
-                handleDrop(event, category, region) {
-                    event.target.closest('.file-upload-zone').classList.remove('dragover');
-                    const file = event.dataTransfer.files[0];
-                    if (file && this.isValidExcel(file)) {
-                        this.files[category][region] = file;
-                        this.showNotification(`${region.toUpperCase()} file uploaded successfully`, 'success');
-                    } else if (file) {
-                        this.showNotification('Please select a valid Excel file (.xlsx, .xls)', 'error');
-                    }
-                },
-
                 handleMappingSelect(event) {
                     const file = event.target.files[0];
                     if (file && this.isValidExcel(file)) {
@@ -3840,17 +3746,6 @@
                         this.showNotification('Please select a valid Excel file (.xlsx, .xls)', 'error');
                     }
                     event.target.value = '';
-                },
-
-                handleMappingDrop(event) {
-                    event.target.closest('.file-upload-zone').classList.remove('dragover');
-                    const file = event.dataTransfer.files[0];
-                    if (file && this.isValidExcel(file)) {
-                        this.files.mapping = file;
-                        this.showNotification('Product mapping file uploaded successfully', 'success');
-                    } else if (file) {
-                        this.showNotification('Please select a valid Excel file (.xlsx, .xls)', 'error');
-                    }
                 },
 
                 isValidExcel(file) {
@@ -3901,6 +3796,7 @@
                         portfolio: { emea: null, nam: null, apac: null },
                         covenants: { emea: null, nam: null, apac: null },
                         ccm: { emea: null, nam: null, apac: null },
+                        rotce: { global: null },
                         mapping: null
                     };
                     this.showNotification('All files cleared', 'info');
@@ -4714,6 +4610,31 @@
                         .replace(/Coming_Due/gi, 'Coming Due');
                 },
 
+                // Normalize Past Due Category values (standardize format)
+                normalizePastDueCategory(value) {
+                    if (!value) return '';
+                    const str = String(value).trim();
+                    
+                    // Normalize to standard format with hyphens
+                    // "1 to 30 Days" -> "0-30 Days"
+                    // "31 to 45 Days" -> "31-45 Days"
+                    // etc.
+                    
+                    const normalized = str
+                        .replace(/1\s+to\s+30\s+Days/gi, '0-30 Days')
+                        .replace(/31\s+to\s+45\s+Days/gi, '31-45 Days')
+                        .replace(/46\s+to\s+60\s+Days/gi, '46-60 Days')
+                        .replace(/61\s+to\s+90\s+Days/gi, '61-90 Days')
+                        .replace(/>90\s+Days/gi, '>90 Days')
+                        // Also handle if they come with hyphens already but inconsistent spacing
+                        .replace(/1-30\s+Days/gi, '0-30 Days')
+                        .replace(/31-45\s+Days/gi, '31-45 Days')
+                        .replace(/46-60\s+Days/gi, '46-60 Days')
+                        .replace(/61-90\s+Days/gi, '61-90 Days');
+                    
+                    return normalized;
+                },
+
                 // Map Covenant row to standard output format
                 mapCovenantRow(row, region) {
                     return {
@@ -4738,7 +4659,7 @@
                         Covenant_Deferred_Date: this.formatDate(row['Covenant Deferred Date'] || row['CovenantDeferredDate'] || ''),
                         Days_Past_Due: row['No of Days Past Due'] || row['NoofDaysPastDue'] || row['DaysPastDue'] || '',
                         Coming_Due_Past_Due: this.normalizeComingDuePastDue(row['Coming Due / Past Due'] || row['ComingDue/PastDue'] || row['ComingDuePastDue'] || ''),
-                        Past_Due_Category: row['Past Due Category'] || row['PastDueCategory'] || '',
+                        Past_Due_Category: this.normalizePastDueCategory(row['Past Due Category'] || row['PastDueCategory'] || ''),
                         Covenant_Description: row['Covenant Description'] || row['CovenantDescription'] || '',
                         Covenant_Remarks: row['Covenant Remarks'] || row['CovenantRemarks'] || '',
                         '45_Days_Past_Due_Date': this.formatDate(row['45 Days Past Due Date'] || row['45DaysPastDueDate'] || ''),
@@ -5311,8 +5232,13 @@
                     const str = String(dateValue).trim().toUpperCase();
                     
                     // Check for known invalid date texts
-                    const invalidTexts = ['DEMAND', 'ON DEMAND', 'N/A', 'TBD', 'TBC', '-', 'OPEN'];
+                    const invalidTexts = ['DEMAND', 'ON DEMAND', 'N/A', 'TBD', 'TBC', 'OPEN'];
                     if (invalidTexts.some(t => str.includes(t))) {
+                        return '';
+                    }
+                    
+                    // Special check for single dash which isn't a date
+                    if (str === '-' || str === '') {
                         return '';
                     }
                     
@@ -5320,8 +5246,9 @@
                     const formatted = this.formatDate(dateValue);
                     
                     // If formatDate returned the original string (couldn't parse), return empty
-                    if (formatted === String(dateValue)) {
-                        // Check if it looks like a valid date format
+                    // But only if it doesn't look like a date at all (no digits)
+                    if (formatted === String(dateValue).trim()) {
+                        // Check if it looks like a valid date format (has digits)
                         if (!/\d/.test(formatted)) {
                             return '';
                         }
@@ -5722,13 +5649,13 @@
                 },
 
                 // Format date to consistent DD/MM/YYYY format
-                // Handles: DD-MMM-YYYY, MM-DD-YYYY, MMM-DD-YYYY, YYYY-MM-DD, DD/MM/YYYY, MM/DD/YYYY, Excel serial numbers
+                // Handles: DD-MMM-YYYY, DD-MMM-YY, MM-DD-YYYY, MMM-DD-YYYY, YYYY-MM-DD, DD/MM/YYYY, MM/DD/YYYY, Excel serial numbers
                 formatDate(dateValue) {
                     if (!dateValue) return '';
                     
                     let date = null;
                     
-                    // Month name mapping
+                    // Month name mapping (case-insensitive)
                     const monthNames = {
                         'jan': 0, 'january': 0,
                         'feb': 1, 'february': 1,
@@ -5756,27 +5683,38 @@
                     else if (typeof dateValue === 'string') {
                         const str = dateValue.trim();
                         
-                        // Try DD-MMM-YYYY or DD/MMM/YYYY (e.g., 15-Jan-2024, 15/Jan/2024)
-                        let match = str.match(/^(\d{1,2})[-\/]([A-Za-z]{3,9})[-\/](\d{2,4})$/);
+                        // Try DD-MMM-YYYY or DD-MMM-YY (e.g., 29-NOV-2025, 29-NOV-25, also handles / separator)
+                        let match = str.match(/^(\d{1,2})[-\/]([A-Za-z]{3,9})[-\/](\d{2,4})$/i);
                         if (match) {
                             const day = parseInt(match[1]);
-                            const month = monthNames[match[2].toLowerCase()];
+                            const monthStr = match[2].toLowerCase();
+                            const month = monthNames[monthStr];
                             let year = parseInt(match[3]);
-                            if (year < 100) year += 2000;
-                            if (month !== undefined) {
+                            
+                            // Handle 2-digit year: 00-49 = 2000-2049, 50-99 = 1950-1999
+                            if (year < 100) {
+                                year += (year < 50) ? 2000 : 1900;
+                            }
+                            
+                            if (month !== undefined && day >= 1 && day <= 31) {
                                 date = new Date(year, month, day);
                             }
                         }
                         
                         // Try MMM-DD-YYYY or MMM/DD/YYYY (e.g., Jan-15-2024, Jan/15/2024)
                         if (!date) {
-                            match = str.match(/^([A-Za-z]{3,9})[-\/](\d{1,2})[-\/](\d{2,4})$/);
+                            match = str.match(/^([A-Za-z]{3,9})[-\/](\d{1,2})[-\/](\d{2,4})$/i);
                             if (match) {
-                                const month = monthNames[match[1].toLowerCase()];
+                                const monthStr = match[1].toLowerCase();
+                                const month = monthNames[monthStr];
                                 const day = parseInt(match[2]);
                                 let year = parseInt(match[3]);
-                                if (year < 100) year += 2000;
-                                if (month !== undefined) {
+                                
+                                if (year < 100) {
+                                    year += (year < 50) ? 2000 : 1900;
+                                }
+                                
+                                if (month !== undefined && day >= 1 && day <= 31) {
                                     date = new Date(year, month, day);
                                 }
                             }
@@ -5786,18 +5724,26 @@
                         if (!date) {
                             match = str.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/);
                             if (match) {
-                                date = new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]));
+                                const year = parseInt(match[1]);
+                                const month = parseInt(match[2]) - 1;
+                                const day = parseInt(match[3]);
+                                if (month >= 0 && month <= 11 && day >= 1 && day <= 31) {
+                                    date = new Date(year, month, day);
+                                }
                             }
                         }
                         
-                        // Try MM-DD-YYYY or MM/DD/YYYY (American format - assume if first number > 12, it's DD/MM)
+                        // Try MM-DD-YYYY or MM/DD/YYYY or DD-MM-YYYY or DD/MM/YYYY
                         if (!date) {
                             match = str.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{2,4})$/);
                             if (match) {
                                 let first = parseInt(match[1]);
                                 let second = parseInt(match[2]);
                                 let year = parseInt(match[3]);
-                                if (year < 100) year += 2000;
+                                
+                                if (year < 100) {
+                                    year += (year < 50) ? 2000 : 1900;
+                                }
                                 
                                 // If first number > 12, it must be DD/MM/YYYY
                                 if (first > 12) {
@@ -5832,7 +5778,7 @@
                     }
                     
                     // Return original value if parsing failed
-                    return String(dateValue);
+                    return String(dateValue).trim();
                 },
 
                 // Determine CCM status based on Next_CCM_Approval_Date vs Report_Date

@@ -4589,7 +4589,7 @@
 
                     // Transform data to standard format
                     const transformedData = rawData
-                        .filter(row => !this.isInternalCovenant(row)) // Filter out Internal Cov* rows
+                        .filter(row => !this.isInternalCovenant(row, region)) // Filter out Internal* rows (NAM/LATAM only)
                         .filter(row => Object.keys(row).length > 0) // Filter empty rows
                         .map(row => this.mapCovenantRow(row, region, regionsMapping))
                         .filter(row => row !== null); // Filter out SARG entries (returns null)
@@ -4598,13 +4598,23 @@
                 },
 
                 // Check if row is an internal covenant
-                isInternalCovenant(row) {
+                // Only applies to NAM and LATAM regions (EMEA and APAC keep all covenants)
+                isInternalCovenant(row, region) {
+                    const regionUpper = String(region).toUpperCase();
+                    
+                    // Only filter Internal covenants for NAM and LATAM
+                    if (regionUpper !== 'NAM' && regionUpper !== 'LATAM') {
+                        return false; // Don't filter for EMEA and APAC
+                    }
+                    
                     const description = row['Covenant Description'] || row['CovenantDescription'] || '';
                     const remarks = row['Covenant Remarks'] || row['CovenantRemarks'] || '';
                     
-                    // Check if description starts with "Internal Cov" OR remarks starts with "Internal"
-                    return String(description).trim().toLowerCase().startsWith('internal cov') ||
-                           String(remarks).trim().toLowerCase().startsWith('internal');
+                    // For NAM/LATAM: Check if description or remarks starts with "Internal"
+                    const descLower = String(description).trim().toLowerCase();
+                    const remarksLower = String(remarks).trim().toLowerCase();
+                    
+                    return descLower.startsWith('internal') || remarksLower.startsWith('internal');
                 },
 
                 // Normalize Coming Due/Past Due values (remove underscores)
@@ -4644,8 +4654,9 @@
 
                 // Map Covenant row to standard output format
                 mapCovenantRow(row, region, regionsMapping = {}) {
-                    // Get Origination_Unit from source data
+                    // Get Origination_Unit and Control_Unit from source data
                     const originationUnit = row['Originating Unit'] || row['OriginatingUnit'] || '';
+                    const controlUnit = row['Control Unit'] || row['ControlUnit'] || '';
                     
                     // Check if this is a SARG entry (should be excluded)
                     const originationUnitUpper = String(originationUnit).trim().toUpperCase();
@@ -4653,9 +4664,9 @@
                         return null; // Will be filtered out
                     }
                     
-                    // Lookup region based on Origination_Unit from Regions_Mapping.xlsx
-                    // Only applies to NAM and LATAM regions
-                    const mappedRegion = this.lookupRegionByOriginationUnit(originationUnit, region, regionsMapping);
+                    // Lookup region based on Control_Unit from Regions_Mapping.xlsx
+                    // Only applies to NAM and LATAM regions (uses Control_Unit, not Origination_Unit)
+                    const mappedRegion = this.lookupRegionByControlUnit(controlUnit, region, regionsMapping);
                     
                     return {
                         Report_Date: this.formatDate(row['As Of Date'] || row['AsOfDate'] || ''),
@@ -4683,7 +4694,7 @@
                         Covenant_Description: row['Covenant Description'] || row['CovenantDescription'] || '',
                         Covenant_Remarks: row['Covenant Remarks'] || row['CovenantRemarks'] || '',
                         '45_Days_Past_Due_Date': this.formatDate(row['45 Days Past Due Date'] || row['45DaysPastDueDate'] || ''),
-                        Control_Unit: row['Control Unit'] || row['ControlUnit'] || ''
+                        Control_Unit: controlUnit
                     };
                 },
 
@@ -4813,25 +4824,25 @@
                     return 'NAM';
                 },
 
-                // Lookup region based on Origination_Unit for Covenants data
+                // Lookup region based on Control_Unit for Covenants data
                 // Only applies mapping for NAM and LATAM regions
-                lookupRegionByOriginationUnit(originationUnit, defaultRegion, regionsMapping) {
+                lookupRegionByControlUnit(controlUnit, defaultRegion, regionsMapping) {
                     const defaultRegionUpper = defaultRegion.toUpperCase();
                     
-                    // Only apply Origination_Unit mapping for NAM and LATAM
+                    // Only apply Control_Unit mapping for NAM and LATAM
                     // EMEA and APAC should just use their file region
                     if (defaultRegionUpper !== 'NAM' && defaultRegionUpper !== 'LATAM') {
                         return defaultRegionUpper;
                     }
                     
-                    // If no regionsMapping or no originationUnit, use default region
-                    if (!regionsMapping || !originationUnit) {
+                    // If no regionsMapping or no controlUnit, use default region
+                    if (!regionsMapping || !controlUnit) {
                         return defaultRegionUpper;
                     }
                     
-                    // Normalize the origination unit for lookup
-                    const originationUnitStr = String(originationUnit).trim().toUpperCase();
-                    const mappedRegion = regionsMapping[originationUnitStr];
+                    // Normalize the control unit for lookup
+                    const controlUnitStr = String(controlUnit).trim().toUpperCase();
+                    const mappedRegion = regionsMapping[controlUnitStr];
                     
                     if (mappedRegion) {
                         const mappedRegionUpper = mappedRegion.toUpperCase();
@@ -5677,7 +5688,7 @@
                         mappedRow.Underwriter = row['Underwriter'] || '';
                         mappedRow.Next_CCM_Month_End = this.formatDate(row['Next CCM Month End']);
                         mappedRow.Next_CCM_Approval_Date = this.formatDate(row['Next CCM Approval Date']);
-                        mappedRow.CCM_Status = this.determineCCMStatus(row);
+                        mappedRow.CCM_Status = row['Status'] || '';
                     } else if (region === 'apac') {
                         // APAC column mapping
                         mappedRow.Region = row['Region'] || 'APAC';
@@ -5689,7 +5700,7 @@
                         mappedRow.Underwriter = row['Specialist'] || row['Underwriter'] || '';
                         mappedRow.Next_CCM_Month_End = this.formatDate(row['Next CCM Month End']);
                         mappedRow.Next_CCM_Approval_Date = this.formatDate(row['Next CCM Approval Date']);
-                        mappedRow.CCM_Status = this.determineCCMStatus(row);
+                        mappedRow.CCM_Status = row['Status'] || '';
                     } else if (region === 'emea') {
                         // EMEA column mapping - No Region column, fill with "EMEA"
                         mappedRow.Region = 'EMEA';
@@ -5704,7 +5715,7 @@
                         mappedRow.Next_CCM_Month_End = this.formatDate(row['Next CCM Month End']);
                         mappedRow.Next_CCM_Approval_Date = this.formatDate(row['Next CCM Approval Date']);
                         // EMEA has "Booked Elsewhere Facility?" column
-                        mappedRow.CCM_Status = this.determineCCMStatus(row);
+                        mappedRow.CCM_Status = row['Status'] || '';
                     }
 
                     return mappedRow;
@@ -5841,41 +5852,6 @@
                     
                     // Return original value if parsing failed
                     return String(dateValue).trim();
-                },
-
-                // Determine CCM status based on Next_CCM_Approval_Date vs Report_Date
-                determineCCMStatus(row) {
-                    const approvalDate = row['Next CCM Approval Date'];
-                    const reportDate = new Date(this.ccmReportDate);
-                    
-                    if (!approvalDate) {
-                        return 'Open';
-                    }
-                    
-                    const nextApprovalDate = this.parseDate(approvalDate);
-                    if (!nextApprovalDate) {
-                        return 'Open';
-                    }
-                    
-                    // Get year and month for comparison
-                    const reportYear = reportDate.getFullYear();
-                    const reportMonth = reportDate.getMonth();
-                    const approvalYear = nextApprovalDate.getFullYear();
-                    const approvalMonth = nextApprovalDate.getMonth();
-                    
-                    // Past Due: Next_CCM_Approval_Date is before the Report_Date month
-                    if (approvalYear < reportYear || 
-                        (approvalYear === reportYear && approvalMonth < reportMonth)) {
-                        return 'Past Due';
-                    }
-                    
-                    // Coming Due: Next_CCM_Approval_Date is in the same month as Report_Date
-                    if (approvalYear === reportYear && approvalMonth === reportMonth) {
-                        return 'Coming Due';
-                    }
-                    
-                    // Open: Next_CCM_Approval_Date is in the future (after Report_Date month)
-                    return 'Open';
                 },
 
                 // Parse date from various formats

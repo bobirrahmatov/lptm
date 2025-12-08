@@ -3204,64 +3204,6 @@
         let ccmData = []; // CCM (Credit Committee Memos) data from CCM_tw.xlsx
         let filteredData = [];
 
-        // Generate dummy data for testing (REMOVE THIS FUNCTION WHEN REAL DATA IS AVAILABLE)
-        function generateDummyData() {
-            const regions = ['APAC', 'EMEA', 'LATAM', 'NAM'];
-            const statuses = ['CM', 'DM'];
-            const commitmentStatuses = ['Committed', 'Uncommitted'];
-            const companies = ['Acme Corp', 'Global Industries', 'Tech Solutions Inc', 'Finance Group Ltd', 'Energy Partners', 'Manufacturing Co', 'Retail Corp', 'Healthcare Systems', 'Transport LLC', 'Communications Inc'];
-            const facilities = ['Term Loan', 'Revolving Credit', 'Letter of Credit', 'Bridge Loan', 'Working Capital'];
-            const productPrograms = ['Commercial Banking', 'Trade Finance', 'Project Finance', 'Asset Finance', 'Structured Finance'];
-            
-            const dummyData = [];
-            const today = new Date();
-            
-            for (let i = 0; i < 250; i++) {
-                const facilityAmount = Math.random() * 50000000 + 1000000;
-                const directOS = facilityAmount * (Math.random() * 0.7 + 0.1);
-                const contingentOS = facilityAmount * (Math.random() * 0.2);
-                const pseOS = facilityAmount * (Math.random() * 0.1);
-                const unusedCommitted = facilityAmount - directOS - contingentOS - pseOS;
-                
-                dummyData.push({
-                    Facility_ID: `FAC-${String(i + 1000).padStart(6, '0')}`,
-                    Facility_Name: `${facilities[i % facilities.length]} ${i + 1}`,
-                    Relationship_Name: companies[i % companies.length],
-                    Relationship_ID: `REL-${String((i % companies.length) + 100).padStart(5, '0')}`,
-                    Region: regions[i % regions.length],
-                    Status: statuses[i % statuses.length],
-                    Commitment_Status: commitmentStatuses[i % commitmentStatuses.length],
-                    Product_Program: productPrograms[i % productPrograms.length],
-                    Facility_Amount: facilityAmount,
-                    Direct_OS: directOS,
-                    Contingent_OS: contingentOS,
-                    PSE_OS: pseOS,
-                    OSUC: directOS + contingentOS + pseOS + unusedCommitted,
-                    Unused_Committed: unusedCommitted,
-                    Origination_Date: new Date(today.getFullYear() - Math.floor(Math.random() * 3), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
-                    Maturity_Date: new Date(today.getFullYear() + Math.floor(Math.random() * 5) + 1, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
-                    CA_Expiration_Date: new Date(today.getFullYear(), today.getMonth() + Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
-                    Facility_First_Approval_Date: new Date(today.getFullYear() - Math.floor(Math.random() * 2), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0],
-                    Report_Date: today.toISOString().split('T')[0],
-                    ROTCE: (Math.random() * 20 + 5).toFixed(2),
-                    Interest_Rate: (Math.random() * 5 + 2).toFixed(2),
-                    Risk_Rating: ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C'][Math.floor(Math.random() * 7)],
-                    Industry: ['Technology', 'Healthcare', 'Manufacturing', 'Retail', 'Energy', 'Finance', 'Transportation'][Math.floor(Math.random() * 7)],
-                    Country: ['USA', 'UK', 'Germany', 'Japan', 'Singapore', 'Brazil', 'Australia'][Math.floor(Math.random() * 7)],
-                    Currency: ['USD', 'EUR', 'GBP', 'JPY', 'SGD'][Math.floor(Math.random() * 5)],
-                    Facility_Type: facilities[i % facilities.length],
-                    Borrower_Name: companies[i % companies.length],
-                    Credit_Officer: ['John Smith', 'Jane Doe', 'Robert Johnson', 'Sarah Williams', 'Michael Brown'][Math.floor(Math.random() * 5)],
-                    Portfolio_Manager: ['Alice Chen', 'Bob Martinez', 'Carol White', 'David Lee', 'Emily Davis'][Math.floor(Math.random() * 5)]
-                });
-            }
-            
-            return dummyData;
-        }
-
-        // TEMPORARY: Load dummy data automatically (COMMENT OUT WHEN REAL DATA IS AVAILABLE)
-        portfolioData = generateDummyData();
-        console.log('✅ Loaded dummy data:', portfolioData.length, 'records');
 
         let expirationChartInstance = null;
         let searchDebounceTimer = null;
@@ -3374,14 +3316,8 @@
                 console.log("✓ XLSX library loaded successfully");
             }
             
-            // TEMPORARY: Use dummy data instead of loading from Confluence
-            // Comment out the next 3 lines and uncomment loadDataFromCSV() when real data is available
-            calculateMetrics();
-            updateAllCharts();
-            console.log('🎯 Dashboard initialized with dummy data');
-            
-            // Load data from Confluence attachment (COMMENTED OUT FOR TESTING)
-            // loadDataFromCSV();
+            // Load data from Confluence attachment
+            loadDataFromCSV();
             
             // Initialize charts - show loading/no-data state immediately
             setTimeout(() => {

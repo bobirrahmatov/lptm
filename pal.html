@@ -8027,14 +8027,15 @@
             // Initialize all 3 months
             next3Months.forEach((monthYear) => {
                 monthlyData[monthYear] = {
-                    casComingDue: new Set(),
-                    facilitiesExpiring: new Set(), // Changed from array to Set for unique Facility IDs
+                    casComingDue: new Set(), // Non-EMEA CAIDs
+                    casComingDueEMEAByRelationship: new Set(), // EMEA Relationship_IDs
+                    facilitiesExpiring: new Set(), // Unique Facility IDs
                     caAmounts: { tfa: 0, direct: 0, contingent: 0, pse: 0 },
                     facilityAmounts: { tfa: 0, direct: 0, contingent: 0, pse: 0 },
                 };
             });
             
-            // Collect CAs Coming Due (only future dates from report date, exclude DM, EMEA requires CA_Review = "Yes")
+            // Collect CAs Coming Due (only future dates from report date, exclude DM, exclude weekends, EMEA requires CA_Review = "Yes" and uses Relationship_ID)
             portfolioData.forEach((row) => {
                 const caExpirationDate = row.CA_Expiration_Date;
                 const caid = row.CAID;
@@ -8042,14 +8043,15 @@
                 const region = (row.Region || "").toUpperCase();
                 const caReview = (row.CA_Review || "").trim();
                 
-                if (caExpirationDate && caid && managementStatus !== "DM") {
-                    // For EMEA, also check CA_Review = "Yes"
-                    if (region === "EMEA" && caReview !== "Yes") {
-                        return; // Skip this row for EMEA if CA_Review is not "Yes"
-                    }
-                    
+                if (caExpirationDate && managementStatus !== "DM") {
                     const dateObj = parseDate(caExpirationDate);
                     if (dateObj && dateObj >= maxReportDate) {
+                        // Exclude weekends (Saturday = 6, Sunday = 0)
+                        const dayOfWeek = dateObj.getDay();
+                        if (dayOfWeek === 0 || dayOfWeek === 6) {
+                            return; // Skip weekend dates
+                        }
+                        
                         // Only future dates (coming due from report date)
                         const year = dateObj.getFullYear();
                         const month = String(dateObj.getMonth() + 1).padStart(2, "0");
@@ -8057,24 +8059,45 @@
                         
                         // Only include if it's in our next 3 months
                         if (next3Months.includes(monthYear)) {
-                            monthlyData[monthYear].casComingDue.add(caid);
-                            // Accumulate amounts for CAs (sum ALL lines for each CA)
-                            monthlyData[monthYear].caAmounts.tfa += parseNumber(
-                                row.Fac_Amount || row.Facility_Amount
-                            );
-                            monthlyData[monthYear].caAmounts.direct += parseNumber(
-                                row.Direct_OS
-                            );
-                            monthlyData[monthYear].caAmounts.contingent += parseNumber(
-                                row.Contingent_OS
-                            );
-                            monthlyData[monthYear].caAmounts.pse += parseNumber(row.PSE_OS);
+                            // For EMEA: count unique Relationship_IDs with CA_Review = "Yes"
+                            if (region === "EMEA") {
+                                if (caReview === "Yes" && row.Relationship_ID) {
+                                    monthlyData[monthYear].casComingDueEMEAByRelationship.add(row.Relationship_ID);
+                                    // Accumulate amounts for EMEA CAs (sum ALL lines)
+                                    monthlyData[monthYear].caAmounts.tfa += parseNumber(
+                                        row.Fac_Amount || row.Facility_Amount
+                                    );
+                                    monthlyData[monthYear].caAmounts.direct += parseNumber(
+                                        row.Direct_OS
+                                    );
+                                    monthlyData[monthYear].caAmounts.contingent += parseNumber(
+                                        row.Contingent_OS
+                                    );
+                                    monthlyData[monthYear].caAmounts.pse += parseNumber(row.PSE_OS);
+                                }
+                            } else {
+                                // For non-EMEA: count unique CAIDs
+                                if (caid) {
+                                    monthlyData[monthYear].casComingDue.add(caid);
+                                    // Accumulate amounts for non-EMEA CAs (sum ALL lines)
+                                    monthlyData[monthYear].caAmounts.tfa += parseNumber(
+                                        row.Fac_Amount || row.Facility_Amount
+                                    );
+                                    monthlyData[monthYear].caAmounts.direct += parseNumber(
+                                        row.Direct_OS
+                                    );
+                                    monthlyData[monthYear].caAmounts.contingent += parseNumber(
+                                        row.Contingent_OS
+                                    );
+                                    monthlyData[monthYear].caAmounts.pse += parseNumber(row.PSE_OS);
+                                }
+                            }
                         }
                     }
                 }
             });
             
-            // Collect Facilities Expiring (only future dates from report date, exclude DM)
+            // Collect Facilities Expiring (only future dates from report date, exclude DM, exclude weekends)
             portfolioData.forEach((row) => {
                 const maturityDate = row.Maturity_Date;
                 const facilityId = row.Facility_ID;
@@ -8083,6 +8106,12 @@
                 if (maturityDate && facilityId && managementStatus !== "DM") {
                     const dateObj = parseDate(maturityDate);
                     if (dateObj && dateObj >= maxReportDate) {
+                        // Exclude weekends (Saturday = 6, Sunday = 0)
+                        const dayOfWeek = dateObj.getDay();
+                        if (dayOfWeek === 0 || dayOfWeek === 6) {
+                            return; // Skip weekend dates
+                        }
+                        
                         // Only future dates (expiring from report date)
                         const year = dateObj.getFullYear();
                         const month = String(dateObj.getMonth() + 1).padStart(2, "0");
@@ -8115,7 +8144,7 @@
             });
 
             const casComingDueData = next3Months.map(
-                (month) => monthlyData[month].casComingDue.size
+                (month) => monthlyData[month].casComingDue.size + monthlyData[month].casComingDueEMEAByRelationship.size
             );
             const facilitiesExpiringData = next3Months.map(
                 (month) => monthlyData[month].facilitiesExpiring.size // Changed from .length to .size
@@ -8236,8 +8265,8 @@
                         let html = `<div class="apexcharts-tooltip-custom" style="padding: 12px; min-width: 200px; background: #ffffff; color: #1f2937; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border: 1px solid #e5e7eb;">`;
                         html += `<div style="font-weight: 600; margin-bottom: 8px; font-size: 13px; color: #1f2937;">${monthName}</div>`;
                         
-                        // CAs Coming Due
-                        const casCount = monthData.casComingDue.size;
+                        // CAs Coming Due (combine non-EMEA CAIDs + EMEA Relationship_IDs)
+                        const casCount = monthData.casComingDue.size + monthData.casComingDueEMEAByRelationship.size;
                         if (casCount > 0) {
                             html += `<div style="margin-bottom: 6px;">`;
                             html += `<div style="display: flex; align-items: center; margin-bottom: 4px;">`;
@@ -8377,14 +8406,15 @@
             // Initialize all 3 months
             next3Months.forEach((monthYear) => {
                 monthlyData[monthYear] = {
-                    casComingDue: new Set(),
-                    facilitiesExpiring: new Set(), // Changed from array to Set for unique Facility IDs
+                    casComingDue: new Set(), // Non-EMEA CAIDs
+                    casComingDueEMEAByRelationship: new Set(), // EMEA Relationship_IDs
+                    facilitiesExpiring: new Set(), // Unique Facility IDs
                     caAmounts: { tfa: 0, direct: 0, contingent: 0, pse: 0 },
                     facilityAmounts: { tfa: 0, direct: 0, contingent: 0, pse: 0 },
                 };
             });
             
-            // Collect CAs Coming Due (only future dates from report date, exclude DM, EMEA requires CA_Review = "Yes")
+            // Collect CAs Coming Due (only future dates from report date, exclude DM, exclude weekends, EMEA requires CA_Review = "Yes" and uses Relationship_ID)
             filteredData.forEach((row) => {
                 const caExpirationDate = row.CA_Expiration_Date;
                 const caid = row.CAID;
@@ -8392,14 +8422,15 @@
                 const region = (row.Region || "").toUpperCase();
                 const caReview = (row.CA_Review || "").trim();
                 
-                if (caExpirationDate && caid && managementStatus !== "DM") {
-                    // For EMEA, also check CA_Review = "Yes"
-                    if (region === "EMEA" && caReview !== "Yes") {
-                        return; // Skip this row for EMEA if CA_Review is not "Yes"
-                    }
-                    
+                if (caExpirationDate && managementStatus !== "DM") {
                     const dateObj = parseDate(caExpirationDate);
                     if (dateObj && dateObj >= maxReportDate) {
+                        // Exclude weekends (Saturday = 6, Sunday = 0)
+                        const dayOfWeek = dateObj.getDay();
+                        if (dayOfWeek === 0 || dayOfWeek === 6) {
+                            return; // Skip weekend dates
+                        }
+                        
                         // Only future dates (coming due from report date)
                         const year = dateObj.getFullYear();
                         const month = String(dateObj.getMonth() + 1).padStart(2, "0");
@@ -8407,24 +8438,45 @@
                         
                         // Only include if it's in our next 3 months
                         if (next3Months.includes(monthYear)) {
-                            monthlyData[monthYear].casComingDue.add(caid);
-                            // Accumulate amounts for CAs (sum ALL lines for each CA)
-                            monthlyData[monthYear].caAmounts.tfa += parseNumber(
-                                row.Fac_Amount || row.Facility_Amount
-                            );
-                            monthlyData[monthYear].caAmounts.direct += parseNumber(
-                                row.Direct_OS
-                            );
-                            monthlyData[monthYear].caAmounts.contingent += parseNumber(
-                                row.Contingent_OS
-                            );
-                            monthlyData[monthYear].caAmounts.pse += parseNumber(row.PSE_OS);
+                            // For EMEA: count unique Relationship_IDs with CA_Review = "Yes"
+                            if (region === "EMEA") {
+                                if (caReview === "Yes" && row.Relationship_ID) {
+                                    monthlyData[monthYear].casComingDueEMEAByRelationship.add(row.Relationship_ID);
+                                    // Accumulate amounts for EMEA CAs (sum ALL lines)
+                                    monthlyData[monthYear].caAmounts.tfa += parseNumber(
+                                        row.Fac_Amount || row.Facility_Amount
+                                    );
+                                    monthlyData[monthYear].caAmounts.direct += parseNumber(
+                                        row.Direct_OS
+                                    );
+                                    monthlyData[monthYear].caAmounts.contingent += parseNumber(
+                                        row.Contingent_OS
+                                    );
+                                    monthlyData[monthYear].caAmounts.pse += parseNumber(row.PSE_OS);
+                                }
+                            } else {
+                                // For non-EMEA: count unique CAIDs
+                                if (caid) {
+                                    monthlyData[monthYear].casComingDue.add(caid);
+                                    // Accumulate amounts for non-EMEA CAs (sum ALL lines)
+                                    monthlyData[monthYear].caAmounts.tfa += parseNumber(
+                                        row.Fac_Amount || row.Facility_Amount
+                                    );
+                                    monthlyData[monthYear].caAmounts.direct += parseNumber(
+                                        row.Direct_OS
+                                    );
+                                    monthlyData[monthYear].caAmounts.contingent += parseNumber(
+                                        row.Contingent_OS
+                                    );
+                                    monthlyData[monthYear].caAmounts.pse += parseNumber(row.PSE_OS);
+                                }
+                            }
                         }
                     }
                 }
             });
             
-            // Collect Facilities Expiring (only future dates from report date, exclude DM)
+            // Collect Facilities Expiring (only future dates from report date, exclude DM, exclude weekends)
             filteredData.forEach((row) => {
                 const maturityDate = row.Maturity_Date;
                 const facilityId = row.Facility_ID;
@@ -8433,6 +8485,12 @@
                 if (maturityDate && facilityId && managementStatus !== "DM") {
                     const dateObj = parseDate(maturityDate);
                     if (dateObj && dateObj >= maxReportDate) {
+                        // Exclude weekends (Saturday = 6, Sunday = 0)
+                        const dayOfWeek = dateObj.getDay();
+                        if (dayOfWeek === 0 || dayOfWeek === 6) {
+                            return; // Skip weekend dates
+                        }
+                        
                         // Only future dates (expiring from report date)
                         const year = dateObj.getFullYear();
                         const month = String(dateObj.getMonth() + 1).padStart(2, "0");
@@ -8465,7 +8523,7 @@
             });
 
             const casComingDueData = next3Months.map(
-                (month) => monthlyData[month].casComingDue.size
+                (month) => monthlyData[month].casComingDue.size + monthlyData[month].casComingDueEMEAByRelationship.size
             );
             const facilitiesExpiringData = next3Months.map(
                 (month) => monthlyData[month].facilitiesExpiring.size // Changed from .length to .size
@@ -8583,8 +8641,8 @@
                         let html = `<div class="apexcharts-tooltip-custom" style="padding: 12px; min-width: 200px; background: #ffffff; color: #1f2937; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border: 1px solid #e5e7eb;">`;
                         html += `<div style="font-weight: 600; margin-bottom: 8px; font-size: 13px; color: #1f2937;">${monthName}</div>`;
                         
-                        // CAs Coming Due
-                        const casCount = monthData.casComingDue.size;
+                        // CAs Coming Due (combine non-EMEA CAIDs + EMEA Relationship_IDs)
+                        const casCount = monthData.casComingDue.size + monthData.casComingDueEMEAByRelationship.size;
                         if (casCount > 0) {
                             html += `<div style="margin-bottom: 6px;">`;
                             html += `<div style="display: flex; align-items: center; margin-bottom: 4px;">`;
@@ -11665,7 +11723,7 @@
             return names[selectedAmountType] || "Direct OS";
         }
 
-        // Get expiring data (CAs & Facilities expiring in next 3 months, excludes DM, EMEA CAs require CA_Review = "Yes")
+        // Get expiring data (CAs & Facilities expiring in next 3 months, excludes DM, excludes weekends, EMEA CAs require CA_Review = "Yes")
         function getExpiringData() {
             const dataSource =
                 filteredData.length > 0 ? filteredData : portfolioData;
@@ -11696,12 +11754,25 @@
                 const caExpiry = parseDate(row.CA_Expiration_Date);
                 const maturityDate = parseDate(row.Maturity_Date);
 
-                const caExpiring =
-                    caExpiry && caExpiry >= maxReportDate && caExpiry <= threeMonthsLater;
-                const facilityExpiring =
-                    maturityDate &&
-                    maturityDate >= maxReportDate &&
-                    maturityDate <= threeMonthsLater;
+                // Check CA expiring (exclude weekends)
+                let caExpiring = false;
+                if (caExpiry && caExpiry >= maxReportDate && caExpiry <= threeMonthsLater) {
+                    const dayOfWeek = caExpiry.getDay();
+                    // Only include if not Saturday (6) or Sunday (0)
+                    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                        caExpiring = true;
+                    }
+                }
+                
+                // Check facility expiring (exclude weekends)
+                let facilityExpiring = false;
+                if (maturityDate && maturityDate >= maxReportDate && maturityDate <= threeMonthsLater) {
+                    const dayOfWeek = maturityDate.getDay();
+                    // Only include if not Saturday (6) or Sunday (0)
+                    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                        facilityExpiring = true;
+                    }
+                }
 
                 // For CA expiring in EMEA, require CA_Review = "Yes"
                 if (caExpiring && region === "EMEA" && caReview !== "Yes") {
@@ -12870,12 +12941,13 @@
                                     <h5 class="font-semibold text-gray-900">Calculation Logic:</h5>
                                 </div>
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
-                                    <li><strong>CAs Expiring:</strong> Count unique CA_IDs where CA_Expiration_Date is within 90 days from the report date (excludes DM). For EMEA region only, also requires CA_Review = "Yes".</li>
-                                    <li><strong>Facilities Expiring:</strong> Count Facility_IDs where Maturity_Date is within 90 days from the report date (excludes DM)</li>
+                                    <li><strong>CAs Expiring:</strong> Count unique CA_IDs where CA_Expiration_Date is within 90 days from the report date (excludes DM, excludes weekends - Saturday/Sunday). For EMEA region only, count unique Relationship_IDs (instead of CA_IDs) and requires CA_Review = "Yes".</li>
+                                    <li><strong>Facilities Expiring:</strong> Count Facility_IDs where Maturity_Date is within 90 days from the report date (excludes DM, excludes weekends - Saturday/Sunday)</li>
                                     <li><strong>CAs Expired:</strong> Count unique CA_IDs where CA_Expiration_Date fell within the current reporting month (excludes DM). For EMEA region only, count unique Relationship_IDs instead of unique CA_IDs.</li>
                                     <li><strong>Facilities Expired:</strong> Count Facility_IDs where Maturity_Date fell within the current reporting month (excludes DM)</li>
                                     <li><strong>Amounts:</strong> Sum of Fac_Amount for respective CAs/facilities</li>
                                     <li><strong>Report Date Reference:</strong> All date comparisons (expiring/expired) are based on the report date from the data, not today's date</li>
+                                    <li><strong>Weekend Exclusion:</strong> CAs and Facilities expiring on Saturdays or Sundays are excluded from expiring counts</li>
                                 </ul>
                             </div>
                             

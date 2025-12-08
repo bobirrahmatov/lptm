@@ -2189,7 +2189,7 @@
                                 <tr class="hover:bg-gray-50 bg-cyan-50/30">
                                     <td class="px-2 py-1 font-mono font-medium">Report_Date</td>
                                     <td class="px-2 py-1 font-mono text-blue-700">As Of Date</td>
-                                    <td class="px-2 py-1 font-mono text-brand-600">Position Date</td>
+                                    <td class="px-2 py-1 font-mono text-brand-600">Position Date <span class="text-cyan-500">(DD-MMM-YYYY) → DD/MM/YYYY</span></td>
                                     <td class="px-2 py-1 font-mono text-gray-600">As Of Date</td>
                                 </tr>
                                 <tr class="hover:bg-gray-50">
@@ -2315,7 +2315,7 @@
                                 <tr class="hover:bg-gray-50 bg-cyan-50/30">
                                     <td class="px-2 py-1 font-mono font-medium">Maturity_Date</td>
                                     <td class="px-2 py-1 font-mono text-blue-700">Facility Maturity Date <span class="text-cyan-500">→ DD/MM/YYYY</span></td>
-                                    <td class="px-2 py-1 font-mono text-brand-600">Mainline Maturity Date <span class="text-cyan-500">→ DD/MM/YYYY</span></td>
+                                    <td class="px-2 py-1 font-mono text-brand-600">Mainline Maturity Date <span class="text-cyan-500">(DD-MMM-YYYY) → DD/MM/YYYY</span></td>
                                     <td class="px-2 py-1 font-mono text-gray-600">Maturity Date Or Demand <span class="text-cyan-500">→ DD/MM/YYYY</span></td>
                                 </tr>
                                 <tr class="hover:bg-gray-50">
@@ -2327,7 +2327,7 @@
                                 <tr class="hover:bg-gray-50 bg-cyan-50/30">
                                     <td class="px-2 py-1 font-mono font-medium">CA_Expiration_Date</td>
                                     <td class="px-2 py-1 font-mono text-blue-700">CA Maturity Date <span class="text-cyan-500">→ DD/MM/YYYY</span></td>
-                                    <td class="px-2 py-1 font-mono text-brand-600">CA Expiration Date <span class="text-cyan-500">→ DD/MM/YYYY</span></td>
+                                    <td class="px-2 py-1 font-mono text-brand-600">CA Expiration Date <span class="text-cyan-500">(DD/MM/YYYY) → DD/MM/YYYY</span></td>
                                     <td class="px-2 py-1 font-mono text-gray-600">CA Expiration Date <span class="text-cyan-500">→ DD/MM/YYYY</span></td>
                                 </tr>
                                 <tr class="hover:bg-gray-50">
@@ -2351,7 +2351,7 @@
                                 <tr class="hover:bg-gray-50 bg-cyan-50/30">
                                     <td class="px-2 py-1 font-mono font-medium">Origination_Date</td>
                                     <td class="px-2 py-1 font-mono text-blue-700">Origination Date <span class="text-cyan-500">→ DD/MM/YYYY</span></td>
-                                    <td class="px-2 py-1 font-mono text-brand-600">Original Origination Date <span class="text-cyan-500">→ DD/MM/YYYY</span></td>
+                                    <td class="px-2 py-1 font-mono text-brand-600">Original Origination Date <span class="text-cyan-500">(dd-MMM-YY) → DD/MM/YYYY</span></td>
                                     <td class="px-2 py-1 font-mono text-gray-600">Origination Date <span class="text-cyan-500">→ DD/MM/YYYY</span></td>
                                 </tr>
                                 <tr class="hover:bg-gray-50 bg-blue-50/30">
@@ -2540,8 +2540,10 @@
                                     <p class="text-[10px] text-gray-600 mb-1">Remove rows where:</p>
                                     <div class="flex flex-wrap gap-1">
                                         <span class="px-1 py-0.5 rounded text-[9px] font-mono bg-white border border-red-200 text-red-600">Internal Cov*</span>
+                                        <span class="text-[9px] text-gray-500">in Description or</span>
+                                        <span class="px-1 py-0.5 rounded text-[9px] font-mono bg-white border border-red-200 text-red-600">Internal*</span>
+                                        <span class="text-[9px] text-gray-500">in Remarks</span>
                                     </div>
-                                    <p class="text-[9px] text-gray-500 mt-1">in Covenant Description</p>
                                 </div>
                             </div>
 
@@ -2726,10 +2728,10 @@
                                     <td class="px-3 py-2 font-mono text-brand-700">Covenant_Description</td>
                                     <td class="px-3 py-2 text-red-600 text-[10px]">Filter: Remove "Internal Cov*" rows</td>
                                 </tr>
-                                <tr class="hover:bg-gray-50">
+                                <tr class="hover:bg-gray-50 bg-red-50/50">
                                     <td class="px-3 py-2 font-mono">Covenant Remarks</td>
                                     <td class="px-3 py-2 font-mono text-brand-700">Covenant_Remarks</td>
-                                    <td class="px-3 py-2 text-gray-500 text-[10px]">-</td>
+                                    <td class="px-3 py-2 text-red-600 text-[10px]">Filter: Remove "Internal*" rows</td>
                                 </tr>
                                 <tr class="hover:bg-gray-50 bg-cyan-50/50">
                                     <td class="px-3 py-2 font-mono">45 Days Past Due Date</td>
@@ -2770,7 +2772,7 @@
                                     </div>
                                     <div>
                                         <h4 class="text-sm font-semibold text-red-900 mb-1">Row Filtering (T4)</h4>
-                                        <p class="text-xs text-red-700">Rows where <span class="font-mono font-semibold">Covenant Description</span> starts with <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-red-300">"Internal Cov"</span> are removed</p>
+                                        <p class="text-xs text-red-700">Rows where <span class="font-mono font-semibold">Covenant Description</span> starts with <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-red-300">"Internal Cov"</span> or <span class="font-mono font-semibold">Covenant Remarks</span> starts with <span class="font-mono bg-white px-1.5 py-0.5 rounded border border-red-300">"Internal"</span> are removed</p>
                                     </div>
                                 </div>
                             </div>
@@ -3673,14 +3675,23 @@
                                         <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-50 text-brand-500 font-bold text-xs flex-shrink-0">T4</div>
                                         <div>
                                             <h4 class="font-medium text-gray-800 text-sm mb-1">Internal Covenant Filter</h4>
-                                            <p class="text-sm text-gray-500 mb-2">Rows where <code class="px-1.5 py-0.5 bg-brand-50 text-brand-600 rounded text-xs">Covenant Description</code> starts with "Internal Cov" are filtered out:</p>
-                                            <div class="bg-gray-50 rounded-lg p-2.5 border border-gray-200">
+                                            <p class="text-sm text-gray-500 mb-2">Rows are filtered out if either condition is met:</p>
+                                            <div class="bg-gray-50 rounded-lg p-2.5 border border-gray-200 space-y-2">
                                                 <div class="flex items-center gap-2 text-sm text-gray-600">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
                                                     </svg>
+                                                    <code class="px-1.5 py-0.5 bg-brand-50 text-brand-600 rounded text-xs">Covenant Description</code>
+                                                    <span class="text-xs">starts with</span>
                                                     <span class="font-mono text-xs">Internal Cov*</span>
-                                                    <span class="text-xs">— Excluded from output</span>
+                                                </div>
+                                                <div class="flex items-center gap-2 text-sm text-gray-600">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                                                    </svg>
+                                                    <code class="px-1.5 py-0.5 bg-brand-50 text-brand-600 rounded text-xs">Covenant Remarks</code>
+                                                    <span class="text-xs">starts with</span>
+                                                    <span class="font-mono text-xs">Internal*</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -4683,14 +4694,14 @@
                     return transformedData;
                 },
 
-                // Check if row is an internal covenant (starts with "Internal Cov")
+                // Check if row is an internal covenant
                 isInternalCovenant(row) {
                     const description = row['Covenant Description'] || row['CovenantDescription'] || '';
                     const remarks = row['Covenant Remarks'] || row['CovenantRemarks'] || '';
                     
-                    // Check if either description or remarks starts with "Internal Cov"
+                    // Check if description starts with "Internal Cov" OR remarks starts with "Internal"
                     return String(description).trim().toLowerCase().startsWith('internal cov') ||
-                           String(remarks).trim().toLowerCase().startsWith('internal cov');
+                           String(remarks).trim().toLowerCase().startsWith('internal');
                 },
 
                 // Normalize Coming Due/Past Due values (remove underscores)
@@ -5421,7 +5432,7 @@
                     // APAC uses Product Program Name as Primary_Key for category lookup
                     const categoryLookup = this.lookupCategoryMapping(productProgramName, 'apac', pseMappingData);
                     
-                    // Try multiple column names for Report Date
+                    // Try multiple column names for Report Date (Position Date is in DD-MMM-YYYY format)
                     const reportDate = row['Position Date'] || row['PositionDate'] || row['Report Date'] || 
                                        row['ReportDate'] || row['As Of Date'] || row['AsOfDate'] || 
                                        row['Data Date'] || row['DataDate'] || '';
@@ -5439,14 +5450,14 @@
                         Risk_Category: row['Risk Category'] || '',
                         Relationship_ID: row['Relationship Id'] || row['Relationship ID'] || '',
                         Relationship_Name: '',
-                        CAID: row['CA No.'] || row['CA No'] || '',
+                        CAID: row['CA No.'] || row['CA No'] || row['CANo'] || row['CANo.'] || '',
                         Lead_Underwriter: this.normalizeUnderwriterName(row['Investment Finance Lead Underwriter Name']),
                         Underwriting_Team_Lead: this.normalizeUnderwriterName(row['Team Lead']),
                         Control_Unit: row['Control unit'] || row['Control Unit'] || '',
-                        Fac_Amount: this.parseNumeric(row['TFA (USD)'] || row['TFA(USD)']),
-                        Direct_OS: this.parseNumeric(row['Direct (USD)'] || row['Direct(USD)']),
-                        Contingent_OS: this.parseNumeric(row['Contingent (USD)'] || row['Contingent(USD)']),
-                        PSE_OS: this.parseNumeric(row['PSE (USD)'] || row['PSE(USD)']),
+                        Fac_Amount: this.parseNumeric(row['TFA (USD)'] || row['TFA(USD)'] || row['TFA']),
+                        Direct_OS: this.parseNumeric(row['Direct (USD)'] || row['Direct(USD)'] || row['Direct']),
+                        Contingent_OS: this.parseNumeric(row['Contingent (USD)'] || row['Contingent(USD)'] || row['Contingent']),
+                        PSE_OS: this.parseNumeric(row['PSE (USD)'] || row['PSE(USD)'] || row['PSE']),
                         Total_Comm_Exposure: 0,
                         Maturity_Date: this.formatDateSafe(row['Mainline Maturity Date']),
                         Product_Underwriter: row['Investment Finance Lead Underwriter Name'] || '',

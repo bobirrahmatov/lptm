@@ -295,6 +295,46 @@
         /* Smooth tab transitions */
         [x-cloak] { display: none !important; }
     </style>
+    
+    <!-- Block Confluence drag-drop interception -->
+    <script>
+        (function() {
+            // Block Confluence's drag-drop handlers from capturing file drops
+            // This runs immediately to set up event listeners before Confluence's handlers
+            
+            function blockConfluenceDragDrop(e) {
+                // Only block if we're over a file-upload-zone
+                const uploadZone = e.target.closest('.file-upload-zone');
+                if (uploadZone) {
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                }
+            }
+            
+            // Use capture phase to intercept before Confluence's handlers
+            document.addEventListener('dragenter', blockConfluenceDragDrop, true);
+            document.addEventListener('dragover', blockConfluenceDragDrop, true);
+            document.addEventListener('dragleave', blockConfluenceDragDrop, true);
+            document.addEventListener('drop', blockConfluenceDragDrop, true);
+            
+            // Also block on the whole page when dragging (prevents accidental drops outside zones)
+            document.addEventListener('dragover', function(e) {
+                // Prevent default to stop browser from navigating to the file
+                if (e.dataTransfer && e.dataTransfer.types.includes('Files')) {
+                    e.preventDefault();
+                }
+            }, false);
+            
+            document.addEventListener('drop', function(e) {
+                // Prevent default drop behavior unless over an upload zone
+                const uploadZone = e.target.closest('.file-upload-zone');
+                if (!uploadZone && e.dataTransfer && e.dataTransfer.types.includes('Files')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }, false);
+        })();
+    </script>
 </head>
 
 <body class="bg-gray-50 min-h-screen" x-data="dataLoaderApp()">
@@ -333,11 +373,11 @@
                     <p class="text-sm text-gray-500 mt-1">Upload regional data files to consolidate portfolio, covenants, and CCM data</p>
                 </div>
                 <a href="portfolioAnalytics.html" 
-                    class="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-600 transition-colors shadow-theme-xs">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 px-3 py-2 text-xs font-medium text-white transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                     </svg>
-                    Go to Analytics
+                    <span>Go to Analytics</span>
                 </a>
             </div>
         </div>
@@ -468,9 +508,11 @@
                             </div>
                             <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
                                 @click="$refs.portfolioEmea.click()"
-                                @dragover.prevent="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragleave.prevent="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
-                                @drop.prevent="handleDrop($event, 'portfolio', 'emea')">
+                                @dragenter.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragover.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragleave.prevent.stop="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
+                                @drop.prevent.stop="handleDrop($event, 'portfolio', 'emea')"
+                                @dragend.prevent.stop>
                                 <input type="file" x-ref="portfolioEmea" class="hidden" accept=".xlsx,.xls" 
                                     @change="handleFileSelect($event, 'portfolio', 'emea')">
                                 <template x-if="!files.portfolio.emea">
@@ -515,9 +557,11 @@
                             </div>
                             <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
                                 @click="$refs.portfolioNam.click()"
-                                @dragover.prevent="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragleave.prevent="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
-                                @drop.prevent="handleDrop($event, 'portfolio', 'nam')">
+                                @dragenter.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragover.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragleave.prevent.stop="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
+                                @drop.prevent.stop="handleDrop($event, 'portfolio', 'nam')"
+                                @dragend.prevent.stop>
                                 <input type="file" x-ref="portfolioNam" class="hidden" accept=".xlsx,.xls" 
                                     @change="handleFileSelect($event, 'portfolio', 'nam')">
                                 <template x-if="!files.portfolio.nam">
@@ -562,9 +606,11 @@
                             </div>
                             <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
                                 @click="$refs.portfolioApac.click()"
-                                @dragover.prevent="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragleave.prevent="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
-                                @drop.prevent="handleDrop($event, 'portfolio', 'apac')">
+                                @dragenter.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragover.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragleave.prevent.stop="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
+                                @drop.prevent.stop="handleDrop($event, 'portfolio', 'apac')"
+                                @dragend.prevent.stop>
                                 <input type="file" x-ref="portfolioApac" class="hidden" accept=".xlsx,.xls" 
                                     @change="handleFileSelect($event, 'portfolio', 'apac')">
                                 <template x-if="!files.portfolio.apac">
@@ -629,9 +675,11 @@
                             </div>
                             <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
                                 @click="$refs.covenantsEmea.click()"
-                                @dragover.prevent="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragleave.prevent="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
-                                @drop.prevent="handleDrop($event, 'covenants', 'emea')">
+                                @dragenter.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragover.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragleave.prevent.stop="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
+                                @drop.prevent.stop="handleDrop($event, 'covenants', 'emea')"
+                                @dragend.prevent.stop>
                                 <input type="file" x-ref="covenantsEmea" class="hidden" accept=".xlsx,.xls" 
                                     @change="handleFileSelect($event, 'covenants', 'emea')">
                                 <template x-if="!files.covenants.emea">
@@ -676,9 +724,11 @@
                             </div>
                             <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
                                 @click="$refs.covenantsNam.click()"
-                                @dragover.prevent="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragleave.prevent="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
-                                @drop.prevent="handleDrop($event, 'covenants', 'nam')">
+                                @dragenter.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragover.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragleave.prevent.stop="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
+                                @drop.prevent.stop="handleDrop($event, 'covenants', 'nam')"
+                                @dragend.prevent.stop>
                                 <input type="file" x-ref="covenantsNam" class="hidden" accept=".xlsx,.xls" 
                                     @change="handleFileSelect($event, 'covenants', 'nam')">
                                 <template x-if="!files.covenants.nam">
@@ -723,9 +773,11 @@
                             </div>
                             <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
                                 @click="$refs.covenantsApac.click()"
-                                @dragover.prevent="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragleave.prevent="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
-                                @drop.prevent="handleDrop($event, 'covenants', 'apac')">
+                                @dragenter.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragover.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragleave.prevent.stop="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
+                                @drop.prevent.stop="handleDrop($event, 'covenants', 'apac')"
+                                @dragend.prevent.stop>
                                 <input type="file" x-ref="covenantsApac" class="hidden" accept=".xlsx,.xls" 
                                     @change="handleFileSelect($event, 'covenants', 'apac')">
                                 <template x-if="!files.covenants.apac">
@@ -801,9 +853,11 @@
                             </div>
                             <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
                                 @click="$refs.ccmEmea.click()"
-                                @dragover.prevent="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragleave.prevent="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
-                                @drop.prevent="handleDrop($event, 'ccm', 'emea')">
+                                @dragenter.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragover.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragleave.prevent.stop="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
+                                @drop.prevent.stop="handleDrop($event, 'ccm', 'emea')"
+                                @dragend.prevent.stop>
                                 <input type="file" x-ref="ccmEmea" class="hidden" accept=".xlsx,.xls" 
                                     @change="handleFileSelect($event, 'ccm', 'emea')">
                                 <template x-if="!files.ccm.emea">
@@ -848,9 +902,11 @@
                             </div>
                             <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
                                 @click="$refs.ccmNam.click()"
-                                @dragover.prevent="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragleave.prevent="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
-                                @drop.prevent="handleDrop($event, 'ccm', 'nam')">
+                                @dragenter.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragover.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragleave.prevent.stop="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
+                                @drop.prevent.stop="handleDrop($event, 'ccm', 'nam')"
+                                @dragend.prevent.stop>
                                 <input type="file" x-ref="ccmNam" class="hidden" accept=".xlsx,.xls" 
                                     @change="handleFileSelect($event, 'ccm', 'nam')">
                                 <template x-if="!files.ccm.nam">
@@ -895,9 +951,11 @@
                             </div>
                             <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
                                 @click="$refs.ccmApac.click()"
-                                @dragover.prevent="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragleave.prevent="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
-                                @drop.prevent="handleDrop($event, 'ccm', 'apac')">
+                                @dragenter.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragover.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragleave.prevent.stop="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
+                                @drop.prevent.stop="handleDrop($event, 'ccm', 'apac')"
+                                @dragend.prevent.stop>
                                 <input type="file" x-ref="ccmApac" class="hidden" accept=".xlsx,.xls" 
                                     @change="handleFileSelect($event, 'ccm', 'apac')">
                                 <template x-if="!files.ccm.apac">
@@ -937,7 +995,78 @@
                 </div>
             </div>
 
-            <!-- Section 4: Product Mapping -->
+            <!-- Section 4: ROTCE Data -->
+            <div class="rounded-2xl border border-gray-200 bg-white overflow-hidden">
+                <div class="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-white">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500 text-white">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">ROTCE Data</h3>
+                            <p class="text-sm text-gray-500">Return on Tangible Common Equity data for portfolio mapping</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="max-w-lg">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-purple-100 text-purple-600">GLOBAL</span>
+                                <span class="text-sm font-medium text-gray-700">ROTCE Report</span>
+                            </div>
+                            <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-4 text-center cursor-pointer"
+                                @click="$refs.rotceFile.click()"
+                                @dragenter.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragover.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragleave.prevent.stop="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
+                                @drop.prevent.stop="handleDrop($event, 'rotce', 'global')"
+                                @dragend.prevent.stop>
+                                <input type="file" x-ref="rotceFile" class="hidden" accept=".xlsx,.xls" 
+                                    @change="handleFileSelect($event, 'rotce', 'global')">
+                                <template x-if="!files.rotce.global">
+                                    <div>
+                                        <div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 text-purple-500">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                            </svg>
+                                        </div>
+                                        <p class="text-sm text-gray-600 font-medium">Drop file or click to upload</p>
+                                        <p class="text-xs text-gray-400 mt-1">Excel files only (.xlsx, .xls)</p>
+                                    </div>
+                                </template>
+                                <template x-if="files.rotce.global">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-50 text-purple-500">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                            </div>
+                                            <div class="text-left">
+                                                <p class="text-sm font-medium text-gray-700 truncate max-w-[140px]" x-text="files.rotce.global.name"></p>
+                                                <p class="text-xs text-gray-400" x-text="formatFileSize(files.rotce.global.size)"></p>
+                                            </div>
+                                        </div>
+                                        <button @click.stop="removeFile('rotce', 'global')" class="p-1 rounded hover:bg-gray-200">
+                                            <svg class="w-4 h-4 text-gray-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                            <p class="text-xs text-gray-500">
+                                Columns: Client Relationship ID, Period, Variable Net Income, Total TCE, Variable RoTCE, Total_RWA_EOP
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 5: Product Mapping -->
             <div class="rounded-2xl border border-gray-200 bg-white overflow-hidden">
                 <div class="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-brand-25 to-white">
                     <div class="flex items-center justify-between">
@@ -954,11 +1083,11 @@
                         </div>
                         <!-- Download Button -->
                         <button @click="downloadMappingTemplate()"
-                            class="inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm font-medium text-brand-600 hover:bg-brand-100 transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                             </svg>
-                            Download Latest Template
+                            <span>Download Template</span>
                         </button>
                     </div>
                 </div>
@@ -971,9 +1100,11 @@
                             </div>
                             <div class="file-upload-zone relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-6 text-center cursor-pointer"
                                 @click="$refs.mappingFile.click()"
-                                @dragover.prevent="$event.target.closest('.file-upload-zone').classList.add('dragover')"
-                                @dragleave.prevent="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
-                                @drop.prevent="handleMappingDrop($event)">
+                                @dragenter.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragover.prevent.stop="$event.target.closest('.file-upload-zone').classList.add('dragover')"
+                                @dragleave.prevent.stop="$event.target.closest('.file-upload-zone').classList.remove('dragover')"
+                                @drop.prevent.stop="handleMappingDrop($event)"
+                                @dragend.prevent.stop>
                                 <input type="file" x-ref="mappingFile" class="hidden" accept=".xlsx,.xls" 
                                     @change="handleMappingSelect($event)">
                                 <template x-if="!files.mapping">
@@ -1042,6 +1173,11 @@
                                         <span x-show="processingResult.ccmUploaded" class="text-brand-500">✓ Uploaded</span>
                                         <span x-show="!processingResult.ccmUploaded" class="text-gray-500">(Download available)</span>
                                     </p>
+                                    <p x-show="processingResult.rotceRecords > 0">
+                                        <strong x-text="processingResult.rotceRecords"></strong> ROTCE records processed
+                                        <span x-show="processingResult.rotceUploaded" class="text-purple-500">✓ Uploaded</span>
+                                        <span x-show="!processingResult.rotceUploaded" class="text-gray-500">(Download available)</span>
+                                    </p>
                                 </div>
                                 
                                 <!-- Download Buttons -->
@@ -1054,40 +1190,50 @@
                                     </h4>
                                     <div class="flex flex-wrap gap-2">
                                         <button x-show="processingResult.portfolioRecords > 0" @click="downloadFile('portfolio')"
-                                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                                            <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            class="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                                            <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                             </svg>
-                                            Portfolio_tw.xlsx
+                                            <span>Portfolio_tw.xlsx</span>
                                         </button>
                                         <button x-show="processingResult.covenantsRecords > 0" @click="downloadFile('covenants')"
-                                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                                            <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            class="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                                            <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                             </svg>
-                                            Covenants_tw.xlsx
+                                            <span>Covenants_tw.xlsx</span>
                                         </button>
                                         <button x-show="processingResult.ccmRecords > 0" @click="downloadFile('ccm')"
-                                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                                            <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            class="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                                            <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                             </svg>
-                                            CCM_tw.xlsx
+                                            <span>CCM_tw.xlsx</span>
+                                        </button>
+                                        <button x-show="processingResult.rotceRecords > 0" @click="downloadFile('rotce')"
+                                            class="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                                            <svg class="w-3.5 h-3.5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                            </svg>
+                                            <span>ROTCE_tw.xlsx</span>
                                         </button>
                                     </div>
                                 </div>
                                 
-                                <div class="mt-4 flex items-center gap-3">
+                                <div class="mt-4 flex items-center gap-2">
                                     <a href="portfolioAnalytics.html" 
-                                        class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        class="flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 px-3 py-2 text-xs font-medium text-white transition-colors">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                         </svg>
-                                        Go to Analytics Dashboard
+                                        <span>Go to Analytics</span>
                                     </a>
                                     <button @click="processingComplete = false; processingResult = null"
-                                        class="inline-flex items-center gap-2 rounded-lg border border-brand-300 bg-white px-4 py-2.5 text-sm font-medium text-brand-700 hover:bg-brand-50 transition-colors">
-                                        Process More Files
+                                        class="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                        </svg>
+                                        <span>Process More</span>
                                     </button>
                                 </div>
                             </div>
@@ -1109,11 +1255,11 @@
                                 <p class="text-sm text-gray-600" x-text="processingResult.error"></p>
                                 <div class="mt-4">
                                     <button @click="processingComplete = false; processingResult = null"
-                                        class="inline-flex items-center gap-2 rounded-lg bg-gray-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-700 transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        class="flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 px-3 py-2 text-xs font-medium text-white transition-colors">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                                         </svg>
-                                        Try Again
+                                        <span>Try Again</span>
                                     </button>
                                 </div>
                             </div>
@@ -1125,27 +1271,27 @@
             <!-- Action Buttons -->
             <div x-show="!processingComplete" class="flex items-center justify-between py-4">
                 <button type="button" @click="clearAllFiles()"
-                    class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                     </svg>
-                    Clear All Files
+                    <span>Clear All</span>
                 </button>
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
                     <button type="button" @click="validateFiles()"
-                        class="inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm font-medium text-brand-700 hover:bg-brand-100 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
-                        Validate Files
+                        <span>Validate</span>
                     </button>
                     <button type="button" @click="processAndLoad()" :disabled="!canProcess()"
-                        :class="canProcess() ? 'bg-brand-600 hover:bg-brand-700 text-white' : 'bg-gray-100 text-gray-400 cursor-not-allowed'"
-                        class="inline-flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-medium transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        :class="canProcess() ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'"
+                        class="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
                         </svg>
-                        Process & Load Data
+                        <span>Process & Load</span>
                     </button>
                 </div>
             </div>
@@ -1884,6 +2030,14 @@
                                 <span class="w-1 h-1 rounded-full bg-brand-400 mt-1.5 flex-shrink-0"></span>
                                 <span><strong>Category:</strong> <code class="bg-brand-100 px-1 rounded text-[10px]">Facility Type</code> → Primary_Key → Product_Program, Product_Sub_Program</span>
                             </li>
+                            <li class="flex items-start gap-2">
+                                <span class="w-1 h-1 rounded-full bg-purple-400 mt-1.5 flex-shrink-0"></span>
+                                <span><strong>Credit Class:</strong> Normalize (P → Pass, SM → Special Mention, etc.)</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="w-1 h-1 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0"></span>
+                                <span><strong>Names:</strong> "LASTNAME, FIRSTNAME" → "FirstName LastName"</span>
+                            </li>
                         </ul>
                     </div>
 
@@ -1914,6 +2068,14 @@
                                 <span class="w-1 h-1 rounded-full bg-brand-400 mt-1.5 flex-shrink-0"></span>
                                 <span><strong>Category:</strong> <code class="bg-brand-100 px-1 rounded text-[10px]">Product Program Name</code> → Primary_Key → Product_Program, Product_Sub_Program</span>
                             </li>
+                            <li class="flex items-start gap-2">
+                                <span class="w-1 h-1 rounded-full bg-purple-400 mt-1.5 flex-shrink-0"></span>
+                                <span><strong>Credit Class:</strong> Normalize (P → Pass, SM → Special Mention, etc.)</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="w-1 h-1 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0"></span>
+                                <span><strong>Names:</strong> "LASTNAME, FIRSTNAME" → "FirstName LastName"</span>
+                            </li>
                         </ul>
                     </div>
 
@@ -1933,6 +2095,14 @@
                                 <span><strong>Filter OUT:</strong> Risk Category = Clearing, Notation, Settlement</span>
                             </li>
                             <li class="flex items-start gap-2">
+                                <span class="w-1 h-1 rounded-full bg-brand-400 mt-1.5 flex-shrink-0"></span>
+                                <span><strong>Region Mapping:</strong> Control Unit → <code class="bg-brand-100 px-1 rounded text-[10px]">Regions_Mapping.xlsx</code> → Region (IPB → NAM)</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="w-1 h-1 rounded-full bg-gray-400 mt-1.5 flex-shrink-0"></span>
+                                <span><strong>Region Filter:</strong> Keep only NAM and LATAM, filter out SARG and non-matches</span>
+                            </li>
+                            <li class="flex items-start gap-2">
                                 <span class="w-1 h-1 rounded-full bg-gray-400 mt-1.5 flex-shrink-0"></span>
                                 <span><strong>PSE:</strong> Product Program OR Facility Type in PSE tab → PSE, else non-PSE</span>
                             </li>
@@ -1943,6 +2113,14 @@
                             <li class="flex items-start gap-2">
                                 <span class="w-1 h-1 rounded-full bg-brand-400 mt-1.5 flex-shrink-0"></span>
                                 <span><strong>Category:</strong> <code class="bg-brand-100 px-1 rounded text-[10px]">Product Program</code> → Primary_Key → Product_Program, Product_Sub_Program</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="w-1 h-1 rounded-full bg-purple-400 mt-1.5 flex-shrink-0"></span>
+                                <span><strong>Credit Class:</strong> Normalize (P → Pass, SM → Special Mention, etc.)</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="w-1 h-1 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0"></span>
+                                <span><strong>Names:</strong> "LASTNAME, FIRSTNAME" → "FirstName LastName"</span>
                             </li>
                         </ul>
                     </div>
@@ -1965,7 +2143,7 @@
                                         <span class="font-semibold text-blue-700">OSUC =</span> If Committed → Fac_Amount, else Direct_OS + Contingent_OS + PSE_OS
                                     </div>
                                     <div class="bg-white rounded-lg p-2 border border-brand-200">
-                                        <span class="font-semibold text-blue-700">Total_Unused_Exposure =</span> If Committed → Fac - (D+C+P), else 0
+                                        <span class="font-semibold text-blue-700">Total_Unused_Exposure =</span> If Committed → Fac_Amount - (Direct_OS + Contingent_OS + PSE_OS), else 0
                                     </div>
                                 </div>
                             </div>
@@ -2178,8 +2356,8 @@
                                 </tr>
                                 <tr class="hover:bg-gray-50 bg-blue-50/30">
                                     <td class="px-2 py-1 font-mono font-medium">OSUC</td>
-                                    <td class="px-2 py-1 font-mono text-blue-600">Calculated: Committed ? Fac_Amount : (D + C + P)</td>
-                                    <td class="px-2 py-1 font-mono text-gray-400">From source</td>
+                                    <td class="px-2 py-1 font-mono text-blue-600">If Committed: Fac_Amount, else: Direct_OS + Contingent_OS + PSE_OS</td>
+                                    <td class="px-2 py-1 font-mono text-blue-600">If Committed: Fac_Amount, else: Direct_OS + Contingent_OS + PSE_OS</td>
                                     <td class="px-2 py-1 font-mono text-gray-600">Total Comm Exposure (Fac Lvl)</td>
                                 </tr>
                                 <tr class="hover:bg-gray-50 bg-amber-50/30">
@@ -2188,8 +2366,8 @@
                                 </tr>
                                 <tr class="hover:bg-gray-50 bg-blue-50/30">
                                     <td class="px-2 py-1 font-mono font-medium">Total_Unused_Exposure</td>
-                                    <td class="px-2 py-1 font-mono text-blue-600">Calculated: Committed ? Fac - OS : 0</td>
-                                    <td class="px-2 py-1 font-mono text-gray-400">From source</td>
+                                    <td class="px-2 py-1 font-mono text-blue-600">If Committed: Fac_Amount - Total_OS, else: 0</td>
+                                    <td class="px-2 py-1 font-mono text-blue-600">If Committed: Fac_Amount - Total_OS, else: 0</td>
                                     <td class="px-2 py-1 font-mono text-gray-600">Unused Commitment (Fac Lvl)</td>
                                 </tr>
                                 <tr class="hover:bg-gray-50 bg-amber-50/30">
@@ -3054,8 +3232,10 @@
                                         </div>
                                         <p class="text-xs text-gray-500 mt-2">Data starts from row 4 (B4), column A is always empty. Rows 1-3 contain report metadata and are skipped.</p>
                                     </div>
-                                    <ul class="text-xs text-gray-500 space-y-1">
-                                        <li>• Filter: <code class="bg-gray-50 px-1 rounded text-gray-700">Risk Category</code> ≠ Clearing, Notation, Settlement</li>
+                                    <ul class="text-xs text-gray-500 space-y-1.5">
+                                        <li>• Filter 1: <code class="bg-gray-50 px-1 rounded text-gray-700">Risk Category</code> ≠ Clearing, Notation, Settlement</li>
+                                        <li>• Region Mapping: <code class="bg-gray-50 px-1 rounded text-gray-700">Control Unit</code> → <code class="bg-brand-50 px-1 rounded text-brand-600">Regions_Mapping.xlsx</code> → Region (IPB → NAM)</li>
+                                        <li>• Filter 2: Keep only <span class="font-semibold text-gray-700">NAM</span> and <span class="font-semibold text-gray-700">LATAM</span>, filter out SARG and non-matches</li>
                                         <li>• Lookup Key: <code class="bg-gray-50 px-1 rounded text-gray-700">Product Program</code></li>
                                     </ul>
                                 </div>
@@ -3157,6 +3337,66 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Rule: Credit Classification Normalization -->
+                                <div class="rounded-xl border border-purple-200 bg-purple-50/30 p-5">
+                                    <div class="flex items-start gap-4">
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 text-purple-600 font-bold text-sm flex-shrink-0">T5</div>
+                                        <div class="w-full">
+                                            <h4 class="font-semibold text-gray-900 mb-2">Credit Classification Normalization</h4>
+                                            <p class="text-sm text-gray-600 mb-3">Standardize credit classification values across all regions to consistent naming:</p>
+                                            <div class="overflow-x-auto">
+                                                <table class="text-xs w-full">
+                                                    <thead>
+                                                        <tr class="bg-purple-100">
+                                                            <th class="px-3 py-2 text-left">Input Values</th>
+                                                            <th class="px-3 py-2 text-left">Normalized Output</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr class="border-t"><td class="px-3 py-2 font-mono text-gray-600">P, Pass, Pass (P)</td><td class="px-3 py-2 font-semibold text-green-600">Pass</td></tr>
+                                                        <tr class="border-t bg-white"><td class="px-3 py-2 font-mono text-gray-600">PWL, Pass Watch List, Pass Watch List (PWL)</td><td class="px-3 py-2 font-semibold text-yellow-600">Pass Watch List</td></tr>
+                                                        <tr class="border-t"><td class="px-3 py-2 font-mono text-gray-600">SM, Special Mention, Special Mention (SM)</td><td class="px-3 py-2 font-semibold text-orange-600">Special Mention</td></tr>
+                                                        <tr class="border-t bg-white"><td class="px-3 py-2 font-mono text-gray-600">SS, Substandard, Substandard (SS)</td><td class="px-3 py-2 font-semibold text-red-500">Substandard</td></tr>
+                                                        <tr class="border-t"><td class="px-3 py-2 font-mono text-gray-600">Substandard Non Performing</td><td class="px-3 py-2 font-semibold text-red-600">Substandard Non Performing</td></tr>
+                                                        <tr class="border-t bg-white"><td class="px-3 py-2 font-mono text-gray-600">Substandard Performing</td><td class="px-3 py-2 font-semibold text-red-400">Substandard Performing</td></tr>
+                                                        <tr class="border-t"><td class="px-3 py-2 font-mono text-gray-600">D, Doubtful, Doubtful (D)</td><td class="px-3 py-2 font-semibold text-red-700">Doubtful</td></tr>
+                                                        <tr class="border-t bg-white"><td class="px-3 py-2 font-mono text-gray-600">L, Loss</td><td class="px-3 py-2 font-semibold text-red-800">Loss</td></tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <p class="text-xs text-gray-500 mt-2 italic">Case-insensitive matching. Unknown values are preserved as-is.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Rule: Underwriter Name Normalization -->
+                                <div class="rounded-xl border border-cyan-200 bg-cyan-50/30 p-5">
+                                    <div class="flex items-start gap-4">
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-100 text-cyan-600 font-bold text-sm flex-shrink-0">T6</div>
+                                        <div class="w-full">
+                                            <h4 class="font-semibold text-gray-900 mb-2">Underwriter Name Normalization</h4>
+                                            <p class="text-sm text-gray-600 mb-3">Standardize underwriter names from uppercase "LASTNAME, FIRSTNAME" format to proper case "FirstName LastName":</p>
+                                            <div class="overflow-x-auto">
+                                                <table class="text-xs w-full">
+                                                    <thead>
+                                                        <tr class="bg-cyan-100">
+                                                            <th class="px-3 py-2 text-left">Input Format</th>
+                                                            <th class="px-3 py-2 text-left">Output Format</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr class="border-t"><td class="px-3 py-2 font-mono text-gray-600">SIMPSON, HARRY</td><td class="px-3 py-2 font-semibold text-cyan-700">Harry Simpson</td></tr>
+                                                        <tr class="border-t bg-white"><td class="px-3 py-2 font-mono text-gray-600">PALMER, KRISTOPHER</td><td class="px-3 py-2 font-semibold text-cyan-700">Kristopher Palmer</td></tr>
+                                                        <tr class="border-t"><td class="px-3 py-2 font-mono text-gray-600">GRAEME-WILSON, DOM</td><td class="px-3 py-2 font-semibold text-cyan-700">Dom Graeme Wilson</td></tr>
+                                                        <tr class="border-t bg-white"><td class="px-3 py-2 font-mono text-gray-600">JOHN SMITH</td><td class="px-3 py-2 font-semibold text-cyan-700">John Smith</td></tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <p class="text-xs text-gray-500 mt-2 italic">Applied to: Lead_Underwriter, Underwriting_Team_Lead, Product_Underwriter columns.</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -3181,9 +3421,9 @@
                                         <tbody>
                                             <tr class="border-b border-gray-100">
                                                 <td class="px-5 py-3 sm:px-6 font-mono text-sm text-gray-800">OSUC</td>
-                                                <td class="px-5 py-3 sm:px-6 text-gray-500 text-xs">Committed ? Fac_Amount : (D + C + P)</td>
+                                                <td class="px-5 py-3 sm:px-6 text-gray-500 text-xs">If Committed: Fac_Amount, else: Direct_OS + Contingent_OS + PSE_OS</td>
                                                 <td class="px-5 py-3 sm:px-6 text-center"><span class="px-2 py-0.5 rounded-full text-xs bg-brand-50 text-brand-600 font-medium">Calculated</span></td>
-                                                <td class="px-5 py-3 sm:px-6 text-center"><span class="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600 font-medium">Source</span></td>
+                                                <td class="px-5 py-3 sm:px-6 text-center"><span class="px-2 py-0.5 rounded-full text-xs bg-brand-50 text-brand-600 font-medium">Calculated</span></td>
                                                 <td class="px-5 py-3 sm:px-6 text-center"><span class="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600 font-medium">Source</span></td>
                                             </tr>
                                             <tr class="border-b border-gray-100">
@@ -3195,14 +3435,14 @@
                                             </tr>
                                             <tr class="border-b border-gray-100">
                                                 <td class="px-5 py-3 sm:px-6 font-mono text-sm text-gray-800">Total_Unused_Exposure</td>
-                                                <td class="px-5 py-3 sm:px-6 text-gray-500 text-xs">Committed ? Fac_Amount - Total_OS : 0</td>
+                                                <td class="px-5 py-3 sm:px-6 text-gray-500 text-xs">If Committed: Fac_Amount - Total_OS, else: 0</td>
                                                 <td class="px-5 py-3 sm:px-6 text-center"><span class="px-2 py-0.5 rounded-full text-xs bg-brand-50 text-brand-600 font-medium">Calculated</span></td>
-                                                <td class="px-5 py-3 sm:px-6 text-center"><span class="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600 font-medium">Source</span></td>
+                                                <td class="px-5 py-3 sm:px-6 text-center"><span class="px-2 py-0.5 rounded-full text-xs bg-brand-50 text-brand-600 font-medium">Calculated</span></td>
                                                 <td class="px-5 py-3 sm:px-6 text-center"><span class="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600 font-medium">Source</span></td>
                                             </tr>
                                             <tr class="border-b border-gray-100">
                                                 <td class="px-5 py-3 sm:px-6 font-mono text-sm text-gray-800">Total_Undrawn</td>
-                                                <td class="px-5 py-3 sm:px-6 text-gray-500 text-xs">Fac_Amount - (D + C + P)</td>
+                                                <td class="px-5 py-3 sm:px-6 text-gray-500 text-xs">Fac_Amount - (Direct_OS + Contingent_OS + PSE_OS)</td>
                                                 <td class="px-5 py-3 sm:px-6 text-center"><span class="px-2 py-0.5 rounded-full text-xs bg-brand-50 text-brand-600 font-medium">Calculated</span></td>
                                                 <td class="px-5 py-3 sm:px-6 text-center"><span class="px-2 py-0.5 rounded-full text-xs bg-brand-50 text-brand-600 font-medium">Calculated</span></td>
                                                 <td class="px-5 py-3 sm:px-6 text-center"><span class="px-2 py-0.5 rounded-full text-xs bg-brand-50 text-brand-600 font-medium">Calculated</span></td>
@@ -3542,6 +3782,7 @@
                     portfolio: { emea: null, nam: null, apac: null },
                     covenants: { emea: null, nam: null, apac: null },
                     ccm: { emea: null, nam: null, apac: null },
+                    rotce: { global: null },
                     mapping: null
                 },
                 
@@ -3552,6 +3793,7 @@
                     ccmFileName: 'CCM_tw.xlsx',
                     portfolioFileName: 'Portfolio_tw.xlsx',
                     covenantsFileName: 'Covenants_tw.xlsx',
+                    rotceFileName: 'ROTCE_tw.xlsx',
                     mappingFileName: 'Product_Mapping.xlsx',
                     regionsMappingFileName: 'Regions_Mapping.xlsx'
                 },
@@ -3654,11 +3896,79 @@
                 },
 
                 canProcess() {
-                    // At least one file from each category should be uploaded
-                    const hasPortfolio = this.getFileCount('portfolio') > 0;
-                    const hasCovenants = this.getFileCount('covenants') > 0;
-                    const hasCCM = this.getFileCount('ccm') > 0;
-                    return hasPortfolio || hasCovenants || hasCCM;
+                    // At least one complete category should be ready to process
+                    const validation = this.validateCategoryCompleteness();
+                    return validation.canProcess;
+                },
+                
+                // Validate that if any file is uploaded for a category, ALL files must be uploaded
+                validateCategoryCompleteness() {
+                    const result = {
+                        canProcess: false,
+                        errors: [],
+                        warnings: [],
+                        completedCategories: []
+                    };
+                    
+                    const regions = ['emea', 'nam', 'apac'];
+                    
+                    // Check Portfolio
+                    const portfolioFiles = regions.map(r => this.files.portfolio[r] ? r.toUpperCase() : null).filter(Boolean);
+                    const portfolioMissing = regions.filter(r => !this.files.portfolio[r]).map(r => r.toUpperCase());
+                    
+                    if (portfolioFiles.length > 0 && portfolioFiles.length < 3) {
+                        result.errors.push({
+                            category: 'Portfolio',
+                            uploaded: portfolioFiles,
+                            missing: portfolioMissing,
+                            message: `Portfolio: Missing ${portfolioMissing.join(', ')} file(s)`
+                        });
+                    } else if (portfolioFiles.length === 3) {
+                        result.completedCategories.push('Portfolio');
+                    }
+                    
+                    // Check Covenants
+                    const covenantsFiles = regions.map(r => this.files.covenants[r] ? r.toUpperCase() : null).filter(Boolean);
+                    const covenantsMissing = regions.filter(r => !this.files.covenants[r]).map(r => r.toUpperCase());
+                    
+                    if (covenantsFiles.length > 0 && covenantsFiles.length < 3) {
+                        result.errors.push({
+                            category: 'Covenants',
+                            uploaded: covenantsFiles,
+                            missing: covenantsMissing,
+                            message: `Covenants: Missing ${covenantsMissing.join(', ')} file(s)`
+                        });
+                    } else if (covenantsFiles.length === 3) {
+                        result.completedCategories.push('Covenants');
+                    }
+                    
+                    // Check CCM
+                    const ccmFiles = regions.map(r => this.files.ccm[r] ? r.toUpperCase() : null).filter(Boolean);
+                    const ccmMissing = regions.filter(r => !this.files.ccm[r]).map(r => r.toUpperCase());
+                    
+                    if (ccmFiles.length > 0 && ccmFiles.length < 3) {
+                        result.errors.push({
+                            category: 'CCM',
+                            uploaded: ccmFiles,
+                            missing: ccmMissing,
+                            message: `CCM: Missing ${ccmMissing.join(', ')} file(s)`
+                        });
+                    } else if (ccmFiles.length === 3) {
+                        result.completedCategories.push('CCM');
+                    }
+                    
+                    // ROTCE and Product_Mapping are optional - just note if uploaded
+                    if (this.files.rotce.global) {
+                        result.warnings.push('ROTCE file uploaded (optional)');
+                    }
+                    if (this.files.mapping) {
+                        result.warnings.push('Product Mapping file uploaded (optional)');
+                    }
+                    
+                    // Can process if at least one category is complete AND no errors
+                    result.canProcess = result.completedCategories.length > 0 && result.errors.length === 0;
+                    
+                    return result;
                 },
 
                 async validateFiles() {
@@ -3668,30 +3978,65 @@
                     // Simulate validation
                     await new Promise(resolve => setTimeout(resolve, 1500));
                     
-                    const issues = [];
-                    
-                    // Check for missing regional files
-                    const categories = ['portfolio', 'covenants', 'ccm'];
-                    categories.forEach(cat => {
-                        const count = this.getFileCount(cat);
-                        if (count > 0 && count < 3) {
-                            issues.push(`${cat.charAt(0).toUpperCase() + cat.slice(1)}: Only ${count}/3 regional files uploaded`);
-                        }
-                    });
+                    const validation = this.validateCategoryCompleteness();
 
                     this.isLoading = false;
 
-                    if (issues.length > 0) {
-                        this.showNotification('Validation warnings: ' + issues.join('; '), 'warning');
-                    } else if (this.canProcess()) {
-                        this.showNotification('All files validated successfully!', 'success');
-                    } else {
-                        this.showNotification('Please upload at least one file to validate', 'info');
+                    // Show validation errors if any
+                    if (validation.errors.length > 0) {
+                        const errorMessages = validation.errors.map(e => e.message).join('\n• ');
+                        this.showValidationPopover(validation);
+                        return;
                     }
+                    
+                    // Check if any files are uploaded
+                    if (validation.completedCategories.length === 0) {
+                        this.showNotification('Please upload all regional files (EMEA, NAM, APAC) for at least one category', 'info');
+                        return;
+                    }
+                    
+                    // All good
+                    const readyMsg = `Ready to process: ${validation.completedCategories.join(', ')}`;
+                    this.showNotification(readyMsg + ' - All files validated successfully!', 'success');
+                },
+                
+                // Show validation error popover with details
+                showValidationPopover(validation) {
+                    let html = '<div class="text-left">';
+                    html += '<p class="font-semibold text-red-700 mb-2">⚠️ Incomplete File Sets Detected</p>';
+                    html += '<p class="text-xs text-gray-600 mb-3">All regional files (EMEA, NAM, APAC) must be uploaded for each category you want to process.</p>';
+                    
+                    validation.errors.forEach(error => {
+                        html += `<div class="mb-3 p-2 bg-red-50 rounded-lg border border-red-200">`;
+                        html += `<p class="font-semibold text-red-800 text-sm">${error.category}</p>`;
+                        html += `<p class="text-xs text-gray-600">Uploaded: <span class="text-green-600 font-medium">${error.uploaded.join(', ') || 'None'}</span></p>`;
+                        html += `<p class="text-xs text-gray-600">Missing: <span class="text-red-600 font-medium">${error.missing.join(', ')}</span></p>`;
+                        html += `</div>`;
+                    });
+                    
+                    if (validation.completedCategories.length > 0) {
+                        html += `<p class="text-xs text-green-600 mt-2">✓ Complete: ${validation.completedCategories.join(', ')}</p>`;
+                    }
+                    
+                    html += '<p class="text-xs text-gray-500 mt-3 italic">Note: ROTCE and Product Mapping files are optional.</p>';
+                    html += '</div>';
+                    
+                    this.showNotification(html, 'error', 10000); // Show for 10 seconds
                 },
 
                 async processAndLoad() {
-                    if (!this.canProcess()) return;
+                    const validation = this.validateCategoryCompleteness();
+                    
+                    // Show errors if validation fails
+                    if (validation.errors.length > 0) {
+                        this.showValidationPopover(validation);
+                        return;
+                    }
+                    
+                    if (!validation.canProcess) {
+                        this.showNotification('Please upload all regional files (EMEA, NAM, APAC) for at least one category', 'warning');
+                        return;
+                    }
                     
                     this.isLoading = true;
                     this.loadingMessage = 'Processing Files...';
@@ -3737,6 +4082,16 @@
                                 allPortfolioData = [...allPortfolioData, ...data];
                                 processedData.portfolio.push({ region, data, rowCount: data.length });
                             }
+                        }
+
+                        // Fetch ROTCE data from Confluence for mapping
+                        this.loadingMessage = 'Loading ROTCE data for Portfolio mapping...';
+                        const rotceData = await this.fetchROTCEFromConfluence();
+                        
+                        // Apply ROTCE mapping to Portfolio data
+                        if (allPortfolioData.length > 0 && rotceData && rotceData.length > 0) {
+                            this.loadingMessage = 'Mapping ROTCE to Portfolio...';
+                            allPortfolioData = this.mapROTCEToPortfolio(allPortfolioData, rotceData);
                         }
 
                         // Apply post-merge calculations
@@ -3812,6 +4167,26 @@
                             }
                         }
 
+                        // Process ROTCE file
+                        let allROTCEData = [];
+                        let rotceUploadSuccess = false;
+                        if (this.files.rotce.global) {
+                            this.loadingMessage = 'Processing ROTCE data...';
+                            allROTCEData = await this.processROTCEFile(this.files.rotce.global);
+                            processedData.rotce = allROTCEData;
+                            
+                            // Upload ROTCE_tw.xlsx to Confluence
+                            if (allROTCEData.length > 0) {
+                                this.loadingMessage = 'Uploading ROTCE_tw.xlsx to Portfolio Analytics...';
+                                rotceUploadSuccess = await this.uploadROTCEToConfluence(allROTCEData);
+                                if (rotceUploadSuccess) {
+                                    this.showNotification(`ROTCE_tw.xlsx uploaded to Portfolio Analytics (${allROTCEData.length} records)`, 'success');
+                                } else {
+                                    this.showNotification('ROTCE processed - use Download button to save file', 'warning');
+                                }
+                            }
+                        }
+
                         // Process mapping file
                         if (this.files.mapping) {
                             this.loadingMessage = 'Processing Product Mapping...';
@@ -3822,7 +4197,8 @@
                         this.processedDataCache = {
                             portfolio: allPortfolioData.length > 0 ? allPortfolioData : null,
                             covenants: allCovenantsData.length > 0 ? allCovenantsData : null,
-                            ccm: allCCMData.length > 0 ? allCCMData : null
+                            ccm: allCCMData.length > 0 ? allCCMData : null,
+                            rotce: allROTCEData.length > 0 ? allROTCEData : null
                         };
                         
                         // Store only metadata (not full data) to avoid localStorage quota issues
@@ -3834,12 +4210,14 @@
                                     portfolio: Object.keys(this.files.portfolio).filter(k => this.files.portfolio[k]),
                                     covenants: Object.keys(this.files.covenants).filter(k => this.files.covenants[k]),
                                     ccm: Object.keys(this.files.ccm).filter(k => this.files.ccm[k]),
+                                    rotce: this.files.rotce.global ? true : false,
                                     mapping: this.files.mapping ? true : false
                                 },
                                 recordCounts: {
                                     portfolio: allPortfolioData.length,
                                     covenants: allCovenantsData.length,
-                                    ccm: allCCMData.length
+                                    ccm: allCCMData.length,
+                                    rotce: allROTCEData ? allROTCEData.length : 0
                                 }
                             }));
                         } catch (storageError) {
@@ -3860,9 +4238,11 @@
                             portfolioRecords: allPortfolioData.length,
                             covenantsRecords: allCovenantsData.length,
                             ccmRecords: allCCMData.length,
+                            rotceRecords: allROTCEData.length,
                             portfolioUploaded: portfolioUploadSuccess,
                             covenantsUploaded: covenantsUploadSuccess,
-                            ccmUploaded: ccmUploadSuccess
+                            ccmUploaded: ccmUploadSuccess,
+                            rotceUploaded: rotceUploadSuccess
                         };
 
                     } catch (error) {
@@ -3977,6 +4357,203 @@
                     
                     XLSX.writeFile(workbook, filename);
                     this.showNotification(`Downloaded ${filename}`, 'success');
+                },
+
+                // ==================== ROTCE ETL FUNCTIONS ====================
+                
+                // Process ROTCE file
+                async processROTCEFile(file) {
+                    return new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            try {
+                                const data = new Uint8Array(e.target.result);
+                                const workbook = XLSX.read(data, { type: 'array' });
+                                
+                                // Read from first sheet
+                                const sheetName = workbook.SheetNames[0];
+                                const sheet = workbook.Sheets[sheetName];
+                                const rawData = XLSX.utils.sheet_to_json(sheet);
+                                
+                                // Map ROTCE columns
+                                const processedData = rawData.map(row => ({
+                                    Client_Relationship_ID: String(row['Client Relationship ID'] || row['Client_Relationship_ID'] || row['ClientRelationshipID'] || '').trim(),
+                                    Period: row['Period'] || '',
+                                    Variable_Net_Income: this.parseNumeric(row['Variable Net Income'] || row['Variable_Net_Income'] || 0),
+                                    Total_TCE: this.parseNumeric(row['Total TCE'] || row['Total_TCE'] || 0),
+                                    Variable_RoTCE: this.parseROTCEPercentage(row['Variable RoTCE'] || row['Variable_RoTCE'] || row['VariableRoTCE'] || 0),
+                                    Total_RWA_EOP: this.parseNumeric(row['Total_RWA_EOP'] || row['Total RWA EOP'] || 0)
+                                })).filter(row => row.Client_Relationship_ID); // Filter out rows without Client Relationship ID
+                                
+                                console.log(`ROTCE: Processed ${processedData.length} records`);
+                                resolve(processedData);
+                            } catch (error) {
+                                console.error('Error processing ROTCE file:', error);
+                                reject(error);
+                            }
+                        };
+                        reader.onerror = reject;
+                        reader.readAsArrayBuffer(file);
+                    });
+                },
+                
+                // Parse ROTCE percentage value
+                parseROTCEPercentage(value) {
+                    if (value === null || value === undefined || value === '') return '0%';
+                    
+                    // If already a string with %
+                    if (typeof value === 'string' && value.includes('%')) {
+                        return value.trim();
+                    }
+                    
+                    // If it's a decimal (e.g., 0.15 = 15%)
+                    const num = parseFloat(String(value).replace(/[%,]/g, ''));
+                    if (isNaN(num)) return '0%';
+                    
+                    // Check if the value seems to be already a percentage (e.g., 15 vs 0.15)
+                    if (Math.abs(num) < 1) {
+                        // It's a decimal, convert to percentage
+                        return (num * 100).toFixed(2) + '%';
+                    } else {
+                        // It's already a percentage number
+                        return num.toFixed(2) + '%';
+                    }
+                },
+                
+                // Upload ROTCE to Confluence
+                async uploadROTCEToConfluence(rotceData) {
+                    try {
+                        const optimizedData = this.optimizeDataForExcel(rotceData);
+                        const workbook = XLSX.utils.book_new();
+                        const worksheet = XLSX.utils.json_to_sheet(optimizedData);
+                        
+                        // Set column widths
+                        worksheet['!cols'] = [
+                            { wch: 25 },  // Client_Relationship_ID
+                            { wch: 12 },  // Period
+                            { wch: 20 },  // Variable_Net_Income
+                            { wch: 15 },  // Total_TCE
+                            { wch: 15 },  // Variable_RoTCE
+                            { wch: 15 }   // Total_RWA_EOP
+                        ];
+                        
+                        XLSX.utils.book_append_sheet(workbook, worksheet, 'ROTCE Data');
+                        
+                        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array', compression: true, bookSST: false });
+                        const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                        
+                        // Check if attachment exists
+                        const attachmentsResponse = await fetch(
+                            `${this.confluenceConfig.baseUrl}/rest/api/content/${this.confluenceConfig.pageId}/child/attachment?filename=${this.confluenceConfig.rotceFileName}`
+                        );
+                        const attachmentsData = await attachmentsResponse.json();
+                        
+                        const formData = new FormData();
+                        formData.append('file', blob, this.confluenceConfig.rotceFileName);
+                        
+                        let uploadUrl;
+                        if (attachmentsData.results && attachmentsData.results.length > 0) {
+                            const attachmentId = attachmentsData.results[0].id;
+                            uploadUrl = `${this.confluenceConfig.baseUrl}/rest/api/content/${this.confluenceConfig.pageId}/child/attachment/${attachmentId}/data`;
+                        } else {
+                            uploadUrl = `${this.confluenceConfig.baseUrl}/rest/api/content/${this.confluenceConfig.pageId}/child/attachment`;
+                        }
+                        
+                        const response = await fetch(uploadUrl, {
+                            method: 'POST',
+                            headers: { 'X-Atlassian-Token': 'no-check' },
+                            body: formData
+                        });
+                        
+                        if (response.status === 413) {
+                            console.warn('ROTCE file too large for Confluence upload (413 error)');
+                            return false;
+                        }
+                        
+                        if (!response.ok) {
+                            throw new Error(`Failed to upload ROTCE: ${response.status}`);
+                        }
+                        
+                        console.log('ROTCE_tw.xlsx uploaded successfully');
+                        return true;
+                    } catch (error) {
+                        console.error('Error uploading ROTCE to Confluence:', error);
+                        return false;
+                    }
+                },
+                
+                // Fetch ROTCE data from Confluence
+                async fetchROTCEFromConfluence() {
+                    try {
+                        const attachmentsResponse = await fetch(
+                            `${this.confluenceConfig.baseUrl}/rest/api/content/${this.confluenceConfig.pageId}/child/attachment?filename=${this.confluenceConfig.rotceFileName}`
+                        );
+                        const attachmentsData = await attachmentsResponse.json();
+                        
+                        if (!attachmentsData.results || attachmentsData.results.length === 0) {
+                            console.log('ROTCE_tw.xlsx not found in Confluence - ROTCE mapping will be skipped');
+                            return null;
+                        }
+                        
+                        const downloadUrl = `${this.confluenceConfig.baseUrl}${attachmentsData.results[0]._links.download}`;
+                        const fileResponse = await fetch(downloadUrl);
+                        const fileBuffer = await fileResponse.arrayBuffer();
+                        
+                        const workbook = XLSX.read(new Uint8Array(fileBuffer), { type: 'array' });
+                        const sheetName = workbook.SheetNames[0];
+                        const sheet = workbook.Sheets[sheetName];
+                        const rawData = XLSX.utils.sheet_to_json(sheet);
+                        
+                        // Build a map of Client_Relationship_ID to Variable_RoTCE
+                        const rotceMap = rawData.map(row => ({
+                            clientRelationshipId: String(row['Client_Relationship_ID'] || row['Client Relationship ID'] || '').trim(),
+                            variableRoTCE: row['Variable_RoTCE'] || row['Variable RoTCE'] || '0%'
+                        })).filter(r => r.clientRelationshipId);
+                        
+                        console.log(`ROTCE: Fetched ${rotceMap.length} records from Confluence`);
+                        return rotceMap;
+                    } catch (error) {
+                        console.error('Error fetching ROTCE from Confluence:', error);
+                        return null;
+                    }
+                },
+                
+                // Map ROTCE to Portfolio data
+                mapROTCEToPortfolio(portfolioData, rotceData) {
+                    if (!rotceData || rotceData.length === 0) {
+                        // Set all ROTCE to 0% if no ROTCE data
+                        return portfolioData.map(row => ({
+                            ...row,
+                            ROTCE: '0%'
+                        }));
+                    }
+                    
+                    // Create a lookup map for faster access
+                    const rotceLookup = new Map();
+                    rotceData.forEach(r => {
+                        if (r.clientRelationshipId) {
+                            rotceLookup.set(r.clientRelationshipId.toLowerCase(), r.variableRoTCE);
+                        }
+                    });
+                    
+                    let matchCount = 0;
+                    const mappedData = portfolioData.map(row => {
+                        const relationshipId = String(row.Relationship_ID || '').trim().toLowerCase();
+                        let rotceValue = '0%';
+                        
+                        if (relationshipId && rotceLookup.has(relationshipId)) {
+                            rotceValue = rotceLookup.get(relationshipId);
+                            matchCount++;
+                        }
+                        
+                        return {
+                            ...row,
+                            ROTCE: rotceValue
+                        };
+                    });
+                    
+                    console.log(`ROTCE Mapping: ${matchCount}/${portfolioData.length} records matched`);
+                    return mappedData;
                 },
 
                 // ==================== COVENANTS ETL FUNCTIONS ====================
@@ -4109,7 +4686,11 @@
                 // Check if row is an internal covenant (starts with "Internal Cov")
                 isInternalCovenant(row) {
                     const description = row['Covenant Description'] || row['CovenantDescription'] || '';
-                    return String(description).trim().toLowerCase().startsWith('internal cov');
+                    const remarks = row['Covenant Remarks'] || row['CovenantRemarks'] || '';
+                    
+                    // Check if either description or remarks starts with "Internal Cov"
+                    return String(description).trim().toLowerCase().startsWith('internal cov') ||
+                           String(remarks).trim().toLowerCase().startsWith('internal cov');
                 },
 
                 // Normalize Coming Due/Past Due values (remove underscores)
@@ -4128,9 +4709,9 @@
                         Report_Date: this.formatDate(row['As Of Date'] || row['AsOfDate'] || ''),
                         Region: row['Region'] || region.toUpperCase(),
                         Origination_Unit: row['Originating Unit'] || row['OriginatingUnit'] || '',
-                        Underwriting_Team_Lead: row['Investment Finance Underwriting Team Lead'] || row['InvestmentFinanceUnderwritingTeamLead'] || '',
-                        Lead_Underwriter: row['Investment Finance Lead Underwriter'] || row['InvestmentFinanceLeadUnderwriter'] || '',
-                        Product_Underwriter: row['Investment Finance Product Underwriter'] || row['InvestmentFinanceProductUnderwriter'] || '',
+                        Underwriting_Team_Lead: this.normalizeUnderwriterName(row['Investment Finance Underwriting Team Lead'] || row['InvestmentFinanceUnderwritingTeamLead']),
+                        Lead_Underwriter: this.normalizeUnderwriterName(row['Investment Finance Lead Underwriter'] || row['InvestmentFinanceLeadUnderwriter']),
+                        Product_Underwriter: this.normalizeUnderwriterName(row['Investment Finance Product Underwriter'] || row['InvestmentFinanceProductUnderwriter']),
                         OU_Expense_Code: row['OU Expense Code'] || row['OUExpenseCode'] || '',
                         CU_Expense_Code: row['CU Expense Code'] || row['CUExpenseCode'] || '',
                         Relationship_ID: row['Relationship ID'] || row['RelationshipID'] || '',
@@ -4589,7 +5170,8 @@
                         transformedData = rawData
                             .filter(row => !this.isExcludedRiskCategory(row)) // Filter OUT Clearing, Notation, Settlement
                             .filter(row => Object.keys(row).length > 1) // Filter out rows with only empty column A
-                            .map(row => this.mapPortfolioRowNAM(row, pseMappingData, regionsMapping));
+                            .map(row => this.mapPortfolioRowNAM(row, pseMappingData, regionsMapping))
+                            .filter(row => this.isAllowedNAMRegion(row.Region)); // Keep only NAM and LATAM, filter out SARG and non-matches
                     }
 
                     return transformedData;
@@ -4606,6 +5188,96 @@
                     const riskCategory = String(row['Risk Category'] || '').trim().toLowerCase();
                     const excludedCategories = ['clearing', 'notation', 'settlement'];
                     return excludedCategories.includes(riskCategory);
+                },
+
+                // Check if region is allowed for NAM file (NAM and LATAM only, filter out SARG and non-matches)
+                isAllowedNAMRegion(region) {
+                    const allowedRegions = ['nam', 'latam'];
+                    const regionStr = String(region || '').trim().toLowerCase();
+                    return allowedRegions.includes(regionStr);
+                },
+
+                // Normalize Underwriter name from "LASTNAME, FIRSTNAME" to "FirstName LastName"
+                normalizeUnderwriterName(value) {
+                    if (!value) return '';
+                    
+                    const trimmed = String(value).trim();
+                    if (!trimmed) return '';
+                    
+                    // Check if it contains a comma (LASTNAME, FIRSTNAME format)
+                    if (trimmed.includes(',')) {
+                        const parts = trimmed.split(',').map(p => p.trim());
+                        if (parts.length >= 2) {
+                            const lastName = parts[0];
+                            const firstName = parts[1];
+                            
+                            // Convert to proper case (FirstName LastName)
+                            const formatName = (name) => {
+                                return name.toLowerCase()
+                                    .split(/[\s-]+/)
+                                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                    .join(' ');
+                            };
+                            
+                            return `${formatName(firstName)} ${formatName(lastName)}`;
+                        }
+                    }
+                    
+                    // If no comma, just convert to proper case
+                    return trimmed.toLowerCase()
+                        .split(/[\s-]+/)
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(' ');
+                },
+
+                // Normalize Credit Classification to standard values
+                normalizeCreditClassification(value) {
+                    if (!value) return '';
+                    
+                    const normalized = String(value).trim().toLowerCase();
+                    
+                    // Pass variants
+                    if (normalized === 'p' || normalized === 'pass' || normalized === 'pass (p)') {
+                        return 'Pass';
+                    }
+                    
+                    // Pass Watch List variants
+                    if (normalized === 'pwl' || normalized === 'pass watch list' || normalized === 'pass watch list (pwl)' || normalized === 'passwatchlist') {
+                        return 'Pass Watch List';
+                    }
+                    
+                    // Special Mention variants
+                    if (normalized === 'sm' || normalized === 'special mention' || normalized === 'special mention (sm)' || normalized === 'specialmention') {
+                        return 'Special Mention';
+                    }
+                    
+                    // Substandard variants
+                    if (normalized === 'ss' || normalized === 'substandard' || normalized === 'substandard (ss)') {
+                        return 'Substandard';
+                    }
+                    
+                    // Substandard Non Performing
+                    if (normalized === 'substandard non performing' || normalized === 'substandard non-performing' || normalized === 'substandardnonperforming') {
+                        return 'Substandard Non Performing';
+                    }
+                    
+                    // Substandard Performing
+                    if (normalized === 'substandard performing' || normalized === 'substandardperforming') {
+                        return 'Substandard Performing';
+                    }
+                    
+                    // Doubtful variants
+                    if (normalized === 'd' || normalized === 'doubtful' || normalized === 'doubtful (d)') {
+                        return 'Doubtful';
+                    }
+                    
+                    // Loss
+                    if (normalized === 'loss' || normalized === 'l') {
+                        return 'Loss';
+                    }
+                    
+                    // If no match, return original value with proper case
+                    return String(value).trim();
                 },
 
                 // Determine Underwriting Team Lead for EMEA
@@ -4654,17 +5326,57 @@
                     return isNaN(num) ? 0 : num;
                 },
 
+                // Get column value with flexible matching (handles whitespace, case variations)
+                getColumnValue(row, columnNames) {
+                    if (!row || !columnNames || !Array.isArray(columnNames)) return '';
+                    
+                    // First try exact matches
+                    for (const name of columnNames) {
+                        if (row[name] !== undefined && row[name] !== null) {
+                            return row[name];
+                        }
+                    }
+                    
+                    // Then try case-insensitive and trimmed matches
+                    const rowKeys = Object.keys(row);
+                    for (const name of columnNames) {
+                        const nameLower = name.toLowerCase().trim();
+                        for (const key of rowKeys) {
+                            if (key.toLowerCase().trim() === nameLower) {
+                                return row[key];
+                            }
+                        }
+                    }
+                    
+                    // Try partial match (column name contains or is contained)
+                    for (const name of columnNames) {
+                        const nameLower = name.toLowerCase().trim();
+                        for (const key of rowKeys) {
+                            const keyLower = key.toLowerCase().trim();
+                            if (keyLower.includes(nameLower) || nameLower.includes(keyLower)) {
+                                return row[key];
+                            }
+                        }
+                    }
+                    
+                    return '';
+                },
+
                 // Map EMEA Portfolio row
                 mapPortfolioRowEMEA(row, pseMappingData) {
                     const facilityType = row['Facility Type'] || '';
-                    const leadUnderwriter = row['Investment Finance Lead Underwriter'] || '';
+                    const leadUnderwriter = this.normalizeUnderwriterName(row['Investment Finance Lead Underwriter']);
                     const committedFacility = String(row['Commited Facility'] || row['Committed Facility'] || '').toUpperCase();
                     
                     // EMEA uses Facility Type as Primary_Key for category lookup
                     const categoryLookup = this.lookupCategoryMapping(facilityType, 'emea', pseMappingData);
                     
+                    // Try multiple column names for Report Date
+                    const reportDate = row['As Of Date'] || row['AsOfDate'] || row['Report Date'] || 
+                                       row['ReportDate'] || row['Position Date'] || '';
+                    
                     return {
-                        Report_Date: this.formatDate(row['As Of Date'] || ''),
+                        Report_Date: this.formatDateSafe(reportDate),
                         Region: 'EMEA',
                         Facility_ID: row['Fac ID'] || '',
                         Parent_Facility_ID: row['Parent Facility ID'] || '',
@@ -4688,7 +5400,7 @@
                         Maturity_Date: this.formatDateSafe(row['Facility Maturity Date']),
                         Product_Underwriter: leadUnderwriter,
                         CA_Expiration_Date: this.formatDateSafe(row['CA Maturity Date']),
-                        Credit_Classification: row['Credit Classification'] || '',
+                        Credit_Classification: this.normalizeCreditClassification(row['Credit Classification']),
                         PSE_non_PSE: this.determinePSE(facilityType, '', 'emea', pseMappingData),
                         Facility_First_Approval_Date: this.formatDateSafe(row['Facility First Approval Date']),
                         Origination_Date: this.formatDateSafe(row['Origination Date']),
@@ -4709,8 +5421,13 @@
                     // APAC uses Product Program Name as Primary_Key for category lookup
                     const categoryLookup = this.lookupCategoryMapping(productProgramName, 'apac', pseMappingData);
                     
+                    // Try multiple column names for Report Date
+                    const reportDate = row['Position Date'] || row['PositionDate'] || row['Report Date'] || 
+                                       row['ReportDate'] || row['As Of Date'] || row['AsOfDate'] || 
+                                       row['Data Date'] || row['DataDate'] || '';
+                    
                     return {
-                        Report_Date: this.formatDateSafe(row['Position Date']),
+                        Report_Date: this.formatDateSafe(reportDate),
                         Region: 'APAC',
                         Facility_ID: row['Facility Id'] || row['Facility ID'] || '',
                         Parent_Facility_ID: row['Facility Id'] || row['Facility ID'] || '',
@@ -4723,8 +5440,8 @@
                         Relationship_ID: row['Relationship Id'] || row['Relationship ID'] || '',
                         Relationship_Name: '',
                         CAID: row['CA No.'] || row['CA No'] || '',
-                        Lead_Underwriter: row['Investment Finance Lead Underwriter Name'] || '',
-                        Underwriting_Team_Lead: row['Team Lead'] || '',
+                        Lead_Underwriter: this.normalizeUnderwriterName(row['Investment Finance Lead Underwriter Name']),
+                        Underwriting_Team_Lead: this.normalizeUnderwriterName(row['Team Lead']),
                         Control_Unit: row['Control unit'] || row['Control Unit'] || '',
                         Fac_Amount: this.parseNumeric(row['TFA (USD)'] || row['TFA(USD)']),
                         Direct_OS: this.parseNumeric(row['Direct (USD)'] || row['Direct(USD)']),
@@ -4734,7 +5451,7 @@
                         Maturity_Date: this.formatDateSafe(row['Mainline Maturity Date']),
                         Product_Underwriter: row['Investment Finance Lead Underwriter Name'] || '',
                         CA_Expiration_Date: this.formatDateSafe(row['CA Expiration Date']),
-                        Credit_Classification: row['Classification'] || '',
+                        Credit_Classification: this.normalizeCreditClassification(row['Classification']),
                         PSE_non_PSE: this.determinePSE(facilityType, '', 'apac', pseMappingData),
                         Facility_First_Approval_Date: '',
                         Origination_Date: this.formatDateSafe(row['Original Origination Date']),
@@ -4760,8 +5477,12 @@
                     // If region is IPB, treat as NAM; otherwise use the mapped region
                     const mappedRegion = this.lookupNAMRegion(controlUnit, regionsMapping);
                     
+                    // Try multiple column names for Report Date
+                    const reportDate = row['As Of Date'] || row['AsOfDate'] || row['Report Date'] || 
+                                       row['ReportDate'] || row['Position Date'] || '';
+                    
                     return {
-                        Report_Date: this.formatDateSafe(row['As Of Date']),
+                        Report_Date: this.formatDateSafe(reportDate),
                         Region: mappedRegion,
                         Facility_ID: row['Facility ID'] || '',
                         Parent_Facility_ID: row['GFRN'] || '',
@@ -4774,8 +5495,8 @@
                         Relationship_ID: row['CARE Relationship ID'] || row['Relationship ID'] || '',
                         Relationship_Name: row['Relationship Short Name'] || '',
                         CAID: row['CA ID'] || '',
-                        Lead_Underwriter: row['Investment Finance Underwriting Team Lead'] || '',
-                        Underwriting_Team_Lead: row['Investment Finance Lead Underwriter'] || '',
+                        Lead_Underwriter: this.normalizeUnderwriterName(row['Investment Finance Underwriting Team Lead']),
+                        Underwriting_Team_Lead: this.normalizeUnderwriterName(row['Investment Finance Lead Underwriter']),
                         Control_Unit: row['Control Unit'] || '',
                         Fac_Amount: this.parseNumeric(row['Facility Amount']),
                         Direct_OS: this.parseNumeric(row['Direct O/S (Fac Lvl)'] || row['Direct O/S']),
@@ -4785,10 +5506,16 @@
                         Maturity_Date: this.formatDateSafe(row['Maturity Date Or Demand'] || row['Maturity Date']),
                         Product_Underwriter: row['Investment Finance Product Underwriter'] || '',
                         CA_Expiration_Date: this.formatDateSafe(row['CA Expiration Date']),
-                        Credit_Classification: row['Credit Classification'] || '',
+                        Credit_Classification: this.normalizeCreditClassification(row['Credit Classification']),
                         PSE_non_PSE: this.determinePSE(facilityType, productProgram, 'nam', pseMappingData),
-                        Facility_First_Approval_Date: this.formatDateSafe(row['Facility Approval Date']),
-                        Origination_Date: this.formatDateSafe(row['Origination Date']),
+                        Facility_First_Approval_Date: this.formatDateSafe(
+                            this.getColumnValue(row, ['Facility Approval Date', 'Facility First Approval Date', 
+                            'First Approval Date', 'Facility_Approval_Date', 'FacilityApprovalDate', 'Fac Approval Date'])
+                        ),
+                        Origination_Date: this.formatDateSafe(
+                            this.getColumnValue(row, ['Origination Date', 'OriginationDate', 'Origination_Date',
+                            'Original Origination Date', 'Orig Date'])
+                        ),
                         OSUC: this.parseNumeric(row['Total Comm Exposure (Fac Lvl)'] || row['OSUC']),
                         Total_OS: 0,
                         Total_Unused_Exposure: this.parseNumeric(row['Unused Commitment (Fac Lvl)'] || row['Unused Commitment']),
@@ -4806,6 +5533,7 @@
                         const pseOS = this.parseNumeric(row.PSE_OS);
                         const isCommitted = row.Committed_Uncommitted === 'Committed';
                         const isEMEA = row.Region === 'EMEA';
+                        const isAPAC = row.Region === 'APAC';
 
                         // Total_OS = Direct_OS + Contingent_OS + PSE_OS (for ALL regions)
                         row.Total_OS = directOS + contingentOS + pseOS;
@@ -4813,8 +5541,8 @@
                         // Total_Undrawn = Fac_Amount - (Direct_OS + Contingent_OS + PSE_OS) (for ALL regions)
                         row.Total_Undrawn = facAmount - (directOS + contingentOS + pseOS);
 
-                        // For EMEA only
-                        if (isEMEA) {
+                        // For EMEA and APAC: Calculate OSUC and Total_Unused_Exposure
+                        if (isEMEA || isAPAC) {
                             // OSUC = If Committed → Fac_Amount, If Uncommitted → Direct_OS + Contingent_OS + PSE_OS
                             row.OSUC = isCommitted ? facAmount : (directOS + contingentOS + pseOS);
 
@@ -5158,7 +5886,8 @@
                     const fileNames = {
                         portfolio: 'Portfolio_tw.xlsx',
                         covenants: 'Covenants_tw.xlsx',
-                        ccm: 'CCM_tw.xlsx'
+                        ccm: 'CCM_tw.xlsx',
+                        rotce: 'ROTCE_tw.xlsx'
                     };
                     
                     try {
@@ -5175,14 +5904,19 @@
                             ];
                         } else if (type === 'covenants') {
                             worksheet['!cols'] = Array(26).fill({ wch: 15 });
+                        } else if (type === 'rotce') {
+                            worksheet['!cols'] = [
+                                { wch: 25 }, { wch: 12 }, { wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 15 }
+                            ];
                         } else {
-                            worksheet['!cols'] = Array(33).fill({ wch: 15 });
+                            worksheet['!cols'] = Array(34).fill({ wch: 15 }); // 33 + ROTCE column
                         }
                         
                         const sheetNames = {
                             portfolio: 'Portfolio Data',
                             covenants: 'Covenants Data',
-                            ccm: 'CCM Data'
+                            ccm: 'CCM Data',
+                            rotce: 'ROTCE Data'
                         };
                         
                         XLSX.utils.book_append_sheet(workbook, worksheet, sheetNames[type]);
@@ -5215,27 +5949,61 @@
                     }
                 },
 
-                showNotification(message, type = 'info') {
+                showNotification(message, type = 'info', duration = 4000) {
                     const container = document.getElementById('notificationContainer');
                     const colors = {
                         success: 'bg-brand-500',
-                        error: 'bg-gray-600',
-                        warning: 'bg-brand-500',
+                        error: 'bg-white border border-red-200',
+                        warning: 'bg-warning-500',
                         info: 'bg-brand-500'
+                    };
+                    const textColors = {
+                        success: 'text-white',
+                        error: 'text-gray-800',
+                        warning: 'text-white',
+                        info: 'text-white'
                     };
                     const icons = {
                         success: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>',
-                        error: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>',
+                        error: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>',
                         warning: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>',
                         info: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
                     };
+                    const iconColors = {
+                        success: 'text-white',
+                        error: 'text-red-500',
+                        warning: 'text-white',
+                        info: 'text-white'
+                    };
 
                     const notification = document.createElement('div');
-                    notification.className = `notification-animate flex items-center gap-3 rounded-lg ${colors[type]} px-4 py-3 text-white shadow-lg max-w-sm`;
-                    notification.innerHTML = `
-                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">${icons[type]}</svg>
-                        <span class="text-sm font-medium">${message}</span>
-                    `;
+                    const isHtmlContent = message.includes('<');
+                    const maxWidth = isHtmlContent ? 'max-w-md' : 'max-w-sm';
+                    
+                    notification.className = `notification-animate rounded-xl ${colors[type]} ${textColors[type]} px-4 py-3 shadow-xl ${maxWidth}`;
+                    
+                    if (isHtmlContent) {
+                        // HTML content with close button
+                        notification.innerHTML = `
+                            <div class="flex items-start gap-3">
+                                <svg class="w-5 h-5 flex-shrink-0 mt-0.5 ${iconColors[type]}" fill="none" stroke="currentColor" viewBox="0 0 24 24">${icons[type]}</svg>
+                                <div class="flex-1">${message}</div>
+                                <button onclick="this.parentElement.parentElement.remove()" class="flex-shrink-0 p-1 hover:bg-gray-200 rounded transition-colors">
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        // Simple text content
+                        notification.innerHTML = `
+                            <div class="flex items-center gap-3">
+                                <svg class="w-5 h-5 flex-shrink-0 ${iconColors[type]}" fill="none" stroke="currentColor" viewBox="0 0 24 24">${icons[type]}</svg>
+                                <span class="text-sm font-medium">${message}</span>
+                            </div>
+                        `;
+                    }
                     
                     container.appendChild(notification);
                     
@@ -5243,7 +6011,7 @@
                         notification.style.opacity = '0';
                         notification.style.transition = 'opacity 0.3s ease-out';
                         setTimeout(() => notification.remove(), 300);
-                    }, 4000);
+                    }, duration);
                 }
             };
         }

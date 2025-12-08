@@ -6835,6 +6835,16 @@
                 if (status === 'past due') {
                     pastDueTotalAll++;
                     
+                    // Debug: Log first few past due records to see actual category values
+                    if (pastDueTotalAll <= 3) {
+                        console.log(`DEBUG Past Due Record ${pastDueTotalAll}:`, {
+                            status: row.Coming_Due_Past_Due,
+                            category: row.Past_Due_Category,
+                            categoryTrimmed: pastDueCategory,
+                            region: region
+                        });
+                    }
+                    
                     // Use Past_Due_Category from dataLoader (normalized categories: "0-30 Days", "31-45 Days", "46-60 Days", "61-90 Days", ">90 Days")
                     if (pastDueCategory === '>90 Days') {
                         pastDueBuckets['>90 Days'].count++;
@@ -6847,6 +6857,11 @@
                     } else if (pastDueCategory === '0-30 Days' || pastDueCategory === '31-45 Days') {
                         // 1-45 days - only in breakdown, not in gauge
                         pastDueBuckets['1-45 Days'].count++;
+                    } else {
+                        // Catch any unmatched categories
+                        if (pastDueTotalAll <= 5) {
+                            console.warn(`⚠️ Unmatched Past_Due_Category: "${pastDueCategory}"`, row);
+                        }
                     }
                 }
                 
@@ -7175,6 +7190,7 @@
             });
             
             // SECOND PASS: Count by status categories using dataLoader fields
+            let regionalDebugCount = 0;
             dataSource.forEach(row => {
                 // Use exact field names from dataLoader export
                 const status = String(row.Coming_Due_Past_Due || "").trim().toLowerCase();
@@ -7188,6 +7204,18 @@
                 
                 // For Past Due covenants - use Past_Due_Category from dataLoader (normalized categories)
                 if (status === 'past due') {
+                    regionalDebugCount++;
+                    
+                    // Debug: Log first few regional past due records
+                    if (regionalDebugCount <= 3) {
+                        console.log(`DEBUG Regional Past Due Record ${regionalDebugCount}:`, {
+                            status: row.Coming_Due_Past_Due,
+                            category: row.Past_Due_Category,
+                            categoryTrimmed: pastDueCategory,
+                            region: region
+                        });
+                    }
+                    
                     if (pastDueCategory === '>90 Days') {
                         regionalData[region]['>90']++;
                     } else if (pastDueCategory === '61-90 Days') {
@@ -7198,6 +7226,11 @@
                         regionalData[region]['31-45']++;
                     } else if (pastDueCategory === '0-30 Days') {
                         regionalData[region]['1-30']++;
+                    } else {
+                        // Catch any unmatched categories
+                        if (regionalDebugCount <= 5) {
+                            console.warn(`⚠️ Regional: Unmatched Past_Due_Category: "${pastDueCategory}"`, row);
+                        }
                     }
                 }
                 

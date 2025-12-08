@@ -8215,19 +8215,18 @@
             // Initialize all 3 months
             next3Months.forEach((monthYear) => {
                 monthlyData[monthYear] = {
-                    casComingDue: new Set(), // Non-EMEA CAIDs
-                    casComingDueEMEAByRelationship: new Set(), // EMEA Relationship_IDs
+                    casComingDueByRelationship: new Set(), // Unique Relationship_IDs for all regions
                     facilitiesExpiring: new Set(), // Unique Facility IDs
                     caAmounts: { tfa: 0, direct: 0, contingent: 0, pse: 0 },
                     facilityAmounts: { tfa: 0, direct: 0, contingent: 0, pse: 0 },
                 };
             });
             
-            // Collect CAs Coming Due (only future dates from report date, exclude DM, EMEA requires CA_Review = "Yes" and uses Relationship_ID)
+            // Collect CAs Coming Due (only future dates from report date, exclude DM)
+            // Use unique Relationship_IDs for all regions (EMEA requires CA_Review = "Yes")
             // Exclude weekend dates if report date is last business day of month
             portfolioData.forEach((row) => {
                 const caExpirationDate = row.CA_Expiration_Date;
-                const caid = row.CAID;
                 const managementStatus = (row.Management_Status || "").toUpperCase();
                 const region = (row.Region || "").toUpperCase();
                 const caReview = (row.CA_Review || "").trim();
@@ -8247,10 +8246,12 @@
                         
                         // Only include if it's in our next 3 months
                         if (next3Months.includes(monthYear)) {
-                            // For EMEA: count unique Relationship_IDs with CA_Review = "Yes"
+                            // For EMEA: require CA_Review = "Yes"
+                            // For all other regions: count all CAs
+                            // All regions use unique Relationship_IDs
                             if (region === "EMEA") {
                                 if (caReview === "Yes" && row.Relationship_ID) {
-                                    monthlyData[monthYear].casComingDueEMEAByRelationship.add(row.Relationship_ID);
+                                    monthlyData[monthYear].casComingDueByRelationship.add(row.Relationship_ID);
                                     // Accumulate amounts for EMEA CAs (sum ALL lines)
                                     monthlyData[monthYear].caAmounts.tfa += parseNumber(
                                         row.Fac_Amount || row.Facility_Amount
@@ -8264,9 +8265,9 @@
                                     monthlyData[monthYear].caAmounts.pse += parseNumber(row.PSE_OS);
                                 }
                             } else {
-                                // For non-EMEA: count unique CAIDs
-                                if (caid) {
-                                    monthlyData[monthYear].casComingDue.add(caid);
+                                // For non-EMEA: count unique Relationship_IDs
+                                if (row.Relationship_ID) {
+                                    monthlyData[monthYear].casComingDueByRelationship.add(row.Relationship_ID);
                                     // Accumulate amounts for non-EMEA CAs (sum ALL lines)
                                     monthlyData[monthYear].caAmounts.tfa += parseNumber(
                                         row.Fac_Amount || row.Facility_Amount
@@ -8332,7 +8333,7 @@
             });
 
             const casComingDueData = next3Months.map(
-                (month) => monthlyData[month].casComingDue.size + monthlyData[month].casComingDueEMEAByRelationship.size
+                (month) => monthlyData[month].casComingDueByRelationship.size
             );
             const facilitiesExpiringData = next3Months.map(
                 (month) => monthlyData[month].facilitiesExpiring.size // Changed from .length to .size
@@ -8463,8 +8464,8 @@
                         let html = `<div class="apexcharts-tooltip-custom" style="padding: 12px; min-width: 200px; background: #ffffff; color: #1f2937; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border: 1px solid #e5e7eb;">`;
                         html += `<div style="font-weight: 600; margin-bottom: 8px; font-size: 13px; color: #1f2937;">${monthName}</div>`;
                         
-                        // CAs Coming Due (combine non-EMEA CAIDs + EMEA Relationship_IDs)
-                        const casCount = monthData.casComingDue.size + monthData.casComingDueEMEAByRelationship.size;
+                        // CAs Coming Due (unique Relationship_IDs for all regions)
+                        const casCount = monthData.casComingDueByRelationship.size;
                         if (casCount > 0) {
                             html += `<div style="margin-bottom: 6px;">`;
                             html += `<div style="display: flex; align-items: center; margin-bottom: 4px;">`;
@@ -8612,19 +8613,18 @@
             // Initialize all 3 months
             next3Months.forEach((monthYear) => {
                 monthlyData[monthYear] = {
-                    casComingDue: new Set(), // Non-EMEA CAIDs
-                    casComingDueEMEAByRelationship: new Set(), // EMEA Relationship_IDs
+                    casComingDueByRelationship: new Set(), // Unique Relationship_IDs for all regions
                     facilitiesExpiring: new Set(), // Unique Facility IDs
                     caAmounts: { tfa: 0, direct: 0, contingent: 0, pse: 0 },
                     facilityAmounts: { tfa: 0, direct: 0, contingent: 0, pse: 0 },
                 };
             });
             
-            // Collect CAs Coming Due (only future dates from report date, exclude DM, EMEA requires CA_Review = "Yes" and uses Relationship_ID)
+            // Collect CAs Coming Due (only future dates from report date, exclude DM)
+            // Use unique Relationship_IDs for all regions (EMEA requires CA_Review = "Yes")
             // Exclude weekend dates if report date is last business day of month
             filteredData.forEach((row) => {
                 const caExpirationDate = row.CA_Expiration_Date;
-                const caid = row.CAID;
                 const managementStatus = (row.Management_Status || "").toUpperCase();
                 const region = (row.Region || "").toUpperCase();
                 const caReview = (row.CA_Review || "").trim();
@@ -8644,10 +8644,12 @@
                         
                         // Only include if it's in our next 3 months
                         if (next3Months.includes(monthYear)) {
-                            // For EMEA: count unique Relationship_IDs with CA_Review = "Yes"
+                            // For EMEA: require CA_Review = "Yes"
+                            // For all other regions: count all CAs
+                            // All regions use unique Relationship_IDs
                             if (region === "EMEA") {
                                 if (caReview === "Yes" && row.Relationship_ID) {
-                                    monthlyData[monthYear].casComingDueEMEAByRelationship.add(row.Relationship_ID);
+                                    monthlyData[monthYear].casComingDueByRelationship.add(row.Relationship_ID);
                                     // Accumulate amounts for EMEA CAs (sum ALL lines)
                                     monthlyData[monthYear].caAmounts.tfa += parseNumber(
                                         row.Fac_Amount || row.Facility_Amount
@@ -8661,9 +8663,9 @@
                                     monthlyData[monthYear].caAmounts.pse += parseNumber(row.PSE_OS);
                                 }
                             } else {
-                                // For non-EMEA: count unique CAIDs
-                                if (caid) {
-                                    monthlyData[monthYear].casComingDue.add(caid);
+                                // For non-EMEA: count unique Relationship_IDs
+                                if (row.Relationship_ID) {
+                                    monthlyData[monthYear].casComingDueByRelationship.add(row.Relationship_ID);
                                     // Accumulate amounts for non-EMEA CAs (sum ALL lines)
                                     monthlyData[monthYear].caAmounts.tfa += parseNumber(
                                         row.Fac_Amount || row.Facility_Amount
@@ -8729,7 +8731,7 @@
             });
 
             const casComingDueData = next3Months.map(
-                (month) => monthlyData[month].casComingDue.size + monthlyData[month].casComingDueEMEAByRelationship.size
+                (month) => monthlyData[month].casComingDueByRelationship.size
             );
             const facilitiesExpiringData = next3Months.map(
                 (month) => monthlyData[month].facilitiesExpiring.size // Changed from .length to .size
@@ -8857,8 +8859,8 @@
                         let html = `<div class="apexcharts-tooltip-custom" style="padding: 12px; min-width: 200px; background: #ffffff; color: #1f2937; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border: 1px solid #e5e7eb;">`;
                         html += `<div style="font-weight: 600; margin-bottom: 8px; font-size: 13px; color: #1f2937;">${monthName}</div>`;
                         
-                        // CAs Coming Due (combine non-EMEA CAIDs + EMEA Relationship_IDs)
-                        const casCount = monthData.casComingDue.size + monthData.casComingDueEMEAByRelationship.size;
+                        // CAs Coming Due (unique Relationship_IDs for all regions)
+                        const casCount = monthData.casComingDueByRelationship.size;
                         if (casCount > 0) {
                             html += `<div style="margin-bottom: 6px;">`;
                             html += `<div style="display: flex; align-items: center; margin-bottom: 4px;">`;

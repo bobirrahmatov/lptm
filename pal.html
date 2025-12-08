@@ -6825,7 +6825,6 @@
             dataSource.forEach(row => {
                 // Use exact field names from dataLoader export
                 const status = String(row.Coming_Due_Past_Due || "").trim().toLowerCase();
-                const daysPastDue = parseInt(row.Days_Past_Due || 0);
                 const pastDueCategory = String(row.Past_Due_Category || "").trim();
                 const region = String(row.Region || "").trim().toUpperCase();
                 
@@ -6836,16 +6835,16 @@
                 if (status === 'past due') {
                     pastDueTotalAll++;
                     
-                    // Use Days_Past_Due from dataLoader for bucketing
-                    if (daysPastDue > 90) {
+                    // Use Past_Due_Category from dataLoader (normalized categories: "0-30 Days", "31-45 Days", "46-60 Days", "61-90 Days", ">90 Days")
+                    if (pastDueCategory === '>90 Days') {
                         pastDueBuckets['>90 Days'].count++;
                         pastDueGaugeBuckets['>90 Days'].count++;
                         pastDueTotalGauge++;
-                    } else if (daysPastDue >= 46) {
+                    } else if (pastDueCategory === '61-90 Days' || pastDueCategory === '46-60 Days') {
                         pastDueBuckets['46-90 Days'].count++;
                         pastDueGaugeBuckets['46-90 Days'].count++;
                         pastDueTotalGauge++;
-                    } else {
+                    } else if (pastDueCategory === '0-30 Days' || pastDueCategory === '31-45 Days') {
                         // 1-45 days - only in breakdown, not in gauge
                         pastDueBuckets['1-45 Days'].count++;
                     }
@@ -7180,24 +7179,24 @@
                 // Use exact field names from dataLoader export
                 const status = String(row.Coming_Due_Past_Due || "").trim().toLowerCase();
                 const region = String(row.Region || "").trim().toUpperCase();
-                const daysPastDue = parseInt(row.Days_Past_Due || 0);
+                const pastDueCategory = String(row.Past_Due_Category || "").trim();
                 
                 if (!regions.includes(region)) return;
                 
                 // Apply region filter if active
                 if (selectedRegion !== 'all' && region !== selectedRegion.toUpperCase()) return;
                 
-                // For Past Due covenants - use Days_Past_Due from dataLoader for bucketing
+                // For Past Due covenants - use Past_Due_Category from dataLoader (normalized categories)
                 if (status === 'past due') {
-                    if (daysPastDue > 90) {
+                    if (pastDueCategory === '>90 Days') {
                         regionalData[region]['>90']++;
-                    } else if (daysPastDue >= 61) {
+                    } else if (pastDueCategory === '61-90 Days') {
                         regionalData[region]['61-90']++;
-                    } else if (daysPastDue >= 46) {
+                    } else if (pastDueCategory === '46-60 Days') {
                         regionalData[region]['46-60']++;
-                    } else if (daysPastDue >= 31) {
+                    } else if (pastDueCategory === '31-45 Days') {
                         regionalData[region]['31-45']++;
-                    } else {
+                    } else if (pastDueCategory === '0-30 Days') {
                         regionalData[region]['1-30']++;
                     }
                 }
@@ -13403,9 +13402,9 @@
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
                                     <li><strong class="text-red-700">>90 Days (Critical):</strong> Severe breach - immediate action required</li>
                                     <li><strong class="text-orange-600">46-90 Days (High):</strong> Escalated risk - urgent follow-up and remediation needed</li>
-                                    <li><strong class="text-yellow-600">1-45 Days (Moderate):</strong> Recent past due - combines 1-30 and 31-45 day buckets from source file for consolidated view</li>
+                                    <li><strong class="text-yellow-600">1-45 Days (Moderate):</strong> Recent past due - combines 0-30 and 31-45 day buckets from source file for consolidated view</li>
                                 </ul>
-                                <p class="text-sm text-gray-500 italic mt-2">Note: The source file (Covenants_tw.xlsx) contains more granular buckets (1-30, 31-45, 46-90, >90), which are aggregated here into 3 display buckets for clearer reporting.</p>
+                                <p class="text-sm text-gray-500 italic mt-2">Note: The source file (Covenants_tw.xlsx) contains more granular buckets (0-30, 31-45, 46-60, 61-90, >90 Days), which are aggregated here into 3 display buckets for clearer reporting.</p>
                             </div>
                             
                             <div>
@@ -13417,10 +13416,10 @@
                                 </div>
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
                                     <li><code class="bg-gray-100 px-1 rounded">Coming_Due_Past_Due</code> - Status indicator ("Past Due" or "Coming Due")</li>
-                                    <li><code class="bg-gray-100 px-1 rounded">Past_Due_Category</code> - Aging classification for past due items</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Past_Due_Category</code> - Normalized aging classification (0-30, 31-45, 46-60, 61-90, >90 Days)</li>
                                     <li><code class="bg-gray-100 px-1 rounded">Covenant_Number</code> - Unique covenant identifier</li>
                                     <li><code class="bg-gray-100 px-1 rounded">Covenant_Due_Date</code> - Deadline for covenant compliance</li>
-                                    <li><code class="bg-gray-100 px-1 rounded">Days_Past_Due</code> - Number of days overdue</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Days_Past_Due</code> - Number of days overdue (reference only)</li>
                                     <li><code class="bg-gray-100 px-1 rounded">Relationship_Name</code> - Client relationship</li>
                                 </ul>
                             </div>
@@ -13490,7 +13489,7 @@
                                 </div>
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
                                     <li><strong>Region:</strong> Geographic region (APAC, EMEA, NAM, LATAM)</li>
-                                    <li><strong>1-45 Days:</strong> Covenants past due for 1-45 days (combines 1-30 and 31-45 day buckets)</li>
+                                    <li><strong>1-45 Days:</strong> Covenants past due for 1-45 days (combines 0-30 and 31-45 day buckets)</li>
                                     <li><strong>46-90 Days:</strong> Covenants past due for 46-90 days (combines 46-60 and 61-90 day buckets)</li>
                                     <li><strong>>90 Days:</strong> Covenants past due for more than 90 days</li>
                                     <li><strong>% Total:</strong> Percentage of covenants for the current view (Past Due or Coming Due) relative to the grand total of all covenants (Past Due + Coming Due across all regions)</li>
@@ -13510,7 +13509,7 @@
                                     <li><strong>Data Source:</strong> Covenants_tw.xlsx file</li>
                                     <li><strong>Past Due View:</strong>
                                         <ul class="list-circle list-inside ml-6 mt-1">
-                                            <li>1-45 Days: 1-30 Days + 31-45 Days past due covenants</li>
+                                            <li>1-45 Days: 0-30 Days + 31-45 Days past due covenants</li>
                                             <li>46-90 Days: 46-60 Days + 61-90 Days past due covenants</li>
                                             <li>>90 Days: Covenants past due for more than 90 days</li>
                                             <li>Total: Sum of all three categories (1-45 + 46-90 + >90) per region</li>
@@ -13539,8 +13538,7 @@
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
                                     <li><code class="bg-gray-100 px-1 rounded">Region</code> - Geographic region classification</li>
                                     <li><code class="bg-gray-100 px-1 rounded">Coming_Due_Past_Due</code> - Status indicator</li>
-                                    <li><code class="bg-gray-100 px-1 rounded">Past_Due_Category</code> - Time bucket classification</li>
-                                    <li><code class="bg-gray-100 px-1 rounded">Days_Past_Due</code> - Number of days overdue</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Past_Due_Category</code> - Normalized time bucket (0-30, 31-45, 46-60, 61-90, >90 Days)</li>
                                     <li><code class="bg-gray-100 px-1 rounded">Covenant_Due_Date</code> - Deadline for compliance</li>
                                     <li><code class="bg-gray-100 px-1 rounded">Covenant_Number</code> - Unique covenant identifier</li>
                                 </ul>

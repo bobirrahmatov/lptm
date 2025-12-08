@@ -5131,7 +5131,7 @@
             monthEnd.setHours(23, 59, 59, 999);
             
             // Count expired facilities and CAs in current month only
-            let facilitiesExpiredCount = 0;
+            const expiredFacilities = new Set(); // Track unique Facility IDs
             let facilitiesExpiredAmount = 0;
             const expiredCAs = new Set();
             const expiredCAsEMEAByRelationship = new Set(); // For EMEA: track unique Relationship_IDs
@@ -5141,16 +5141,17 @@
                 const row = filteredData[i];
                 const managementStatus = (row.Management_Status || "").toUpperCase();
                 
-                // Check Facilities Expired (count ALL lines, not unique, exclude DM)
+                // Check Facilities Expired (count unique Facility IDs, exclude DM)
                 const maturityDate = parseDate(row.Maturity_Date);
                 if (
                     maturityDate &&
                     maturityDate >= monthStart &&
                     maturityDate <= monthEnd &&
                     maturityDate < maxReportDate &&
+                    row.Facility_ID &&
                     managementStatus !== "DM"
                 ) {
-                    facilitiesExpiredCount++;
+                    expiredFacilities.add(row.Facility_ID);
                     facilitiesExpiredAmount += parseNumber(
                         row.Fac_Amount || row.Facility_Amount
                     );
@@ -5183,6 +5184,7 @@
             
             // Combine counts: non-EMEA CAIDs + EMEA Relationship_IDs
             const casExpiredCount = expiredCAs.size + expiredCAsEMEAByRelationship.size;
+            const facilitiesExpiredCount = expiredFacilities.size;
             
             // Update DOM
             document.getElementById("facilitiesExpiredCount").textContent =
@@ -6258,7 +6260,7 @@
             monthEnd.setHours(23, 59, 59, 999);
             
             // Count expired facilities and CAs in current month only
-            let facilitiesExpiredCount = 0;
+            const expiredFacilities = new Set(); // Track unique Facility IDs
             let facilitiesExpiredAmount = 0;
             const expiredCAs = new Set();
             const expiredCAsEMEAByRelationship = new Set(); // For EMEA: track unique Relationship_IDs
@@ -6268,16 +6270,17 @@
                 const row = portfolioData[i];
                 const managementStatus = (row.Management_Status || "").toUpperCase();
                 
-                // Check Facilities Expired (count ALL lines, not unique, exclude DM)
+                // Check Facilities Expired (count unique Facility IDs, exclude DM)
                 const maturityDate = parseDate(row.Maturity_Date);
                 if (
                     maturityDate &&
                     maturityDate >= monthStart &&
                     maturityDate <= monthEnd &&
                     maturityDate < maxReportDate &&
+                    row.Facility_ID &&
                     managementStatus !== "DM"
                 ) {
-                    facilitiesExpiredCount++;
+                    expiredFacilities.add(row.Facility_ID);
                     facilitiesExpiredAmount += parseNumber(
                         row.Fac_Amount || row.Facility_Amount
                     );
@@ -6310,6 +6313,7 @@
             
             // Combine counts: non-EMEA CAIDs + EMEA Relationship_IDs
             const casExpiredCount = expiredCAs.size + expiredCAsEMEAByRelationship.size;
+            const facilitiesExpiredCount = expiredFacilities.size;
             
             // Update DOM
             document.getElementById("facilitiesExpiredCount").textContent =
@@ -7995,20 +7999,27 @@
             }
             
             // Get the current reporting month from the data
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            const reportDates = portfolioData
+                .map((row) => parseDate(row.Report_Date))
+                .filter((d) => d);
+            if (reportDates.length === 0) {
+                console.log("⚠️ No valid report dates found");
+                return;
+            }
+            const maxReportDate = new Date(Math.max(...reportDates));
+            maxReportDate.setHours(0, 0, 0, 0);
             
-            // Generate next 3 months starting from current month
+            // Generate next 3 months starting from report date
             const next3Months = [];
             for (let i = 0; i < 3; i++) {
-                const date = new Date(today);
+                const date = new Date(maxReportDate);
                 date.setMonth(date.getMonth() + i);
                 const year = date.getFullYear();
                 const month = String(date.getMonth() + 1).padStart(2, "0");
                 next3Months.push(`${year}-${month}`);
             }
             
-            console.log("Next 3 months starting from current:", next3Months);
+            console.log("Next 3 months starting from report date:", next3Months, "Report Date:", maxReportDate);
             
             // Group by month-year for both CAs and Facilities
             const monthlyData = {};
@@ -8017,22 +8028,29 @@
             next3Months.forEach((monthYear) => {
                 monthlyData[monthYear] = {
                     casComingDue: new Set(),
-                    facilitiesExpiring: [],
+                    facilitiesExpiring: new Set(), // Changed from array to Set for unique Facility IDs
                     caAmounts: { tfa: 0, direct: 0, contingent: 0, pse: 0 },
                     facilityAmounts: { tfa: 0, direct: 0, contingent: 0, pse: 0 },
                 };
             });
             
-            // Collect CAs Coming Due (only future dates, exclude DM)
+            // Collect CAs Coming Due (only future dates from report date, exclude DM, EMEA requires CA_Review = "Yes")
             portfolioData.forEach((row) => {
                 const caExpirationDate = row.CA_Expiration_Date;
                 const caid = row.CAID;
                 const managementStatus = (row.Management_Status || "").toUpperCase();
+                const region = (row.Region || "").toUpperCase();
+                const caReview = (row.CA_Review || "").trim();
                 
                 if (caExpirationDate && caid && managementStatus !== "DM") {
+                    // For EMEA, also check CA_Review = "Yes"
+                    if (region === "EMEA" && caReview !== "Yes") {
+                        return; // Skip this row for EMEA if CA_Review is not "Yes"
+                    }
+                    
                     const dateObj = parseDate(caExpirationDate);
-                    if (dateObj && dateObj >= today) {
-                        // Only future dates (coming due)
+                    if (dateObj && dateObj >= maxReportDate) {
+                        // Only future dates (coming due from report date)
                         const year = dateObj.getFullYear();
                         const month = String(dateObj.getMonth() + 1).padStart(2, "0");
                         const monthYear = `${year}-${month}`;
@@ -8056,7 +8074,7 @@
                 }
             });
             
-            // Collect Facilities Expiring (only future dates, exclude DM)
+            // Collect Facilities Expiring (only future dates from report date, exclude DM)
             portfolioData.forEach((row) => {
                 const maturityDate = row.Maturity_Date;
                 const facilityId = row.Facility_ID;
@@ -8064,15 +8082,15 @@
                 
                 if (maturityDate && facilityId && managementStatus !== "DM") {
                     const dateObj = parseDate(maturityDate);
-                    if (dateObj && dateObj >= today) {
-                        // Only future dates (expiring)
+                    if (dateObj && dateObj >= maxReportDate) {
+                        // Only future dates (expiring from report date)
                         const year = dateObj.getFullYear();
                         const month = String(dateObj.getMonth() + 1).padStart(2, "0");
                         const monthYear = `${year}-${month}`;
                         
                         // Only include if it's in our next 3 months
                         if (next3Months.includes(monthYear)) {
-                            monthlyData[monthYear].facilitiesExpiring.push(facilityId);
+                            monthlyData[monthYear].facilitiesExpiring.add(facilityId); // Use add for Set
                             // Accumulate amounts for Facilities (sum ALL lines)
                             monthlyData[monthYear].facilityAmounts.tfa += parseNumber(
                                 row.Fac_Amount || row.Facility_Amount
@@ -8100,7 +8118,7 @@
                 (month) => monthlyData[month].casComingDue.size
             );
             const facilitiesExpiringData = next3Months.map(
-                (month) => monthlyData[month].facilitiesExpiring.length
+                (month) => monthlyData[month].facilitiesExpiring.size // Changed from .length to .size
             );
 
             console.log("CAs Coming Due:", casComingDueData);
@@ -8247,7 +8265,7 @@
                         }
                         
                         // Facilities Expiring
-                        const facilitiesCount = monthData.facilitiesExpiring.length;
+                        const facilitiesCount = monthData.facilitiesExpiring.size; // Changed from .length to .size
                         if (facilitiesCount > 0) {
                             html += `<div>`;
                             html += `<div style="display: flex; align-items: center; margin-bottom: 4px;">`;
@@ -8333,13 +8351,20 @@
             }
             
             // Get the current reporting month from the data
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            const reportDates = filteredData
+                .map((row) => parseDate(row.Report_Date))
+                .filter((d) => d);
+            if (reportDates.length === 0) {
+                console.log("⚠️ No valid report dates found in filtered data");
+                return;
+            }
+            const maxReportDate = new Date(Math.max(...reportDates));
+            maxReportDate.setHours(0, 0, 0, 0);
             
-            // Generate next 3 months starting from current month
+            // Generate next 3 months starting from report date
             const next3Months = [];
             for (let i = 0; i < 3; i++) {
-                const date = new Date(today);
+                const date = new Date(maxReportDate);
                 date.setMonth(date.getMonth() + i);
                 const year = date.getFullYear();
                 const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -8353,22 +8378,29 @@
             next3Months.forEach((monthYear) => {
                 monthlyData[monthYear] = {
                     casComingDue: new Set(),
-                    facilitiesExpiring: [],
+                    facilitiesExpiring: new Set(), // Changed from array to Set for unique Facility IDs
                     caAmounts: { tfa: 0, direct: 0, contingent: 0, pse: 0 },
                     facilityAmounts: { tfa: 0, direct: 0, contingent: 0, pse: 0 },
                 };
             });
             
-            // Collect CAs Coming Due (only future dates, exclude DM)
+            // Collect CAs Coming Due (only future dates from report date, exclude DM, EMEA requires CA_Review = "Yes")
             filteredData.forEach((row) => {
                 const caExpirationDate = row.CA_Expiration_Date;
                 const caid = row.CAID;
                 const managementStatus = (row.Management_Status || "").toUpperCase();
+                const region = (row.Region || "").toUpperCase();
+                const caReview = (row.CA_Review || "").trim();
                 
                 if (caExpirationDate && caid && managementStatus !== "DM") {
+                    // For EMEA, also check CA_Review = "Yes"
+                    if (region === "EMEA" && caReview !== "Yes") {
+                        return; // Skip this row for EMEA if CA_Review is not "Yes"
+                    }
+                    
                     const dateObj = parseDate(caExpirationDate);
-                    if (dateObj && dateObj >= today) {
-                        // Only future dates (coming due)
+                    if (dateObj && dateObj >= maxReportDate) {
+                        // Only future dates (coming due from report date)
                         const year = dateObj.getFullYear();
                         const month = String(dateObj.getMonth() + 1).padStart(2, "0");
                         const monthYear = `${year}-${month}`;
@@ -8392,7 +8424,7 @@
                 }
             });
             
-            // Collect Facilities Expiring (only future dates, exclude DM)
+            // Collect Facilities Expiring (only future dates from report date, exclude DM)
             filteredData.forEach((row) => {
                 const maturityDate = row.Maturity_Date;
                 const facilityId = row.Facility_ID;
@@ -8400,15 +8432,15 @@
                 
                 if (maturityDate && facilityId && managementStatus !== "DM") {
                     const dateObj = parseDate(maturityDate);
-                    if (dateObj && dateObj >= today) {
-                        // Only future dates (expiring)
+                    if (dateObj && dateObj >= maxReportDate) {
+                        // Only future dates (expiring from report date)
                         const year = dateObj.getFullYear();
                         const month = String(dateObj.getMonth() + 1).padStart(2, "0");
                         const monthYear = `${year}-${month}`;
                         
                         // Only include if it's in our next 3 months
                         if (next3Months.includes(monthYear)) {
-                            monthlyData[monthYear].facilitiesExpiring.push(facilityId);
+                            monthlyData[monthYear].facilitiesExpiring.add(facilityId); // Use add for Set
                             // Accumulate amounts for Facilities (sum ALL lines)
                             monthlyData[monthYear].facilityAmounts.tfa += parseNumber(
                                 row.Fac_Amount || row.Facility_Amount
@@ -8436,7 +8468,7 @@
                 (month) => monthlyData[month].casComingDue.size
             );
             const facilitiesExpiringData = next3Months.map(
-                (month) => monthlyData[month].facilitiesExpiring.length
+                (month) => monthlyData[month].facilitiesExpiring.size // Changed from .length to .size
             );
 
             // Check if all data is empty
@@ -8580,7 +8612,7 @@
                         }
                         
                         // Facilities Expiring
-                        const facilitiesCount = monthData.facilitiesExpiring.length;
+                        const facilitiesCount = monthData.facilitiesExpiring.size; // Changed from .length to .size
                         if (facilitiesCount > 0) {
                             html += `<div>`;
                             html += `<div style="display: flex; align-items: center; margin-bottom: 4px;">`;
@@ -8726,8 +8758,16 @@
                 `📊 Aggregating maturity data for ${data.length} rows (Expired vs Expiring)`
             );
             
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); // Start of today
+            // Get report date from data
+            const reportDates = data
+                .map((row) => parseDate(row.Report_Date))
+                .filter((d) => d);
+            if (reportDates.length === 0) {
+                console.log("⚠️ No valid report dates found");
+                return { categories: [], expiredData: [], expiringData: [] };
+            }
+            const maxReportDate = new Date(Math.max(...reportDates));
+            maxReportDate.setHours(0, 0, 0, 0);
             
             // Group by month-year with Sets to track unique Facility IDs
             const expiredByMonth = {}; // { 'YYYY-MM': Set<Facility_ID> }
@@ -8750,16 +8790,16 @@
                         const month = String(dateObj.getMonth() + 1).padStart(2, "0");
                         const monthYear = `${year}-${month}`;
                         
-                        // Determine if expired or expiring
-                        if (dateObj < today) {
-                            // Expired (past date)
+                        // Determine if expired or expiring (based on report date)
+                        if (dateObj < maxReportDate) {
+                            // Expired (before report date)
                             expiredCount++;
                             if (!expiredByMonth[monthYear]) {
                                 expiredByMonth[monthYear] = new Set();
                             }
                             expiredByMonth[monthYear].add(row.Facility_ID);
                         } else {
-                            // Expiring (future date)
+                            // Expiring (on or after report date)
                             expiringCount++;
                             if (!expiringByMonth[monthYear]) {
                                 expiringByMonth[monthYear] = new Set();
@@ -8769,9 +8809,9 @@
                         
                         // Log first few for debugging
                         if (index < 3) {
-                            const status = dateObj < today ? "Expired" : "Expiring";
+                            const status = dateObj < maxReportDate ? "Expired" : "Expiring";
                             console.log(
-                                `  Row ${index}: Maturity=${maturityDate} → ${monthYear}, Status=${status}, Facility=${row.Facility_ID}`
+                                `  Row ${index}: Maturity=${maturityDate} → ${monthYear}, Status=${status}, Facility=${row.Facility_ID}, Report Date=${maxReportDate}`
                             );
                         }
                     }
@@ -11625,18 +11665,30 @@
             return names[selectedAmountType] || "Direct OS";
         }
 
-        // Get expiring data (CAs & Facilities expiring in next 3 months, excludes DM)
+        // Get expiring data (CAs & Facilities expiring in next 3 months, excludes DM, EMEA CAs require CA_Review = "Yes")
         function getExpiringData() {
             const dataSource =
                 filteredData.length > 0 ? filteredData : portfolioData;
             console.log("getExpiringData - dataSource length:", dataSource.length);
-            const today = new Date();
-            const threeMonthsLater = new Date(
-                today.getTime() + 90 * 24 * 60 * 60 * 1000
-            );
+            
+            // Get report date from data
+            const reportDates = dataSource
+                .map((row) => parseDate(row.Report_Date))
+                .filter((d) => d);
+            if (reportDates.length === 0) {
+                console.log("⚠️ No valid report dates found");
+                return [];
+            }
+            const maxReportDate = new Date(Math.max(...reportDates));
+            maxReportDate.setHours(0, 0, 0, 0);
+            
+            const threeMonthsLater = new Date(maxReportDate);
+            threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
 
             const result = dataSource.filter((row) => {
                 const managementStatus = (row.Management_Status || "").toUpperCase();
+                const region = (row.Region || "").toUpperCase();
+                const caReview = (row.CA_Review || "").trim();
                 
                 // Exclude DM status
                 if (managementStatus === "DM") return false;
@@ -11645,11 +11697,16 @@
                 const maturityDate = parseDate(row.Maturity_Date);
 
                 const caExpiring =
-                    caExpiry && caExpiry >= today && caExpiry <= threeMonthsLater;
+                    caExpiry && caExpiry >= maxReportDate && caExpiry <= threeMonthsLater;
                 const facilityExpiring =
                     maturityDate &&
-                    maturityDate >= today &&
+                    maturityDate >= maxReportDate &&
                     maturityDate <= threeMonthsLater;
+
+                // For CA expiring in EMEA, require CA_Review = "Yes"
+                if (caExpiring && region === "EMEA" && caReview !== "Yes") {
+                    return facilityExpiring; // Only include if facility is also expiring
+                }
 
                 return caExpiring || facilityExpiring;
             });
@@ -12813,11 +12870,12 @@
                                     <h5 class="font-semibold text-gray-900">Calculation Logic:</h5>
                                 </div>
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
-                                    <li><strong>CAs Expiring:</strong> Count unique CA_IDs where CA_Expiration_Date is within 90 days from today (excludes DM)</li>
-                                    <li><strong>Facilities Expiring:</strong> Count Facility_IDs where Maturity_Date is within 90 days from today</li>
+                                    <li><strong>CAs Expiring:</strong> Count unique CA_IDs where CA_Expiration_Date is within 90 days from the report date (excludes DM). For EMEA region only, also requires CA_Review = "Yes".</li>
+                                    <li><strong>Facilities Expiring:</strong> Count Facility_IDs where Maturity_Date is within 90 days from the report date (excludes DM)</li>
                                     <li><strong>CAs Expired:</strong> Count unique CA_IDs where CA_Expiration_Date fell within the current reporting month (excludes DM). For EMEA region only, count unique Relationship_IDs instead of unique CA_IDs.</li>
-                                    <li><strong>Facilities Expired:</strong> Count Facility_IDs where Maturity_Date fell within the current reporting month</li>
+                                    <li><strong>Facilities Expired:</strong> Count Facility_IDs where Maturity_Date fell within the current reporting month (excludes DM)</li>
                                     <li><strong>Amounts:</strong> Sum of Fac_Amount for respective CAs/facilities</li>
+                                    <li><strong>Report Date Reference:</strong> All date comparisons (expiring/expired) are based on the report date from the data, not today's date</li>
                                 </ul>
                             </div>
                             
@@ -12835,7 +12893,10 @@
                                     <li><code class="bg-gray-100 px-1 rounded">Facility_ID</code> - Unique facility identifier</li>
                                     <li><code class="bg-gray-100 px-1 rounded">Fac_Amount</code> - Facility amount for value calculations</li>
                                     <li><code class="bg-gray-100 px-1 rounded">Management_Status</code> - To exclude DM status</li>
-                                    <li><code class="bg-gray-100 px-1 rounded">Report_Date</code> - Current reporting month reference</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Region</code> - For EMEA-specific logic (Relationship_ID counting and CA_Review filter)</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Relationship_ID</code> - For EMEA expired CAs counting</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">CA_Review</code> - For EMEA CAs expiring (must be "Yes")</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Report_Date</code> - Current reporting month reference (all expiring/expired comparisons use report date, not today's date)</li>
                                 </ul>
                             </div>
                             

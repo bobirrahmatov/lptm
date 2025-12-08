@@ -5101,9 +5101,6 @@
             // Populate pipeline deals table from filtered data
             populatePipelineTable();
 
-            // Populate covenants by product program table
-            populateCovenantsByProgramTable();
-
             // Populate Covenant Monitoring data and chart
             populateCovenantMonitoringData();
             createCovenantMonitoringChart('pastDue');
@@ -5137,18 +5134,21 @@
             let facilitiesExpiredCount = 0;
             let facilitiesExpiredAmount = 0;
             const expiredCAs = new Set();
+            const expiredCAsEMEAByRelationship = new Set(); // For EMEA: track unique Relationship_IDs
             let casExpiredAmount = 0;
             
             for (let i = 0; i < filteredData.length; i++) {
                 const row = filteredData[i];
+                const managementStatus = (row.Management_Status || "").toUpperCase();
                 
-                // Check Facilities Expired (count ALL lines, not unique)
+                // Check Facilities Expired (count ALL lines, not unique, exclude DM)
                 const maturityDate = parseDate(row.Maturity_Date);
                 if (
                     maturityDate &&
                     maturityDate >= monthStart &&
                     maturityDate <= monthEnd &&
-                    maturityDate < maxReportDate
+                    maturityDate < maxReportDate &&
+                    managementStatus !== "DM"
                 ) {
                     facilitiesExpiredCount++;
                     facilitiesExpiredAmount += parseNumber(
@@ -5156,25 +5156,33 @@
                     );
                 }
                 
-                // Check CAs Expired (count unique CAIDs, but sum ALL lines, exclude DM)
+                // Check CAs Expired (count unique CAIDs for non-EMEA, unique Relationship_IDs for EMEA, but sum ALL lines, exclude DM)
                 const caExpirationDate = parseDate(row.CA_Expiration_Date);
-                const managementStatus = (row.Management_Status || "").toUpperCase();
+                const region = (row.Region || "").toUpperCase();
+                
                 if (
                     caExpirationDate &&
                     caExpirationDate >= monthStart &&
                     caExpirationDate <= monthEnd &&
                     caExpirationDate < maxReportDate &&
-                    row.CAID &&
                     managementStatus !== "DM"
                 ) {
-                    expiredCAs.add(row.CAID);
+                    // For EMEA: count unique Relationship_IDs instead of CAIDs
+                    if (region === "EMEA" && row.Relationship_ID) {
+                        expiredCAsEMEAByRelationship.add(row.Relationship_ID);
+                    } else if (row.CAID) {
+                        // For non-EMEA: count unique CAIDs
+                        expiredCAs.add(row.CAID);
+                    }
+                    
                     casExpiredAmount += parseNumber(
                         row.Fac_Amount || row.Facility_Amount
                     );
                 }
             }
             
-            const casExpiredCount = expiredCAs.size;
+            // Combine counts: non-EMEA CAIDs + EMEA Relationship_IDs
+            const casExpiredCount = expiredCAs.size + expiredCAsEMEAByRelationship.size;
             
             // Update DOM
             document.getElementById("facilitiesExpiredCount").textContent =
@@ -6220,9 +6228,6 @@
             // Populate pipeline deals table
             populatePipelineTable();
 
-            // Populate covenants by product program table
-            populateCovenantsByProgramTable();
-
             // Populate Covenant Monitoring data and chart
             populateCovenantMonitoringData();
             createCovenantMonitoringChart('pastDue');
@@ -6256,18 +6261,21 @@
             let facilitiesExpiredCount = 0;
             let facilitiesExpiredAmount = 0;
             const expiredCAs = new Set();
+            const expiredCAsEMEAByRelationship = new Set(); // For EMEA: track unique Relationship_IDs
             let casExpiredAmount = 0;
             
             for (let i = 0; i < portfolioData.length; i++) {
                 const row = portfolioData[i];
+                const managementStatus = (row.Management_Status || "").toUpperCase();
                 
-                // Check Facilities Expired (count ALL lines, not unique)
+                // Check Facilities Expired (count ALL lines, not unique, exclude DM)
                 const maturityDate = parseDate(row.Maturity_Date);
                 if (
                     maturityDate &&
                     maturityDate >= monthStart &&
                     maturityDate <= monthEnd &&
-                    maturityDate < maxReportDate
+                    maturityDate < maxReportDate &&
+                    managementStatus !== "DM"
                 ) {
                     facilitiesExpiredCount++;
                     facilitiesExpiredAmount += parseNumber(
@@ -6275,25 +6283,33 @@
                     );
                 }
                 
-                // Check CAs Expired (count unique CAIDs, but sum ALL lines, exclude DM)
+                // Check CAs Expired (count unique CAIDs for non-EMEA, unique Relationship_IDs for EMEA, but sum ALL lines, exclude DM)
                 const caExpirationDate = parseDate(row.CA_Expiration_Date);
-                const managementStatus = (row.Management_Status || "").toUpperCase();
+                const region = (row.Region || "").toUpperCase();
+                
                 if (
                     caExpirationDate &&
                     caExpirationDate >= monthStart &&
                     caExpirationDate <= monthEnd &&
                     caExpirationDate < maxReportDate &&
-                    row.CAID &&
                     managementStatus !== "DM"
                 ) {
-                    expiredCAs.add(row.CAID);
+                    // For EMEA: count unique Relationship_IDs instead of CAIDs
+                    if (region === "EMEA" && row.Relationship_ID) {
+                        expiredCAsEMEAByRelationship.add(row.Relationship_ID);
+                    } else if (row.CAID) {
+                        // For non-EMEA: count unique CAIDs
+                        expiredCAs.add(row.CAID);
+                    }
+                    
                     casExpiredAmount += parseNumber(
                         row.Fac_Amount || row.Facility_Amount
                     );
                 }
             }
             
-            const casExpiredCount = expiredCAs.size;
+            // Combine counts: non-EMEA CAIDs + EMEA Relationship_IDs
+            const casExpiredCount = expiredCAs.size + expiredCAsEMEAByRelationship.size;
             
             // Update DOM
             document.getElementById("facilitiesExpiredCount").textContent =
@@ -6561,90 +6577,6 @@
             
             const mtdVarianceEl = document.getElementById('newDealsMTDVariance');
             updateVarianceDisplay(mtdVarianceEl, mtdVariance);
-        }
-
-        // Populate Pipeline Deals Table
-        function populateCovenantsByProgramTable() {
-            console.log('📊 Populating Covenants by Product Program table');
-            
-            // Use covenant data if available, otherwise fallback to portfolio data
-            const dataSource = covenantsData.length > 0 ? covenantsData : (filteredData.length > 0 ? filteredData : portfolioData);
-            const tableBody = document.getElementById("covenantsSummaryTableBody");
-            
-            console.log('Using data source with', dataSource.length, 'records');
-            console.log('Covenant data available:', covenantsData.length > 0 ? 'Yes' : 'No');
-            
-            if (!tableBody) {
-                console.error('Covenants summary table body not found');
-                return;
-            }
-
-            // Group by Product_Program_Name
-            const programData = {};
-            
-            dataSource.forEach(row => {
-                const programName = String(row.Product_Program_Name || "").trim();
-                
-                // Skip if no program name
-                if (!programName || programName === "") return;
-                
-                // Initialize program if not exists
-                if (!programData[programName]) {
-                    programData[programName] = {
-                        count: 0
-                    };
-                }
-                
-                // Count all rows (no unique filtering)
-                programData[programName].count++;
-            });
-
-            // Convert to array and sort by covenant count (descending)
-            const sortedPrograms = Object.entries(programData)
-                .map(([name, data]) => ({
-                    name: name,
-                    count: data.count
-                }))
-                .sort((a, b) => b.count - a.count);
-
-            // Calculate total covenants
-            let totalCovenants = 0;
-            sortedPrograms.forEach(prog => {
-                totalCovenants += prog.count;
-            });
-
-            // Render table rows
-            let html = '';
-            
-            if (sortedPrograms.length === 0) {
-                html = `
-                    <tr>
-                        <td colspan="2" class="px-5 py-8 text-center text-sm text-gray-500">
-                            No covenant data available for the selected filters.
-                        </td>
-                    </tr>
-                `;
-            } else {
-                sortedPrograms.forEach(prog => {
-                    html += `
-                        <tr>
-                            <td class="px-5 py-3 text-sm text-gray-900 font-medium">${prog.name}</td>
-                            <td class="px-5 py-3 text-sm text-gray-900 text-right font-semibold">${prog.count}</td>
-                        </tr>
-                    `;
-                });
-                
-                // Add total row
-                html += `
-                    <tr class="bg-gray-50 font-bold">
-                        <td class="px-5 py-3 text-sm text-gray-900 font-bold">Total</td>
-                        <td class="px-5 py-3 text-sm text-gray-900 text-right font-bold">${totalCovenants}</td>
-                    </tr>
-                `;
-            }
-
-            tableBody.innerHTML = html;
-            console.log(`✅ Covenants by Program: ${sortedPrograms.length} programs, ${totalCovenants} total covenants`);
         }
 
         function populatePipelineTable() {
@@ -8124,12 +8056,13 @@
                 }
             });
             
-            // Collect Facilities Expiring (only future dates)
+            // Collect Facilities Expiring (only future dates, exclude DM)
             portfolioData.forEach((row) => {
                 const maturityDate = row.Maturity_Date;
                 const facilityId = row.Facility_ID;
+                const managementStatus = (row.Management_Status || "").toUpperCase();
                 
-                if (maturityDate && facilityId) {
+                if (maturityDate && facilityId && managementStatus !== "DM") {
                     const dateObj = parseDate(maturityDate);
                     if (dateObj && dateObj >= today) {
                         // Only future dates (expiring)
@@ -8459,12 +8392,13 @@
                 }
             });
             
-            // Collect Facilities Expiring (only future dates)
+            // Collect Facilities Expiring (only future dates, exclude DM)
             filteredData.forEach((row) => {
                 const maturityDate = row.Maturity_Date;
                 const facilityId = row.Facility_ID;
+                const managementStatus = (row.Management_Status || "").toUpperCase();
                 
-                if (maturityDate && facilityId) {
+                if (maturityDate && facilityId && managementStatus !== "DM") {
                     const dateObj = parseDate(maturityDate);
                     if (dateObj && dateObj >= today) {
                         // Only future dates (expiring)
@@ -8786,7 +8720,7 @@
             return null;
         }
 
-        // Aggregate expiration data for the next 3 months (counts unique Facilities only)
+        // Aggregate expiration data for the next 3 months (counts unique Facilities only, excludes DM)
         function aggregateExpirationData(data) {
             console.log(
                 `📊 Aggregating maturity data for ${data.length} rows (Expired vs Expiring)`
@@ -8805,7 +8739,9 @@
             
             data.forEach((row, index) => {
                 const maturityDate = row.Maturity_Date;
-                if (maturityDate) {
+                const managementStatus = (row.Management_Status || "").toUpperCase();
+                
+                if (maturityDate && managementStatus !== "DM") {
                     const dateObj = parseDate(maturityDate);
                     if (dateObj && row.Facility_ID) {
                         validMaturityDates++;
@@ -11689,7 +11625,7 @@
             return names[selectedAmountType] || "Direct OS";
         }
 
-        // Get expiring data (CAs & Facilities expiring in next 3 months)
+        // Get expiring data (CAs & Facilities expiring in next 3 months, excludes DM)
         function getExpiringData() {
             const dataSource =
                 filteredData.length > 0 ? filteredData : portfolioData;
@@ -11700,6 +11636,11 @@
             );
 
             const result = dataSource.filter((row) => {
+                const managementStatus = (row.Management_Status || "").toUpperCase();
+                
+                // Exclude DM status
+                if (managementStatus === "DM") return false;
+                
                 const caExpiry = parseDate(row.CA_Expiration_Date);
                 const maturityDate = parseDate(row.Maturity_Date);
 
@@ -12874,7 +12815,7 @@
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
                                     <li><strong>CAs Expiring:</strong> Count unique CA_IDs where CA_Expiration_Date is within 90 days from today (excludes DM)</li>
                                     <li><strong>Facilities Expiring:</strong> Count Facility_IDs where Maturity_Date is within 90 days from today</li>
-                                    <li><strong>CAs Expired:</strong> Count unique CA_IDs where CA_Expiration_Date fell within the current reporting month (excludes DM)</li>
+                                    <li><strong>CAs Expired:</strong> Count unique CA_IDs where CA_Expiration_Date fell within the current reporting month (excludes DM). For EMEA region only, count unique Relationship_IDs instead of unique CA_IDs.</li>
                                     <li><strong>Facilities Expired:</strong> Count Facility_IDs where Maturity_Date fell within the current reporting month</li>
                                     <li><strong>Amounts:</strong> Sum of Fac_Amount for respective CAs/facilities</li>
                                 </ul>

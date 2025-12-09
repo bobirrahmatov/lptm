@@ -3175,7 +3175,18 @@
                                 90
                             );
                             
-                        initializeDashboard();
+                            // Initialize dashboard with data
+                            buildIndexes();
+                            populateFilterOptions();
+                            calculateMetrics();
+                            
+                            // Initialize covenant and CCM charts
+                            populateCovenantMonitoringData();
+                            createCovenantMonitoringChart('pastDue');
+                            updateCovenantRegionalTable('pastDue');
+                            calculateCCMStats();
+                            createCCMRegionalChart();
+                            updateCCMStats('pastDue');
                             
                             const loadTime = ((performance.now() - loadStartTime) / 1000).toFixed(1);
                             

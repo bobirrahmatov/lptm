@@ -11564,63 +11564,18 @@
         
         // Initialize charts in expanded views
         function initializeExpandCharts(chartType, dataSource) {
-            console.log('initializeExpandCharts called for:', chartType);
-            
-            // Use requestAnimationFrame to ensure DOM is ready
-            requestAnimationFrame(() => {
-                if (chartType === 'tfa') {
-                    initializeTFAChart(dataSource);
-                } else if (chartType === 'osuc') {
-                    initializeOSUCChart(dataSource);
-                } else if (chartType === 'outstanding') {
-                    initializeOutstandingChart(dataSource);
-                } else if (chartType === 'facilities') {
-                    initializeFacilitiesChart(dataSource);
-                } else if (chartType === 'relationships') {
-                    initializeRelationshipsChart(dataSource);
-                } else if (chartType === 'expiring') {
-                    if (typeof renderExpiringAnalysis === 'function') {
-                        renderExpiringAnalysis();
-                    }
-                } else if (chartType === 'newFacilities') {
-                    if (typeof renderNewFacilitiesExpandedViews === 'function') {
-                        renderNewFacilitiesExpandedViews();
-                    }
-                } else if (chartType === 'newDealsYTD') {
-                    if (typeof renderNewDealsYTDExpandedViews === 'function') {
-                        renderNewDealsYTDExpandedViews();
-                    }
-                } else if (chartType === 'newDealsMTD') {
-                    if (typeof renderNewDealsMTDExpandedViews === 'function') {
-                        renderNewDealsMTDExpandedViews();
-                    }
-                } else if (chartType === 'pipeline') {
-                    if (typeof renderPipelineExpandedViews === 'function') {
-                        renderPipelineExpandedViews();
-                    }
-                } else if (chartType === 'topRelationships') {
-                    if (typeof renderTopRelationshipsExpandedViews === 'function') {
-                        renderTopRelationshipsExpandedViews();
-                    }
-                } else if (chartType === 'rotce') {
-                    if (typeof renderROTCEExpandedViews === 'function') {
-                        renderROTCEExpandedViews();
-                    }
-                } else if (chartType === 'covenantMonitoring' || chartType === 'covenantRegional') {
-                    if (typeof renderCovenantExpandedViews === 'function') {
-                        renderCovenantExpandedViews();
-                    }
-                } else if (chartType === 'ccmRegionalChart') {
-                    if (typeof renderCCMExpandedViews === 'function') {
-                        renderCCMExpandedViews();
-                    }
-                }
-                
-                // Also initialize data table if present
-                if (typeof initializeDataTable === 'function') {
-                    setTimeout(() => initializeDataTable(), 100);
-                }
-            });
+            if (chartType === 'tfa') {
+                initializeTFAChart(dataSource);
+            } else if (chartType === 'osuc') {
+                initializeOSUCChart(dataSource);
+            } else if (chartType === 'outstanding') {
+                initializeOutstandingChart(dataSource);
+            } else if (chartType === 'facilities') {
+                initializeFacilitiesChart(dataSource);
+            } else if (chartType === 'relationships') {
+                initializeRelationshipsChart(dataSource);
+            }
+            // Add other chart initializations as needed
         }
         
         // Initialize TFA Charts

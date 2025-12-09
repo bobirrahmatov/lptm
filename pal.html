@@ -3180,6 +3180,12 @@
                             populateFilterOptions();
                             calculateMetrics();
                             
+                            // Create all main charts
+                            createFacilityTrendChart();
+                            createRelationshipChart();
+                            createCreditClassificationChart();
+                            createROTCEChart();
+                            
                             // Initialize covenant and CCM charts
                             populateCovenantMonitoringData();
                             createCovenantMonitoringChart('pastDue');
@@ -10970,6 +10976,45 @@
         }
         
         // Helper function to get data headers based on chart type
+        // Helper function to get chart name based on type
+        function getChartName(chartType) {
+            switch(chartType) {
+                case 'tfa':
+                    return 'Total Facility Amount (TFA)';
+                case 'osuc':
+                    return 'Outstanding + Undrawn Committed (OSUC)';
+                case 'outstanding':
+                    return 'Outstanding Exposure';
+                case 'facilities':
+                    return 'Facilities';
+                case 'relationships':
+                    return 'Relationships';
+                case 'expiring':
+                    return 'Expiring Facilities';
+                case 'newFacilities':
+                    return 'New Facilities Approved';
+                case 'newDealsYTD':
+                    return 'New Deals YTD';
+                case 'newDealsMTD':
+                    return 'New Deals MTD';
+                case 'pipeline':
+                    return 'Deals Pending Closure';
+                case 'topRelationships':
+                    return 'Top Relationships';
+                case 'rotce':
+                    return 'ROTCE Performance';
+                case 'covenantMonitoring':
+                    return currentCovenantViewType === 'pastDue' ? 'Past Due Covenants' : 'Coming Due Covenants';
+                case 'covenantRegional':
+                    return currentCovenantViewType === 'pastDue' ? 'Past Due Covenants by Region' : 'Coming Due Covenants by Region';
+                case 'ccmRegionalChart':
+                    return 'Criticized/Classified Memos & Reviews';
+                default:
+                    return 'Chart Data';
+            }
+        }
+        
+        // Helper function to get data headers based on chart type
         function getDataHeaders(chartType) {
             switch(chartType) {
                 case 'tfa':
@@ -10981,6 +11026,23 @@
                     return ['Region', 'Relationship_Name', 'Facility_ID', 'Direct_OS', 'Contingent_OS', 'PSE_OS', 'Total_OS', 'Underwriter'];
                 case 'relationships':
                     return ['Region', 'Relationship_Name', 'Relationship_ID', 'Fac_Amount', 'Total_OS', 'Product_Program'];
+                case 'topRelationships':
+                    return ['Region', 'Relationship_Name', 'Direct_OS', 'Contingent_OS', 'PSE_OS', 'Total_OS', 'ROTCE'];
+                case 'rotce':
+                    return ['Region', 'Relationship_Name', 'Facility_ID', 'ROTCE', 'Direct_OS', 'Product_Program'];
+                case 'expiring':
+                    return ['Region', 'Relationship_Name', 'Facility_ID', 'Maturity_Date', 'Fac_Amount', 'Product_Program'];
+                case 'newFacilities':
+                case 'newDealsYTD':
+                case 'newDealsMTD':
+                    return ['Region', 'Relationship_Name', 'Facility_ID', 'Origination_Date', 'Fac_Amount', 'Product_Program', 'Underwriter'];
+                case 'pipeline':
+                    return ['Region', 'Relationship_Name', 'Facility_ID', 'Facility_First_Approval_Date', 'Fac_Amount', 'Product_Program', 'Underwriter'];
+                case 'covenantMonitoring':
+                case 'covenantRegional':
+                    return ['Region', 'Relationship_Name', 'Facility_ID', 'Coming_Due_Past_Due', 'Past_Due_Category', 'Product_Program'];
+                case 'ccmRegionalChart':
+                    return ['Region', 'Relationship_Name', 'CCM_Status', 'Next_CCM_Approval_Date', 'Product_Program', 'Lead_Underwriter'];
                 default:
                     return ['Region', 'Relationship_Name', 'Facility_ID', 'Product_Program', 'Fac_Amount'];
             }
@@ -10988,8 +11050,48 @@
         
         // Helper function to get filtered data based on chart type
         function getFilteredData(chartType, dataSource) {
-            // Return the dataSource as is - it's already filtered by the global filters
-            return dataSource;
+            console.log('getFilteredData called for:', chartType, 'with', dataSource.length, 'records');
+            
+            // For covenant charts, use covenant data if available
+            if (chartType === 'covenantMonitoring' || chartType === 'covenantRegional') {
+                const covenantDataSource = window.covenantsData && window.covenantsData.length > 0 ? window.covenantsData : dataSource;
+                const filtered = covenantDataSource.filter(row => {
+                    const status = String(row.Coming_Due_Past_Due || "").trim().toLowerCase();
+                    const region = (row.Region || "").toUpperCase();
+                    
+                    // Apply region filter if active
+                    if (window.selectedRegion && window.selectedRegion !== 'all' && region !== window.selectedRegion.toUpperCase()) return false;
+                    
+                    // Apply view type filter
+                    if (window.currentCovenantViewType === 'pastDue') {
+                        return status === 'past due';
+                    } else if (window.currentCovenantViewType === 'comingDue') {
+                        return status === 'coming due';
+                    }
+                    return true;
+                });
+                console.log('Filtered covenant data:', filtered.length, 'records');
+                return filtered;
+            }
+            
+            // For CCM charts, use CCM data
+            if (chartType === 'ccmRegionalChart') {
+                const ccmDataSource = window.ccmData || [];
+                const filtered = ccmDataSource.filter(row => {
+                    const region = String(row.Region || "").trim().toUpperCase();
+                    if (!['APAC', 'EMEA', 'NAM', 'LATAM'].includes(region)) return false;
+                    
+                    // Apply region filter if active
+                    if (window.selectedRegion && window.selectedRegion !== 'all' && region !== window.selectedRegion.toUpperCase()) return false;
+                    
+                    return true;
+                });
+                console.log('Filtered CCM data:', filtered.length, 'records');
+                return filtered;
+            }
+            
+            // For other charts, return the dataSource as is (it's already filtered by global filters)
+            return dataSource || [];
         }
 
         // Generate TFA Expanded View

@@ -3981,16 +3981,18 @@
         function applyFilters() {
             const startTime = performance.now();
             
+            console.log('applyFilters called');
+            
             // Get advanced filter values (excluding Region, Status, and Commitment Status which are in smart filters)
+            // Add safety checks for each element
             const filters = {
-                productProgram: document.getElementById("filterProductProgram").value,
-                extendingUnit: document.getElementById("filterExtendingUnit").value,
-                facilityType: document.getElementById("filterFacilityType").value,
-                teamLead: document.getElementById("filterTeamLead").value,
-                underwriter: document.getElementById("filterUnderwriter").value,
-                caMaturity: document.getElementById("filterCAMaturity").value,
-                facilityMaturity: document.getElementById("filterFacilityMaturity")
-                    .value,
+                productProgram: document.getElementById("filterProductProgram")?.value || "",
+                extendingUnit: document.getElementById("filterExtendingUnit")?.value || "",
+                facilityType: document.getElementById("filterFacilityType")?.value || "",
+                teamLead: document.getElementById("filterTeamLead")?.value || "",
+                underwriter: document.getElementById("filterUnderwriter")?.value || "",
+                caMaturity: document.getElementById("filterCAMaturity")?.value || "",
+                facilityMaturity: document.getElementById("filterFacilityMaturity")?.value || "",
             };
 
             // Update active filters object (including Region, Status, and Commitment Status smart filters)
@@ -4084,9 +4086,7 @@
                 facilityDateRange = { today, futureDate };
             }
             
-            const searchTerm = document
-                .getElementById("searchInput")
-                .value.toLowerCase();
+            const searchTerm = (document.getElementById("searchInput")?.value || "").toLowerCase();
             
             // OPTIMIZED filtering: Use early exits and minimal object access
             filteredData = [];
@@ -10927,6 +10927,8 @@
             const headers = getDataHeaders(chartType);
             const data = getFilteredData(chartType, dataSource);
             
+            console.log('generateDataTableForChart:', chartType, 'Records:', data.length);
+            
             if (!data || data.length === 0) {
                 return `
                     <div class="text-center py-12">
@@ -10938,41 +10940,244 @@
                 `;
             }
             
+            // Initialize table state
+            window.tableState = {
+                allData: data,
+                filteredData: data,
+                columns: headers,
+                currentPage: 1,
+                pageSize: 50,
+                searchTerm: '',
+                columnFilters: {}
+            };
+            
             return `
                 <div class="rounded-2xl border border-gray-200 bg-white">
+                    <!-- Header -->
                     <div class="px-6 py-4 border-b border-gray-200">
                         <h3 class="text-lg font-semibold text-gray-800">${chartName} - Detailed Data</h3>
-                        <p class="text-xs text-gray-500 mt-1">Showing ${Math.min(data.length, 100)} of ${data.length} records</p>
+                        <p class="text-xs text-gray-500 mt-1">${data.length.toLocaleString()} total records</p>
                     </div>
+                    
+                    <!-- Search and Filters -->
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                        <div class="flex items-center gap-4">
+                            <div class="flex-1">
+                                <input 
+                                    type="text" 
+                                    id="dataTableSearch" 
+                                    placeholder="Search across all columns..." 
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    oninput="filterDataTable()"
+                                />
+                            </div>
+                            <button 
+                                onclick="clearDataTableFilters()" 
+                                class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+                            >
+                                Clear Filters
+                            </button>
+                        </div>
+                        
+                        <!-- Column Filters -->
+                        <div class="mt-3 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                            ${headers.map(header => `
+                                <select 
+                                    id="filter_${header}" 
+                                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    onchange="filterDataTable()"
+                                >
+                                    <option value="">All ${header.replace(/_/g, ' ')}</option>
+                                </select>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- Table -->
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                            <thead class="bg-gray-50 sticky top-0">
                                 <tr>
-                                    ${headers.map(h => `<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">${h.replace(/_/g, ' ')}</th>`).join('')}
+                                    ${headers.map(h => `
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                                            ${h.replace(/_/g, ' ')}
+                                        </th>
+                                    `).join('')}
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                ${data.slice(0, 100).map(row => `
-                                    <tr class="hover:bg-gray-50">
-                                        ${headers.map(h => {
-                                            const value = row[h] || '';
-                                            const displayValue = typeof value === 'number' ? 
-                                                (h.includes('Amount') || h.includes('TFA') || h.includes('OS') || h.includes('OSUC') ? formatCurrency(value) : value) :
-                                                value;
-                                            return `<td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">${displayValue}</td>`;
-                                        }).join('')}
-                                    </tr>
-                                `).join('')}
+                            <tbody id="chartDataTableBody" class="bg-white divide-y divide-gray-200">
+                                <!-- Data will be rendered here -->
                             </tbody>
                         </table>
                     </div>
-                    ${data.length > 100 ? `
-                        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
-                            <p class="text-sm text-gray-500">Showing first 100 of ${data.length} total records</p>
+                    
+                    <!-- Pagination -->
+                    <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <span>Showing</span>
+                            <span id="dataRowsStart" class="font-medium">0</span>
+                            <span>to</span>
+                            <span id="dataRowsEnd" class="font-medium">0</span>
+                            <span>of</span>
+                            <span id="dataTotalRows" class="font-medium">0</span>
+                            <span>records</span>
                         </div>
-                    ` : ''}
+                        
+                        <div class="flex items-center gap-4">
+                            <div class="flex items-center gap-2">
+                                <label class="text-sm text-gray-600">Rows per page:</label>
+                                <select id="dataPageSize" class="px-3 py-1 border border-gray-300 rounded-lg text-sm">
+                                    <option value="25">25</option>
+                                    <option value="50" selected>50</option>
+                                    <option value="100">100</option>
+                                    <option value="250">250</option>
+                                </select>
+                            </div>
+                            
+                            <div class="flex items-center gap-2">
+                                <button 
+                                    id="dataPrevBtn" 
+                                    class="px-3 py-1 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled
+                                >
+                                    Previous
+                                </button>
+                                <span class="text-sm text-gray-600">
+                                    Page <span id="dataCurrentPage" class="font-medium">1</span> of <span id="dataTotalPages" class="font-medium">1</span>
+                                </span>
+                                <button 
+                                    id="dataNextBtn" 
+                                    class="px-3 py-1 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+                
+                <script>
+                    // Initialize table after a short delay
+                    setTimeout(() => {
+                        initializeDataTable();
+                    }, 100);
+                <\/script>
             `;
+        }
+        
+        // Initialize data table with filters and pagination
+        function initializeDataTable() {
+            if (!window.tableState) return;
+            
+            const { columns, allData } = window.tableState;
+            
+            // Populate column filter dropdowns with unique values
+            columns.forEach(column => {
+                const select = document.getElementById(`filter_${column}`);
+                if (!select) return;
+                
+                const uniqueValues = [...new Set(allData.map(row => row[column]).filter(Boolean))].sort();
+                uniqueValues.forEach(value => {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = value;
+                    select.appendChild(option);
+                });
+            });
+            
+            // Initial render
+            renderTablePage(document.getElementById('chartDataTableBody'));
+            setupPaginationControls();
+        }
+        
+        // Filter data table
+        function filterDataTable() {
+            if (!window.tableState) return;
+            
+            const searchTerm = (document.getElementById('dataTableSearch')?.value || '').toLowerCase();
+            const { columns, allData } = window.tableState;
+            
+            // Get column filters
+            const columnFilters = {};
+            columns.forEach(column => {
+                const select = document.getElementById(`filter_${column}`);
+                if (select && select.value) {
+                    columnFilters[column] = select.value;
+                }
+            });
+            
+            // Apply filters
+            window.tableState.filteredData = allData.filter(row => {
+                // Search filter (across all columns)
+                if (searchTerm) {
+                    const matchesSearch = columns.some(col => {
+                        const value = String(row[col] || '').toLowerCase();
+                        return value.includes(searchTerm);
+                    });
+                    if (!matchesSearch) return false;
+                }
+                
+                // Column filters
+                for (const [column, filterValue] of Object.entries(columnFilters)) {
+                    if (String(row[column]) !== filterValue) return false;
+                }
+                
+                return true;
+            });
+            
+            // Reset to first page
+            window.tableState.currentPage = 1;
+            
+            // Re-render
+            renderTablePage(document.getElementById('chartDataTableBody'));
+            setupPaginationControls();
+        }
+        
+        // Clear all data table filters
+        function clearDataTableFilters() {
+            if (!window.tableState) return;
+            
+            // Clear search
+            const searchInput = document.getElementById('dataTableSearch');
+            if (searchInput) searchInput.value = '';
+            
+            // Clear column filters
+            window.tableState.columns.forEach(column => {
+                const select = document.getElementById(`filter_${column}`);
+                if (select) select.value = '';
+            });
+            
+            // Reset filtered data
+            window.tableState.filteredData = window.tableState.allData;
+            window.tableState.currentPage = 1;
+            
+            // Re-render
+            renderTablePage(document.getElementById('chartDataTableBody'));
+            setupPaginationControls();
+        }
+        
+        // Format cell value
+        function formatCellValue(column, value) {
+            if (value === null || value === undefined || value === '') return '-';
+            
+            // Currency fields
+            if (column.includes('Amount') || column.includes('TFA') || column.includes('OS') || column.includes('OSUC')) {
+                return formatCurrency(parseNumber(value));
+            }
+            
+            // Percentage fields
+            if (column.includes('ROTCE') || column.includes('Rate') || column.includes('Percent')) {
+                const num = parseFloat(value);
+                return isNaN(num) ? value : num.toFixed(2) + '%';
+            }
+            
+            // Date fields
+            if (column.includes('Date')) {
+                return formatDate(value);
+            }
+            
+            return value;
         }
         
         // Helper function to get data headers based on chart type
@@ -11359,18 +11564,63 @@
         
         // Initialize charts in expanded views
         function initializeExpandCharts(chartType, dataSource) {
-            if (chartType === 'tfa') {
-                initializeTFAChart(dataSource);
-            } else if (chartType === 'osuc') {
-                initializeOSUCChart(dataSource);
-            } else if (chartType === 'outstanding') {
-                initializeOutstandingChart(dataSource);
-            } else if (chartType === 'facilities') {
-                initializeFacilitiesChart(dataSource);
-            } else if (chartType === 'relationships') {
-                initializeRelationshipsChart(dataSource);
-            }
-            // Add other chart initializations as needed
+            console.log('initializeExpandCharts called for:', chartType);
+            
+            // Use requestAnimationFrame to ensure DOM is ready
+            requestAnimationFrame(() => {
+                if (chartType === 'tfa') {
+                    initializeTFAChart(dataSource);
+                } else if (chartType === 'osuc') {
+                    initializeOSUCChart(dataSource);
+                } else if (chartType === 'outstanding') {
+                    initializeOutstandingChart(dataSource);
+                } else if (chartType === 'facilities') {
+                    initializeFacilitiesChart(dataSource);
+                } else if (chartType === 'relationships') {
+                    initializeRelationshipsChart(dataSource);
+                } else if (chartType === 'expiring') {
+                    if (typeof renderExpiringAnalysis === 'function') {
+                        renderExpiringAnalysis();
+                    }
+                } else if (chartType === 'newFacilities') {
+                    if (typeof renderNewFacilitiesExpandedViews === 'function') {
+                        renderNewFacilitiesExpandedViews();
+                    }
+                } else if (chartType === 'newDealsYTD') {
+                    if (typeof renderNewDealsYTDExpandedViews === 'function') {
+                        renderNewDealsYTDExpandedViews();
+                    }
+                } else if (chartType === 'newDealsMTD') {
+                    if (typeof renderNewDealsMTDExpandedViews === 'function') {
+                        renderNewDealsMTDExpandedViews();
+                    }
+                } else if (chartType === 'pipeline') {
+                    if (typeof renderPipelineExpandedViews === 'function') {
+                        renderPipelineExpandedViews();
+                    }
+                } else if (chartType === 'topRelationships') {
+                    if (typeof renderTopRelationshipsExpandedViews === 'function') {
+                        renderTopRelationshipsExpandedViews();
+                    }
+                } else if (chartType === 'rotce') {
+                    if (typeof renderROTCEExpandedViews === 'function') {
+                        renderROTCEExpandedViews();
+                    }
+                } else if (chartType === 'covenantMonitoring' || chartType === 'covenantRegional') {
+                    if (typeof renderCovenantExpandedViews === 'function') {
+                        renderCovenantExpandedViews();
+                    }
+                } else if (chartType === 'ccmRegionalChart') {
+                    if (typeof renderCCMExpandedViews === 'function') {
+                        renderCCMExpandedViews();
+                    }
+                }
+                
+                // Also initialize data table if present
+                if (typeof initializeDataTable === 'function') {
+                    setTimeout(() => initializeDataTable(), 100);
+                }
+            });
         }
         
         // Initialize TFA Charts

@@ -4005,8 +4005,8 @@
                 activeFilters["Status"] = selectedStatus;
             if (selectedCommitmentStatus !== 'all')
                 activeFilters["Commitment Status"] = selectedCommitmentStatus;
-            if (!includePSE)
-                activeFilters["PSE"] = "Excluded";
+            if (selectedPSE !== 'all')
+                activeFilters["PSE"] = selectedPSE;
             
             if (filters.productProgram)
                 activeFilters["Product Program"] = filters.productProgram;
@@ -4208,10 +4208,6 @@
                 calculateCCMStats();
                 createCCMRegionalChart();
             });
-
-            // Reset to first page and render table immediately
-            currentPage = 1;
-            renderTable();
         }
 
         // Apply chart-based filter (cross-filtering)
@@ -4313,8 +4309,8 @@
                 activeFilters["Status"] = selectedStatus;
             if (selectedCommitmentStatus !== 'all')
                 activeFilters["Commitment Status"] = selectedCommitmentStatus;
-            if (!includePSE)
-                activeFilters["PSE"] = "Excluded";
+            if (selectedPSE !== 'all')
+                activeFilters["PSE"] = selectedPSE;
             
             if (filters.productProgram)
                 activeFilters["Product Program"] = filters.productProgram;
@@ -4519,10 +4515,6 @@
                 calculateCCMStats();
                 createCCMRegionalChart();
             });
-            
-            // Reset to first page and render table immediately
-            currentPage = 1;
-            renderTable();
         }
 
         // Display filter badges
@@ -7330,8 +7322,8 @@
                 filters.push(key);
                 addedFilters.add(key.toLowerCase());
             }
-            if (!includePSE) {
-                filters.push('PSE: Excluded');
+            if (selectedPSE !== 'all') {
+                filters.push(`PSE: ${selectedPSE}`);
             }
             if (selectedStatus !== 'all') {
                 filters.push(`Status: ${selectedStatus}`);
@@ -8999,7 +8991,7 @@
             
             // Check if smart filters are active
             if (selectedRegion !== 'all') return true;
-            if (!includePSE) return true;
+            if (selectedPSE !== 'all') return true;
             if (selectedStatus !== 'all') return true;
             if (selectedCommitmentStatus !== 'all') return true;
             

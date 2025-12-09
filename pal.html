@@ -10924,7 +10924,6 @@
         // Generate data table for chart type
         function generateDataTableForChart(chartType, dataSource) {
             const chartName = getChartName(chartType);
-            const headers = getDataHeaders(chartType);
             const data = getFilteredData(chartType, dataSource);
             
             console.log('generateDataTableForChart:', chartType, 'Records:', data.length);
@@ -10940,78 +10939,44 @@
                 `;
             }
             
-            // Initialize table state
+            // Initialize table state for this view
             window.tableState = {
-                allData: data,
+                data: data,
                 filteredData: data,
-                columns: headers,
+                columns: data.length > 0 ? Object.keys(data[0]) : [],
                 currentPage: 1,
                 pageSize: 50,
-                searchTerm: '',
-                columnFilters: {}
+                columnFilters: {},
+                columnFilterOps: {},
+                columnFilterMin: {},
+                columnFilterMax: {},
+                columnFilterExact: {}
             };
             
             return `
                 <div class="rounded-2xl border border-gray-200 bg-white">
-                    <!-- Header -->
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h3 class="text-lg font-semibold text-gray-800">${chartName} - Detailed Data</h3>
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                        <h3 class="text-lg font-semibold text-gray-800">${chartName} - Underlying Data</h3>
                         <p class="text-xs text-gray-500 mt-1">${data.length.toLocaleString()} total records</p>
                     </div>
                     
-                    <!-- Search and Filters -->
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <div class="flex items-center gap-4">
-                            <div class="flex-1">
-                                <input 
-                                    type="text" 
-                                    id="dataTableSearch" 
-                                    placeholder="Search across all columns..." 
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    oninput="filterDataTable()"
-                                />
-                            </div>
-                            <button 
-                                onclick="clearDataTableFilters()" 
-                                class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-colors"
-                            >
-                                Clear Filters
-                            </button>
-                        </div>
-                        
-                        <!-- Column Filters -->
-                        <div class="mt-3 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                            ${headers.map(header => `
-                                <select 
-                                    id="filter_${header}" 
-                                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    onchange="filterDataTable()"
-                                >
-                                    <option value="">All ${header.replace(/_/g, ' ')}</option>
-                                </select>
-                            `).join('')}
-                        </div>
-                    </div>
-                    
-                    <!-- Table -->
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50 sticky top-0">
-                                <tr>
-                                    ${headers.map(h => `
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                                            ${h.replace(/_/g, ' ')}
-                                        </th>
-                                    `).join('')}
+                            <thead>
+                                <tr id="chartDataTableHeader">
+                                    <!-- Headers will be inserted here -->
+                                </tr>
+                                <tr id="chartDataTableFilters">
+                                    <!-- Filters will be inserted here -->
                                 </tr>
                             </thead>
                             <tbody id="chartDataTableBody" class="bg-white divide-y divide-gray-200">
-                                <!-- Data will be rendered here -->
+                                <!-- Data rows will be inserted here -->
                             </tbody>
                         </table>
                     </div>
                     
-                    <!-- Pagination -->
+                    <!-- Pagination Controls -->
                     <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
                         <div class="flex items-center gap-2 text-sm text-gray-600">
                             <span>Showing</span>
@@ -11035,21 +11000,13 @@
                             </div>
                             
                             <div class="flex items-center gap-2">
-                                <button 
-                                    id="dataPrevBtn" 
-                                    class="px-3 py-1 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    disabled
-                                >
+                                <button id="dataPrevBtn" class="px-3 py-1 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
                                     Previous
                                 </button>
                                 <span class="text-sm text-gray-600">
                                     Page <span id="dataCurrentPage" class="font-medium">1</span> of <span id="dataTotalPages" class="font-medium">1</span>
                                 </span>
-                                <button 
-                                    id="dataNextBtn" 
-                                    class="px-3 py-1 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    disabled
-                                >
+                                <button id="dataNextBtn" class="px-3 py-1 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
                                     Next
                                 </button>
                             </div>
@@ -11058,126 +11015,136 @@
                 </div>
                 
                 <script>
-                    // Initialize table after a short delay
                     setTimeout(() => {
-                        initializeDataTable();
-                    }, 100);
+                        if (window.tableState && window.tableState.data.length > 0) {
+                            buildDataTable(
+                                window.tableState.data,
+                                document.getElementById('chartDataTableHeader'),
+                                document.getElementById('chartDataTableBody')
+                            );
+                        }
+                    }, 50);
                 <\/script>
             `;
         }
         
-        // Initialize data table with filters and pagination
-        function initializeDataTable() {
-            if (!window.tableState) return;
-            
-            const { columns, allData } = window.tableState;
-            
-            // Populate column filter dropdowns with unique values
-            columns.forEach(column => {
-                const select = document.getElementById(`filter_${column}`);
-                if (!select) return;
-                
-                const uniqueValues = [...new Set(allData.map(row => row[column]).filter(Boolean))].sort();
-                uniqueValues.forEach(value => {
-                    const option = document.createElement('option');
-                    option.value = value;
-                    option.textContent = value;
-                    select.appendChild(option);
-                });
-            });
-            
-            // Initial render
-            renderTablePage(document.getElementById('chartDataTableBody'));
-            setupPaginationControls();
-        }
-        
-        // Filter data table
-        function filterDataTable() {
-            if (!window.tableState) return;
-            
-            const searchTerm = (document.getElementById('dataTableSearch')?.value || '').toLowerCase();
-            const { columns, allData } = window.tableState;
-            
-            // Get column filters
-            const columnFilters = {};
-            columns.forEach(column => {
-                const select = document.getElementById(`filter_${column}`);
-                if (select && select.value) {
-                    columnFilters[column] = select.value;
-                }
-            });
+        // Build data table (from old working version)
+        function buildDataTable(data, tableHeader, tableBody) {
+            if (!data || data.length === 0) {
+                tableHeader.innerHTML = "";
+                document.getElementById("chartDataTableFilters").innerHTML = "";
+                tableBody.innerHTML = '<tr><td colspan="100" class="text-center py-8 text-gray-500">No data available</td></tr>';
+                updatePaginationControls(0, 0, 0);
+                return;
+            }
+
+            // Update table state
+            window.tableState.data = data;
+            window.tableState.columns = Object.keys(data[0]);
+            window.tableState.currentPage = 1;
+            window.tableState.columnFilters = {};
             
             // Apply filters
-            window.tableState.filteredData = allData.filter(row => {
-                // Search filter (across all columns)
-                if (searchTerm) {
-                    const matchesSearch = columns.some(col => {
-                        const value = String(row[col] || '').toLowerCase();
-                        return value.includes(searchTerm);
-                    });
-                    if (!matchesSearch) return false;
-                }
-                
-                // Column filters
-                for (const [column, filterValue] of Object.entries(columnFilters)) {
-                    if (String(row[column]) !== filterValue) return false;
-                }
-                
-                return true;
-            });
+            applyTableFilters();
+
+            // Build header
+            buildTableHeader(tableHeader);
             
-            // Reset to first page
-            window.tableState.currentPage = 1;
+            // Build filter row
+            buildFilterRow();
+
+            // Render current page
+            renderTablePage(tableBody);
             
-            // Re-render
-            renderTablePage(document.getElementById('chartDataTableBody'));
+            // Setup pagination
             setupPaginationControls();
         }
-        
-        // Clear all data table filters
-        function clearDataTableFilters() {
+
+        function buildTableHeader(tableHeader) {
+            if (!window.tableState) return;
+            tableHeader.innerHTML = window.tableState.columns
+                .map(col => `<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 tracking-wider bg-gray-50">${col.replace(/_/g, ' ')}</th>`)
+                .join("");
+        }
+
+        function buildFilterRow() {
             if (!window.tableState) return;
             
-            // Clear search
-            const searchInput = document.getElementById('dataTableSearch');
-            if (searchInput) searchInput.value = '';
+            const filterRow = document.getElementById("chartDataTableFilters");
+            if (!filterRow) return;
             
-            // Clear column filters
-            window.tableState.columns.forEach(column => {
-                const select = document.getElementById(`filter_${column}`);
-                if (select) select.value = '';
+            const { columns, data } = window.tableState;
+            
+            // Get unique values for each column
+            const columnInfo = {};
+            columns.forEach(col => {
+                const uniqueValues = [...new Set(data.map(row => row[col]))];
+                const cleanValues = uniqueValues.filter(v => v !== null && v !== undefined && v !== '');
+                
+                // Detect column type
+                const colLower = col.toLowerCase();
+                const isAmountColumn = colLower.includes('amount') || colLower.includes('_os') || colLower.includes('osuc') || 
+                                      colLower.includes('tfa') || colLower.includes('balance') || colLower.includes('exposure');
+                const isNumericColumn = isAmountColumn || colLower.includes('rate') || colLower.includes('rotce');
+                
+                columnInfo[col] = {
+                    values: cleanValues.sort().slice(0, 100),
+                    isCategorical: cleanValues.length <= 50 && !isNumericColumn
+                };
             });
             
-            // Reset filtered data
-            window.tableState.filteredData = window.tableState.allData;
-            window.tableState.currentPage = 1;
+            filterRow.innerHTML = columns.map((col, idx) => {
+                const info = columnInfo[col];
+                
+                if (info.isCategorical && info.values.length > 0) {
+                    // Dropdown filter for categorical columns
+                    return `<th class="px-4 py-2 bg-gray-50">
+                        <select onchange="applyColumnFilter('${col}', this.value)" 
+                            class="w-full rounded border border-gray-300 px-2 py-1 text-xs focus:border-blue-500">
+                            <option value="">All</option>
+                            ${info.values.map(v => `<option value="${v}">${v}</option>`).join('')}
+                        </select>
+                    </th>`;
+                } else {
+                    // Text search for other columns
+                    return `<th class="px-4 py-2 bg-gray-50">
+                        <input type="text" placeholder="Filter..." 
+                            oninput="applyColumnFilter('${col}', this.value)"
+                            class="w-full rounded border border-gray-300 px-2 py-1 text-xs focus:border-blue-500">
+                    </th>`;
+                }
+            }).join("");
+        }
+
+        function applyColumnFilter(column, value) {
+            if (!window.tableState) return;
             
-            // Re-render
+            if (value === "" || value === null) {
+                delete window.tableState.columnFilters[column];
+            } else {
+                window.tableState.columnFilters[column] = value.toLowerCase();
+            }
+            
+            window.tableState.currentPage = 1;
+            applyTableFilters();
             renderTablePage(document.getElementById('chartDataTableBody'));
             setupPaginationControls();
         }
-        
-        // Format cell value
-        function formatCellValue(column, value) {
-            if (value === null || value === undefined || value === '') return '-';
+
+        function applyTableFilters() {
+            if (!window.tableState) return;
             
-            // Currency fields
-            if (column.includes('Amount') || column.includes('TFA') || column.includes('OS') || column.includes('OSUC')) {
-                return formatCurrency(parseNumber(value));
-            }
+            const { data, columnFilters } = window.tableState;
             
-            // Percentage fields
-            if (column.includes('ROTCE') || column.includes('Rate') || column.includes('Percent')) {
-                const num = parseFloat(value);
-                return isNaN(num) ? value : num.toFixed(2) + '%';
-            }
-            
-            // Date fields
-            if (column.includes('Date')) {
-                return formatDate(value);
-            }
-            
-            return value;
+            window.tableState.filteredData = data.filter(row => {
+                for (const [col, filterValue] of Object.entries(columnFilters)) {
+                    const cellValue = String(row[col] || '').toLowerCase();
+                    if (!cellValue.includes(filterValue)) {
+                        return false;
+                    }
+                }
+                return true;
+            });
         }
         
         // Helper function to get data headers based on chart type

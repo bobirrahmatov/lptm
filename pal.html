@@ -16173,70 +16173,107 @@
                 productDonutChart.render();
             }
             
-            // 6. Credit Classification Treemap (replaces Product Deal Count Chart)
-            const creditClassChartEl = document.getElementById('newDealsYTDCreditClassChart');
-            if (creditClassChartEl && creditClassification && creditClassification.length > 0) {
-                const treemapOptions = {
-                    series: [
-                        {
-                            data: creditClassification.map(c => ({
-                                x: c.name,
-                                y: c.count
-                            }))
-                        }
-                    ],
-                    legend: {
-                        show: false
-                    },
+            // 6. Product Deal Count - Donut Chart (matching TFA Product Program style)
+            const dealCountChartEl = document.getElementById('newDealsYTDCreditClassChart');
+            const dealCountListEl = document.getElementById('newDealsYTDDealCountList');
+            if (dealCountChartEl && topProducts && topProducts.length > 0) {
+                const totalDeals = topProducts.reduce((sum, p) => sum + p.count, 0);
+                const colors = [
+                    "#3641f5",  // Primary blue
+                    "#7592ff",  // Light blue
+                    "#dde9ff",  // Lighter blue
+                    "#ff6b6b",  // Red
+                    "#ffd93d",  // Yellow
+                    "#6bcf7f",  // Green
+                    "#c084fc",  // Purple
+                    "#14b8a6",  // Teal
+                    "#f97316",  // Orange
+                    "#06b6d4"   // Cyan
+                ];
+                
+                const dealCountDonutOptions = {
+                    series: topProducts.map(p => p.count),
+                    colors: colors.slice(0, topProducts.length),
+                    labels: topProducts.map(p => p.name),
                     chart: {
-                        height: 380,
-                        type: 'treemap',
-                        fontFamily: 'Outfit, sans-serif',
-                        toolbar: { show: false }
+                        fontFamily: "Outfit, sans-serif",
+                        type: "donut",
+                        width: 300,
+                        height: 300,
                     },
-                    title: {
-                        text: undefined
+                    stroke: {
+                        show: false,
                     },
-                    colors: ['#465fff'],
                     plotOptions: {
-                        treemap: {
-                            distributed: true,
-                            enableShades: true
-                        }
+                        pie: {
+                            donut: {
+                                size: "65%",
+                                background: "transparent",
+                                labels: {
+                                    show: true,
+                                    name: {
+                                        show: true,
+                                        offsetY: -10,
+                                        color: "#1D2939",
+                                        fontSize: "14px",
+                                        fontWeight: "600",
+                                    },
+                                    value: {
+                                        show: true,
+                                        offsetY: 10,
+                                        color: "#667085",
+                                        fontSize: "16px",
+                                        fontWeight: "700",
+                                        formatter: (val) => val.toString(),
+                                    },
+                                    total: {
+                                        show: true,
+                                        label: "Total Deals",
+                                        color: "#111827",
+                                        fontSize: "16px",
+                                        fontWeight: "700",
+                                        formatter: () => totalDeals.toString(),
+                                    },
+                                },
+                            },
+                        },
                     },
                     dataLabels: {
-                        enabled: true,
-                        style: {
-                            fontSize: '14px',
-                            fontWeight: 700,
-                            colors: ['#fff']
-                        },
-                        formatter: function(text, op) {
-                            const item = creditClassification[op.dataPointIndex];
-                            return [text, `${item.count} deals`];
-                        },
-                        offsetY: -4
+                        enabled: false,
+                    },
+                    legend: {
+                        show: false, // Hide built-in legend, using custom HTML legend
                     },
                     tooltip: {
-                        theme: 'light',
-                        custom: function({ seriesIndex, dataPointIndex, w }) {
-                            const item = creditClassification[dataPointIndex];
-                            return `
-                                <div style="padding: 8px 12px; background: white; border: 1px solid #e5e7eb; border-radius: 6px;">
-                                    <div style="font-weight: 600; margin-bottom: 4px;">${item.name}</div>
-                                    <div style="font-size: 11px; color: #6b7280;">
-                                        <div>Deals: ${item.count}</div>
-                                        <div>Total TFA: ${formatCurrency(item.tfa)}</div>
-                                    </div>
-                                </div>
-                            `;
+                        enabled: true,
+                        theme: "light",
+                        y: {
+                            formatter: function(val, opts) {
+                                const percentage = ((val / totalDeals) * 100).toFixed(1);
+                                const tfa = topProducts[opts.seriesIndex].tfa;
+                                return val + ' deals (' + percentage + '%) - ' + formatCurrency(tfa);
+                            }
                         }
-                    }
+                    },
                 };
                 
-                creditClassChartEl.innerHTML = '';
-                const creditClassChart = new ApexCharts(creditClassChartEl, treemapOptions);
-                creditClassChart.render();
+                dealCountChartEl.innerHTML = '';
+                const dealCountChart = new ApexCharts(dealCountChartEl, dealCountDonutOptions);
+                dealCountChart.render();
+                
+                // Populate legend list
+                if (dealCountListEl) {
+                    dealCountListEl.innerHTML = topProducts.map((product, index) => {
+                        const color = colors[index % colors.length];
+                        return `
+                            <div class="flex items-center gap-3 py-2">
+                                <div class="w-4 h-4 rounded-sm flex-shrink-0" style="background-color: ${color};"></div>
+                                <p class="text-sm font-medium text-gray-800 flex-1">${product.name}</p>
+                                <p class="text-sm font-semibold text-gray-900">${product.count}</p>
+                            </div>
+                        `;
+                    }).join('');
+                }
             }
             const productCountChartEl = document.getElementById('newDealsYTDProductCountChart');
             if (productCountChartEl && topProducts && topProducts.length > 0) {
@@ -16741,70 +16778,107 @@
                 productDonutChart.render();
             }
             
-            // 6. Credit Classification Treemap (replaces Product Deal Count Chart)
-            const creditClassChartEl = document.getElementById('newDealsMTDCreditClassChart');
-            if (creditClassChartEl && creditClassification && creditClassification.length > 0) {
-                const treemapOptions = {
-                    series: [
-                        {
-                            data: creditClassification.map(c => ({
-                                x: c.name,
-                                y: c.count
-                            }))
-                        }
-                    ],
-                    legend: {
-                        show: false
-                    },
+            // 6. Product Deal Count - Donut Chart (matching TFA Product Program style)
+            const dealCountChartEl = document.getElementById('newDealsMTDCreditClassChart');
+            const dealCountListEl = document.getElementById('newDealsMTDDealCountList');
+            if (dealCountChartEl && topProducts && topProducts.length > 0) {
+                const totalDeals = topProducts.reduce((sum, p) => sum + p.count, 0);
+                const colors = [
+                    "#3641f5",  // Primary blue
+                    "#7592ff",  // Light blue
+                    "#dde9ff",  // Lighter blue
+                    "#ff6b6b",  // Red
+                    "#ffd93d",  // Yellow
+                    "#6bcf7f",  // Green
+                    "#c084fc",  // Purple
+                    "#14b8a6",  // Teal
+                    "#f97316",  // Orange
+                    "#06b6d4"   // Cyan
+                ];
+                
+                const dealCountDonutOptions = {
+                    series: topProducts.map(p => p.count),
+                    colors: colors.slice(0, topProducts.length),
+                    labels: topProducts.map(p => p.name),
                     chart: {
-                        height: 380,
-                        type: 'treemap',
-                        fontFamily: 'Outfit, sans-serif',
-                        toolbar: { show: false }
+                        fontFamily: "Outfit, sans-serif",
+                        type: "donut",
+                        width: 300,
+                        height: 300,
                     },
-                    title: {
-                        text: undefined
+                    stroke: {
+                        show: false,
                     },
-                    colors: ['#465fff'],
                     plotOptions: {
-                        treemap: {
-                            distributed: true,
-                            enableShades: true
-                        }
+                        pie: {
+                            donut: {
+                                size: "65%",
+                                background: "transparent",
+                                labels: {
+                                    show: true,
+                                    name: {
+                                        show: true,
+                                        offsetY: -10,
+                                        color: "#1D2939",
+                                        fontSize: "14px",
+                                        fontWeight: "600",
+                                    },
+                                    value: {
+                                        show: true,
+                                        offsetY: 10,
+                                        color: "#667085",
+                                        fontSize: "16px",
+                                        fontWeight: "700",
+                                        formatter: (val) => val.toString(),
+                                    },
+                                    total: {
+                                        show: true,
+                                        label: "Total Deals",
+                                        color: "#111827",
+                                        fontSize: "16px",
+                                        fontWeight: "700",
+                                        formatter: () => totalDeals.toString(),
+                                    },
+                                },
+                            },
+                        },
                     },
                     dataLabels: {
-                        enabled: true,
-                        style: {
-                            fontSize: '14px',
-                            fontWeight: 700,
-                            colors: ['#fff']
-                        },
-                        formatter: function(text, op) {
-                            const item = creditClassification[op.dataPointIndex];
-                            return [text, `${item.count} deals`];
-                        },
-                        offsetY: -4
+                        enabled: false,
+                    },
+                    legend: {
+                        show: false, // Hide built-in legend, using custom HTML legend
                     },
                     tooltip: {
-                        theme: 'light',
-                        custom: function({ seriesIndex, dataPointIndex, w }) {
-                            const item = creditClassification[dataPointIndex];
-                            return `
-                                <div style="padding: 8px 12px; background: white; border: 1px solid #e5e7eb; border-radius: 6px;">
-                                    <div style="font-weight: 600; margin-bottom: 4px;">${item.name}</div>
-                                    <div style="font-size: 11px; color: #6b7280;">
-                                        <div>Deals: ${item.count}</div>
-                                        <div>Total TFA: ${formatCurrency(item.tfa)}</div>
-                                    </div>
-                                </div>
-                            `;
+                        enabled: true,
+                        theme: "light",
+                        y: {
+                            formatter: function(val, opts) {
+                                const percentage = ((val / totalDeals) * 100).toFixed(1);
+                                const tfa = topProducts[opts.seriesIndex].tfa;
+                                return val + ' deals (' + percentage + '%) - ' + formatCurrency(tfa);
+                            }
                         }
-                    }
+                    },
                 };
                 
-                creditClassChartEl.innerHTML = '';
-                const creditClassChart = new ApexCharts(creditClassChartEl, treemapOptions);
-                creditClassChart.render();
+                dealCountChartEl.innerHTML = '';
+                const dealCountChart = new ApexCharts(dealCountChartEl, dealCountDonutOptions);
+                dealCountChart.render();
+                
+                // Populate legend list
+                if (dealCountListEl) {
+                    dealCountListEl.innerHTML = topProducts.map((product, index) => {
+                        const color = colors[index % colors.length];
+                        return `
+                            <div class="flex items-center gap-3 py-2">
+                                <div class="w-4 h-4 rounded-sm flex-shrink-0" style="background-color: ${color};"></div>
+                                <p class="text-sm font-medium text-gray-800 flex-1">${product.name}</p>
+                                <p class="text-sm font-semibold text-gray-900">${product.count}</p>
+                            </div>
+                        `;
+                    }).join('');
+                }
             }
             
             // 7. Top Underwriters Table
@@ -16939,70 +17013,111 @@
                 regionalTableEl.innerHTML = tableHTML;
             }
             
-            // 2. Product Program Treemap
-            const treemapChartEl = document.getElementById('pipelineProductTreemap');
-            if (treemapChartEl && topProducts && topProducts.length > 0) {
-                const treemapOptions = {
-                    series: [
-                        {
-                            data: topProducts.map(p => ({
-                                x: p.name,
-                                y: p.tfa
-                            }))
-                        }
-                    ],
-                    legend: {
-                        show: false
-                    },
+            // 2. Product Program Distribution - Donut Chart (matching TFA Product Program style)
+            const productChartEl = document.getElementById('pipelineProductTreemap');
+            const productListEl = document.getElementById('pipelineProductList');
+            if (productChartEl && topProducts && topProducts.length > 0) {
+                const totalDeals = topProducts.reduce((sum, p) => sum + p.count, 0);
+                const totalTFASum = topProducts.reduce((sum, p) => sum + p.tfa, 0);
+                const colors = [
+                    "#3641f5",  // Primary blue
+                    "#7592ff",  // Light blue
+                    "#dde9ff",  // Lighter blue
+                    "#ff6b6b",  // Red
+                    "#ffd93d",  // Yellow
+                    "#6bcf7f",  // Green
+                    "#c084fc",  // Purple
+                    "#14b8a6",  // Teal
+                    "#f97316",  // Orange
+                    "#06b6d4"   // Cyan
+                ];
+                
+                const productDonutOptions = {
+                    series: topProducts.map(p => p.count),
+                    colors: colors.slice(0, topProducts.length),
+                    labels: topProducts.map(p => p.name),
                     chart: {
-                        height: 380,
-                        type: 'treemap',
-                        fontFamily: 'Outfit, sans-serif',
-                        toolbar: { show: false }
+                        fontFamily: "Outfit, sans-serif",
+                        type: "donut",
+                        width: 300,
+                        height: 300,
                     },
-                    title: {
-                        text: undefined
+                    stroke: {
+                        show: false,
                     },
-                    colors: ['#465fff'],
                     plotOptions: {
-                        treemap: {
-                            distributed: true,
-                            enableShades: true
-                        }
+                        pie: {
+                            donut: {
+                                size: "65%",
+                                background: "transparent",
+                                labels: {
+                                    show: true,
+                                    name: {
+                                        show: true,
+                                        offsetY: -10,
+                                        color: "#1D2939",
+                                        fontSize: "14px",
+                                        fontWeight: "600",
+                                    },
+                                    value: {
+                                        show: true,
+                                        offsetY: 10,
+                                        color: "#667085",
+                                        fontSize: "16px",
+                                        fontWeight: "700",
+                                        formatter: (val) => val.toString(),
+                                    },
+                                    total: {
+                                        show: true,
+                                        label: "Total Deals",
+                                        color: "#111827",
+                                        fontSize: "16px",
+                                        fontWeight: "700",
+                                        formatter: () => totalDeals.toString(),
+                                    },
+                                },
+                            },
+                        },
                     },
                     dataLabels: {
-                        enabled: true,
-                        style: {
-                            fontSize: '14px',
-                            fontWeight: 700,
-                            colors: ['#fff']
-                        },
-                        formatter: function(text, op) {
-                            const product = topProducts[op.dataPointIndex];
-                            return [text, `${product.count} (${formatCurrency(product.tfa)})`];
-                        },
-                        offsetY: -4
+                        enabled: false,
+                    },
+                    legend: {
+                        show: false, // Hide built-in legend, using custom HTML legend
                     },
                     tooltip: {
-                        theme: 'light',
-                        custom: function({ seriesIndex, dataPointIndex, w }) {
-                            const product = topProducts[dataPointIndex];
-                            return `
-                                <div style="padding: 8px 12px; background: white; border: 1px solid #e5e7eb; border-radius: 6px;">
-                                    <div style="font-weight: 600; margin-bottom: 4px;">${product.name}</div>
-                                    <div style="font-size: 11px; color: #6b7280;">
-                                        <div>Pending Deals: ${product.count}</div>
-                                        <div>Total TFA: ${formatCurrency(product.tfa)}</div>
-                                    </div>
-                                </div>
-                            `;
+                        enabled: true,
+                        theme: "light",
+                        y: {
+                            formatter: function(val, opts) {
+                                const percentage = ((val / totalDeals) * 100).toFixed(1);
+                                const tfa = topProducts[opts.seriesIndex].tfa;
+                                return val + ' deals (' + percentage + '%) - ' + formatCurrency(tfa);
+                            }
                         }
-                    }
+                    },
                 };
                 
-                treemapChartEl.innerHTML = '';
-                const treemapChart = new ApexCharts(treemapChartEl, treemapOptions);
-                treemapChart.render();
+                productChartEl.innerHTML = '';
+                const productChart = new ApexCharts(productChartEl, productDonutOptions);
+                productChart.render();
+                
+                // Populate legend list
+                if (productListEl) {
+                    productListEl.innerHTML = topProducts.map((product, index) => {
+                        const color = colors[index % colors.length];
+                        const formattedAmount = product.tfa >= 1000000000 
+                            ? `$${(product.tfa / 1000000000).toFixed(2)}B`
+                            : `$${(product.tfa / 1000000).toFixed(1)}M`;
+                        return `
+                            <div class="flex items-center gap-3 py-2">
+                                <div class="w-4 h-4 rounded-sm flex-shrink-0" style="background-color: ${color};"></div>
+                                <p class="text-sm font-medium text-gray-800 flex-1">${product.name}</p>
+                                <p class="text-sm font-semibold text-gray-900">${product.count} (${formattedAmount})</p>
+                            </div>
+                        `;
+                    }).join('');
+                }
             }
             
             
@@ -18521,14 +18636,26 @@
                         </div>
                     </div>
                     
-                    <!-- Deal Count -->
+                    <!-- Deal Count by Product - Donut Chart with Legends -->
                     <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-base font-semibold text-gray-900">Deal Count</h3>
-                            <p class="text-xs text-gray-500 mt-1">Deal Count</p>
+                            <h3 class="text-base font-semibold text-gray-900">Deal Count by Product</h3>
+                            <p class="text-xs text-gray-500 mt-1">Deal count distribution across products</p>
                         </div>
                         <div class="p-6">
-                            <div id="newDealsYTDCreditClassChart" style="min-height: 380px;"></div>
+                            <div class="flex flex-row items-center justify-center gap-8">
+                                <!-- Donut Chart -->
+                                <div class="flex-shrink-0">
+                                    <div id="newDealsYTDCreditClassChart"></div>
+                                </div>
+                                
+                                <!-- Legend / Details List - Right Side -->
+                                <div class="flex-1 max-w-md">
+                                    <div id="newDealsYTDDealCountList" class="space-y-3">
+                                        <!-- Legend will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -18607,14 +18734,26 @@
                         </div>
                     </div>
                     
-                    <!-- Deal Count -->
+                    <!-- Deal Count by Product - Donut Chart with Legends -->
                     <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-base font-semibold text-gray-900">Deal Count</h3>
-                            <p class="text-xs text-gray-500 mt-1">Deal Count</p>
+                            <h3 class="text-base font-semibold text-gray-900">Deal Count by Product</h3>
+                            <p class="text-xs text-gray-500 mt-1">Deal count distribution across products</p>
                         </div>
                         <div class="p-6">
-                            <div id="newDealsMTDCreditClassChart" style="min-height: 380px;"></div>
+                            <div class="flex flex-row items-center justify-center gap-8">
+                                <!-- Donut Chart -->
+                                <div class="flex-shrink-0">
+                                    <div id="newDealsMTDCreditClassChart"></div>
+                                </div>
+                                
+                                <!-- Legend / Details List - Right Side -->
+                                <div class="flex-1 max-w-md">
+                                    <div id="newDealsMTDDealCountList" class="space-y-3">
+                                        <!-- Legend will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -18718,14 +18857,26 @@
                         </div>
                     </div>
                     
-                    <!-- Product Program Treemap -->
+                    <!-- Product Program Distribution - Donut Chart with Legends -->
                     <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
                             <h3 class="text-base font-semibold text-gray-900">Product Program Distribution</h3>
                             <p class="text-xs text-gray-500 mt-1">Deals by product with count and TFA</p>
                         </div>
                         <div class="p-6">
-                            <div id="pipelineProductTreemap" style="min-height: 300px;"></div>
+                            <div class="flex flex-row items-center justify-center gap-8">
+                                <!-- Donut Chart -->
+                                <div class="flex-shrink-0">
+                                    <div id="pipelineProductTreemap"></div>
+                                </div>
+                                
+                                <!-- Legend / Details List - Right Side -->
+                                <div class="flex-1 max-w-md">
+                                    <div id="pipelineProductList" class="space-y-3">
+                                        <!-- Legend will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

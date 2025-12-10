@@ -14230,7 +14230,13 @@
                                 filterState === 'facilities' ? 'Facilities Expiring Details (Top 10)' : 
                                 'CAs & Facilities Expiring Details (Top 10)'
                             }</h3>
-                            <p class="text-xs text-gray-500 mt-1">Detailed breakdown by item</p>
+                            <p class="text-xs text-gray-500 mt-1">${
+                                filterState === 'cas' 
+                                    ? 'Credit Agreements approaching expiration' 
+                                    : filterState === 'facilities' 
+                                        ? 'Facilities approaching maturity' 
+                                        : 'Expiring items overview'
+                            }</p>
                         </div>
                         <!-- Filter Buttons in Table Header (CAs or Facilities only) -->
                         <div class="flex items-center gap-2">
@@ -14251,7 +14257,7 @@
                         <table class="min-w-full">
                             <thead>
                                 <tr class="bg-gray-50">
-                                    ${filterState === 'cas' ? `
+                                ${filterState === 'cas' ? `
                                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Relationship</th>
                                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Region</th>
                                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Underwriter</th>
@@ -14265,7 +14271,7 @@
                                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Underwriter</th>
                                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Product Program</th>
                                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Facility ID</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Maturity Date</th>
+                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Facility Maturity Date</th>
                                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">TFA</th>
                                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Status</th>
                                     ` : ''}
@@ -14381,16 +14387,18 @@
             // 2. Product Category Chart
             const productChartEl = document.getElementById('productCategoryChart');
             if (productChartEl && productData && productData.length > 0) {
-                const productOptions = {
+                    const productChartHeight = Math.max(280, productData.length * 34);
+                    const productOptions = {
                     series: [{
                         name: 'TFA',
                         data: productData.map(p => p.tfa)
                     }],
                     chart: {
                         type: 'bar',
-                            height: 300,
+                            height: productChartHeight,
                         fontFamily: 'Outfit, sans-serif',
-                            toolbar: { show: false }
+                            toolbar: { show: false },
+                            parentHeightOffset: 0
                     },
                         colors: ['#465fff'],
                         plotOptions: {
@@ -14398,13 +14406,14 @@
                                 borderRadius: 6,
                                 horizontal: true,
                                 distributed: false,
-                                dataLabels: { position: 'right' }
+                                dataLabels: { position: 'right' },
+                                barHeight: '70%'
                             }
                         },
                         dataLabels: {
                             enabled: true,
                             textAnchor: 'start',
-                            offsetX: 12,
+                            offsetX: 16,
                             formatter: function(val) {
                                 return formatCurrency(val);
                             },
@@ -14418,7 +14427,7 @@
                                 foreColor: '#374151',
                                 backgroundColor: '#F3F4F6',
                                 borderRadius: 12,
-                                padding: 6,
+                                padding: 8,
                                 opacity: 1,
                                 borderWidth: 0
                             }
@@ -14447,11 +14456,18 @@
                                     fontSize: "12px",
                                     fontFamily: "Outfit, sans-serif",
                                 },
+                                maxWidth: 180
                             },
                         },
                         grid: {
                             borderColor: '#E5E7EB',
-                            strokeDashArray: 4
+                            strokeDashArray: 4,
+                            padding: {
+                                top: 4,
+                                right: 0,
+                                bottom: 0,
+                                left: 0
+                            }
                         },
                         tooltip: {
                             theme: 'light',

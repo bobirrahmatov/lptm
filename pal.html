@@ -11313,7 +11313,7 @@
             // Group by Underwriter for detailed table
             const detailedData = {};
             dataSource.forEach(row => {
-                const underwriter = row.Underwriter || 'Unknown';
+                const underwriter = row.Lead_Underwriter || 'Unknown';
                 const region = row.Region || 'Unknown';
                 const product = row.Product_Program || 'Unknown';
                 
@@ -11533,8 +11533,28 @@
                 initializeFacilitiesChart(dataSource);
             } else if (chartType === 'relationships') {
                 initializeRelationshipsChart(dataSource);
+            } else if (chartType === 'expiring') {
+                setTimeout(() => {
+                    renderExpiringAnalysis();
+                    renderExpiringTable();
+                }, 150);
+            } else if (chartType === 'newFacilities') {
+                setTimeout(() => renderNewFacilitiesExpandedViews(), 150);
+            } else if (chartType === 'newDealsYTD') {
+                setTimeout(() => renderNewDealsYTDExpandedViews(), 150);
+            } else if (chartType === 'newDealsMTD') {
+                setTimeout(() => renderNewDealsMTDExpandedViews(), 150);
+            } else if (chartType === 'pipeline') {
+                setTimeout(() => renderPipelineExpandedViews(), 150);
+            } else if (chartType === 'topRelationships') {
+                setTimeout(() => renderTopRelationshipsExpandedViews(), 150);
+            } else if (chartType === 'rotce') {
+                setTimeout(() => renderROTCEExpandedViews(), 150);
+            } else if (chartType === 'covenantMonitoring' || chartType === 'covenantRegional') {
+                setTimeout(() => renderCovenantExpandedViews(), 150);
+            } else if (chartType === 'ccmRegionalChart') {
+                setTimeout(() => renderCCMExpandedViews(), 150);
             }
-            // Add other chart initializations as needed
         }
         
         // Initialize TFA Charts
@@ -12544,7 +12564,7 @@
             // Underwriter breakdown
             const byUnderwriter = {};
             dataSource.forEach(row => {
-                const underwriter = row.Underwriter || 'Unknown';
+                const underwriter = row.Lead_Underwriter || 'Unknown';
                 const region = row.Region || 'Unknown';
                 
                 if (!byUnderwriter[underwriter]) {
@@ -12778,7 +12798,7 @@
             // Top underwriters by Total OS
             const byUnderwriter = {};
             dataSource.forEach(row => {
-                const underwriter = row.Underwriter || 'Unknown';
+                const underwriter = row.Lead_Underwriter || 'Unknown';
                 const region = row.Region || 'Unknown';
                 
                 if (!byUnderwriter[underwriter]) {
@@ -13058,7 +13078,7 @@
             // By Underwriter (Top 10)
             const byUnderwriter = {};
             dataSource.forEach(row => {
-                const underwriter = row.Underwriter || 'Unknown';
+                const underwriter = row.Lead_Underwriter || 'Unknown';
                 const region = row.Region || 'Unknown';
                 
                 if (!byUnderwriter[underwriter]) {
@@ -13332,7 +13352,7 @@
             // By Underwriter (Top 10)
             const byUnderwriter = {};
             dataSource.forEach(row => {
-                const underwriter = row.Underwriter || 'Unknown';
+                const underwriter = row.Lead_Underwriter || 'Unknown';
                 const region = row.Region || 'Unknown';
                 const relId = row.Relationship_ID;
                 
@@ -15803,9 +15823,6 @@
             tbody.innerHTML = html;
         }
         
-        function generateNewFacilitiesExpandedView(dataSource) {
-            return '<p class="text-gray-500">New Facilities detailed view - to be implemented</p>';
-        }
         function generateNewDealsYTDExpandedView(dataSource) {
             // Get reporting month range
             const { monthStart, monthEnd, reportingMonth: repMonth } = getReportingMonthRange();

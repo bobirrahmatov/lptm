@@ -174,71 +174,8 @@
         </div>
     </div>
 
-    <div class="p-4 md:p-6" x-data="{ activeTab: 'overview' }">
-        <!-- Tab Navigation -->
-        <div class="mb-6">
-            <div class="border-b border-gray-200">
-                <nav class="-mb-px flex space-x-2 overflow-x-auto custom-scrollbar">
-                    <button
-                        class="inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors duration-200 ease-in-out whitespace-nowrap"
-                        :class="activeTab === 'overview' ? 'text-blue-600 border-blue-600' : 'bg-transparent text-gray-500 border-transparent hover:text-gray-700'"
-                        @click="activeTab = 'overview'">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                        </svg>
-                        Portfolio Overview
-                    </button>
-                    <button
-                        class="inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors duration-200 ease-in-out whitespace-nowrap"
-                        :class="activeTab === 'balances' ? 'text-blue-600 border-blue-600' : 'bg-transparent text-gray-500 border-transparent hover:text-gray-700'"
-                        @click="activeTab = 'balances'">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        Portfolio Balances
-                    </button>
-                    <button
-                        class="inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors duration-200 ease-in-out whitespace-nowrap"
-                        :class="activeTab === 'team' ? 'text-blue-600 border-blue-600' : 'bg-transparent text-gray-500 border-transparent hover:text-gray-700'"
-                        @click="activeTab = 'team'">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                        </svg>
-                        Team View
-                    </button>
-                    <button
-                        class="inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors duration-200 ease-in-out whitespace-nowrap"
-                        :class="activeTab === 'topnames' ? 'text-blue-600 border-blue-600' : 'bg-transparent text-gray-500 border-transparent hover:text-gray-700'"
-                        @click="activeTab = 'topnames'">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
-                        </svg>
-                        Top Names
-                    </button>
-                    <button
-                        class="inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors duration-200 ease-in-out whitespace-nowrap"
-                        :class="activeTab === 'covenants' ? 'text-blue-600 border-blue-600' : 'bg-transparent text-gray-500 border-transparent hover:text-gray-700'"
-                        @click="activeTab = 'covenants'">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        Covenants
-                    </button>
-                    <button
-                        class="inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors duration-200 ease-in-out whitespace-nowrap"
-                        :class="activeTab === 'ccm' ? 'text-blue-600 border-blue-600' : 'bg-transparent text-gray-500 border-transparent hover:text-gray-700'"
-                        @click="activeTab = 'ccm'">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        Credit Reviews
-                    </button>
-                </nav>
-            </div>
-        </div>
-
-        <!-- Portfolio Overview Tab Content -->
-        <div x-show="activeTab === 'overview'">
+    <div class="p-4 md:p-6">
+        <!-- Portfolio Overview Content -->
         <!-- Page Header -->
         <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-5">
             <!-- First Row: Search Bar, Action Buttons, and Last Updated -->
@@ -1283,13 +1220,13 @@
                         <table class="w-full table-auto h-full">
                     <thead>
                                 <tr class="bg-gray-50 text-left" id="covenantRegionalTableHeader">
-                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">Region</th>
-                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center" style="min-width: 60px;"><span class="whitespace-nowrap">1-45</span><br><span class="whitespace-nowrap">Days</span></th>
-                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center" style="min-width: 65px;"><span class="whitespace-nowrap">46-90</span><br><span class="whitespace-nowrap">Days</span></th>
-                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center" style="min-width: 55px;"><span class="whitespace-nowrap">&gt;90</span><br><span class="whitespace-nowrap">Days</span></th>
-                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center" style="min-width: 75px;"><span class="whitespace-nowrap">Total</span><br><span class="whitespace-nowrap">Past Dues</span></th>
-                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center" style="min-width: 80px;"><span class="whitespace-nowrap">Total</span><br><span class="whitespace-nowrap">Covenants</span></th>
-                                    <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center" style="min-width: 70px;"><span class="whitespace-nowrap">% of</span><br><span class="whitespace-nowrap">Total</span></th>
+                                    <th class="px-3 py-3 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">Region</th>
+                                    <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">1-45</span><br><span class="whitespace-nowrap">Days</span></th>
+                                    <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">46-90</span><br><span class="whitespace-nowrap">Days</span></th>
+                                    <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">&gt;90</span><br><span class="whitespace-nowrap">Days</span></th>
+                                    <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">Total</span><br><span class="whitespace-nowrap">Past Dues</span></th>
+                                    <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">Total</span><br><span class="whitespace-nowrap">Covenants</span></th>
+                                    <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">% of</span><br><span class="whitespace-nowrap">Total</span></th>
                                 </tr>
                             </thead>
                             <tbody id="covenantRegionalTableBody" class="divide-y divide-gray-200">
@@ -1562,9 +1499,9 @@
                     </div>
 
                     <!-- Modal content -->
-                    <div class="flex-1 overflow-auto bg-white">
+                    <div class="flex-1 overflow-auto">
                         <!-- Insights Tab Content -->
-                        <div id="insightsContent" class="p-6">
+                        <div id="insightsContent" class="p-6 bg-white">
                             <!-- Dynamic insights content will be inserted here -->
                             <div class="flex items-center justify-center py-12 text-gray-400">
                                 <svg class="animate-spin h-8 w-8 mr-3" viewBox="0 0 24 24">
@@ -1576,7 +1513,7 @@
                         </div>
 
                         <!-- Data Tab Content -->
-                        <div id="dataContent" class="hidden h-full">
+                        <div id="dataContent" class="hidden h-full bg-white overflow-hidden">
                             <!-- Dynamic data table will be inserted here -->
                             <div class="flex items-center justify-center py-12 text-gray-400">
                                 <svg class="animate-spin h-8 w-8 mr-3" viewBox="0 0 24 24">
@@ -1598,10 +1535,8 @@
             </div>
         </div>
 
-        <!-- End Portfolio Overview Tab -->
-
-        <!-- Portfolio Balances Tab Content -->
-        <div x-show="activeTab === 'balances'" style="display: none;">
+        <!-- Portfolio Balances Section (Hidden) -->
+        <div style="display: none;">
             <!-- Logistics-Style Layout: 3 Horizontal Metric Cards + Large Chart + Side Panel -->
             
             <!-- Row 1: 3 Horizontal Metric Cards (Logistics Style) -->
@@ -1798,10 +1733,8 @@
                     </div>
                 </div>
         </div>
-        <!-- End Portfolio Balances Tab -->
-
-        <!-- Team View Tab Content - eCommerce Style Layout -->
-        <div x-show="activeTab === 'team'" style="display: none;">
+        <!-- Team View Section (Hidden) -->
+        <div style="display: none;">
             <!-- Row 1: Metrics (7) + Donut Chart (5) - eCommerce style -->
             <div class="mb-6 grid grid-cols-12 gap-4 md:gap-6">
                 <!-- Left Column: Stacked Metrics + Bar Chart -->
@@ -1978,10 +1911,9 @@
                         </div>
                     </div>
         </div>
-        <!-- End Team View Tab -->
 
-        <!-- Top Names Tab Content - Marketing Style Layout -->
-        <div x-show="activeTab === 'topnames'" style="display: none;">
+        <!-- Top Names Section (Hidden) -->
+        <div style="display: none;">
             <!-- Row 1: Full Width Metrics (like Marketing) -->
             <div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4 md:gap-6">
                 <!-- Total Relationships -->
@@ -2200,10 +2132,9 @@
                 </div>
             </div>
         </div>
-        <!-- End Top Names Tab -->
 
-        <!-- Covenants Tab Content - CRM Style Layout -->
-        <div x-show="activeTab === 'covenants'" style="display: none;">
+        <!-- Covenants Section (Hidden) -->
+        <div style="display: none;">
             <!-- Row 1: Full Width Metrics -->
             <div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4 md:gap-6">
                 <!-- Total Covenants -->
@@ -2449,10 +2380,9 @@
                     </div>
             </div>
         </div>
-        <!-- End Covenants Tab -->
 
-        <!-- Credit Reviews (CCM) Tab Content - SaaS Style Layout -->
-        <div x-show="activeTab === 'ccm'" style="display: none;">
+        <!-- Credit Reviews (CCM) Section (Hidden) -->
+        <div style="display: none;">
             <!-- Row 1: Metrics with sparklines (SaaS Style) -->
             <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 md:gap-6">
                 <!-- Total CCMs -->
@@ -2778,6 +2708,177 @@
         let ccmData = []; // CCM (Credit Committee Memos) data from CCM_tw.xlsx
         let filteredData = [];
 
+        // ===== DUMMY DATA FOR TESTING =====
+        // Uncomment this section to test with dummy data without loading from Confluence
+        const ENABLE_DUMMY_DATA = true; // Set to false to use real data from Confluence
+        
+        if (ENABLE_DUMMY_DATA) {
+            portfolioData = [
+                // Row 1
+                {
+                    Report_Date: '2024-11-30',
+                    Region: 'NAM',
+                    Origination_Unit: 'Commercial Banking',
+                    Underwriting_Team_Lead: 'John Smith',
+                    Lead_Underwriter: 'John Smith',
+                    Product_Underwriter: 'Jane Doe',
+                    Relationship_ID: 'REL001',
+                    Relationship_Name: 'ABC Corporation',
+                    Borrowers_Name: 'ABC Corp Inc',
+                    CA_Number: 'CA2024001',
+                    Facility_ID: 'FAC2024001',
+                    Facility_Number: 'F001',
+                    Product_Program: 'Corporate Lending',
+                    Product_Program_Name: 'Corporate Lending',
+                    Facility_Type: 'Revolver',
+                    Fac_Amount: 5000000,
+                    Facility_Amount: 5000000,
+                    OSUC: 4500000,
+                    Total_OS: 500000,
+                    Unused_Commitment: 4000000,
+                    Credit_Classification: 'PASS',
+                    Management_Status: 'CM',
+                    'PSE_non-PSE': 'non-PSE',
+                    PSE_non_PSE: 'non-PSE',
+                    Commitment_Type: 'Committed',
+                    Maturity_Date: '2025-12-31',
+                    Origination_Date: '2024-01-15',
+                    CA_Expiry_Date: '2025-12-31',
+                    ROTCE: 15.5
+                },
+                // Row 2
+                {
+                    Report_Date: '2024-11-30',
+                    Region: 'EMEA',
+                    Origination_Unit: 'Investment Banking',
+                    Underwriting_Team_Lead: 'Sarah Johnson',
+                    Lead_Underwriter: 'Sarah Johnson',
+                    Product_Underwriter: 'Mike Wilson',
+                    Relationship_ID: 'REL002',
+                    Relationship_Name: 'XYZ Limited',
+                    Borrowers_Name: 'XYZ Ltd',
+                    CA_Number: 'CA2024002',
+                    Facility_ID: 'FAC2024002',
+                    Facility_Number: 'F002',
+                    Product_Program: 'Trade Finance',
+                    Product_Program_Name: 'Trade Finance',
+                    Facility_Type: 'Term Loan',
+                    Fac_Amount: 10000000,
+                    Facility_Amount: 10000000,
+                    OSUC: 8500000,
+                    Total_OS: 8500000,
+                    Unused_Commitment: 0,
+                    Credit_Classification: 'SPECIAL MENTION',
+                    Management_Status: 'DM',
+                    'PSE_non-PSE': 'PSE',
+                    PSE_non_PSE: 'PSE',
+                    Commitment_Type: 'Uncommitted',
+                    Maturity_Date: '2026-06-30',
+                    Origination_Date: '2024-02-20',
+                    CA_Expiry_Date: '2026-06-30',
+                    ROTCE: 12.3
+                },
+                // Row 3
+                {
+                    Report_Date: '2024-11-30',
+                    Region: 'APAC',
+                    Origination_Unit: 'SME Banking',
+                    Underwriting_Team_Lead: 'David Lee',
+                    Lead_Underwriter: 'David Lee',
+                    Product_Underwriter: 'Emily Chen',
+                    Relationship_ID: 'REL003',
+                    Relationship_Name: 'Tech Innovations Pte Ltd',
+                    Borrowers_Name: 'Tech Innovations',
+                    CA_Number: 'CA2024003',
+                    Facility_ID: 'FAC2024003',
+                    Facility_Number: 'F003',
+                    Product_Program: 'Working Capital',
+                    Product_Program_Name: 'Working Capital',
+                    Facility_Type: 'Overdraft',
+                    Fac_Amount: 2500000,
+                    Facility_Amount: 2500000,
+                    OSUC: 2200000,
+                    Total_OS: 1800000,
+                    Unused_Commitment: 400000,
+                    Credit_Classification: 'PASS',
+                    Management_Status: 'CM',
+                    'PSE_non-PSE': 'non-PSE',
+                    PSE_non_PSE: 'non-PSE',
+                    Commitment_Type: 'Committed',
+                    Maturity_Date: '2025-09-30',
+                    Origination_Date: '2024-03-10',
+                    CA_Expiry_Date: '2025-09-30',
+                    ROTCE: 18.2
+                },
+                // Row 4
+                {
+                    Report_Date: '2024-11-30',
+                    Region: 'LATAM',
+                    Origination_Unit: 'Structured Finance',
+                    Underwriting_Team_Lead: 'Carlos Rodriguez',
+                    Lead_Underwriter: 'Carlos Rodriguez',
+                    Product_Underwriter: 'Maria Garcia',
+                    Relationship_ID: 'REL004',
+                    Relationship_Name: 'Global Energy SA',
+                    Borrowers_Name: 'Global Energy',
+                    CA_Number: 'CA2024004',
+                    Facility_ID: 'FAC2024004',
+                    Facility_Number: 'F004',
+                    Product_Program: 'Project Finance',
+                    Product_Program_Name: 'Project Finance',
+                    Facility_Type: 'Bridge Loan',
+                    Fac_Amount: 15000000,
+                    Facility_Amount: 15000000,
+                    OSUC: 12000000,
+                    Total_OS: 12000000,
+                    Unused_Commitment: 0,
+                    Credit_Classification: 'SUBSTANDARD',
+                    Management_Status: 'DM',
+                    'PSE_non-PSE': 'non-PSE',
+                    PSE_non_PSE: 'non-PSE',
+                    Commitment_Type: 'Uncommitted',
+                    Maturity_Date: '2025-03-31',
+                    Origination_Date: '2024-04-05',
+                    CA_Expiry_Date: '2025-03-31',
+                    ROTCE: 8.7
+                },
+                // Row 5
+                {
+                    Report_Date: '2024-11-30',
+                    Region: 'NAM',
+                    Origination_Unit: 'Real Estate Finance',
+                    Underwriting_Team_Lead: 'Robert Brown',
+                    Lead_Underwriter: 'Robert Brown',
+                    Product_Underwriter: 'Lisa Anderson',
+                    Relationship_ID: 'REL005',
+                    Relationship_Name: 'Property Developers Inc',
+                    Borrowers_Name: 'Property Developers',
+                    CA_Number: 'CA2024005',
+                    Facility_ID: 'FAC2024005',
+                    Facility_Number: 'F005',
+                    Product_Program: 'Real Estate',
+                    Product_Program_Name: 'Real Estate',
+                    Facility_Type: 'Construction Loan',
+                    Fac_Amount: 20000000,
+                    Facility_Amount: 20000000,
+                    OSUC: 15000000,
+                    Total_OS: 10000000,
+                    Unused_Commitment: 5000000,
+                    Credit_Classification: 'PASS',
+                    Management_Status: 'CM',
+                    'PSE_non-PSE': 'PSE',
+                    PSE_non_PSE: 'PSE',
+                    Commitment_Type: 'Committed',
+                    Maturity_Date: '2026-12-31',
+                    Origination_Date: '2024-05-15',
+                    CA_Expiry_Date: '2026-12-31',
+                    ROTCE: 14.8
+                }
+            ];
+            
+            console.log('✅ Loaded DUMMY DATA for testing:', portfolioData.length, 'records');
+        }
+        // ===== END DUMMY DATA =====
 
         let expirationChartInstance = null;
         let searchDebounceTimer = null;
@@ -2797,6 +2898,7 @@
         let selectedCommitmentStatus = "all"; // all, Committed, Uncommitted
         let selectedAmountType = "direct"; // direct, contingent, pse, osuc, tfa (for metrics)
         let selectedPeriod = "current"; // current, previous (for New Facilities Approved  chart)
+        let selectedSearchTerm = ""; // Global search filter
         
         // Chart View States (for View Data filtering)
         let currentCovenantViewType = "pastDue"; // pastDue, comingDue
@@ -2865,10 +2967,83 @@
         // Initialize on page load
         document.addEventListener("DOMContentLoaded", function () {
             console.log("=== Portfolio Analytics Dashboard ===");
-            console.log("READ-ONLY mode - Loading data from Confluence");
-            console.log("Page ID:", CONFLUENCE_PAGE_ID);
-            console.log("File:", CONFLUENCE_FILE_NAME);
-            console.log("=====================================");
+            
+            // Initialize search functionality
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                // Handle Enter key press
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        handleMainSearch(this.value);
+                    }
+                });
+                
+                // Handle input changes (detect when text is cleared/changed)
+                let searchDebounceTimer = null;
+                searchInput.addEventListener('input', function(e) {
+                    // Clear previous timer
+                    if (searchDebounceTimer) {
+                        clearTimeout(searchDebounceTimer);
+                    }
+                    
+                    // Debounce to avoid too many updates while typing
+                    searchDebounceTimer = setTimeout(() => {
+                        const currentValue = this.value.trim();
+                        // If search box is cleared or value changed significantly
+                        if (currentValue === '' && selectedSearchTerm !== '') {
+                            // Search was cleared
+                            handleMainSearch('');
+                        }
+                    }, 300); // 300ms debounce
+                });
+            }
+            
+            // Check if dummy data is enabled
+            if (ENABLE_DUMMY_DATA && portfolioData.length > 0) {
+                console.log("📊 DUMMY DATA MODE - Using test data");
+                console.log("Records loaded:", portfolioData.length);
+                console.log("=====================================");
+                
+                // Initialize with dummy data immediately
+                setTimeout(() => {
+                    // Build indexes for dummy data
+                    buildIndexes();
+                    
+                    // Populate filter options
+                    populateFilterOptions();
+                    
+                    // Calculate metrics and create charts
+                    calculateMetrics();
+                    createFacilityTrendChart();
+                    createRelationshipChart();
+                    createCreditClassificationChart();
+                    createROTCEChart();
+                    
+                    // Initialize covenant and CCM charts
+                    populateCovenantMonitoringData();
+                    createCovenantMonitoringChart('pastDue');
+                    updateCovenantRegionalTable('pastDue');
+                    calculateCCMStats();
+                    createCCMRegionalChart();
+                    
+                    // Initial filter
+                    filterData();
+                    
+                    showNotification(
+                        "Success",
+                        `Loaded ${portfolioData.length} dummy records for testing`,
+                        "success"
+                    );
+                }, 100);
+            } else {
+                console.log("READ-ONLY mode - Loading data from Confluence");
+                console.log("Page ID:", CONFLUENCE_PAGE_ID);
+                console.log("File:", CONFLUENCE_FILE_NAME);
+                console.log("=====================================");
+                
+                // Load actual data from Confluence
+                loadDataFromCSV();
+            }
             
             // Verify all required libraries are loaded
             if (typeof ApexCharts === "undefined") {
@@ -2891,39 +3066,6 @@
             } else {
                 console.log("✓ XLSX library loaded successfully");
             }
-            
-            // Load actual data from Confluence
-            loadDataFromCSV();
-            
-            // Initialize charts - show loading/no-data state immediately
-            setTimeout(() => {
-                // Show initial no-data messages for charts that depend on portfolio data
-                const chartInits = [
-                    { id: '#facilityTrendChart', name: 'CAs & Facilities Expiring' },
-                    { id: '#creditClassificationChart', name: 'New Facilities Approved' },
-                    { id: '#relationshipChart', name: 'Top Relationships' },
-                    { id: '#rotceChart', name: 'ROTCE Performance' }
-                ];
-                
-                chartInits.forEach(({ id, name }) => {
-                    const el = document.querySelector(id);
-                    if (el) {
-                        // Check if element has no actual chart content (just comments or whitespace)
-                        const hasChart = el.querySelector('.apexcharts-canvas');
-                        const hasNoDataMsg = el.querySelector('div[style*="flex"]');
-                        if (!hasChart && !hasNoDataMsg) {
-                            el.innerHTML = generateNoDataMessage(name);
-                        }
-                    }
-                });
-                
-                // Initialize covenant and CCM charts
-                populateCovenantMonitoringData();
-                createCovenantMonitoringChart('pastDue');
-                updateCovenantRegionalTable('pastDue');
-                calculateCCMStats();
-                createCCMRegionalChart();
-            }, 100);
             
             // Setup search functionality with debouncing (increased for large datasets)
             document
@@ -4459,13 +4601,37 @@
             
             if (badgesContainer) badgesContainer.innerHTML = "";
             
-            if (Object.keys(activeFilters).length === 0) {
+            // Check if there are any filters (including search)
+            const hasFilters = Object.keys(activeFilters).length > 0 || selectedSearchTerm !== "";
+            
+            if (!hasFilters) {
                 if (badgesContainer) badgesContainer.style.display = "none";
                 return;
             }
             
             if (badgesContainer) badgesContainer.style.display = "flex";
             
+            // Add search badge if search is active
+            if (selectedSearchTerm !== "") {
+                const searchBadge = document.createElement("span");
+                searchBadge.className =
+                    "inline-flex items-center bg-white text-sm text-gray-600 border border-gray-300 rounded-lg gap-x-2 py-1.5 pl-3 pr-1";
+                searchBadge.innerHTML = `
+                    <span class="text-gray-600">Search</span>
+                    <span class="h-4 w-px bg-gray-300"></span>
+                    <span class="font-medium text-gray-800">"${selectedSearchTerm}"</span>
+                    <button type="button" onclick="clearSearchFilter()" 
+                        class="flex h-5 w-5 items-center justify-center rounded text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                        aria-label="Remove">
+                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                `;
+                badgesContainer.appendChild(searchBadge);
+            }
+            
+            // Add other filter badges
             Object.entries(activeFilters).forEach(([label, value]) => {
                 // Create badge for Portfolio Overview
                 if (badgesContainer) {
@@ -4611,8 +4777,13 @@
 
         // Update filter count badge
         function updateFilterCount() {
-            // Count all filters (smart filters are already included in activeFilters)
+            // Count all filters (smart filters are already included in activeFilters) + search
             let count = Object.keys(activeFilters).length;
+            
+            // Add 1 if search is active
+            if (selectedSearchTerm !== "") {
+                count++;
+            }
             
             const badge = document.getElementById("filterCount");
             const badgeInline = document.getElementById("filterCountInline");
@@ -5410,6 +5581,31 @@
             }
         }
         
+        // Handle Main Search (Enter key or search button)
+        function handleMainSearch(searchTerm) {
+            const trimmedSearch = searchTerm ? searchTerm.trim() : '';
+            console.log('🔍 Main search triggered:', trimmedSearch);
+            
+            selectedSearchTerm = trimmedSearch;
+            
+            // Update active filters badges
+            updateFilterCount();
+            
+            // Apply filters
+            applyFilters();
+        }
+        
+        // Clear search filter
+        function clearSearchFilter() {
+            selectedSearchTerm = '';
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = '';
+            }
+            updateFilterCount();
+            applyFilters();
+        }
+        
         // Select PSE Filter (optimized)
         function selectPSEFilter(pse) {
             selectedPSE = pse;
@@ -5517,6 +5713,13 @@
             selectedStatus = "all";
             selectedCommitmentStatus = "all";
             selectedAmountType = "direct";
+            selectedSearchTerm = ""; // Reset search
+            
+            // Clear search input
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = '';
+            }
             
             // Batch UI updates using requestAnimationFrame for smooth rendering
             requestAnimationFrame(() => {
@@ -6686,20 +6889,20 @@
             if (headerEl) {
                 if (isPastDue) {
                     headerEl.innerHTML = `
-                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">Region</th>
-                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center" style="min-width: 60px;"><span class="whitespace-nowrap">1-45</span><br><span class="whitespace-nowrap">Days</span></th>
-                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center" style="min-width: 65px;"><span class="whitespace-nowrap">46-90</span><br><span class="whitespace-nowrap">Days</span></th>
-                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center" style="min-width: 55px;"><span class="whitespace-nowrap">&gt;90</span><br><span class="whitespace-nowrap">Days</span></th>
-                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center" style="min-width: 75px;"><span class="whitespace-nowrap">Total</span><br><span class="whitespace-nowrap">Past Dues</span></th>
-                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center" style="min-width: 80px;"><span class="whitespace-nowrap">Total</span><br><span class="whitespace-nowrap">Covenants</span></th>
-                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center" style="min-width: 70px;"><span class="whitespace-nowrap">% of</span><br><span class="whitespace-nowrap">Total</span></th>
+                        <th class="px-3 py-3 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">Region</th>
+                        <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">1-45</span><br><span class="whitespace-nowrap">Days</span></th>
+                        <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">46-90</span><br><span class="whitespace-nowrap">Days</span></th>
+                        <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">&gt;90</span><br><span class="whitespace-nowrap">Days</span></th>
+                        <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">Total</span><br><span class="whitespace-nowrap">Past Dues</span></th>
+                        <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">Total</span><br><span class="whitespace-nowrap">Covenants</span></th>
+                        <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">% of</span><br><span class="whitespace-nowrap">Total</span></th>
                     `;
                 } else {
                     headerEl.innerHTML = `
-                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">Region</th>
-                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center" style="min-width: 55px;"><span class="whitespace-nowrap">Due</span><br><span class="whitespace-nowrap">(30d)</span></th>
-                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center" style="min-width: 80px;"><span class="whitespace-nowrap">Total</span><br><span class="whitespace-nowrap">Covenants</span></th>
-                        <th class="px-5 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center" style="min-width: 70px;"><span class="whitespace-nowrap">% of</span><br><span class="whitespace-nowrap">Total</span></th>
+                        <th class="px-3 py-3 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">Region</th>
+                        <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">Due</span><br><span class="whitespace-nowrap">(30d)</span></th>
+                        <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">Total</span><br><span class="whitespace-nowrap">Covenants</span></th>
+                        <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">% of</span><br><span class="whitespace-nowrap">Total</span></th>
                     `;
                 }
             }
@@ -6838,13 +7041,13 @@
                     
                 html += `
                         <tr class="border-b border-gray-100 hover:bg-gray-50">
-                            <td class="px-5 py-3 text-xs font-medium text-gray-700">${region}</td>
-                            <td class="px-5 py-3 text-xs text-gray-700 text-center font-semibold">${count145}</td>
-                            <td class="px-5 py-3 text-xs text-gray-700 text-center font-semibold">${count4690}</td>
-                            <td class="px-5 py-3 text-xs text-gray-700 text-center font-semibold">${countOver90}</td>
-                            <td class="px-5 py-3 text-xs text-gray-900 text-center font-bold">${regionPastDueTotal}</td>
-                            <td class="px-5 py-3 text-xs text-gray-900 text-center font-bold">${regPopulation}</td>
-                            <td class="px-5 py-3 text-xs text-gray-900 text-center font-semibold">${percentOfTotal}%</td>
+                            <td class="px-3 py-3 text-xs font-medium text-gray-700">${region}</td>
+                            <td class="px-2 py-3 text-xs text-gray-700 text-center font-semibold">${count145}</td>
+                            <td class="px-2 py-3 text-xs text-gray-700 text-center font-semibold">${count4690}</td>
+                            <td class="px-2 py-3 text-xs text-gray-700 text-center font-semibold">${countOver90}</td>
+                            <td class="px-2 py-3 text-xs text-gray-900 text-center font-bold">${regionPastDueTotal}</td>
+                            <td class="px-2 py-3 text-xs text-gray-900 text-center font-bold">${regPopulation}</td>
+                            <td class="px-2 py-3 text-xs text-gray-900 text-center font-semibold">${percentOfTotal}%</td>
                         </tr>
                     `;
                 } else {
@@ -6853,11 +7056,11 @@
                     
                     html += `
                         <tr class="border-b border-gray-100 hover:bg-gray-50">
-                            <td class="px-5 py-3 text-xs font-medium text-gray-700">${region}</td>
-                            <td class="px-5 py-3 text-xs text-gray-700 text-center font-semibold">${countComingDue}</td>
-                            <td class="px-5 py-3 text-xs text-gray-900 text-center font-bold">${countComingDue}</td>
-                            <td class="px-5 py-3 text-xs text-gray-900 text-center font-bold">${regPopulation}</td>
-                            <td class="px-5 py-3 text-xs text-gray-900 text-center font-semibold">${percentOfTotal}%</td>
+                            <td class="px-3 py-3 text-xs font-medium text-gray-700">${region}</td>
+                            <td class="px-2 py-3 text-xs text-gray-700 text-center font-semibold">${countComingDue}</td>
+                            <td class="px-2 py-3 text-xs text-gray-900 text-center font-bold">${countComingDue}</td>
+                            <td class="px-2 py-3 text-xs text-gray-900 text-center font-bold">${regPopulation}</td>
+                            <td class="px-2 py-3 text-xs text-gray-900 text-center font-semibold">${percentOfTotal}%</td>
                         </tr>
                     `;
                 }
@@ -6870,24 +7073,24 @@
                 const totalPercentOfTotal = totalPopulation > 0 ? ((totalPastDue / totalPopulation) * 100).toFixed(1) : 0;
                 html += `
                     <tr class="bg-gray-50 font-bold border-t-2 border-gray-200">
-                        <td class="px-5 py-3 text-xs text-gray-900">Total</td>
-                        <td class="px-5 py-3 text-xs text-gray-900 text-center">${total145}</td>
-                        <td class="px-5 py-3 text-xs text-gray-900 text-center">${total4690}</td>
-                        <td class="px-5 py-3 text-xs text-gray-900 text-center">${totalOver90}</td>
-                        <td class="px-5 py-3 text-xs text-gray-900 text-center">${totalPastDue}</td>
-                        <td class="px-5 py-3 text-xs text-gray-900 text-center">${totalPopulation}</td>
-                        <td class="px-5 py-3 text-xs text-gray-900 text-center font-bold">${totalPercentOfTotal}%</td>
+                        <td class="px-3 py-3 text-xs text-gray-900">Total</td>
+                        <td class="px-2 py-3 text-xs text-gray-900 text-center">${total145}</td>
+                        <td class="px-2 py-3 text-xs text-gray-900 text-center">${total4690}</td>
+                        <td class="px-2 py-3 text-xs text-gray-900 text-center">${totalOver90}</td>
+                        <td class="px-2 py-3 text-xs text-gray-900 text-center">${totalPastDue}</td>
+                        <td class="px-2 py-3 text-xs text-gray-900 text-center">${totalPopulation}</td>
+                        <td class="px-2 py-3 text-xs text-gray-900 text-center font-bold">${totalPercentOfTotal}%</td>
                     </tr>
                 `;
             } else {
                 const totalPercentOfTotal = totalPopulation > 0 ? ((totalComingDue / totalPopulation) * 100).toFixed(1) : 0;
                 html += `
                     <tr class="bg-gray-50 font-bold border-t-2 border-gray-200">
-                        <td class="px-5 py-3 text-xs text-gray-900">Total</td>
-                        <td class="px-5 py-3 text-xs text-gray-900 text-center">${totalComingDue}</td>
-                        <td class="px-5 py-3 text-xs text-gray-900 text-center">${totalComingDue}</td>
-                        <td class="px-5 py-3 text-xs text-gray-900 text-center">${totalPopulation}</td>
-                        <td class="px-5 py-3 text-xs text-gray-900 text-center font-bold">${totalPercentOfTotal}%</td>
+                        <td class="px-3 py-3 text-xs text-gray-900">Total</td>
+                        <td class="px-2 py-3 text-xs text-gray-900 text-center">${totalComingDue}</td>
+                        <td class="px-2 py-3 text-xs text-gray-900 text-center">${totalComingDue}</td>
+                        <td class="px-2 py-3 text-xs text-gray-900 text-center">${totalPopulation}</td>
+                        <td class="px-2 py-3 text-xs text-gray-900 text-center font-bold">${totalPercentOfTotal}%</td>
                     </tr>
                 `;
             }
@@ -10438,13 +10641,11 @@
             
             // Check if any smart filters are active
             const smartFiltersActive =
-                selectedRegion !== "all" || !includePSE || selectedStatus !== "all";
+                selectedRegion !== "all" || selectedPSE !== "all" || selectedStatus !== "all";
             
             // If no filters are active (neither advanced nor smart filters), just apply search to all data
             if (Object.keys(activeFilters).length === 0 && !smartFiltersActive) {
-                const searchTerm = document
-                    .getElementById("searchInput")
-                    .value.toLowerCase();
+                const searchTerm = selectedSearchTerm.toLowerCase();
                 
                 if (searchTerm === "") {
                     filteredData = [...portfolioData];
@@ -10665,6 +10866,13 @@
             const insightsContent = document.getElementById('insightsContent');
             const dataContent = document.getElementById('dataContent');
             
+            console.log('📊 populateExpandModalValues:', {
+                chartType,
+                portfolioDataLength: portfolioData.length,
+                filteredDataLength: filteredData.length,
+                dataSourceLength: dataSource.length
+            });
+            
             // Show loading state for insights
             insightsContent.innerHTML = `
                 <div class="flex items-center justify-center py-12 text-gray-400">
@@ -10712,18 +10920,23 @@
             }, 50);
         }
         
-        // Direct Initialization: Initialize Data Table for expanded modal
+        // Direct Initialization: Initialize Data Table for expanded modal - NEW VERSION
         function initializeDataTable(chartType, dataSource) {
             const dataContent = document.getElementById('dataContent');
-            if (!dataContent) return;
+            console.log('🆕 NEW initializeDataTable v2.0');
+            
+            if (!dataContent) {
+                console.error('❌ dataContent element not found!');
+                return;
+            }
             
             // Get chart name and filtered data
             const chartName = getChartName(chartType);
-            const data = getFilteredData(chartType, dataSource);
+            const fullData = getFilteredData(chartType, dataSource);
             
-            console.log('initializeDataTable:', chartType, 'Records:', data.length);
+            console.log('🆕 Data received:', fullData.length, 'records');
             
-            if (!data || data.length === 0) {
+            if (!fullData || fullData.length === 0) {
                 dataContent.innerHTML = `
                     <div class="flex items-center justify-center h-full">
                         <div class="text-center py-12">
@@ -10737,135 +10950,329 @@
                 return;
             }
             
-            // Initialize table state for this view
-            window.tableState = {
-                data: data,
-                filteredData: data,
-                columns: data.length > 0 ? Object.keys(data[0]) : [],
+            // Store data globally for search/pagination functionality
+            window.currentTableData = {
+                full: fullData,
+                filtered: fullData,
+                columns: Object.keys(fullData[0]),
                 currentPage: 1,
-                pageSize: 50,
-                columnFilters: {},
-                columnFilterOps: {},
-                columnFilterMin: {},
-                columnFilterMax: {},
-                columnFilterExact: {},
-                searchTerm: ''
+                pageSize: 25,
+                chartName: chartName
             };
             
-            // Generate table HTML structure
-            dataContent.innerHTML = `
-                <div class="rounded-2xl border border-gray-200 bg-white h-full flex flex-col">
-                    <!-- Header with Search -->
-                    <div class="mb-4 flex flex-col gap-2 px-5 sm:flex-row sm:items-center sm:justify-between sm:px-6 pt-4 flex-shrink-0">
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-800">${chartName}</h3>
-                            <p class="text-xs text-gray-500 mt-1">${data.length.toLocaleString()} total records</p>
+            // Build and render table
+            renderDataTable();
+        }
+        
+        // Render table with current filtered data and pagination
+        function renderDataTable(initialRender = true) {
+            const dataContent = document.getElementById('dataContent');
+            const { filtered, columns, currentPage, pageSize, chartName } = window.currentTableData;
+            
+            // Calculate pagination
+            const totalPages = Math.ceil(filtered.length / pageSize);
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = Math.min(startIndex + pageSize, filtered.length);
+            const pageData = filtered.slice(startIndex, endIndex);
+            
+            console.log('🆕 Rendering page', currentPage, 'of', totalPages, '(', pageData.length, 'records)');
+            
+            // Build table headers HTML - matching TailAdmin structure
+            const headerHTML = columns.map((col, index) => {
+                const isFirst = index === 0;
+                const paddingClass = isFirst ? 'pr-5 sm:pr-6' : 'px-5 sm:px-6';
+                return `
+                    <th class="${paddingClass} py-3 font-normal whitespace-nowrap">
+                        <div class="flex items-center">
+                            <p class="text-sm text-gray-500">${col.replace(/_/g, ' ')}</p>
                         </div>
-
-                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-                            <form onsubmit="event.preventDefault();">
-                                <div class="relative">
-                                    <span class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2">
-                                        <svg class="fill-gray-500" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path fill-rule="evenodd" clip-rule="evenodd" d="M3.04199 9.37381C3.04199 5.87712 5.87735 3.04218 9.37533 3.04218C12.8733 3.04218 15.7087 5.87712 15.7087 9.37381C15.7087 12.8705 12.8733 15.7055 9.37533 15.7055C5.87735 15.7055 3.04199 12.8705 3.04199 9.37381ZM9.37533 1.54218C5.04926 1.54218 1.54199 5.04835 1.54199 9.37381C1.54199 13.6993 5.04926 17.2055 9.37533 17.2055C11.2676 17.2055 13.0032 16.5346 14.3572 15.4178L17.1773 18.2381C17.4702 18.531 17.945 18.5311 18.2379 18.2382C18.5308 17.9453 18.5309 17.4704 18.238 17.1775L15.4182 14.3575C16.5367 13.0035 17.2087 11.2671 17.2087 9.37381C17.2087 5.04835 13.7014 1.54218 9.37533 1.54218Z" fill=""/>
-                                        </svg>
-                                    </span>
-                                    <input
-                                        type="text"
-                                        id="dataGlobalSearch"
-                                        placeholder="Search..."
-                                        oninput="window.handleGlobalSearch(this.value)"
-                                        class="h-[42px] w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pr-4 pl-[42px] text-sm text-gray-800 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none xl:w-[300px]"
-                                    />
+                    </th>`;
+            }).join('');
+            
+            // Build table rows HTML - matching TailAdmin structure
+            const rowsHTML = pageData.map(row => {
+                const cellsHTML = columns.map((col, index) => {
+                    const isFirst = index === 0;
+                    const paddingClass = isFirst ? 'pr-5 sm:pr-6' : 'px-5 sm:px-6';
+                    const value = row[col] !== null && row[col] !== undefined ? row[col] : '';
+                    
+                    return `
+                        <td class="${paddingClass} py-3 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <p class="text-sm text-gray-700">${value}</p>
+                            </div>
+                        </td>`;
+                }).join('');
+                
+                return `<tr>${cellsHTML}</tr>`;
+            }).join('');
+            
+            // Generate page numbers for pagination
+            const pageNumbers = [];
+            if (totalPages <= 7) {
+                for (let i = 1; i <= totalPages; i++) {
+                    pageNumbers.push(i);
+                }
+            } else {
+                if (currentPage <= 3) {
+                    pageNumbers.push(1, 2, 3, '...', totalPages);
+                } else if (currentPage >= totalPages - 2) {
+                    pageNumbers.push(1, '...', totalPages - 2, totalPages - 1, totalPages);
+                } else {
+                    pageNumbers.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+                }
+            }
+            
+            const pageNumbersHTML = pageNumbers.map(page => {
+                if (page === '...') {
+                    return `<li>
+                        <span class="flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium text-gray-700">...</span>
+                    </li>`;
+                }
+                const isActive = page === currentPage;
+                const btnClass = isActive 
+                    ? 'flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500 text-sm font-medium text-white hover:bg-blue-500 hover:text-white'
+                    : 'flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium text-gray-700 hover:bg-blue-500 hover:text-white';
+                return `<li>
+                    <button onclick="window.goToPage(${page})" class="${btnClass}">${page}</button>
+                </li>`;
+            }).join('');
+            
+            if (initialRender) {
+                // Initial render - create complete table structure
+                const tableHTML = `
+                    <div class="p-6 h-full flex flex-col">
+                        <div class="rounded-2xl border border-gray-200 bg-white shadow-sm flex flex-col flex-1 overflow-hidden">
+                            <div class="flex flex-col gap-2 px-5 sm:flex-row sm:items-center sm:justify-between sm:px-6 pt-4 pb-4 flex-shrink-0">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">${chartName}</h3>
                                 </div>
-                            </form>
-                        </div>
-                    </div>
-                    
-                    <div class="custom-scrollbar max-w-full overflow-x-auto overflow-y-visible px-5 sm:px-6 flex-1">
-                        <table class="min-w-full">
-                            <thead class="border-y border-gray-100 py-3">
-                                <tr id="chartDataTableHeader">
-                                    <!-- Headers will be inserted here -->
-                                </tr>
-                                <tr id="chartDataTableFilters">
-                                    <!-- Filters will be inserted here -->
-                                </tr>
-                            </thead>
-                            <tbody id="chartDataTableBody" class="divide-y divide-gray-100">
-                                <!-- Data rows will be inserted here -->
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <!-- Pagination Controls -->
-                    <div class="border-t border-gray-200 px-6 py-4 flex-shrink-0">
-                        <div class="flex items-center justify-between">
-                            <button id="dataPrevBtn"
-                                class="shadow-theme-xs flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-2 py-2 font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 sm:px-3.5 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                                <svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M2.58301 9.99868C2.58272 10.1909 2.65588 10.3833 2.80249 10.53L7.79915 15.5301C8.09194 15.8231 8.56682 15.8233 8.85981 15.5305C9.15281 15.2377 9.15297 14.7629 8.86018 14.4699L5.14009 10.7472L16.6675 10.7472C17.0817 10.7472 17.4175 10.4114 17.4175 9.99715C17.4175 9.58294 17.0817 9.24715 16.6675 9.24715L5.14554 9.24715L8.86017 5.53016C9.15297 5.23717 9.15282 4.7623 8.85983 4.4695C8.56684 4.1767 8.09197 4.17685 7.79917 4.46984L2.84167 9.43049C2.68321 9.568 2.58301 9.77087 2.58301 9.99715C2.58301 9.99766 2.58301 9.99817 2.58301 9.99868Z" fill=""/>
-                                </svg>
-                                <span class="hidden sm:inline">Previous</span>
-                            </button>
-
-                            <span class="block text-sm font-medium text-gray-700 sm:hidden">
-                                Page <span id="dataCurrentPage">1</span> of <span id="dataTotalPages">1</span>
-                            </span>
-
-                            <ul class="hidden items-center gap-0.5 sm:flex" id="dataPaginationNumbers">
-                                <!-- Page numbers will be inserted here -->
-                            </ul>
-
-                            <button id="dataNextBtn"
-                                class="shadow-theme-xs flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-2 py-2 font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 sm:px-3.5 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                                <span class="hidden sm:inline">Next</span>
-                                <svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M17.4175 9.9986C17.4178 10.1909 17.3446 10.3832 17.198 10.53L12.2013 15.5301C11.9085 15.8231 11.4337 15.8233 11.1407 15.5305C10.8477 15.2377 10.8475 14.7629 11.1403 14.4699L14.8604 10.7472L3.33301 10.7472C2.91879 10.7472 2.58301 10.4114 2.58301 9.99715C2.58301 9.58294 2.91879 9.24715 3.33301 9.24715L14.8549 9.24715L11.1403 5.53016C10.8475 5.23717 10.8477 4.7623 11.1407 4.4695C11.4336 4.1767 11.9085 4.17685 12.2013 4.46984L17.1588 9.43049C17.3173 9.568 17.4175 9.77087 17.4175 9.99715C17.4175 9.99763 17.4175 9.99812 17.4175 9.9986Z" fill=""/>
-                                </svg>
-                            </button>
-                        </div>
-                        
-                        <div class="mt-3 flex items-center justify-between text-sm text-gray-600">
-                            <div class="flex items-center gap-2">
-                                <span>Showing</span>
-                                <span id="dataRowsStart" class="font-medium">0</span>
-                                <span>to</span>
-                                <span id="dataRowsEnd" class="font-medium">0</span>
-                                <span>of</span>
-                                <span id="dataTotalRows" class="font-medium">0</span>
-                                <span>records</span>
+                                
+                                <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                                    <div class="relative">
+                                        <span class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2">
+                                            <svg class="fill-gray-500" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M3.04199 9.37381C3.04199 5.87712 5.87735 3.04218 9.37533 3.04218C12.8733 3.04218 15.7087 5.87712 15.7087 9.37381C15.7087 12.8705 12.8733 15.7055 9.37533 15.7055C5.87735 15.7055 3.04199 12.8705 3.04199 9.37381ZM9.37533 1.54218C5.04926 1.54218 1.54199 5.04835 1.54199 9.37381C1.54199 13.6993 5.04926 17.2055 9.37533 17.2055C11.2676 17.2055 13.0032 16.5346 14.3572 15.4178L17.1773 18.2381C17.4702 18.531 17.945 18.5311 18.2379 18.2382C18.5308 17.9453 18.5309 17.4704 18.238 17.1775L15.4182 14.3575C16.5367 13.0035 17.2087 11.2671 17.2087 9.37381C17.2087 5.04835 13.7014 1.54218 9.37533 1.54218Z" fill=""/>
+                                            </svg>
+                                        </span>
+                                        <input
+                                            type="text"
+                                            id="tableSearchInput"
+                                            placeholder="Search..."
+                                            onkeyup="window.searchDataTable(this.value)"
+                                            class="h-[42px] w-full rounded-lg border border-gray-300 bg-white py-2.5 pr-4 pl-[42px] text-sm text-gray-800 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none xl:w-[300px]"
+                                        />
+                                    </div>
+                                </div>
                             </div>
                             
-                            <div class="flex items-center gap-2">
-                                <label class="text-sm text-gray-600">Rows per page:</label>
-                                <select id="dataPageSize" onchange="window.changePageSize(parseInt(this.value))" class="px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white">
-                                    <option value="25">25</option>
-                                    <option value="50" selected>50</option>
-                                    <option value="100">100</option>
-                                    <option value="250">250</option>
-                                </select>
+                            <div class="custom-scrollbar overflow-x-auto overflow-y-auto px-5 sm:px-6 flex-1">
+                                <table class="min-w-full">
+                                    <thead id="dataTableHeader" class="bg-gray-50 border-y border-gray-200 sticky top-0 z-10">
+                                        ${headerHTML}
+                                    </thead>
+                                    <tbody id="dataTableBody" class="divide-y divide-gray-100 bg-white">
+                                        ${rowsHTML}
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div id="dataTableFooter" class="border-t border-gray-200 flex-shrink-0">
+                                <div class="flex items-center justify-between gap-2 px-6 py-4 sm:justify-normal" x-data="{openPageSize: false, pageSize: ${pageSize}}">
+                                    <button 
+                                        onclick="window.previousPage()" 
+                                        ${currentPage === 1 ? 'disabled' : ''}
+                                        class="flex items-center gap-2 rounded-lg border border-gray-300 bg-white p-2 sm:p-2.5 text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed">
+                                        <span>
+                                            <svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M2.58203 9.99868C2.58174 10.1909 2.6549 10.3833 2.80152 10.53L7.79818 15.5301C8.09097 15.8231 8.56584 15.8233 8.85883 15.5305C9.15183 15.2377 9.152 14.7629 8.85921 14.4699L5.13911 10.7472L16.6665 10.7472C17.0807 10.7472 17.4165 10.4114 17.4165 9.99715C17.4165 9.58294 17.0807 9.24715 16.6665 9.24715L5.14456 9.24715L8.85919 5.53016C9.15199 5.23717 9.15184 4.7623 8.85885 4.4695C8.56587 4.1767 8.09099 4.17685 7.79819 4.46984L2.84069 9.43049C2.68224 9.568 2.58203 9.77087 2.58203 9.99715C2.58203 9.99766 2.58203 9.99817 2.58203 9.99868Z" fill=""/>
+                                            </svg>
+                                        </span>
+                                    </button>
+                                    
+                                    <span class="block text-sm font-medium text-gray-700 sm:hidden">
+                                        Page ${currentPage} of ${totalPages}
+                                    </span>
+                                    
+                                    <ul id="paginationNumbers" class="hidden items-center gap-0.5 sm:flex">
+                                        ${pageNumbersHTML}
+                                    </ul>
+                                    
+                                    <button 
+                                        onclick="window.nextPage()" 
+                                        ${currentPage === totalPages ? 'disabled' : ''}
+                                        class="flex items-center gap-2 rounded-lg border border-gray-300 bg-white p-2 sm:p-2.5 text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed">
+                                        <span>
+                                            <svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M17.4165 9.9986C17.4168 10.1909 17.3437 10.3832 17.197 10.53L12.2004 15.5301C11.9076 15.8231 11.4327 15.8233 11.1397 15.5305C10.8467 15.2377 10.8465 14.7629 11.1393 14.4699L14.8594 10.7472L3.33203 10.7472C2.91782 10.7472 2.58203 10.4114 2.58203 9.99715C2.58203 9.58294 2.91782 9.24715 3.33203 9.24715L14.854 9.24715L11.1393 5.53016C10.8465 5.23717 10.8467 4.7623 11.1397 4.4695C11.4327 4.1767 11.9075 4.17685 12.2003 4.46984L17.1578 9.43049C17.3163 9.568 17.4165 9.77087 17.4165 9.99715C17.4165 9.99763 17.4165 9.99812 17.4165 9.9986Z" fill=""/>
+                                            </svg>
+                                        </span>
+                                    </button>
+                                    
+                                    <!-- Page Size Dropdown (matching Top N style) -->
+                                    <div class="relative ml-4">
+                                        <button @click="openPageSize = !openPageSize"
+                                            class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                                            <span>Show <span x-text="pageSize"></span></span>
+                                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+                                        <div x-show="openPageSize" @click.outside="openPageSize = false"
+                                            class="absolute right-0 bottom-full z-[9999] w-28 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mb-2"
+                                            style="display: none;">
+                                            <button
+                                                @click="pageSize = 10; openPageSize = false; window.changePageSize(10);"
+                                                :class="pageSize === 10 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                                class="flex w-full rounded-lg px-3 py-1.5 text-left text-xs font-medium transition-colors">
+                                                Show 10
+                                            </button>
+                                            <button
+                                                @click="pageSize = 25; openPageSize = false; window.changePageSize(25);"
+                                                :class="pageSize === 25 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                                class="flex w-full rounded-lg px-3 py-1.5 text-left text-xs font-medium transition-colors">
+                                                Show 25
+                                            </button>
+                                            <button
+                                                @click="pageSize = 50; openPageSize = false; window.changePageSize(50);"
+                                                :class="pageSize === 50 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                                class="flex w-full rounded-lg px-3 py-1.5 text-left text-xs font-medium transition-colors">
+                                                Show 50
+                                            </button>
+                                            <button
+                                                @click="pageSize = 100; openPageSize = false; window.changePageSize(100);"
+                                                :class="pageSize === 100 ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                                class="flex w-full rounded-lg px-3 py-1.5 text-left text-xs font-medium transition-colors">
+                                                Show 100
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <p id="recordsInfo" class="text-sm text-gray-600 ml-4">
+                                        Showing ${startIndex + 1}-${endIndex} of ${filtered.length} records
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `;
-            
-            // Direct Initialization: Build the table immediately after HTML is set
-            const tableHeader = document.getElementById('chartDataTableHeader');
-            const tableBody = document.getElementById('chartDataTableBody');
-            
-            if (tableHeader && tableBody && window.tableState.data.length > 0) {
-                buildDataTable(window.tableState.data, tableHeader, tableBody);
+                `;
+                
+                dataContent.innerHTML = tableHTML;
+            } else {
+                // Update only - just replace table body and pagination
+                const tableBody = document.getElementById('dataTableBody');
+                const paginationNumbers = document.getElementById('paginationNumbers');
+                const recordsInfo = document.getElementById('recordsInfo');
+                
+                if (tableBody) {
+                    tableBody.innerHTML = rowsHTML;
+                }
+                
+                if (paginationNumbers) {
+                    paginationNumbers.innerHTML = pageNumbersHTML;
+                }
+                
+                if (recordsInfo) {
+                    recordsInfo.textContent = `Showing ${startIndex + 1}-${endIndex} of ${filtered.length} records`;
+                }
+                
+                // Update pagination buttons state
+                const prevBtn = document.querySelector('#dataTableFooter button:first-of-type');
+                const nextBtn = document.querySelector('#dataTableFooter button:nth-of-type(2)');
+                
+                if (prevBtn) {
+                    prevBtn.disabled = currentPage === 1;
+                }
+                
+                if (nextBtn) {
+                    nextBtn.disabled = currentPage === totalPages;
+                }
             }
+            
+            console.log('✅ NEW Data table rendered successfully!');
         }
+        
+        // Pagination functions
+        window.goToPage = function(page) {
+            window.currentTableData.currentPage = page;
+            renderDataTable(false); // Update-only render
+        };
+        
+        window.nextPage = function() {
+            const totalPages = Math.ceil(window.currentTableData.filtered.length / window.currentTableData.pageSize);
+            if (window.currentTableData.currentPage < totalPages) {
+                window.currentTableData.currentPage++;
+                renderDataTable(false); // Update-only render
+            }
+        };
+        
+        window.previousPage = function() {
+            if (window.currentTableData.currentPage > 1) {
+                window.currentTableData.currentPage--;
+                renderDataTable(false); // Update-only render
+            }
+        };
+        
+        window.changePageSize = function(newSize) {
+            window.currentTableData.pageSize = newSize;
+            window.currentTableData.currentPage = 1; // Reset to first page
+            renderDataTable(false); // Update-only render
+        };
+        
+        // Search functionality with debouncing
+        let searchTimeout = null;
+        window.searchDataTable = function(searchTerm) {
+            if (!window.currentTableData) return;
+            
+            // Clear previous timeout
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+            
+            // Debounce search - wait 300ms after user stops typing
+            searchTimeout = setTimeout(() => {
+                console.log('🔍 Searching for:', searchTerm);
+                
+                const term = searchTerm.toLowerCase().trim();
+                
+                if (!term) {
+                    // If search is empty, show all data
+                    window.currentTableData.filtered = window.currentTableData.full;
+                } else {
+                    // Filter data based on search term
+                    window.currentTableData.filtered = window.currentTableData.full.filter(row => {
+                        return window.currentTableData.columns.some(col => {
+                            const value = row[col];
+                            if (value === null || value === undefined) return false;
+                            return String(value).toLowerCase().includes(term);
+                        });
+                    });
+                }
+                
+                console.log('✅ Found', window.currentTableData.filtered.length, 'records');
+                
+                // Reset to page 1 when searching
+                window.currentTableData.currentPage = 1;
+                renderDataTable(false); // Pass false for update-only render
+            }, 300);
+        };
         
         // Switch between tabs in expanded modal
         function switchExpandTab(tabName) {
+            console.log('🔄 switchExpandTab called with:', tabName);
+            
             const insightsTab = document.getElementById('insightsTab');
             const dataTab = document.getElementById('dataTab');
             const insightsContent = document.getElementById('insightsContent');
             const dataContent = document.getElementById('dataContent');
+            
+            console.log('📋 Tab elements:', {
+                insightsTab: !!insightsTab,
+                dataTab: !!dataTab,
+                insightsContent: !!insightsContent,
+                dataContent: !!dataContent,
+                dataContentClasses: dataContent?.className
+            });
             
             // Define active and inactive classes
             const activeClass = 'inline-flex items-center gap-2 border-b-2 px-2.5 py-3 text-sm font-medium transition-colors duration-200 ease-in-out text-blue-600 border-blue-600';
@@ -10877,12 +11284,14 @@
                 dataTab.className = inactiveClass;
                 insightsContent.classList.remove('hidden');
                 dataContent.classList.add('hidden');
+                console.log('✅ Switched to Insights tab');
             } else if (tabName === 'data') {
                 // Active data tab
                 insightsTab.className = inactiveClass;
                 dataTab.className = activeClass;
                 insightsContent.classList.add('hidden');
                 dataContent.classList.remove('hidden');
+                console.log('✅ Switched to Data tab, dataContent classes:', dataContent.className);
             }
         }
         
@@ -10928,7 +11337,10 @@
         
         // Build data table (from old working version)
         function buildDataTable(data, tableHeader, tableBody) {
+            console.log('🔨 buildDataTable called with:', data?.length, 'records');
+            
             if (!data || data.length === 0) {
+                console.warn('⚠️ No data to build table');
                 tableHeader.innerHTML = "";
                 document.getElementById("chartDataTableFilters").innerHTML = "";
                 tableBody.innerHTML = '<tr><td colspan="100" class="text-center py-8 text-gray-500">No data available</td></tr>';
@@ -10936,6 +11348,8 @@
                 return;
             }
 
+            console.log('✅ Building table with columns:', Object.keys(data[0]));
+            
             // Update table state
             window.tableState.data = data;
             window.tableState.columns = Object.keys(data[0]);
@@ -10944,29 +11358,40 @@
             
             // Apply filters
             applyTableFilters();
+            console.log('📊 After applyTableFilters, filteredData length:', window.tableState.filteredData.length);
 
             // Build header
             buildTableHeader(tableHeader);
+            console.log('📊 After buildTableHeader');
             
             // Build filter row
             buildFilterRow();
+            console.log('📊 After buildFilterRow');
 
             // Render current page
             renderTablePage(tableBody);
+            console.log('📊 After renderTablePage');
             
             // Setup pagination
             setupPaginationControls();
+            console.log('📊 After setupPaginationControls');
         }
 
         function buildTableHeader(tableHeader) {
-            if (!window.tableState) return;
-            tableHeader.innerHTML = window.tableState.columns
+            console.log('🏗️ buildTableHeader called, columns:', window.tableState?.columns?.length);
+            if (!window.tableState) {
+                console.error('❌ window.tableState is null in buildTableHeader');
+                return;
+            }
+            const html = window.tableState.columns
                 .map(col => `<th class="py-3 pr-5 font-normal whitespace-nowrap sm:pr-6">
                     <div class="flex items-center">
                         <p class="text-sm text-gray-500">${col.replace(/_/g, ' ')}</p>
                     </div>
                 </th>`)
                 .join("");
+            tableHeader.innerHTML = html;
+            console.log('✅ buildTableHeader completed, HTML length:', html.length);
         }
         
         // Global search handler
@@ -11006,7 +11431,7 @@
                 // Detect column type
                 const colLower = col.toLowerCase();
                 const isAmountColumn = colLower.includes('amount') || colLower.includes('_os') || colLower.includes('osuc') || 
-                                      colLower.includes('tfa') || colLower.includes('balance') || colLower.includes('exposure');
+                colLower.includes('tfa') || colLower.includes('balance') || colLower.includes('exposure');
                 const isNumericColumn = isAmountColumn || colLower.includes('rate') || colLower.includes('rotce');
                 
                 columnInfo[col] = {
@@ -11358,7 +11783,7 @@
                             <h3 class="text-base font-semibold text-gray-900">TFA by Product Program</h3>
                             <p class="text-xs text-gray-500 mt-1">Distribution across product programs</p>
                         </div>
-                        <div class="p-6">
+                        <div class="p-6 flex items-center justify-center" style="min-height: 400px;">
                             <div class="flex flex-row items-center justify-center gap-8">
                                 <!-- Donut Chart -->
                                 <div class="flex-shrink-0">
@@ -11375,11 +11800,13 @@
                                             const formattedAmount = amount >= 1000000000 
                                                 ? `$${(amount / 1000000000).toFixed(2)}B`
                                                 : `$${(amount / 1000000).toFixed(1)}M`;
+                                            // Calculate percentage
+                                            const percentage = ((amount / totalTfa) * 100).toFixed(1);
                                             return `
                                                 <div class="flex items-center gap-3 py-2">
                                                     <div class="w-4 h-4 rounded-sm flex-shrink-0" style="background-color: ${color};"></div>
                                                     <p class="text-sm font-medium text-gray-800 flex-1">${program}</p>
-                                                    <p class="text-sm font-semibold text-gray-900">${formattedAmount}</p>
+                                                    <p class="text-sm font-semibold text-gray-900">${formattedAmount} <span class="text-gray-500 font-normal">• ${percentage}%</span></p>
                                                 </div>
                                             `;
                                         }).join('')}
@@ -12303,6 +12730,20 @@
                 dataLabels: {
                     enabled: false
                 },
+                grid: {
+                    borderColor: "#E5E7EB",
+                    strokeDashArray: 4,
+                    xaxis: {
+                        lines: {
+                            show: false
+                        }
+                    },
+                    yaxis: {
+                        lines: {
+                            show: true
+                        }
+                    }
+                },
                 tooltip: {
                     theme: "light",
                     y: {
@@ -12385,16 +12826,31 @@
                 },
                 yaxis: {
                     labels: {
+                        align: 'left',
                         style: {
                             colors: "#6B7280",
                             fontSize: "11px",
                             fontFamily: "Outfit, sans-serif"
+                        },
+                        formatter: function(val, index) {
+                            // Add ranking number before label
+                            return (index + 1) + '. ' + val;
                         }
                     }
                 },
                 grid: {
                     borderColor: "#E5E7EB",
-                    strokeDashArray: 4
+                    strokeDashArray: 4,
+                    xaxis: {
+                        lines: {
+                            show: true  // Show vertical grid lines
+                        }
+                    },
+                    yaxis: {
+                        lines: {
+                            show: false  // Hide horizontal grid lines
+                        }
+                    }
                 },
                 tooltip: {
                     theme: "light",
@@ -13939,7 +14395,7 @@
                             <h3 class="text-base font-semibold text-gray-900">OSUC by Product Program</h3>
                             <p class="text-xs text-gray-500 mt-1">Distribution across product programs</p>
                         </div>
-                        <div class="p-6">
+                        <div class="p-6 flex items-center justify-center" style="min-height: 400px;">
                             <div class="flex flex-row items-center justify-center gap-8">
                                 <!-- Donut Chart -->
                                 <div class="flex-shrink-0">
@@ -13955,11 +14411,13 @@
                                             const formattedAmount = amount >= 1000000000 
                                                 ? `$${(amount / 1000000000).toFixed(2)}B`
                                                 : `$${(amount / 1000000).toFixed(1)}M`;
+                                            // Calculate percentage
+                                            const percentage = ((amount / totalOSUC) * 100).toFixed(1);
                                             return `
                                                 <div class="flex items-center gap-3 py-2">
                                                     <div class="w-4 h-4 rounded-sm flex-shrink-0" style="background-color: ${color};"></div>
                                                     <p class="text-sm font-medium text-gray-800 flex-1">${program}</p>
-                                                    <p class="text-sm font-semibold text-gray-900">${formattedAmount}</p>
+                                                    <p class="text-sm font-semibold text-gray-900">${formattedAmount} <span class="text-gray-500 font-normal">• ${percentage}%</span></p>
                                                 </div>
                                             `;
                                         }).join('')}
@@ -14200,7 +14658,7 @@
                             <h3 class="text-base font-semibold text-gray-900">Outstanding by Product Program</h3>
                             <p class="text-xs text-gray-500 mt-1">Distribution across product programs</p>
                         </div>
-                        <div class="p-6">
+                        <div class="p-6 flex items-center justify-center" style="min-height: 400px;">
                             <div class="flex flex-row items-center justify-center gap-8">
                                 <!-- Donut Chart -->
                                 <div class="flex-shrink-0">
@@ -14216,11 +14674,13 @@
                                             const formattedAmount = amount >= 1000000000 
                                                 ? `$${(amount / 1000000000).toFixed(2)}B`
                                                 : `$${(amount / 1000000).toFixed(1)}M`;
+                                            // Calculate percentage
+                                            const percentage = ((amount / totalOS) * 100).toFixed(1);
                                             return `
                                                 <div class="flex items-center gap-3 py-2">
                                                     <div class="w-4 h-4 rounded-sm flex-shrink-0" style="background-color: ${color};"></div>
                                                     <p class="text-sm font-medium text-gray-800 flex-1">${program}</p>
-                                                    <p class="text-sm font-semibold text-gray-900">${formattedAmount}</p>
+                                                    <p class="text-sm font-semibold text-gray-900">${formattedAmount} <span class="text-gray-500 font-normal">• ${percentage}%</span></p>
                                                 </div>
                                             `;
                                         }).join('')}
@@ -16077,100 +16537,110 @@
                 monthlyChart.render();
             }
             
-            // 5. Product Donut Chart
+            // 5. Product Distribution by TFA - Donut Chart (matching Deal Count style)
             const productChartEl = document.getElementById('newDealsYTDProductChart');
+            const productListEl = document.getElementById('newDealsYTDProductList');
             if (productChartEl && topProducts && topProducts.length > 0) {
-                const colors = ['#465fff', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', '#ec4899', '#14b8a6', '#f97316', '#6366f1'];
+                const totalTFA = topProducts.reduce((sum, p) => sum + p.tfa, 0);
+                const colors = [
+                    "#3641f5",  // Primary blue
+                    "#7592ff",  // Light blue
+                    "#dde9ff",  // Lighter blue
+                    "#ff6b6b",  // Red
+                    "#ffd93d",  // Yellow
+                    "#6bcf7f",  // Green
+                    "#c084fc",  // Purple
+                    "#14b8a6",  // Teal
+                    "#f97316",  // Orange
+                    "#06b6d4"   // Cyan
+                ];
+                
                 const productDonutOptions = {
                     series: topProducts.map(p => p.tfa),
-                    chart: {
-                        type: 'donut',
-                        height: 380,
-                        fontFamily: 'Outfit, sans-serif',
-                        toolbar: { show: false }
-                    },
-                    labels: topProducts.map(p => p.name),
                     colors: colors.slice(0, topProducts.length),
+                    labels: topProducts.map(p => p.name),
+                    chart: {
+                        fontFamily: "Outfit, sans-serif",
+                        type: "donut",
+                        width: 300,
+                        height: 300,
+                    },
+                    stroke: {
+                        show: false,
+                    },
                     plotOptions: {
                         pie: {
                             donut: {
-                                size: '65%',
+                                size: "65%",
+                                background: "transparent",
                                 labels: {
                                     show: true,
                                     name: {
                                         show: true,
-                                        fontSize: '14px',
-                                        fontFamily: 'Outfit, sans-serif',
-                                        fontWeight: 500,
-                                        color: '#374151',
-                                        offsetY: -10
+                                        offsetY: -10,
+                                        color: "#1D2939",
+                                        fontSize: "14px",
+                                        fontWeight: "600",
                                     },
                                     value: {
                                         show: true,
-                                        fontSize: '24px',
-                                        fontFamily: 'Outfit, sans-serif',
-                                        fontWeight: 700,
-                                        color: '#111827',
                                         offsetY: 10,
-                                        formatter: function(val) {
-                                            return formatCurrency(val);
-                                        }
+                                        color: "#667085",
+                                        fontSize: "16px",
+                                        fontWeight: "700",
+                                        formatter: (val) => formatCurrency(val),
                                     },
                                     total: {
                                         show: true,
-                                        label: 'Total TFA',
-                                        fontSize: '14px',
-                                        fontFamily: 'Outfit, sans-serif',
-                                        fontWeight: 500,
-                                        color: '#6B7280',
-                                        formatter: function(w) {
-                                            const total = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
-                                            return formatCurrency(total);
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                                        label: "Total TFA",
+                                        color: "#111827",
+                                        fontSize: "16px",
+                                        fontWeight: "700",
+                                        formatter: () => formatCurrency(totalTFA),
+                                    },
+                                },
+                            },
+                        },
                     },
                     dataLabels: {
-                        enabled: false
+                        enabled: false,
                     },
                     legend: {
-                        show: true,
-                        position: 'right',
-                        horizontalAlign: 'center',
-                        fontFamily: 'Outfit, sans-serif',
-                        fontSize: '12px',
-                        fontWeight: 500,
-                        markers: {
-                            size: 6,
-                            shape: 'circle',
-                            radius: 12,
-                            strokeWidth: 0
-                        },
-                        itemMargin: {
-                            horizontal: 8,
-                            vertical: 4
-                        },
-                        formatter: function(seriesName, opts) {
-                            const value = opts.w.globals.series[opts.seriesIndex];
-                            return seriesName + ': ' + formatCurrency(value);
-                        }
+                        show: false, // Hide built-in legend, using custom HTML legend
                     },
                     tooltip: {
-                        theme: 'light',
+                        enabled: true,
+                        theme: "light",
                         y: {
                             formatter: function(val, opts) {
+                                const percentage = ((val / totalTFA) * 100).toFixed(1);
                                 const count = topProducts[opts.seriesIndex].count;
-                                return formatCurrency(val) + ` (${count} deals)`;
+                                return formatCurrency(val) + ' (' + percentage + '%) - ' + count + ' deals';
                             }
                         }
-                    }
+                    },
                 };
                 
                 productChartEl.innerHTML = '';
                 const productDonutChart = new ApexCharts(productChartEl, productDonutOptions);
                 productDonutChart.render();
+                
+                // Populate legend list
+                if (productListEl) {
+                    productListEl.innerHTML = topProducts.map((product, index) => {
+                        const color = colors[index % colors.length];
+                        const formattedAmount = product.tfa >= 1000000000 
+                            ? `$${(product.tfa / 1000000000).toFixed(2)}B`
+                            : `$${(product.tfa / 1000000).toFixed(1)}M`;
+                        return `
+                            <div class="flex items-center gap-3 py-2">
+                                <div class="w-4 h-4 rounded-sm flex-shrink-0" style="background-color: ${color};"></div>
+                                <p class="text-sm font-medium text-gray-800 flex-1">${product.name}</p>
+                                <p class="text-sm font-semibold text-gray-900">${formattedAmount}</p>
+                            </div>
+                        `;
+                    }).join('');
+                }
             }
             
             // 6. Product Deal Count - Donut Chart (matching TFA Product Program style)
@@ -16682,100 +17152,110 @@
                 weeklyChart.render();
             }
             
-            // 5. Product Donut Chart (legends on right)
+            // 5. Product Distribution by TFA - Donut Chart (matching Deal Count style)
             const productChartEl = document.getElementById('newDealsMTDProductChart');
+            const productListEl = document.getElementById('newDealsMTDProductList');
             if (productChartEl && topProducts && topProducts.length > 0) {
-                const colors = ['#465fff', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', '#ec4899', '#14b8a6', '#f97316', '#6366f1'];
+                const totalTFA = topProducts.reduce((sum, p) => sum + p.tfa, 0);
+                const colors = [
+                    "#3641f5",  // Primary blue
+                    "#7592ff",  // Light blue
+                    "#dde9ff",  // Lighter blue
+                    "#ff6b6b",  // Red
+                    "#ffd93d",  // Yellow
+                    "#6bcf7f",  // Green
+                    "#c084fc",  // Purple
+                    "#14b8a6",  // Teal
+                    "#f97316",  // Orange
+                    "#06b6d4"   // Cyan
+                ];
+                
                 const productDonutOptions = {
                     series: topProducts.map(p => p.tfa),
-                    chart: {
-                        type: 'donut',
-                        height: 380,
-                        fontFamily: 'Outfit, sans-serif',
-                        toolbar: { show: false }
-                    },
-                    labels: topProducts.map(p => p.name),
                     colors: colors.slice(0, topProducts.length),
+                    labels: topProducts.map(p => p.name),
+                    chart: {
+                        fontFamily: "Outfit, sans-serif",
+                        type: "donut",
+                        width: 300,
+                        height: 300,
+                    },
+                    stroke: {
+                        show: false,
+                    },
                     plotOptions: {
                         pie: {
                             donut: {
-                                size: '65%',
+                                size: "65%",
+                                background: "transparent",
                                 labels: {
                                     show: true,
                                     name: {
                                         show: true,
-                                        fontSize: '14px',
-                                        fontFamily: 'Outfit, sans-serif',
-                                        fontWeight: 500,
-                                        color: '#374151',
-                                        offsetY: -10
+                                        offsetY: -10,
+                                        color: "#1D2939",
+                                        fontSize: "14px",
+                                        fontWeight: "600",
                                     },
                                     value: {
                                         show: true,
-                                        fontSize: '24px',
-                                        fontFamily: 'Outfit, sans-serif',
-                                        fontWeight: 700,
-                                        color: '#111827',
                                         offsetY: 10,
-                                        formatter: function(val) {
-                                            return formatCurrency(val);
-                                        }
+                                        color: "#667085",
+                                        fontSize: "16px",
+                                        fontWeight: "700",
+                                        formatter: (val) => formatCurrency(val),
                                     },
                                     total: {
                                         show: true,
-                                        label: 'Total TFA',
-                                        fontSize: '14px',
-                                        fontFamily: 'Outfit, sans-serif',
-                                        fontWeight: 500,
-                                        color: '#6B7280',
-                                        formatter: function(w) {
-                                            const total = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
-                                            return formatCurrency(total);
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                                        label: "Total TFA",
+                                        color: "#111827",
+                                        fontSize: "16px",
+                                        fontWeight: "700",
+                                        formatter: () => formatCurrency(totalTFA),
+                                    },
+                                },
+                            },
+                        },
                     },
                     dataLabels: {
-                        enabled: false
+                        enabled: false,
                     },
                     legend: {
-                        show: true,
-                        position: 'right',
-                        horizontalAlign: 'center',
-                        fontFamily: 'Outfit, sans-serif',
-                        fontSize: '12px',
-                        fontWeight: 500,
-                        markers: {
-                            size: 6,
-                            shape: 'circle',
-                            radius: 12,
-                            strokeWidth: 0
-                        },
-                        itemMargin: {
-                            horizontal: 8,
-                            vertical: 4
-                        },
-                        formatter: function(seriesName, opts) {
-                            const value = opts.w.globals.series[opts.seriesIndex];
-                            return seriesName + ': ' + formatCurrency(value);
-                        }
+                        show: false, // Hide built-in legend, using custom HTML legend
                     },
                     tooltip: {
-                        theme: 'light',
+                        enabled: true,
+                        theme: "light",
                         y: {
                             formatter: function(val, opts) {
+                                const percentage = ((val / totalTFA) * 100).toFixed(1);
                                 const count = topProducts[opts.seriesIndex].count;
-                                return formatCurrency(val) + ` (${count} deals)`;
+                                return formatCurrency(val) + ' (' + percentage + '%) - ' + count + ' deals';
                             }
                         }
-                    }
+                    },
                 };
                 
                 productChartEl.innerHTML = '';
                 const productDonutChart = new ApexCharts(productChartEl, productDonutOptions);
                 productDonutChart.render();
+                
+                // Populate legend list
+                if (productListEl) {
+                    productListEl.innerHTML = topProducts.map((product, index) => {
+                        const color = colors[index % colors.length];
+                        const formattedAmount = product.tfa >= 1000000000 
+                            ? `$${(product.tfa / 1000000000).toFixed(2)}B`
+                            : `$${(product.tfa / 1000000).toFixed(1)}M`;
+                        return `
+                            <div class="flex items-center gap-3 py-2">
+                                <div class="w-4 h-4 rounded-sm flex-shrink-0" style="background-color: ${color};"></div>
+                                <p class="text-sm font-medium text-gray-800 flex-1">${product.name}</p>
+                                <p class="text-sm font-semibold text-gray-900">${formattedAmount}</p>
+                            </div>
+                        `;
+                    }).join('');
+                }
             }
             
             // 6. Product Deal Count - Donut Chart (matching TFA Product Program style)
@@ -17109,11 +17589,12 @@
                         const formattedAmount = product.tfa >= 1000000000 
                             ? `$${(product.tfa / 1000000000).toFixed(2)}B`
                             : `$${(product.tfa / 1000000).toFixed(1)}M`;
+                        const percentage = ((product.count / totalDeals) * 100).toFixed(1);
                         return `
                             <div class="flex items-center gap-3 py-2">
                                 <div class="w-4 h-4 rounded-sm flex-shrink-0" style="background-color: ${color};"></div>
                                 <p class="text-sm font-medium text-gray-800 flex-1">${product.name}</p>
-                                <p class="text-sm font-semibold text-gray-900">${product.count} (${formattedAmount})</p>
+                                <p class="text-sm font-semibold text-gray-900">${product.count} (${formattedAmount}) <span class="text-gray-500 font-normal">• ${percentage}%</span></p>
                             </div>
                         `;
                     }).join('');
@@ -18625,14 +19106,26 @@
                 
                 <!-- Product Programs - Split into 2 boxes -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <!-- Product Distribution by TFA (Donut) -->
+                    <!-- Product Distribution by TFA - Donut Chart with Legends -->
                     <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
                             <h3 class="text-base font-semibold text-gray-900">Product Distribution by TFA</h3>
                             <p class="text-xs text-gray-500 mt-1">Total facility amount by product</p>
                         </div>
                         <div class="p-6">
-                            <div id="newDealsYTDProductChart" style="min-height: 380px;"></div>
+                            <div class="flex flex-row items-center justify-center gap-8">
+                                <!-- Donut Chart -->
+                                <div class="flex-shrink-0">
+                                    <div id="newDealsYTDProductChart"></div>
+                                </div>
+                                
+                                <!-- Legend / Details List - Right Side -->
+                                <div class="flex-1 max-w-md">
+                                    <div id="newDealsYTDProductList" class="space-y-3">
+                                        <!-- Legend will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
@@ -18723,14 +19216,26 @@
                 
                 <!-- Product Programs - Split into 2 boxes -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <!-- Product Distribution by TFA (Donut) -->
+                    <!-- Product Distribution by TFA - Donut Chart with Legends -->
                     <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
                             <h3 class="text-base font-semibold text-gray-900">Product Distribution by TFA</h3>
                             <p class="text-xs text-gray-500 mt-1">Total facility amount by product</p>
                         </div>
                         <div class="p-6">
-                            <div id="newDealsMTDProductChart" style="min-height: 380px;"></div>
+                            <div class="flex flex-row items-center justify-center gap-8">
+                                <!-- Donut Chart -->
+                                <div class="flex-shrink-0">
+                                    <div id="newDealsMTDProductChart"></div>
+                                </div>
+                                
+                                <!-- Legend / Details List - Right Side -->
+                                <div class="flex-1 max-w-md">
+                                    <div id="newDealsMTDProductList" class="space-y-3">
+                                        <!-- Legend will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
@@ -18863,7 +19368,7 @@
                             <h3 class="text-base font-semibold text-gray-900">Product Program Distribution</h3>
                             <p class="text-xs text-gray-500 mt-1">Deals by product with count and TFA</p>
                         </div>
-                        <div class="p-6">
+                        <div class="p-6 flex items-center justify-center" style="min-height: 400px;">
                             <div class="flex flex-row items-center justify-center gap-8">
                                 <!-- Donut Chart -->
                                 <div class="flex-shrink-0">

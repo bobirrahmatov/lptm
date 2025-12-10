@@ -10776,8 +10776,21 @@
             
             // Defer rendering for performance
             setTimeout(() => {
-                // Generate insights content
-                insightsContent.innerHTML = generateExpandedView(chartType, dataSource);
+                // Generate insights content  
+                const htmlContent = generateExpandedView(chartType, dataSource);
+                insightsContent.innerHTML = htmlContent;
+                
+                // Extract and execute any embedded scripts (for charts not yet refactored)
+                const scriptRegex = /<script>([\s\S]*?)<\\?\/script>/gi;
+                let match;
+                while ((match = scriptRegex.exec(htmlContent)) !== null) {
+                    try {
+                        eval(match[1]);
+                    } catch (e) {
+                        console.error(`Error executing embedded script for ${chartType}:`, e);
+                    }
+                }
+                
                 // Initialize any charts if needed
                 initializeExpandCharts(chartType, dataSource);
                 
@@ -11534,26 +11547,23 @@
             } else if (chartType === 'relationships') {
                 initializeRelationshipsChart(dataSource);
             } else if (chartType === 'expiring') {
-                setTimeout(() => {
-                    renderExpiringAnalysis();
-                    renderExpiringTable();
-                }, 150);
+                initializeExpiringChart(dataSource);
             } else if (chartType === 'newFacilities') {
-                setTimeout(() => renderNewFacilitiesExpandedViews(), 150);
+                initializeNewFacilitiesChart(dataSource);
             } else if (chartType === 'newDealsYTD') {
-                setTimeout(() => renderNewDealsYTDExpandedViews(), 150);
+                initializeNewDealsYTDChart(dataSource);
             } else if (chartType === 'newDealsMTD') {
-                setTimeout(() => renderNewDealsMTDExpandedViews(), 150);
+                initializeNewDealsMTDChart(dataSource);
             } else if (chartType === 'pipeline') {
-                setTimeout(() => renderPipelineExpandedViews(), 150);
+                initializePipelineChart(dataSource);
             } else if (chartType === 'topRelationships') {
-                setTimeout(() => renderTopRelationshipsExpandedViews(), 150);
+                initializeTopRelationshipsChart(dataSource);
             } else if (chartType === 'rotce') {
-                setTimeout(() => renderROTCEExpandedViews(), 150);
+                initializeROTCEChart(dataSource);
             } else if (chartType === 'covenantMonitoring' || chartType === 'covenantRegional') {
-                setTimeout(() => renderCovenantExpandedViews(), 150);
+                initializeCovenantChart(dataSource);
             } else if (chartType === 'ccmRegionalChart') {
-                setTimeout(() => renderCCMExpandedViews(), 150);
+                initializeCCMChart(dataSource);
             }
         }
         
@@ -12495,6 +12505,363 @@
                 const regionChart = new ApexCharts(regionChartEl, regionChartOptions);
                 regionChart.render();
             }
+        }
+        
+        // Initialize New Facilities Chart
+        function initializeNewFacilitiesChart(dataSource) {
+            const period = selectedPeriod || 'current';
+            
+            // Find the most recent Report_Date
+            let mostRecentReportDate = null;
+            for (let i = 0; i < dataSource.length; i++) {
+                const reportDate = parseDate(dataSource[i].Report_Date);
+                if (reportDate && (!mostRecentReportDate || reportDate > mostRecentReportDate)) {
+                    mostRecentReportDate = reportDate;
+                }
+            }
+            
+            if (!mostRecentReportDate) return;
+            
+            // Calculate date range based on period
+            let targetStartDate, targetEndDate;
+            if (period === "current") {
+                targetStartDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth(), 1);
+                targetStartDate.setHours(0, 0, 0, 0);
+                targetEndDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth() + 1, 0);
+                targetEndDate.setHours(23, 59, 59, 999);
+            } else {
+                targetStartDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth() - 1, 1);
+                targetStartDate.setHours(0, 0, 0, 0);
+                targetEndDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth(), 0);
+                targetEndDate.setHours(23, 59, 59, 999);
+            }
+            
+            // Collect data
+            const regionalData = { AMER: {count: 0, tfa: 0}, EMEA: {count: 0, tfa: 0}, APAC: {count: 0, tfa: 0} };
+            const productData = {};
+            const underwriterData = {};
+            const newFacilities = new Set();
+            
+            dataSource.forEach(row => {
+                const region = (row.Region || "Unknown").toUpperCase();
+                const product = row.Product_Program || "Unknown";
+                const underwriter = row.Lead_Underwriter || "Unknown";
+                const facilityId = row.Facility_ID;
+                
+                const approvalDate = region === "EMEA" 
+                    ? parseDate(row.Origination_Date)
+                    : parseDate(row.Facility_First_Approval_Date);
+                
+                if (!facilityId) return;
+                
+                if (approvalDate && approvalDate >= targetStartDate && approvalDate <= targetEndDate) {
+                    newFacilities.add(facilityId);
+                    const amount = parseNumber(row.Facility_Amount);
+                    
+                    if (!regionalData[region]) regionalData[region] = {count: 0, tfa: 0};
+                    regionalData[region].count++;
+                    regionalData[region].tfa += amount;
+                    
+                    if (!productData[product]) productData[product] = { count: 0, tfa: 0 };
+                    productData[product].count++;
+                    productData[product].tfa += amount;
+                    
+                    if (!underwriterData[underwriter]) underwriterData[underwriter] = { facilities: new Set(), tfa: 0, region: region };
+                    underwriterData[underwriter].facilities.add(facilityId);
+                    underwriterData[underwriter].tfa += amount;
+                }
+            });
+            
+            const topProducts = Object.entries(productData)
+                .map(([name, data]) => ({name, ...data}))
+                .sort((a, b) => b.tfa - a.tfa)
+                .slice(0, 10);
+            
+            const topUnderwriters = Object.entries(underwriterData)
+                .map(([name, data]) => ({name, facilities: data.facilities.size, tfa: data.tfa, region: data.region}))
+                .sort((a, b) => b.tfa - a.tfa)
+                .slice(0, 10);
+            
+            renderNewFacilitiesExpandedViews(regionalData, topProducts, topUnderwriters);
+        }
+        
+        // Initialize Expiring Chart - processes data and renders
+        function initializeExpiringChart(dataSource) {
+            const filterState = window.expiringFilterState || 'cas';
+            
+            // Get report date
+            const reportDates = dataSource.map(row => parseDate(row.Report_Date)).filter(d => d);
+            const maxReportDate = reportDates.length > 0 ? new Date(Math.max(...reportDates)) : new Date();
+            maxReportDate.setHours(0, 0, 0, 0);
+            
+            // Calculate date ranges for next 3 months
+            const next3Months = [];
+            for (let i = 0; i < 3; i++) {
+                const date = new Date(maxReportDate);
+                date.setMonth(date.getMonth() + i);
+                next3Months.push({
+                    year: date.getFullYear(),
+                    month: date.getMonth(),
+                    label: date.toLocaleDateString("en-US", { month: "short", year: "numeric" })
+                });
+            }
+            
+            // Collect CA and Facility data
+            const caData = {
+                expiring: { relationships: new Set(), tfa: 0, count: 0 },
+                expired: { relationships: new Set(), tfa: 0, count: 0 },
+                byMonth: {}
+            };
+            
+            const facilityData = {
+                expiring: { facilities: new Set(), tfa: 0, count: 0 },
+                expired: { facilities: new Set(), tfa: 0, count: 0 },
+                byMonth: {}
+            };
+            
+            // Initialize month data
+            next3Months.forEach(m => {
+                const key = `${m.year}-${String(m.month + 1).padStart(2, '0')}`;
+                caData.byMonth[key] = { relationships: new Set(), tfa: 0 };
+                facilityData.byMonth[key] = { facilities: new Set(), tfa: 0 };
+            });
+            
+            // Process CA data (CM only)
+            dataSource.forEach(row => {
+                const caExpirationDate = row.CA_Expiration_Date;
+                const managementStatus = (row.Management_Status || "").toUpperCase();
+                const region = (row.Region || "").toUpperCase();
+                const caReview = (row.CA_Review || "").trim();
+                
+                if (caExpirationDate && managementStatus === "CM" && row.Relationship_ID) {
+                    const dateObj = parseDate(caExpirationDate);
+                    if (!dateObj) return;
+                    
+                    const amount = parseNumber(row.Fac_Amount || row.Facility_Amount);
+                    
+                    // Check EMEA CA_Review requirement
+                    if (region === "EMEA" && caReview !== "Yes") return;
+                    
+                    // Expired (everything before report date)
+                    if (dateObj < maxReportDate) {
+                        caData.expired.relationships.add(row.Relationship_ID);
+                        caData.expired.tfa += amount;
+                        caData.expired.count++;
+                    }
+                    // Expiring (from report date onwards)
+                    else if (dateObj >= maxReportDate) {
+                        const year = dateObj.getFullYear();
+                        const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+                        const monthKey = `${year}-${month}`;
+                        
+                        if (caData.byMonth[monthKey]) {
+                            caData.byMonth[monthKey].relationships.add(row.Relationship_ID);
+                            caData.byMonth[monthKey].tfa += amount;
+                            caData.expiring.relationships.add(row.Relationship_ID);
+                            caData.expiring.tfa += amount;
+                            caData.expiring.count++;
+                        }
+                    }
+                }
+            });
+            
+            // Process Facility data (NO DM exclusion)
+            dataSource.forEach(row => {
+                const maturityDate = row.Maturity_Date;
+                const facilityId = row.Facility_ID;
+                
+                if (maturityDate && facilityId) {
+                    const dateObj = parseDate(maturityDate);
+                    if (!dateObj) return;
+                    
+                    const amount = parseNumber(row.Fac_Amount || row.Facility_Amount);
+                    
+                    // Expired (everything before report date)
+                    if (dateObj < maxReportDate) {
+                        facilityData.expired.facilities.add(facilityId);
+                        facilityData.expired.tfa += amount;
+                        facilityData.expired.count++;
+                    }
+                    // Expiring (from report date onwards)
+                    else if (dateObj >= maxReportDate) {
+                        const year = dateObj.getFullYear();
+                        const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+                        const monthKey = `${year}-${month}`;
+                        
+                        if (facilityData.byMonth[monthKey]) {
+                            facilityData.byMonth[monthKey].facilities.add(facilityId);
+                            facilityData.byMonth[monthKey].tfa += amount;
+                            facilityData.expiring.facilities.add(facilityId);
+                            facilityData.expiring.tfa += amount;
+                            facilityData.expiring.count++;
+                        }
+                    }
+                }
+            });
+            
+            // Collect regional, product, and underwriter data for expiring items
+            const regionalData = { AMER: {cas: 0, facilities: 0, tfa: 0}, EMEA: {cas: 0, facilities: 0, tfa: 0}, APAC: {cas: 0, facilities: 0, tfa: 0} };
+            const productData = {};
+            const underwriterData = {};
+            
+            dataSource.forEach(row => {
+                const region = (row.Region || "Unknown").toUpperCase();
+                const product = row.Product_Program || "Unknown";
+                const underwriter = row.Lead_Underwriter || "Unknown";
+                const amount = parseNumber(row.Fac_Amount || row.Facility_Amount);
+                
+                // Check if CA is expiring (CM only, within next 3 months)
+                const caExpirationDate = row.CA_Expiration_Date;
+                const managementStatus = (row.Management_Status || "").toUpperCase();
+                const caReview = (row.CA_Review || "").trim();
+                let isCAExpiring = false;
+                
+                if (caExpirationDate && managementStatus === "CM" && row.Relationship_ID) {
+                    const dateObj = parseDate(caExpirationDate);
+                    if (dateObj && dateObj >= maxReportDate) {
+                        const year = dateObj.getFullYear();
+                        const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+                        const monthKey = `${year}-${month}`;
+                        if (caData.byMonth[monthKey]) {
+                            if (region !== "EMEA" || caReview === "Yes") {
+                                isCAExpiring = true;
+                            }
+                        }
+                    }
+                }
+                
+                // Check if Facility is expiring (within next 3 months, no DM exclusion)
+                const maturityDate = row.Maturity_Date;
+                const facilityId = row.Facility_ID;
+                let isFacilityExpiring = false;
+                
+                if (maturityDate && facilityId) {
+                    const dateObj = parseDate(maturityDate);
+                    if (dateObj && dateObj >= maxReportDate) {
+                        const year = dateObj.getFullYear();
+                        const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+                        const monthKey = `${year}-${month}`;
+                        if (facilityData.byMonth[monthKey]) {
+                            isFacilityExpiring = true;
+                        }
+                    }
+                }
+                
+                if (isCAExpiring || isFacilityExpiring) {
+                    if (!regionalData[region]) regionalData[region] = {cas: 0, facilities: 0, tfa: 0};
+                    regionalData[region].tfa += amount;
+                    if (isCAExpiring) regionalData[region].cas++;
+                    if (isFacilityExpiring) regionalData[region].facilities++;
+                    
+                    if (!productData[product]) productData[product] = { tfa: 0, cas: 0, facilities: 0 };
+                    productData[product].tfa += amount;
+                    if (isCAExpiring) productData[product].cas++;
+                    if (isFacilityExpiring) productData[product].facilities++;
+                    
+                    if (!underwriterData[underwriter]) {
+                        underwriterData[underwriter] = { tfa: 0, cas: new Set(), facilities: new Set(), region: region };
+                    }
+                    underwriterData[underwriter].tfa += amount;
+                    if (isCAExpiring && row.Relationship_ID) underwriterData[underwriter].cas.add(row.Relationship_ID);
+                    if (isFacilityExpiring && facilityId) underwriterData[underwriter].facilities.add(facilityId);
+                }
+            });
+            
+            const productDataArr = Object.entries(productData)
+                .map(([name, v]) => ({ name, ...v }))
+                .sort((a, b) => b.tfa - a.tfa)
+                .slice(0, 10);
+            
+            const underwriterArr = Object.entries(underwriterData)
+                .map(([name, v]) => ({
+                    name,
+                    tfa: v.tfa,
+                    cas: v.cas.size,
+                    facilities: v.facilities.size,
+                    region: v.region
+                }))
+                .sort((a, b) => b.tfa - a.tfa)
+                .slice(0, 10);
+            
+            const expiringData = {
+                filterState,
+                caData: {
+                    expiring: { count: caData.expiring.count, tfa: caData.expiring.tfa, relationships: Array.from(caData.expiring.relationships) },
+                    expired: { count: caData.expired.count, tfa: caData.expired.tfa, relationships: Array.from(caData.expired.relationships) },
+                    byMonth: Object.fromEntries(Object.entries(caData.byMonth).map(([k,v]) => [k, {tfa: v.tfa, relationships: Array.from(v.relationships)}]))
+                },
+                facilityData: {
+                    expiring: { count: facilityData.expiring.count, tfa: facilityData.expiring.tfa, facilities: Array.from(facilityData.expiring.facilities) },
+                    expired: { count: facilityData.expired.count, tfa: facilityData.expired.tfa, facilities: Array.from(facilityData.expired.facilities) },
+                    byMonth: Object.fromEntries(Object.entries(facilityData.byMonth).map(([k,v]) => [k, {tfa: v.tfa, facilities: Array.from(v.facilities)}]))
+                },
+                regionalData,
+                productData: productDataArr,
+                underwriterData: underwriterArr,
+                next3Months
+            };
+            
+            // Store for filter toggles
+            window.expiringData = expiringData;
+            
+            renderExpiringAnalysis(expiringData);
+            renderExpiringTable(dataSource, filterState);
+        }
+        
+        // Initialize New Deals YTD Chart - processes data and renders
+        function initializeNewDealsYTDChart(dataSource) {
+            // For now, use the embedded script approach (to be refactored later)
+            setTimeout(() => {
+                if (window.newDealsYTDExpandedData) renderNewDealsYTDExpandedViews();
+            }, 150);
+        }
+        
+        // Initialize New Deals MTD Chart - processes data and renders
+        function initializeNewDealsMTDChart(dataSource) {
+            // For now, use the embedded script approach (to be refactored later)
+            setTimeout(() => {
+                if (window.newDealsMTDExpandedData) renderNewDealsMTDExpandedViews();
+            }, 150);
+        }
+        
+        // Initialize Pipeline Chart - processes data and renders
+        function initializePipelineChart(dataSource) {
+            // For now, use the embedded script approach (to be refactored later)
+            setTimeout(() => {
+                if (window.pipelineExpandedData) renderPipelineExpandedViews();
+            }, 150);
+        }
+        
+        // Initialize Top Relationships Chart - processes data and renders
+        function initializeTopRelationshipsChart(dataSource) {
+            // For now, use the embedded script approach (to be refactored later)
+            setTimeout(() => {
+                if (window.topRelationshipsExpandedData) renderTopRelationshipsExpandedViews();
+            }, 150);
+        }
+        
+        // Initialize ROTCE Chart - processes data and renders
+        function initializeROTCEChart(dataSource) {
+            // For now, use the embedded script approach (to be refactored later)
+            setTimeout(() => {
+                if (window.rotceExpandedData) renderROTCEExpandedViews();
+            }, 150);
+        }
+        
+        // Initialize Covenant Chart - processes data and renders
+        function initializeCovenantChart(dataSource) {
+            // For now, use the embedded script approach (to be refactored later)
+            setTimeout(() => {
+                if (window.covenantExpandedData) renderCovenantExpandedViews();
+            }, 150);
+        }
+        
+        // Initialize CCM Chart - processes data and renders
+        function initializeCCMChart(dataSource) {
+            // For now, use the embedded script approach (to be refactored later)
+            setTimeout(() => {
+                if (window.ccmExpandedData) renderCCMExpandedViews();
+            }, 150);
         }
         
         // Placeholder functions for other chart types (to be implemented similarly)
@@ -13906,39 +14273,6 @@
                         </table>
                     </div>
                 </div>
-                
-                <script>
-                    // Store filter state
-                    window.expiringFilterState = '${filterState}';
-                    window.expiringData = {
-                        caData: ${JSON.stringify({
-                            expiring: { count: caData.expiring.count, tfa: caData.expiring.tfa, relationships: Array.from(caData.expiring.relationships) },
-                            expired: { count: caData.expired.count, tfa: caData.expired.tfa, relationships: Array.from(caData.expired.relationships) },
-                            byMonth: Object.fromEntries(Object.entries(caData.byMonth).map(([k,v]) => [k, {tfa: v.tfa, relationships: Array.from(v.relationships)}]))
-                        })},
-                        facilityData: ${JSON.stringify({
-                            expiring: { count: facilityData.expiring.count, tfa: facilityData.expiring.tfa, facilities: Array.from(facilityData.expiring.facilities) },
-                            expired: { count: facilityData.expired.count, tfa: facilityData.expired.tfa, facilities: Array.from(facilityData.expired.facilities) },
-                            byMonth: Object.fromEntries(Object.entries(facilityData.byMonth).map(([k,v]) => [k, {tfa: v.tfa, facilities: Array.from(v.facilities)}]))
-                        })},
-                        regionalData: ${JSON.stringify(regionalData)},
-                        productData: ${JSON.stringify(Object.entries(productData).map(([k,v]) => ({name: k, ...v})).sort((a,b) => b.tfa - a.tfa).slice(0, 10))},
-                        underwriterData: ${JSON.stringify(Object.entries(underwriterData).map(([k,v]) => ({
-                            name: k, 
-                            tfa: v.tfa, 
-                            cas: v.cas.size, 
-                            facilities: v.facilities.size,
-                            region: v.region
-                        })).sort((a,b) => b.tfa - a.tfa).slice(0, 10))},
-                        next3Months: ${JSON.stringify(next3Months)}
-                    };
-                    
-                    // Render analysis views after a short delay to ensure DOM is ready
-                    setTimeout(() => {
-                        renderExpiringAnalysis();
-                        renderExpiringTable();
-                    }, 100);
-                <\/script>
             `;
         }
         
@@ -13974,13 +14308,16 @@
             if (container) {
                 container.innerHTML = content;
             }
+            // Recompute and render charts/tables with direct init
+            initializeExpiringChart(dataSource);
         }
         
         // Render expiring analysis views - Regional, Product, and Underwriter breakdowns
-        function renderExpiringAnalysis() {
-            if (!window.expiringData || typeof ApexCharts === 'undefined') return;
+        function renderExpiringAnalysis(expiringData) {
+            const data = expiringData || window.expiringData;
+            if (!data || typeof ApexCharts === 'undefined') return;
             
-            const { regionalData, productData, underwriterData } = window.expiringData;
+            const { regionalData, productData, underwriterData } = data;
             
             // 1. Regional Summary Table
             const regionalTableEl = document.getElementById('regionalSummaryTable');
@@ -14138,10 +14475,17 @@
         }
         
         // Render New Facilities Expanded Analysis Views
-        function renderNewFacilitiesExpandedViews() {
-            if (!window.newFacilitiesExpandedData || typeof ApexCharts === 'undefined') return;
+        function renderNewFacilitiesExpandedViews(regional, products, underwriters) {
+            if (typeof ApexCharts === 'undefined') return;
             
-            const { regional, products, underwriters } = window.newFacilitiesExpandedData;
+            // Use parameters if provided, otherwise fall back to window variable for backward compatibility
+            if (!regional && window.newFacilitiesExpandedData) {
+                regional = window.newFacilitiesExpandedData.regional;
+                products = window.newFacilitiesExpandedData.products;
+                underwriters = window.newFacilitiesExpandedData.underwriters;
+            }
+            
+            if (!regional) return;
             
             // 1. Regional Summary Table
             const regionalTableEl = document.getElementById('newFacilitiesRegionalTable');
@@ -15692,9 +16036,9 @@
         }
         
         // Render expiring table
-        function renderExpiringTable() {
-            const dataSource = filteredData.length > 0 ? filteredData : portfolioData;
-            const filterState = window.expiringFilterState || 'cas';
+        function renderExpiringTable(dataSourceParam, filterStateParam) {
+            const dataSource = dataSourceParam || (filteredData.length > 0 ? filteredData : portfolioData);
+            const filterState = filterStateParam || window.expiringFilterState || 'cas';
             const tbody = document.getElementById('expiringTableBody');
             
             if (!tbody || !dataSource) return;

@@ -6373,9 +6373,9 @@
             // Add total row
             html += `
                 <tr class="bg-gray-50 font-semibold border-t-2 border-gray-300">
-                    <td class="px-5 py-3 text-sm text-gray-900">Total</td>
+                    <td class="px-5 py-3 text-sm text-gray-900 rounded-bl-xl">Total</td>
                     <td class="px-5 py-3 text-sm text-gray-900 text-right">${totalCount.toLocaleString()}</td>
-                    <td class="px-5 py-3 text-sm text-gray-900 text-right">${formatCurrency(totalTFA)}</td>
+                    <td class="px-5 py-3 text-sm text-gray-900 text-right rounded-br-xl">${formatCurrency(totalTFA)}</td>
                 </tr>
             `;
 
@@ -13129,10 +13129,127 @@
         
         // Initialize Pipeline Chart - processes data and renders
         function initializePipelineChart(dataSource) {
-            // For now, use the embedded script approach (to be refactored later)
-            setTimeout(() => {
-                if (window.pipelineExpandedData) renderPipelineExpandedViews();
-            }, 150);
+            const currentYear = new Date().getFullYear();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Excluded facility types
+            const excludedFacilityTypes = [
+                "Uncommitted Advised Lines",
+                "Credit Cards",
+                "Overdraft Protection"
+            ];
+            
+            // Initialize regional data for all regions
+            const regionalData = { 
+                NAM: {count: 0, tfa: 0, facilities: 0},
+                LATAM: {count: 0, tfa: 0, facilities: 0}
+            };
+            const productData = {};
+            const underwriterData = {};
+            const allPendingDeals = [];
+            let totalTFA = 0;
+            
+            // Track unique facilities
+            const allPendingFacilities = new Set();
+            
+            // Process data
+            dataSource.forEach(row => {
+                // Always exclude PSE
+                const pseColumn = row["PSE_non-PSE"] || row.PSE_non_PSE || "";
+                const pseValue = String(pseColumn).trim().toUpperCase();
+                if (pseValue === "PSE") return;
+                
+                // Only include NAM and LATAM regions
+                const region = String(row.Region || "").trim().toUpperCase();
+                if (region !== "NAM" && region !== "LATAM") return;
+                
+                // Exclude specific facility types
+                const facilityType = String(row.Facility_Type || "").trim();
+                if (excludedFacilityTypes.includes(facilityType)) return;
+                
+                const originationDate = row.Origination_Date;
+                const firstApprovalDate = parseDate(row.Facility_First_Approval_Date);
+                const facilityId = row.Facility_ID;
+                const tfaAmount = parseNumber(row.Fac_Amount || row.Facility_Amount);
+                const product = row.Product_Program || "Unknown";
+                const underwriter = row.Lead_Underwriter || "Unknown";
+                const relationship = row.Relationship_Name || row.Relationship_ID || "Unknown";
+                
+                // Pending closure criteria
+                if ((!originationDate || originationDate.trim() === '') &&
+                    firstApprovalDate &&
+                    facilityId &&
+                    firstApprovalDate.getFullYear() === currentYear) {
+                    
+                    allPendingFacilities.add(facilityId);
+                    totalTFA += tfaAmount;
+                    
+                    // Calculate days since approval
+                    const daysSinceApproval = Math.floor((today - firstApprovalDate) / (1000 * 60 * 60 * 24));
+                    
+                    // Store full deal details
+                    allPendingDeals.push({
+                        facilityId: facilityId,
+                        relationship: relationship,
+                        region: region,
+                        product: product,
+                        facilityType: facilityType,
+                        underwriter: underwriter,
+                        tfa: tfaAmount,
+                        daysOld: daysSinceApproval,
+                        firstApprovalDate: firstApprovalDate
+                    });
+                    
+                    // Regional data
+                    if (regionalData[region]) {
+                        regionalData[region].facilities++;
+                        regionalData[region].tfa += tfaAmount;
+                        regionalData[region].count++;
+                    }
+                    
+                    // Product data
+                    if (!productData[product]) {
+                        productData[product] = { count: 0, tfa: 0 };
+                    }
+                    productData[product].count++;
+                    productData[product].tfa += tfaAmount;
+                    
+                    // Underwriter data
+                    if (!underwriterData[underwriter]) {
+                        underwriterData[underwriter] = { facilities: 0, tfa: 0, region: region };
+                    }
+                    underwriterData[underwriter].facilities++;
+                    underwriterData[underwriter].tfa += tfaAmount;
+                }
+            });
+            
+            // Convert to arrays and sort
+            const topProducts = Object.entries(productData)
+                .map(([name, data]) => ({name, count: data.count, tfa: data.tfa}))
+                .sort((a, b) => b.tfa - a.tfa);
+            
+            const topUnderwriters = Object.entries(underwriterData)
+                .map(([name, data]) => ({name, facilities: data.facilities, tfa: data.tfa, region: data.region}))
+                .sort((a, b) => b.facilities - a.facilities)
+                .slice(0, 10);
+            
+            // Sort deals by days old (oldest first)
+            const sortedDeals = allPendingDeals.sort((a, b) => b.daysOld - a.daysOld);
+            
+            // Store data for rendering
+            window.pipelineExpandedData = {
+                regional: regionalData,
+                topProducts: topProducts,
+                topUnderwriters: topUnderwriters,
+                allDeals: sortedDeals,
+                totalFacilities: allPendingFacilities.size,
+                totalTFA: totalTFA,
+                currentYear: currentYear
+            };
+            
+            // Directly render the views
+            renderPipelineExpandedViews();
         }
         
         // Initialize Top Relationships Chart - processes data and renders
@@ -13354,10 +13471,137 @@
         
         // Initialize ROTCE Chart - processes data and renders
         function initializeROTCEChart(dataSource) {
-            // For now, use the embedded script approach (to be refactored later)
-            setTimeout(() => {
-                if (window.rotceExpandedData) renderROTCEExpandedViews();
-            }, 150);
+            // Get Top N filter value
+            const topN = parseInt(document.getElementById("topNFilter").value) || 10;
+            
+            // Collect ROTCE data by relationship
+            const rotceByRelationship = new Map();
+            const relationshipDetails = new Map();
+            
+            dataSource.forEach(row => {
+                const relName = row.Relationship_Name || row.Relationship_ID;
+                const rotce = parsePercentage(row.ROTCE);
+                const region = (row.Region || "Unknown").toUpperCase();
+                const product = row.Product_Program || "Unknown";
+                
+                if (!relName) return;
+                
+                // ROTCE values
+                if (!rotceByRelationship.has(relName)) {
+                    rotceByRelationship.set(relName, []);
+                }
+                if (!isNaN(rotce)) {
+                    rotceByRelationship.get(relName).push(rotce);
+                }
+                
+                // Relationship details
+                if (!relationshipDetails.has(relName)) {
+                    relationshipDetails.set(relName, {
+                        name: relName,
+                        region: region,
+                        direct: 0,
+                        tfa: 0,
+                        facilities: new Set(),
+                        products: new Set(),
+                        rotceValues: []
+                    });
+                }
+                
+                const details = relationshipDetails.get(relName);
+                details.direct += parseNumber(row.Direct_OS);
+                details.tfa += parseNumber(row.Fac_Amount || row.Facility_Amount);
+                if (row.Facility_ID) details.facilities.add(row.Facility_ID);
+                details.products.add(product);
+                if (!isNaN(rotce)) details.rotceValues.push(rotce);
+            });
+            
+            // Calculate averages and prepare relationship data
+            const relationshipROTCE = [];
+            relationshipDetails.forEach((details, relName) => {
+                const avgROTCE = details.rotceValues.length > 0
+                    ? details.rotceValues.reduce((sum, val) => sum + val, 0) / details.rotceValues.length
+                    : 0;
+                const minROTCE = details.rotceValues.length > 0 ? Math.min(...details.rotceValues) : 0;
+                const maxROTCE = details.rotceValues.length > 0 ? Math.max(...details.rotceValues) : 0;
+                
+                relationshipROTCE.push({
+                    name: relName,
+                    region: details.region,
+                    avgROTCE: avgROTCE,
+                    minROTCE: minROTCE,
+                    maxROTCE: maxROTCE,
+                    direct: details.direct,
+                    tfa: details.tfa,
+                    facilities: details.facilities.size,
+                    products: details.products.size,
+                    dataPoints: details.rotceValues.length
+                });
+            });
+            
+            // Sort by Direct OS and get top N
+            const topRelationships = relationshipROTCE
+                .sort((a, b) => b.direct - a.direct)
+                .slice(0, topN);
+            
+            // Get relationships below target (ROTCE < 8%) for the bar chart
+            const belowTargetRelationships = relationshipROTCE
+                .filter(r => r.avgROTCE < 8)
+                .sort((a, b) => a.avgROTCE - b.avgROTCE)
+                .slice(0, 10);
+            
+            // Regional data - initialize all regions
+            const regionalData = {
+                APAC: {count: 0, direct: 0, avgRotce: []},
+                EMEA: {count: 0, direct: 0, avgRotce: []},
+                NAM: {count: 0, direct: 0, avgRotce: []},
+                LATAM: {count: 0, direct: 0, avgRotce: []}
+            };
+            
+            topRelationships.forEach(rel => {
+                const region = rel.region;
+                if (regionalData[region]) {
+                    regionalData[region].count++;
+                    regionalData[region].direct += rel.direct;
+                    regionalData[region].avgRotce.push(rel.avgROTCE);
+                }
+            });
+            
+            // Calculate regional averages
+            Object.keys(regionalData).forEach(region => {
+                const values = regionalData[region].avgRotce;
+                regionalData[region].avgRotce = values.length > 0 
+                    ? values.reduce((sum, val) => sum + val, 0) / values.length 
+                    : 0;
+            });
+            
+            // Calculate portfolio average
+            const portfolioAvg = topRelationships.length > 0
+                ? topRelationships.reduce((sum, r) => sum + r.avgROTCE, 0) / topRelationships.length
+                : 0;
+            
+            // Performance categorization
+            const excellent = topRelationships.filter(r => r.avgROTCE >= 15).length;
+            const good = topRelationships.filter(r => r.avgROTCE >= 12 && r.avgROTCE < 15).length;
+            const acceptable = topRelationships.filter(r => r.avgROTCE >= 8 && r.avgROTCE < 12).length;
+            const belowTarget = topRelationships.filter(r => r.avgROTCE < 8).length;
+            
+            // Store data for rendering
+            window.rotceExpandedData = {
+                relationships: topRelationships,
+                belowTargetRelationships: belowTargetRelationships,
+                regional: regionalData,
+                portfolioAvg: portfolioAvg,
+                topN: topN,
+                stats: {
+                    excellent: excellent,
+                    good: good,
+                    acceptable: acceptable,
+                    belowTarget: belowTarget
+                }
+            };
+            
+            // Directly render the views
+            renderROTCEExpandedViews();
         }
         
         // Initialize Covenant Chart - processes data and renders
@@ -14883,10 +15127,10 @@
                 
                 tableHTML += `
                         <tr class="bg-gray-50 font-semibold border-t-2 border-gray-300">
-                            <td class="px-6 py-4 text-sm text-gray-900">Total</td>
+                            <td class="px-6 py-4 text-sm text-gray-900 rounded-bl-xl">Total</td>
                             <td class="px-6 py-4 text-sm text-right text-gray-900">${totalCAs}</td>
                             <td class="px-6 py-4 text-sm text-right text-gray-900">${totalFacilities}</td>
-                            <td class="px-6 py-4 text-sm text-right text-gray-900">${formatCurrency(totalTFA)}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-900 rounded-br-xl">${formatCurrency(totalTFA)}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -15133,10 +15377,10 @@
                 const avgTotal = totalCount > 0 ? totalTFA / totalCount : 0;
                 tableHTML += `
                         <tr class="bg-gray-50 font-semibold border-t-2 border-gray-300">
-                            <td class="px-6 py-4 text-sm text-gray-900">Total</td>
+                            <td class="px-6 py-4 text-sm text-gray-900 rounded-bl-xl">Total</td>
                             <td class="px-6 py-4 text-sm text-right text-gray-900">${totalCount}</td>
                             <td class="px-6 py-4 text-sm text-right text-gray-900">${formatCurrency(totalTFA)}</td>
-                            <td class="px-6 py-4 text-sm text-right text-gray-900">${formatCurrency(avgTotal)}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-900 rounded-br-xl">${formatCurrency(avgTotal)}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -15575,10 +15819,10 @@
                 const avgTotal = totalCount > 0 ? totalTFA / totalCount : 0;
                 tableHTML += `
                         <tr class="bg-gray-50 font-semibold border-t-2 border-gray-300">
-                            <td class="px-6 py-4 text-sm text-gray-900">Total</td>
+                            <td class="px-6 py-4 text-sm text-gray-900 rounded-bl-xl">Total</td>
                             <td class="px-6 py-4 text-sm text-right text-gray-900">${totalCount}</td>
                             <td class="px-6 py-4 text-sm text-right text-gray-900">${formatCurrency(totalTFA)}</td>
-                            <td class="px-6 py-4 text-sm text-right text-gray-900">${formatCurrency(avgTotal)}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-900 rounded-br-xl">${formatCurrency(avgTotal)}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -16143,10 +16387,10 @@
                 const avgTotal = totalCount > 0 ? totalTFA / totalCount : 0;
                 tableHTML += `
                         <tr class="bg-gray-50 font-semibold border-t-2 border-gray-300">
-                            <td class="px-6 py-4 text-sm text-gray-900">Total</td>
+                            <td class="px-6 py-4 text-sm text-gray-900 rounded-bl-xl">Total</td>
                             <td class="px-6 py-4 text-sm text-right text-gray-900">${totalCount}</td>
                             <td class="px-6 py-4 text-sm text-right text-gray-900">${formatCurrency(totalTFA)}</td>
-                            <td class="px-6 py-4 text-sm text-right text-gray-900">${formatCurrency(avgTotal)}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-900 rounded-br-xl">${formatCurrency(avgTotal)}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -16453,7 +16697,261 @@
         function renderPipelineExpandedViews() {
             if (!window.pipelineExpandedData || typeof ApexCharts === 'undefined') return;
             
-            const { aging, regional, products, underwriters, relationships, facilityTypes } = window.pipelineExpandedData;
+            const { regional, topProducts, topUnderwriters, allDeals, totalFacilities, totalTFA, currentYear } = window.pipelineExpandedData;
+            
+            // Update KPIs
+            document.getElementById('pipelineTotalFacilities').textContent = totalFacilities;
+            document.getElementById('pipelineTotalTFA').textContent = formatCurrency(totalTFA);
+            document.getElementById('pipelineNAMCount').textContent = regional.NAM ? regional.NAM.facilities : 0;
+            document.getElementById('pipelineNAMTFA').textContent = regional.NAM ? formatCurrency(regional.NAM.tfa) : '$0';
+            document.getElementById('pipelineLATAMCount').textContent = regional.LATAM ? regional.LATAM.facilities : 0;
+            document.getElementById('pipelineLATAMTFA').textContent = regional.LATAM ? formatCurrency(regional.LATAM.tfa) : '$0';
+            const avgDealSize = totalFacilities > 0 ? totalTFA / totalFacilities : 0;
+            document.getElementById('pipelineAvgDealSize').textContent = formatCurrency(avgDealSize);
+            
+            // 1. Regional Distribution Table (matching CAs Expiring style)
+            const regionalTableEl = document.getElementById('pipelineRegionalTable');
+            if (regionalTableEl && regional) {
+                const regionEntries = [
+                    { name: 'NAM', ...(regional.NAM || {count: 0, tfa: 0, facilities: 0}) },
+                    { name: 'LATAM', ...(regional.LATAM || {count: 0, tfa: 0, facilities: 0}) }
+                ].sort((a, b) => b.facilities - a.facilities);
+                
+                let tableHTML = `
+                <table class="min-w-full h-full">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Region</th>
+                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Pending Deals</th>
+                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Total TFA</th>
+                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Avg per Deal</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                `;
+                
+                let totalCount = 0, totalTFASum = 0;
+                regionEntries.forEach(region => {
+                    totalCount += region.facilities;
+                    totalTFASum += region.tfa;
+                    const avg = region.facilities > 0 ? region.tfa / region.facilities : 0;
+                    
+                    const regionBadgeColors = {
+                        'NAM': 'bg-orange-50 text-orange-600',
+                        'LATAM': 'bg-purple-50 text-purple-600'
+                    };
+                    
+                    tableHTML += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 text-center whitespace-nowrap">
+                                <span class="inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-medium ${regionBadgeColors[region.name]}">${region.name}</span>
+                            </td>
+                            <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-900">${region.facilities}</td>
+                            <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-900">${formatCurrency(region.tfa)}</td>
+                            <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-900">${formatCurrency(avg)}</td>
+                        </tr>
+                    `;
+                });
+                
+                const avgTotal = totalCount > 0 ? totalTFASum / totalCount : 0;
+                tableHTML += `
+                        <tr class="bg-gray-50 font-semibold border-t-2 border-gray-300">
+                            <td class="px-6 py-4 text-center text-sm text-gray-900 rounded-bl-xl">Total</td>
+                            <td class="px-6 py-4 text-center text-sm text-gray-900">${totalCount}</td>
+                            <td class="px-6 py-4 text-center text-sm text-gray-900">${formatCurrency(totalTFASum)}</td>
+                            <td class="px-6 py-4 text-center text-sm text-gray-900 rounded-br-xl">${formatCurrency(avgTotal)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                `;
+                regionalTableEl.innerHTML = tableHTML;
+            }
+            
+            // 2. Product Program Treemap
+            const treemapChartEl = document.getElementById('pipelineProductTreemap');
+            if (treemapChartEl && topProducts && topProducts.length > 0) {
+                const treemapOptions = {
+                    series: [
+                        {
+                            data: topProducts.map(p => ({
+                                x: p.name,
+                                y: p.tfa
+                            }))
+                        }
+                    ],
+                    legend: {
+                        show: false
+                    },
+                    chart: {
+                        height: 380,
+                        type: 'treemap',
+                        fontFamily: 'Outfit, sans-serif',
+                        toolbar: { show: false }
+                    },
+                    title: {
+                        text: undefined
+                    },
+                    colors: ['#465fff'],
+                    plotOptions: {
+                        treemap: {
+                            distributed: true,
+                            enableShades: true
+                        }
+                    },
+                    dataLabels: {
+                        enabled: true,
+                        style: {
+                            fontSize: '14px',
+                            fontWeight: 700,
+                            colors: ['#fff']
+                        },
+                        formatter: function(text, op) {
+                            const product = topProducts[op.dataPointIndex];
+                            return [text, `${product.count} (${formatCurrency(product.tfa)})`];
+                        },
+                        offsetY: -4
+                    },
+                    tooltip: {
+                        theme: 'light',
+                        custom: function({ seriesIndex, dataPointIndex, w }) {
+                            const product = topProducts[dataPointIndex];
+                            return `
+                                <div style="padding: 8px 12px; background: white; border: 1px solid #e5e7eb; border-radius: 6px;">
+                                    <div style="font-weight: 600; margin-bottom: 4px;">${product.name}</div>
+                                    <div style="font-size: 11px; color: #6b7280;">
+                                        <div>Pending Deals: ${product.count}</div>
+                                        <div>Total TFA: ${formatCurrency(product.tfa)}</div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }
+                };
+                
+                treemapChartEl.innerHTML = '';
+                const treemapChart = new ApexCharts(treemapChartEl, treemapOptions);
+                treemapChart.render();
+            }
+            
+            // 3. Top Underwriters Table
+            const underwriterTableEl = document.getElementById('pipelineUnderwriterTable');
+            if (underwriterTableEl) {
+                let tableHTML = `
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Underwriter</th>
+                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Region</th>
+                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Pending Deals</th>
+                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Total TFA</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                `;
+                
+                if (topUnderwriters && topUnderwriters.length > 0) {
+                    topUnderwriters.forEach((uw, index) => {
+                        const regionBadgeColors = {
+                            'NAM': 'bg-orange-50 text-orange-600',
+                            'LATAM': 'bg-purple-50 text-purple-600'
+                        };
+                        
+                        tableHTML += `
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap font-medium text-gray-900">${uw.name}</td>
+                                <td class="px-6 py-4 text-center whitespace-nowrap">
+                                    <span class="inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-medium ${regionBadgeColors[uw.region]}">${uw.region}</span>
+                                </td>
+                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap">
+                                    <span class="inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-medium bg-blue-50 text-blue-600">${uw.facilities}</span>
+                                </td>
+                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap font-medium text-gray-900">${formatCurrency(uw.tfa)}</td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tableHTML += `
+                        <tr>
+                            <td colspan="4" class="px-6 py-8 text-center text-sm text-gray-500">No underwriter data available</td>
+                        </tr>
+                    `;
+                }
+                
+                tableHTML += `
+                    </tbody>
+                </table>
+                `;
+                underwriterTableEl.innerHTML = tableHTML;
+            }
+            
+            // 4. Deals Close Details Table
+            const detailsTableEl = document.getElementById('pipelineDetailsTable');
+            if (detailsTableEl) {
+                let tableHTML = `
+                <table class="min-w-full">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Facility ID</th>
+                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Relationship</th>
+                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Region</th>
+                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Product</th>
+                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Facility Type</th>
+                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Underwriter</th>
+                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">TFA</th>
+                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Days Old</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                `;
+                
+                if (allDeals && allDeals.length > 0) {
+                    allDeals.forEach(deal => {
+                        const regionBadgeColors = {
+                            'NAM': 'bg-orange-50 text-orange-600',
+                            'LATAM': 'bg-purple-50 text-purple-600'
+                        };
+                        
+                        // Age badge color
+                        let ageBadgeColor = 'bg-green-50 text-green-600';
+                        if (deal.daysOld > 90) ageBadgeColor = 'bg-red-50 text-red-600';
+                        else if (deal.daysOld > 60) ageBadgeColor = 'bg-orange-50 text-orange-600';
+                        else if (deal.daysOld > 30) ageBadgeColor = 'bg-amber-50 text-amber-600';
+                        
+                        tableHTML += `
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap font-medium text-gray-900">${deal.facilityId}</td>
+                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-900">${deal.relationship}</td>
+                                <td class="px-6 py-4 text-center whitespace-nowrap">
+                                    <span class="inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-medium ${regionBadgeColors[deal.region]}">${deal.region}</span>
+                                </td>
+                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-900">${deal.product}</td>
+                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-900">${deal.facilityType}</td>
+                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-900">${deal.underwriter}</td>
+                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap font-medium text-gray-900">${formatCurrency(deal.tfa)}</td>
+                                <td class="px-6 py-4 text-center whitespace-nowrap">
+                                    <span class="inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-medium ${ageBadgeColor}">${deal.daysOld}</span>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tableHTML += `
+                        <tr>
+                            <td colspan="8" class="px-6 py-8 text-center text-sm text-gray-500">No pending deals data available</td>
+                        </tr>
+                    `;
+                }
+                
+                tableHTML += `
+                    </tbody>
+                </table>
+                `;
+                detailsTableEl.innerHTML = tableHTML;
+            }
+        }
+        
+        // Render Top Relationships Expanded Analysis Views
+        function renderTopRelationshipsExpandedViews() {
             
             // 1. Aging Distribution Chart
             const agingChartEl = document.getElementById('pipelineAgingChart');
@@ -16793,10 +17291,10 @@
                 const avgTotal = totalCount > 0 ? totalDirect / totalCount : 0;
                 tableHTML += `
                         <tr class="bg-gray-50 font-semibold border-t-2 border-gray-300">
-                            <td class="px-6 py-4 text-sm text-gray-900">Total</td>
+                            <td class="px-6 py-4 text-sm text-gray-900 rounded-bl-xl">Total</td>
                             <td class="px-6 py-4 text-sm text-right text-gray-900">${totalCount}</td>
                             <td class="px-6 py-4 text-sm text-right text-gray-900">${formatCurrency(totalDirect)}</td>
-                            <td class="px-6 py-4 text-sm text-right text-gray-900">${formatCurrency(avgTotal)}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-900 rounded-br-xl">${formatCurrency(avgTotal)}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -16929,155 +17427,195 @@
         function renderROTCEExpandedViews() {
             if (!window.rotceExpandedData || typeof ApexCharts === 'undefined') return;
             
-            const { relationships, regional, portfolioAvg } = window.rotceExpandedData;
+            const { relationships, belowTargetRelationships, regional, portfolioAvg, topN, stats } = window.rotceExpandedData;
             
-            // 1. Regional Performance Table
+            // Update KPI values
+            document.getElementById('rotcePortfolioAvg').textContent = portfolioAvg.toFixed(1) + '%';
+            document.getElementById('rotcePortfolioAvg').className = `text-2xl font-bold ${portfolioAvg >= 12 ? 'text-green-600' : 'text-amber-600'}`;
+            
+            document.getElementById('rotceAboveTarget').textContent = stats.good + stats.excellent;
+            document.getElementById('rotceAboveTargetPct').textContent = `${((stats.good + stats.excellent) / relationships.length * 100).toFixed(0)}% of portfolio`;
+            
+            document.getElementById('rotceAcceptable').textContent = stats.acceptable;
+            document.getElementById('rotceAcceptablePct').textContent = `${(stats.acceptable / relationships.length * 100).toFixed(0)}% of portfolio`;
+            
+            document.getElementById('rotceBelowTarget').textContent = stats.belowTarget;
+            document.getElementById('rotceBelowTargetPct').textContent = `${(stats.belowTarget / relationships.length * 100).toFixed(0)}% of portfolio`;
+            
+            // 1. Regional Distribution Table (matching CAs Expiring style)
             const regionalTableEl = document.getElementById('rotceRegionalTable');
             if (regionalTableEl && regional) {
-                const regions = Object.keys(regional).filter(r => regional[r] > 0);
+                const regionEntries = [
+                    { name: 'APAC', ...(regional.APAC || {count: 0, direct: 0, avgRotce: 0}) },
+                    { name: 'EMEA', ...(regional.EMEA || {count: 0, direct: 0, avgRotce: 0}) },
+                    { name: 'NAM', ...(regional.NAM || {count: 0, direct: 0, avgRotce: 0}) },
+                    { name: 'LATAM', ...(regional.LATAM || {count: 0, direct: 0, avgRotce: 0}) }
+                ].sort((a, b) => b.count - a.count);
+                
                 let tableHTML = `
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="border-b border-gray-200">
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Region</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Avg ROTCE</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">vs Portfolio</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
+                <table class="min-w-full h-full">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Region</th>
+                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Relationships</th>
+                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Direct OS</th>
+                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Avg ROTCE</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
                 `;
                 
-                regions.forEach(region => {
-                    const avg = regional[region];
-                    const variance = avg - portfolioAvg;
+                let totalCount = 0;
+                let totalDirect = 0;
+                let totalRotce = 0;
+                let regionsWithData = 0;
+                
+                regionEntries.forEach(region => {
+                    totalCount += region.count;
+                    totalDirect += region.direct;
+                    if (region.count > 0) {
+                        totalRotce += region.avgRotce;
+                        regionsWithData++;
+                    }
+                    
+                    const regionBadgeColors = {
+                        'APAC': 'bg-blue-50 text-blue-600',
+                        'EMEA': 'bg-green-50 text-green-600',
+                        'NAM': 'bg-orange-50 text-orange-600',
+                        'LATAM': 'bg-purple-50 text-purple-600'
+                    };
+                    
+                    const rotceColor = region.avgRotce >= 12 ? 'text-green-600' : region.avgRotce >= 8 ? 'text-amber-600' : region.avgRotce > 0 ? 'text-red-600' : 'text-gray-400';
                     
                     tableHTML += `
                         <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-sm font-medium text-gray-900">${region}</td>
-                            <td class="px-4 py-3 text-sm text-right font-medium ${avg >= 12 ? 'text-green-600' : avg >= 8 ? 'text-amber-600' : 'text-red-600'}">${avg.toFixed(1)}%</td>
-                            <td class="px-4 py-3 text-sm text-right ${variance >= 0 ? 'text-green-600' : 'text-red-600'}">${variance >= 0 ? '+' : ''}${variance.toFixed(1)}%</td>
+                            <td class="px-6 py-4 text-center whitespace-nowrap">
+                                <span class="inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-medium ${regionBadgeColors[region.name]}">${region.name}</span>
+                            </td>
+                            <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-900">${region.count}</td>
+                            <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-900">${formatCurrency(region.direct)}</td>
+                            <td class="px-6 py-4 text-center text-sm whitespace-nowrap font-medium ${rotceColor}">${region.avgRotce > 0 ? region.avgRotce.toFixed(1) + '%' : '-'}</td>
                         </tr>
                     `;
                 });
                 
+                const avgRotce = regionsWithData > 0 ? totalRotce / regionsWithData : 0;
                 tableHTML += `
+                        <tr class="bg-gray-50 font-semibold border-t-2 border-gray-300">
+                            <td class="px-6 py-4 text-center text-sm text-gray-900 rounded-bl-2xl">Total</td>
+                            <td class="px-6 py-4 text-center text-sm text-gray-900">${totalCount}</td>
+                            <td class="px-6 py-4 text-center text-sm text-gray-900">${formatCurrency(totalDirect)}</td>
+                            <td class="px-6 py-4 text-center text-sm font-medium rounded-br-2xl ${avgRotce >= 12 ? 'text-green-600' : avgRotce >= 8 ? 'text-amber-600' : 'text-red-600'}">${avgRotce.toFixed(1)}%</td>
+                        </tr>
                     </tbody>
                 </table>
-            </div>
                 `;
                 regionalTableEl.innerHTML = tableHTML;
             }
             
-            // 2. ROTCE Range Chart (Top 10)
-            const rangeChartEl = document.getElementById('rotceRangeChart');
-            if (rangeChartEl && relationships && relationships.length > 0) {
-                const top10 = relationships.slice(0, 10);
-                const rangeOptions = {
-                    series: [{
-                        name: 'ROTCE Range',
-                        data: top10.map(r => [r.minROTCE, r.maxROTCE])
-                    }],
-                    chart: {
-                        type: 'rangeBar',
-                        height: 300,
-                        fontFamily: 'Outfit, sans-serif',
-                        toolbar: { show: false }
-                    },
-                    colors: ['#10b981'],
-                    plotOptions: {
-                        bar: {
-                            horizontal: true,
-                            borderRadius: 4
-                        }
-                    },
-                    dataLabels: {
-                        enabled: false
-                    },
-                    xaxis: {
-                        categories: top10.map(r => r.name.substring(0, 20) + (r.name.length > 20 ? '...' : '')),
-                        labels: {
+            // 2. Below Target ROTCE Bar Chart (Top 10)
+            const belowChartEl = document.getElementById('rotceBelowTargetChart');
+            if (belowChartEl) {
+                if (belowTargetRelationships && belowTargetRelationships.length > 0) {
+                    const belowOptions = {
+                        series: [{
+                            name: 'ROTCE',
+                            data: belowTargetRelationships.map(r => r.avgROTCE)
+                        }],
+                        chart: {
+                            type: 'bar',
+                            height: Math.max(300, belowTargetRelationships.length * 40),
+                            fontFamily: 'Outfit, sans-serif',
+                            toolbar: { show: false },
+                            parentHeightOffset: 0
+                        },
+                        colors: ['#ef4444'],
+                        plotOptions: {
+                            bar: {
+                                borderRadius: 6,
+                                horizontal: true,
+                                distributed: false,
+                                dataLabels: { position: 'right' },
+                                barHeight: '70%'
+                            }
+                        },
+                        dataLabels: {
+                            enabled: true,
+                            textAnchor: 'start',
+                            offsetX: 8,
+                            style: {
+                                fontSize: '11px',
+                                fontWeight: 500,
+                                colors: ['#374151']
+                            },
                             formatter: function(val) {
                                 return val.toFixed(1) + '%';
                             }
+                        },
+                        xaxis: {
+                            categories: belowTargetRelationships.map(r => r.name),
+                            labels: {
+                                formatter: function(val) {
+                                    return val.toFixed(1) + '%';
+                                },
+                                style: {
+                                    colors: "#6B7280",
+                                    fontSize: "12px",
+                                    fontFamily: "Outfit, sans-serif",
+                                }
+                            },
+                            axisBorder: { show: false },
+                            axisTicks: { show: false }
+                        },
+                        yaxis: {
+                            labels: {
+                                align: 'left',
+                                offsetX: -10,
+                                style: {
+                                    colors: "#6B7280",
+                                    fontSize: "12px",
+                                    fontFamily: "Outfit, sans-serif",
+                                },
+                                maxWidth: 180
+                            }
+                        },
+                        grid: {
+                            borderColor: '#E5E7EB',
+                            strokeDashArray: 4,
+                            xaxis: { lines: { show: true } },
+                            yaxis: { lines: { show: false } },
+                            padding: {
+                                top: 4,
+                                right: 0,
+                                bottom: 0,
+                                left: 0
+                            }
+                        },
+                        tooltip: {
+                            theme: 'light',
+                            y: {
+                                formatter: function(val, opts) {
+                                    const rel = belowTargetRelationships[opts.dataPointIndex];
+                                    return `${val.toFixed(1)}% ROTCE<br/>Direct OS: ${formatCurrency(rel.direct)}<br/>Facilities: ${rel.facilities}`;
+                                }
+                            }
                         }
-                    },
-                    yaxis: {
-                        labels: {
-                            maxWidth: 120
-                        }
-                    },
-                    grid: {
-                        borderColor: '#f1f5f9',
-                        strokeDashArray: 4
-                    },
-                    tooltip: {
-                        custom: function({ seriesIndex, dataPointIndex, w }) {
-                            const rel = top10[dataPointIndex];
-                            return `
-                                <div style="padding: 8px 12px; background: white; border: 1px solid #e5e7eb; border-radius: 6px;">
-                                    <div style="font-weight: 600; margin-bottom: 4px;">${rel.name}</div>
-                                    <div style="font-size: 11px; color: #6b7280;">
-                                        <div>Min: ${rel.minROTCE.toFixed(1)}%</div>
-                                        <div>Avg: ${rel.avgROTCE.toFixed(1)}%</div>
-                                        <div>Max: ${rel.maxROTCE.toFixed(1)}%</div>
-                                        <div style="margin-top: 4px; padding-top: 4px; border-top: 1px solid #e5e7eb;">
-                                            Data Points: ${rel.dataPoints}
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        }
-                    }
-                };
-                
-                rangeChartEl.innerHTML = '';
-                const rangeChart = new ApexCharts(rangeChartEl, rangeOptions);
-                rangeChart.render();
-            }
-            
-            // 3. Detailed ROTCE Table
-            const detailTableEl = document.getElementById('rotceDetailTable');
-            if (detailTableEl && relationships && relationships.length > 0) {
-                let tableHTML = `
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="border-b border-gray-200">
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Rank</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Relationship</th>
-                                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700">Region</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Avg ROTCE</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Min ROTCE</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Max ROTCE</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Direct OS</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Data Points</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
-                `;
-                
-                relationships.forEach((rel, index) => {
-                    tableHTML += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-sm text-gray-600">${index + 1}</td>
-                            <td class="px-4 py-3 text-sm font-medium text-gray-900">${rel.name}</td>
-                            <td class="px-4 py-3 text-sm text-center text-gray-700">${rel.region}</td>
-                            <td class="px-4 py-3 text-sm text-right font-semibold ${rel.avgROTCE >= 15 ? 'text-green-600' : rel.avgROTCE >= 12 ? 'text-blue-600' : rel.avgROTCE >= 8 ? 'text-amber-600' : 'text-red-600'}">${rel.avgROTCE.toFixed(1)}%</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-600">${rel.minROTCE.toFixed(1)}%</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-600">${rel.maxROTCE.toFixed(1)}%</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-700">${formatCurrency(rel.direct)}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-600">${rel.dataPoints}</td>
-                        </tr>
+                    };
+                    
+                    belowChartEl.innerHTML = '';
+                    const belowChart = new ApexCharts(belowChartEl, belowOptions);
+                    belowChart.render();
+                } else {
+                    belowChartEl.innerHTML = `
+                        <div class="flex flex-col items-center justify-center py-12 text-gray-500">
+                            <svg class="h-12 w-12 mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <p class="text-sm font-medium">No relationships below target ROTCE</p>
+                            <p class="text-xs text-gray-400 mt-1">All relationships are performing above 8% target</p>
+                        </div>
                     `;
-                });
-                
-                tableHTML += `
-                    </tbody>
-                </table>
-            </div>
-                `;
-                detailTableEl.innerHTML = tableHTML;
+                }
             }
         }
         
@@ -17766,11 +18304,170 @@
             `;
         }
         function generatePipelineExpandedView(dataSource) {
-            const currentYear = new Date().getFullYear();
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            // Data processing is now done in initializePipelineChart
+            // This function only returns the HTML structure
             
-            // Excluded facility types
+            return `
+                <!-- Title Section -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Deals Pending Closure</h3>
+                    <p class="text-sm text-gray-500 mt-1">Approved deals awaiting origination (NAM & LATAM, excl. PSE)</p>
+                </div>
+                
+                <!-- Summary KPIs -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="rounded-xl border border-gray-200 bg-white p-5">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100">
+                                <svg class="h-5 w-5 shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">Total Pending</p>
+                                <h3 class="text-2xl font-bold text-gray-900" id="pipelineTotalFacilities">--</h3>
+                                <p class="text-xs text-gray-500 mt-1" id="pipelineTotalTFA">--</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="rounded-xl border border-gray-200 bg-white p-5">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100">
+                                <svg class="h-5 w-5 shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">NAM Region</p>
+                                <h3 class="text-2xl font-bold text-gray-900" id="pipelineNAMCount">--</h3>
+                                <p class="text-xs text-gray-500 mt-1" id="pipelineNAMTFA">--</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="rounded-xl border border-gray-200 bg-white p-5">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-100">
+                                <svg class="h-5 w-5 shrink-0 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">LATAM Region</p>
+                                <h3 class="text-2xl font-bold text-gray-900" id="pipelineLATAMCount">--</h3>
+                                <p class="text-xs text-gray-500 mt-1" id="pipelineLATAMTFA">--</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="rounded-xl border border-gray-200 bg-white p-5">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-100">
+                                <svg class="h-5 w-5 shrink-0 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">Avg Deal Size</p>
+                                <h3 class="text-xl font-bold text-gray-900" id="pipelineAvgDealSize">--</h3>
+                                <p class="text-xs text-gray-500 mt-1">Per facility</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Analysis Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <!-- Regional Distribution -->
+                    <div class="rounded-xl border border-gray-200 bg-white flex flex-col">
+                        <div class="border-b border-gray-200 px-6 py-4">
+                            <h3 class="text-base font-semibold text-gray-900">Regional Distribution</h3>
+                            <p class="text-xs text-gray-500 mt-1">Breakdown by region for pending deals</p>
+                        </div>
+                        <div class="flex-1 overflow-hidden">
+                            <div id="pipelineRegionalTable" class="h-full"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Product Program Treemap -->
+                    <div class="rounded-xl border border-gray-200 bg-white">
+                        <div class="border-b border-gray-200 px-6 py-4">
+                            <h3 class="text-base font-semibold text-gray-900">Product Program Distribution</h3>
+                            <p class="text-xs text-gray-500 mt-1">Deals by product with count and TFA</p>
+                        </div>
+                        <div class="p-6">
+                            <div id="pipelineProductTreemap" style="min-height: 300px;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Top Underwriters Table -->
+                <div class="rounded-2xl border border-gray-200 bg-white mb-6">
+                    <div class="px-6 py-4">
+                        <h3 class="text-lg font-semibold text-gray-800">Top Underwriters (Top 10)</h3>
+                        <p class="text-xs text-gray-500 mt-1">Lead underwriters with most pending deals</p>
+                    </div>
+                    <div class="custom-scrollbar overflow-x-auto">
+                        <div id="pipelineUnderwriterTable"></div>
+                    </div>
+                </div>
+                
+                <!-- Deals Close Details Table -->
+                <div class="rounded-2xl border border-gray-200 bg-white">
+                    <div class="px-6 py-4">
+                        <h3 class="text-lg font-semibold text-gray-800">Deals Pending Closure Details</h3>
+                        <p class="text-xs text-gray-500 mt-1">Complete details of all pending deals</p>
+                    </div>
+                    <div class="custom-scrollbar overflow-x-auto">
+                        <div id="pipelineDetailsTable"></div>
+                    </div>
+                </div>
+            `;
+        }
+        function generateNewFacilitiesExpandedView(dataSource) {
+            // This function now only returns the HTML template
+            // Data processing is done in initializeNewFacilitiesChart()
+            
+            return `
+                <!-- Title Section -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900">New Facilities Approved</h3>
+                    <p class="text-sm text-gray-500 mt-1">Analysis of newly approved facilities for the selected period</p>
+                </div>
+                
+                <!-- Summary KPIs -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6" id="newFacilitiesKPIs">
+                    <div class="rounded-xl border border-gray-200 bg-white p-5">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100">
+                                <svg class="h-5 w-5 shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">Total New Facilities</p>
+                                <h3 class="text-2xl font-bold text-gray-900" id="newFacilitiesCount">0</h3>
+                                <p class="text-xs text-gray-500 mt-1" id="newFacilitiesTotalTFA">$0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Regional Distribution -->
+                <div class="rounded-xl border border-gray-200 bg-white flex flex-col mb-6">
+                    <div class="border-b border-gray-200 px-6 py-4">
+                        <h3 class="text-base font-semibold text-gray-900">Regional Distribution</h3>
+                        <p class="text-xs text-gray-500 mt-1">New facilities by region</p>
+                    </div>
+                    <div class="flex-1 overflow-hidden">
+                        <div id="newFacilitiesRegionalTable" class="h-full"></div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function generateTopRelationshipsExpandedView(dataSource) {
             const excludedFacilityTypes = [
                 "Uncommitted Advised Lines",
                 "Credit Cards",
@@ -18430,109 +19127,13 @@
         }
         
         function generateROTCEExpandedView(dataSource) {
-            // Get Top N filter value
-            const topN = parseInt(document.getElementById("topNFilter").value) || 10;
-            
-            // Collect ROTCE data by relationship
-            const rotceByRelationship = new Map();
-            const relationshipDetails = new Map();
-            
-            dataSource.forEach(row => {
-                const relName = row.Relationship_Name || row.Relationship_ID;
-                const rotce = parsePercentage(row.ROTCE);
-                const region = (row.Region || "Unknown").toUpperCase();
-                const product = row.Product_Program || "Unknown";
-                
-                if (!relName) return;
-                
-                // ROTCE values
-                if (!rotceByRelationship.has(relName)) {
-                    rotceByRelationship.set(relName, []);
-                }
-                if (!isNaN(rotce)) {
-                    rotceByRelationship.get(relName).push(rotce);
-                }
-                
-                // Relationship details
-                if (!relationshipDetails.has(relName)) {
-                    relationshipDetails.set(relName, {
-                        name: relName,
-                        region: region,
-                        direct: 0,
-                        tfa: 0,
-                        facilities: new Set(),
-                        products: new Set(),
-                        rotceValues: []
-                    });
-                }
-                
-                const details = relationshipDetails.get(relName);
-                details.direct += parseNumber(row.Direct_OS);
-                details.tfa += parseNumber(row.Fac_Amount || row.Facility_Amount);
-                if (row.Facility_ID) details.facilities.add(row.Facility_ID);
-                details.products.add(product);
-                if (!isNaN(rotce)) details.rotceValues.push(rotce);
-            });
-            
-            // Calculate averages
-            const relationshipROTCE = [];
-            relationshipDetails.forEach((details, relName) => {
-                const avgROTCE = details.rotceValues.length > 0
-                    ? details.rotceValues.reduce((sum, val) => sum + val, 0) / details.rotceValues.length
-                    : 0;
-                const minROTCE = details.rotceValues.length > 0 ? Math.min(...details.rotceValues) : 0;
-                const maxROTCE = details.rotceValues.length > 0 ? Math.max(...details.rotceValues) : 0;
-                
-                relationshipROTCE.push({
-                    name: relName,
-                    region: details.region,
-                    avgROTCE: avgROTCE,
-                    minROTCE: minROTCE,
-                    maxROTCE: maxROTCE,
-                    direct: details.direct,
-                    tfa: details.tfa,
-                    facilities: details.facilities.size,
-                    products: details.products.size,
-                    dataPoints: details.rotceValues.length
-                });
-            });
-            
-            // Sort by Direct OS and get top N
-            const topRelationships = relationshipROTCE
-                .sort((a, b) => b.direct - a.direct)
-                .slice(0, topN);
-            
-            // Performance categorization
-            const excellent = topRelationships.filter(r => r.avgROTCE >= 15).length;
-            const good = topRelationships.filter(r => r.avgROTCE >= 12 && r.avgROTCE < 15).length;
-            const acceptable = topRelationships.filter(r => r.avgROTCE >= 8 && r.avgROTCE < 12).length;
-            const belowTarget = topRelationships.filter(r => r.avgROTCE < 8).length;
-            
-            // Regional performance
-            const regionalPerformance = { NAM: [], LATAM: [], EMEA: [], APAC: [] };
-            topRelationships.forEach(rel => {
-                const region = rel.region;
-                if (regionalPerformance[region]) {
-                    regionalPerformance[region].push(rel.avgROTCE);
-                }
-            });
-            
-            const regionalAvg = {};
-            Object.keys(regionalPerformance).forEach(region => {
-                const values = regionalPerformance[region];
-                regionalAvg[region] = values.length > 0 
-                    ? values.reduce((sum, val) => sum + val, 0) / values.length 
-                    : 0;
-            });
-            
-            const portfolioAvg = topRelationships.length > 0
-                ? topRelationships.reduce((sum, r) => sum + r.avgROTCE, 0) / topRelationships.length
-                : 0;
+            // Data processing is now done in initializeROTCEChart
+            // This function only returns the HTML structure
             
             return `
                 <!-- Title Section -->
                 <div class="mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900">ROTCE Performance - Top ${topN} Relationships</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">ROTCE Performance - Top N Relationships</h3>
                     <p class="text-sm text-gray-500 mt-1">Return on Tangible Common Equity analysis for largest clients</p>
                 </div>
                 
@@ -18540,14 +19141,14 @@
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                     <div class="rounded-xl border border-gray-200 bg-white p-5">
                         <div class="flex items-start gap-3">
-                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${portfolioAvg >= 12 ? 'bg-green-100' : 'bg-amber-100'}">
-                                <svg class="h-5 w-5 shrink-0 ${portfolioAvg >= 12 ? 'text-green-600' : 'text-amber-600'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100">
+                                <svg class="h-5 w-5 shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                 </svg>
                             </div>
                             <div>
                                 <p class="text-xs text-gray-500">Portfolio Avg ROTCE</p>
-                                <h3 class="text-2xl font-bold ${portfolioAvg >= 12 ? 'text-green-600' : 'text-amber-600'}">${portfolioAvg.toFixed(1)}%</h3>
+                                <h3 class="text-2xl font-bold text-gray-900" id="rotcePortfolioAvg">--</h3>
                                 <p class="text-xs text-gray-500 mt-1">Target: 12%+</p>
                             </div>
                         </div>
@@ -18562,8 +19163,8 @@
                             </div>
                             <div>
                                 <p class="text-xs text-gray-500">Above Target (≥12%)</p>
-                                <h3 class="text-2xl font-bold text-gray-900">${good + excellent}</h3>
-                                <p class="text-xs text-gray-500 mt-1">${((good + excellent) / topRelationships.length * 100).toFixed(0)}% of portfolio</p>
+                                <h3 class="text-2xl font-bold text-gray-900" id="rotceAboveTarget">--</h3>
+                                <p class="text-xs text-gray-500 mt-1" id="rotceAboveTargetPct">--</p>
                             </div>
                         </div>
                     </div>
@@ -18577,8 +19178,8 @@
                             </div>
                             <div>
                                 <p class="text-xs text-gray-500">Acceptable (8-12%)</p>
-                                <h3 class="text-2xl font-bold text-gray-900">${acceptable}</h3>
-                                <p class="text-xs text-gray-500 mt-1">${(acceptable / topRelationships.length * 100).toFixed(0)}% of portfolio</p>
+                                <h3 class="text-2xl font-bold text-gray-900" id="rotceAcceptable">--</h3>
+                                <p class="text-xs text-gray-500 mt-1" id="rotceAcceptablePct">--</p>
                             </div>
                         </div>
                     </div>
@@ -18592,85 +19193,37 @@
                             </div>
                             <div>
                                 <p class="text-xs text-gray-500">Below Target (<8%)</p>
-                                <h3 class="text-2xl font-bold text-gray-900">${belowTarget}</h3>
-                                <p class="text-xs text-gray-500 mt-1">${(belowTarget / topRelationships.length * 100).toFixed(0)}% of portfolio</p>
+                                <h3 class="text-2xl font-bold text-gray-900" id="rotceBelowTarget">--</h3>
+                                <p class="text-xs text-gray-500 mt-1" id="rotceBelowTargetPct">--</p>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Performance Distribution -->
-                <div class="rounded-xl border border-gray-200 bg-white p-6 mb-6">
-                    <h3 class="text-base font-semibold text-gray-900 mb-4">Performance Distribution</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div class="text-center p-4 bg-green-50 rounded-lg">
-                            <p class="text-sm text-gray-600 mb-1">Excellent (≥15%)</p>
-                            <p class="text-3xl font-bold text-green-600">${excellent}</p>
-                        </div>
-                        <div class="text-center p-4 bg-blue-50 rounded-lg">
-                            <p class="text-sm text-gray-600 mb-1">Good (12-15%)</p>
-                            <p class="text-3xl font-bold text-blue-600">${good}</p>
-                        </div>
-                        <div class="text-center p-4 bg-amber-50 rounded-lg">
-                            <p class="text-sm text-gray-600 mb-1">Acceptable (8-12%)</p>
-                            <p class="text-3xl font-bold text-amber-600">${acceptable}</p>
-                        </div>
-                        <div class="text-center p-4 bg-red-50 rounded-lg">
-                            <p class="text-sm text-gray-600 mb-1">Below Target (<8%)</p>
-                            <p class="text-3xl font-bold text-red-600">${belowTarget}</p>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Analysis Row -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <!-- Regional Performance -->
-                    <div class="rounded-xl border border-gray-200 bg-white">
-                        <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-base font-semibold text-gray-900">Regional Performance</h3>
-                            <p class="text-xs text-gray-500 mt-1">Average ROTCE by region</p>
+                    <!-- Regional Distribution -->
+                    <div class="rounded-2xl border border-gray-200 bg-white flex flex-col">
+                        <div class="px-6 py-4">
+                            <h3 class="text-lg font-semibold text-gray-800">Regional Distribution</h3>
+                            <p class="text-xs text-gray-500 mt-1">Breakdown by region for ROTCE performance</p>
                         </div>
-                        <div class="p-6">
-                            <div id="rotceRegionalTable"></div>
+                        <div class="flex-1 overflow-hidden">
+                            <div id="rotceRegionalTable" class="h-full"></div>
                         </div>
                     </div>
                     
-                    <!-- ROTCE Range Chart -->
+                    <!-- Below Target ROTCE Chart -->
                     <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-base font-semibold text-gray-900">ROTCE Range Analysis</h3>
-                            <p class="text-xs text-gray-500 mt-1">Min, Avg, Max ROTCE (Top 10)</p>
+                            <h3 class="text-base font-semibold text-gray-900">Below Target ROTCE (Top 10)</h3>
+                            <p class="text-xs text-gray-500 mt-1">Relationships with ROTCE below 8% target</p>
                         </div>
                         <div class="p-6">
-                            <div id="rotceRangeChart" style="min-height: 300px;"></div>
+                            <div id="rotceBelowTargetChart" style="min-height: 300px;"></div>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Detailed ROTCE Table -->
-                <div class="rounded-xl border border-gray-200 bg-white mb-6">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">Detailed ROTCE Metrics</h3>
-                        <p class="text-xs text-gray-500 mt-1">Comprehensive ROTCE analysis for top ${topN} relationships</p>
-                    </div>
-                    <div class="p-6">
-                        <div id="rotceDetailTable"></div>
-                    </div>
-                </div>
-                
-                <script>
-                    // Store data for rendering
-                    window.rotceExpandedData = {
-                        relationships: ${JSON.stringify(topRelationships)},
-                        regional: ${JSON.stringify(regionalAvg)},
-                        portfolioAvg: ${portfolioAvg}
-                    };
-                    
-                    // Render views after a short delay
-                    setTimeout(() => {
-                        renderROTCEExpandedViews();
-                    }, 100);
-                <\/script>
             `;
         }
         function generateCovenantExpandedView(dataSource) {

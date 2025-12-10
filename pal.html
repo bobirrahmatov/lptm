@@ -14226,9 +14226,9 @@
                     <div class="flex items-center justify-between px-6 py-4">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800">${
-                                filterState === 'cas' ? 'CAs Expiring Details' : 
-                                filterState === 'facilities' ? 'Facilities Expiring Details' : 
-                                'CAs & Facilities Expiring Details'
+                                filterState === 'cas' ? 'CAs Expiring Details (Top 10)' : 
+                                filterState === 'facilities' ? 'Facilities Expiring Details (Top 10)' : 
+                                'CAs & Facilities Expiring Details (Top 10)'
                             }</h3>
                             <p class="text-xs text-gray-500 mt-1">Detailed breakdown by item</p>
                         </div>
@@ -14250,25 +14250,29 @@
                     <div class="custom-scrollbar overflow-x-auto">
                         <table class="min-w-full">
                             <thead>
-                                <tr class="border-b border-gray-200">
+                                <tr class="bg-gray-50">
                                     ${filterState === 'cas' ? `
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700">Region</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700">Relationship</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700">CA Expiry Date</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold text-gray-700">TFA</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700">Status</th>
+                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Relationship</th>
+                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Region</th>
+                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Underwriter</th>
+                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Product Program</th>
+                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">CA Expiry Date</th>
+                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">TFA</th>
+                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Status</th>
                                     ` : filterState === 'facilities' ? `
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700">Region</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700">Relationship</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700">Facility ID</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700">Maturity Date</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold text-gray-700">TFA</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700">Status</th>
+                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Relationship</th>
+                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Region</th>
+                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Underwriter</th>
+                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Product Program</th>
+                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Facility ID</th>
+                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Maturity Date</th>
+                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">TFA</th>
+                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Status</th>
                                     ` : ''}
                                 </tr>
                             </thead>
-                            <tbody id="expiringTableBody" class="divide-y divide-gray-100">
-                                <tr><td colspan="6" class="px-6 py-8 text-center text-sm text-gray-500">Loading data...</td></tr>
+                            <tbody id="expiringTableBody" class="divide-y divide-gray-200">
+                                <tr><td colspan="8" class="px-6 py-8 text-center text-sm text-gray-500">Loading data...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -14322,9 +14326,16 @@
             // 1. Regional Summary Table
             const regionalTableEl = document.getElementById('regionalSummaryTable');
             if (regionalTableEl && regionalData) {
-                const regions = ['AMER', 'EMEA', 'APAC'];
+                // Convert to array and sort by TFA (highest to lowest)
+                const regionEntries = [
+                    { name: 'APAC', ...regionalData.APAC },
+                    { name: 'EMEA', ...regionalData.EMEA },
+                    { name: 'NAM', ...regionalData.NAM },
+                    { name: 'LATAM', ...regionalData.LATAM }
+                ].sort((a, b) => b.tfa - a.tfa);
+                
                 let tableHTML = `
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto w-full h-full">
                         <table class="w-full">
                             <thead>
                                 <tr class="border-b border-gray-200">
@@ -14338,18 +14349,17 @@
                 `;
                 
                 let totalCAs = 0, totalFacilities = 0, totalTFA = 0;
-                regions.forEach(region => {
-                    const data = regionalData[region] || {cas: 0, facilities: 0, tfa: 0};
-                    totalCAs += data.cas;
-                    totalFacilities += data.facilities;
-                    totalTFA += data.tfa;
+                regionEntries.forEach(region => {
+                    totalCAs += region.cas;
+                    totalFacilities += region.facilities;
+                    totalTFA += region.tfa;
                     
                     tableHTML += `
                         <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-sm font-medium text-gray-900">${region}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-700">${data.cas}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-700">${data.facilities}</td>
-                            <td class="px-4 py-3 text-sm text-right font-medium text-gray-900">${formatCurrency(data.tfa)}</td>
+                            <td class="px-4 py-3 text-sm font-medium text-gray-900">${region.name}</td>
+                            <td class="px-4 py-3 text-sm text-right text-gray-700">${region.cas}</td>
+                            <td class="px-4 py-3 text-sm text-right text-gray-700">${region.facilities}</td>
+                            <td class="px-4 py-3 text-sm text-right font-medium text-gray-900">${formatCurrency(region.tfa)}</td>
                         </tr>
                     `;
                 });
@@ -14378,55 +14388,80 @@
                     }],
                     chart: {
                         type: 'bar',
-                        height: 300,
+                            height: 300,
                         fontFamily: 'Outfit, sans-serif',
-                        toolbar: { show: false }
+                            toolbar: { show: false }
                     },
-                    colors: ['#8b5cf6'],
-                    plotOptions: {
-                        bar: {
-                            borderRadius: 6,
-                            horizontal: true,
-                            distributed: false,
-                            dataLabels: { position: 'right' }
-                        }
-                    },
-                    dataLabels: {
-                        enabled: true,
-                        formatter: function(val) {
-                            return formatCurrency(val);
+                        colors: ['#465fff'],
+                        plotOptions: {
+                            bar: {
+                                borderRadius: 6,
+                                horizontal: true,
+                                distributed: false,
+                                dataLabels: { position: 'right' }
+                            }
                         },
-                        offsetX: 5,
-                        style: {
-                            fontSize: '10px',
-                            colors: ['#374151']
-                        }
-                    },
-                    xaxis: {
-                        categories: productData.map(p => p.name),
-                        labels: {
+                        dataLabels: {
+                            enabled: true,
+                            textAnchor: 'start',
+                            offsetX: 12,
                             formatter: function(val) {
                                 return formatCurrency(val);
+                            },
+                            style: {
+                                fontSize: '11px',
+                                fontWeight: 500,
+                                colors: ['#374151']
+                            },
+                            background: {
+                                enabled: true,
+                                foreColor: '#374151',
+                                backgroundColor: '#F3F4F6',
+                                borderRadius: 12,
+                                padding: 6,
+                                opacity: 1,
+                                borderWidth: 0
+                            }
+                        },
+                        xaxis: {
+                            categories: productData.map(p => p.name),
+                            labels: {
+                                formatter: function(val) {
+                                    return formatCurrency(val);
+                                },
+                                style: {
+                                    colors: "#6B7280",
+                                    fontSize: "12px",
+                                    fontFamily: "Outfit, sans-serif",
+                                },
+                            },
+                            axisBorder: { show: false },
+                            axisTicks: { show: false },
+                        },
+                        yaxis: {
+                            labels: {
+                                align: 'left',
+                                offsetX: -10,
+                                style: {
+                                    colors: "#6B7280",
+                                    fontSize: "12px",
+                                    fontFamily: "Outfit, sans-serif",
+                                },
+                            },
+                        },
+                        grid: {
+                            borderColor: '#E5E7EB',
+                            strokeDashArray: 4
+                        },
+                        tooltip: {
+                            theme: 'light',
+                            y: {
+                                formatter: function(val) {
+                                    return formatCurrency(val);
+                                }
                             }
                         }
-                    },
-                    yaxis: {
-                        labels: {
-                            maxWidth: 120
-                        }
-                    },
-                    grid: {
-                        borderColor: '#f1f5f9',
-                        strokeDashArray: 4
-                    },
-                    tooltip: {
-                        y: {
-                            formatter: function(val) {
-                                return formatCurrency(val);
-                            }
-                        }
-                    }
-                };
+                    };
                 
                 productChartEl.innerHTML = '';
                 const productChart = new ApexCharts(productChartEl, productOptions);
@@ -16073,6 +16108,8 @@
                             type: 'CA',
                             region: row.Region || 'Unknown',
                             relationship: row.Relationship_Name || row.Relationship_ID || 'Unknown',
+                            underwriter: row.Lead_Underwriter || 'Unknown',
+                            product: row.Product_Program || 'Unknown',
                             idOrDate: dateObj.toLocaleDateString(),
                             date: dateObj,
                             tfa: amount,
@@ -16099,6 +16136,8 @@
                             type: 'Facility',
                             region: row.Region || 'Unknown',
                             relationship: row.Relationship_Name || 'Unknown',
+                            underwriter: row.Lead_Underwriter || 'Unknown',
+                            product: row.Product_Program || 'Unknown',
                             idOrDate: filterState === 'facilities' ? facilityId : `${facilityId} / ${dateObj.toLocaleDateString()}`,
                             facilityId: facilityId,
                             maturityDate: dateObj.toLocaleDateString(),
@@ -16113,52 +16152,75 @@
             // Sort by date (closest first)
             items.sort((a, b) => a.date - b.date);
             
-            // Limit to top 50 items
-            const displayItems = items.slice(0, 50);
+            // Limit to top 10 items (changed from 50)
+            const displayItems = items.slice(0, 10);
             
             if (displayItems.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-sm text-gray-500">No expiring or expired items found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="px-6 py-8 text-center text-sm text-gray-500">No expiring or expired items found</td></tr>';
                 return;
             }
             
-            // Build table rows based on filter
+            // Build table rows based on filter with TFA-style badges
             let html = '';
             displayItems.forEach(item => {
-                const statusClass = item.status === 'Expired' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800';
+                const statusClass = item.status === 'Expired' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700';
+                const regionColors = {
+                    'APAC': 'bg-blue-50 text-blue-600',
+                    'EMEA': 'bg-green-50 text-green-600',
+                    'NAM': 'bg-orange-50 text-orange-600',
+                    'LATAM': 'bg-purple-50 text-purple-600'
+                };
+                const regionColor = regionColors[item.region] || 'bg-gray-50 text-gray-600';
                 
                 if (filterState === 'cas') {
                     html += `
                         <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-3 text-xs text-gray-700">${item.region}</td>
-                            <td class="px-6 py-3 text-xs text-gray-900 font-medium">${item.relationship}</td>
-                            <td class="px-6 py-3 text-xs text-gray-700">${item.idOrDate}</td>
-                            <td class="px-6 py-3 text-xs text-gray-900 font-semibold text-right">${formatCurrency(item.tfa)}</td>
-                            <td class="px-6 py-3">
-                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${statusClass}">${item.status}</span>
+                            <td class="px-6 py-4 text-center text-sm font-medium text-gray-900">${item.relationship}</td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="${regionColor} rounded-full px-2 py-0.5 text-xs font-medium">
+                                    ${item.region}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-center text-sm text-gray-700">${item.underwriter}</td>
+                            <td class="px-6 py-4 text-center text-sm text-gray-700">${item.product}</td>
+                            <td class="px-6 py-4 text-center text-sm text-gray-700">${item.idOrDate}</td>
+                            <td class="px-6 py-4 text-center text-sm font-semibold text-gray-900">${formatCurrency(item.tfa)}</td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="${statusClass} rounded-full px-2 py-0.5 text-xs font-medium">
+                                    ${item.status}
+                                </span>
                             </td>
                         </tr>
                     `;
                 } else if (filterState === 'facilities') {
                     html += `
                         <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-3 text-xs text-gray-700">${item.region}</td>
-                            <td class="px-6 py-3 text-xs text-gray-900 font-medium">${item.relationship}</td>
-                            <td class="px-6 py-3 text-xs text-gray-700">${item.facilityId}</td>
-                            <td class="px-6 py-3 text-xs text-gray-700">${item.maturityDate}</td>
-                            <td class="px-6 py-3 text-xs text-gray-900 font-semibold text-right">${formatCurrency(item.tfa)}</td>
-                            <td class="px-6 py-3">
-                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${statusClass}">${item.status}</span>
+                            <td class="px-6 py-4 text-center text-sm font-medium text-gray-900">${item.relationship}</td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="${regionColor} rounded-full px-2 py-0.5 text-xs font-medium">
+                                    ${item.region}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-center text-sm text-gray-700">${item.underwriter}</td>
+                            <td class="px-6 py-4 text-center text-sm text-gray-700">${item.product}</td>
+                            <td class="px-6 py-4 text-center text-sm text-gray-700">${item.facilityId}</td>
+                            <td class="px-6 py-4 text-center text-sm text-gray-700">${item.maturityDate}</td>
+                            <td class="px-6 py-4 text-center text-sm font-semibold text-gray-900">${formatCurrency(item.tfa)}</td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="${statusClass} rounded-full px-2 py-0.5 text-xs font-medium">
+                                    ${item.status}
+                                </span>
                             </td>
                         </tr>
                     `;
                 }
             });
             
-            if (items.length > 50) {
+            if (items.length > 10) {
                 html += `
                     <tr>
-                        <td colspan="6" class="px-6 py-4 text-center text-xs text-gray-500 italic">
-                            Showing top 50 of ${items.length} items
+                        <td colspan="${filterState === 'cas' ? '7' : '8'}" class="px-6 py-4 text-center text-xs text-gray-500 italic">
+                            Showing top 10 of ${items.length} items
                         </td>
                     </tr>
                 `;
@@ -17202,20 +17264,6 @@
                         <div id="newFacilitiesUnderwriterTable"></div>
                     </div>
                 </div>
-                
-                <script>
-                    // Store data for rendering
-                    window.newFacilitiesExpandedData = {
-                        regional: ${JSON.stringify(regionalData)},
-                        products: ${JSON.stringify(topProducts)},
-                        underwriters: ${JSON.stringify(topUnderwriters)}
-                    };
-                    
-                    // Render views after a short delay
-                    setTimeout(() => {
-                        renderNewFacilitiesExpandedViews();
-                    }, 100);
-                <\/script>
             `;
         }
         

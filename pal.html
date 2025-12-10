@@ -6051,7 +6051,7 @@
 
                 const approvalDate = parseDate(row.Origination_Date);
                 const facilityId = row.Facility_ID;
-                const facAmount = parseNumber(row.Fac_Amount);
+                const facAmount = parseNumber(row.Fac_Amount || row.Facility_Amount);
                 
                 if (!approvalDate || !facilityId) continue;
                 
@@ -12749,7 +12749,7 @@
             });
             
             // Collect regional, product, and underwriter data for expiring items
-            const regionalData = { AMER: {cas: 0, facilities: 0, tfa: 0}, EMEA: {cas: 0, facilities: 0, tfa: 0}, APAC: {cas: 0, facilities: 0, tfa: 0} };
+            const regionalData = { NAM: {cas: 0, facilities: 0, tfa: 0}, LATAM: {cas: 0, facilities: 0, tfa: 0}, EMEA: {cas: 0, facilities: 0, tfa: 0}, APAC: {cas: 0, facilities: 0, tfa: 0} };
             const productData = {};
             const underwriterData = {};
             
@@ -12876,6 +12876,7 @@
             const productData = {};
             const underwriterData = {};
             const monthlyData = {};
+            const creditClassData = {};
             const currentYearFacilities = new Set();
             let currentYearTFA = 0;
             
@@ -12884,12 +12885,18 @@
             let prevYearTFA = 0;
             
             dataSource.forEach(row => {
+                // Always exclude PSE for New Deals metrics
+                const pseColumn = row["PSE_non-PSE"] || row.PSE_non_PSE || "";
+                const pseValue = String(pseColumn).trim().toUpperCase();
+                if (pseValue === "PSE") return;
+                
                 const originationDate = parseDate(row.Origination_Date);
                 const facilityId = row.Facility_ID;
                 const region = (row.Region || "Unknown").toUpperCase();
                 const product = row.Product_Program || "Unknown";
                 const underwriter = row.Lead_Underwriter || "Unknown";
-                const amount = parseNumber(row.Facility_Amount);
+                const creditClassification = (row.Credit_Classification || "Unknown").toUpperCase();
+                const amount = parseNumber(row.Fac_Amount || row.Facility_Amount);
                 
                 if (!facilityId || !originationDate) return;
                 
@@ -12908,6 +12915,11 @@
                         if (!productData[product]) productData[product] = { count: 0, tfa: 0 };
                         productData[product].count++;
                         productData[product].tfa += amount;
+                        
+                        // Credit Classification data
+                        if (!creditClassData[creditClassification]) creditClassData[creditClassification] = { count: 0, tfa: 0 };
+                        creditClassData[creditClassification].count++;
+                        creditClassData[creditClassification].tfa += amount;
                         
                         // Underwriter data
                         if (!underwriterData[underwriter]) underwriterData[underwriter] = { facilities: new Set(), tfa: 0, region: region };
@@ -12952,12 +12964,18 @@
                 .map(([name, data]) => ({name, ...data}))
                 .sort((a, b) => a.month - b.month);
             
+            // Convert credit classification to array
+            const creditClassification = Object.entries(creditClassData)
+                .map(([name, data]) => ({name, count: data.count, tfa: data.tfa}))
+                .sort((a, b) => b.count - a.count);
+            
             // Store data for rendering
             window.newDealsYTDExpandedData = {
                 regionalData,
                 topProducts,
                 topUnderwriters,
                 monthlyTrend,
+                creditClassification,
                 prevYearFacilities: prevYearFacilities.size,
                 prevYearTFA,
                 currentCount: currentYearFacilities.size,
@@ -12992,6 +13010,7 @@
             const productData = {};
             const underwriterData = {};
             const weeklyData = {};
+            const creditClassData = {};
             const currentMonthFacilities = new Set();
             let currentMonthTFA = 0;
             
@@ -13000,12 +13019,18 @@
             let prevMonthTFA = 0;
             
             dataSource.forEach(row => {
+                // Always exclude PSE for New Deals metrics
+                const pseColumn = row["PSE_non-PSE"] || row.PSE_non_PSE || "";
+                const pseValue = String(pseColumn).trim().toUpperCase();
+                if (pseValue === "PSE") return;
+                
                 const originationDate = parseDate(row.Origination_Date);
                 const facilityId = row.Facility_ID;
                 const region = (row.Region || "Unknown").toUpperCase();
                 const product = row.Product_Program || "Unknown";
                 const underwriter = row.Lead_Underwriter || "Unknown";
-                const amount = parseNumber(row.Facility_Amount);
+                const creditClassification = (row.Credit_Classification || "Unknown").toUpperCase();
+                const amount = parseNumber(row.Fac_Amount || row.Facility_Amount);
                 
                 if (!facilityId || !originationDate) return;
                 
@@ -13024,6 +13049,11 @@
                         if (!productData[product]) productData[product] = { count: 0, tfa: 0 };
                         productData[product].count++;
                         productData[product].tfa += amount;
+                        
+                        // Credit Classification data
+                        if (!creditClassData[creditClassification]) creditClassData[creditClassification] = { count: 0, tfa: 0 };
+                        creditClassData[creditClassification].count++;
+                        creditClassData[creditClassification].tfa += amount;
                         
                         // Underwriter data
                         if (!underwriterData[underwriter]) underwriterData[underwriter] = { facilities: new Set(), tfa: 0, region: region };
@@ -13069,12 +13099,18 @@
                 .map(([name, data]) => ({name, ...data}))
                 .sort((a, b) => a.week - b.week);
             
+            // Convert credit classification to array
+            const creditClassification = Object.entries(creditClassData)
+                .map(([name, data]) => ({name, count: data.count, tfa: data.tfa}))
+                .sort((a, b) => b.count - a.count);
+            
             // Store data for rendering
             window.newDealsMTDExpandedData = {
                 regionalData,
                 topProducts,
                 topUnderwriters,
                 weeklyTrend,
+                creditClassification,
                 prevMonthFacilities: prevMonthFacilities.size,
                 prevMonthTFA,
                 currentCount: currentMonthFacilities.size,
@@ -13199,7 +13235,6 @@
                 APAC: {count: 0, tfa: 0, direct: 0}, 
                 EMEA: {count: 0, tfa: 0, direct: 0}, 
                 NAM: {count: 0, tfa: 0, direct: 0},
-                AMER: {count: 0, tfa: 0, direct: 0},
                 LATAM: {count: 0, tfa: 0, direct: 0}
             };
             topRelationships.forEach(rel => {
@@ -14517,7 +14552,7 @@
             });
             
             // Collect regional, product, and underwriter data for expiring items
-            const regionalData = { AMER: {cas: 0, facilities: 0, tfa: 0}, EMEA: {cas: 0, facilities: 0, tfa: 0}, APAC: {cas: 0, facilities: 0, tfa: 0} };
+            const regionalData = { NAM: {cas: 0, facilities: 0, tfa: 0}, LATAM: {cas: 0, facilities: 0, tfa: 0}, EMEA: {cas: 0, facilities: 0, tfa: 0}, APAC: {cas: 0, facilities: 0, tfa: 0} };
             const productData = {};
             const underwriterData = {};
             
@@ -15385,6 +15420,7 @@
                 topProducts,
                 topUnderwriters,
                 monthlyTrend,
+                creditClassification,
                 prevYearFacilities,
                 prevYearTFA,
                 currentCount,
@@ -15685,7 +15721,7 @@
                     },
                     legend: {
                         show: true,
-                        position: 'bottom',
+                        position: 'right',
                         horizontalAlign: 'center',
                         fontFamily: 'Outfit, sans-serif',
                         fontSize: '12px',
@@ -15721,7 +15757,71 @@
                 productDonutChart.render();
             }
             
-            // 6. Product Deal Count Chart
+            // 6. Credit Classification Treemap (replaces Product Deal Count Chart)
+            const creditClassChartEl = document.getElementById('newDealsYTDCreditClassChart');
+            if (creditClassChartEl && creditClassification && creditClassification.length > 0) {
+                const treemapOptions = {
+                    series: [
+                        {
+                            data: creditClassification.map(c => ({
+                                x: c.name,
+                                y: c.count
+                            }))
+                        }
+                    ],
+                    legend: {
+                        show: false
+                    },
+                    chart: {
+                        height: 380,
+                        type: 'treemap',
+                        fontFamily: 'Outfit, sans-serif',
+                        toolbar: { show: false }
+                    },
+                    title: {
+                        text: undefined
+                    },
+                    colors: ['#465fff'],
+                    plotOptions: {
+                        treemap: {
+                            distributed: true,
+                            enableShades: true
+                        }
+                    },
+                    dataLabels: {
+                        enabled: true,
+                        style: {
+                            fontSize: '14px',
+                            fontWeight: 700,
+                            colors: ['#fff']
+                        },
+                        formatter: function(text, op) {
+                            const item = creditClassification[op.dataPointIndex];
+                            return [text, `${item.count} deals`];
+                        },
+                        offsetY: -4
+                    },
+                    tooltip: {
+                        theme: 'light',
+                        custom: function({ seriesIndex, dataPointIndex, w }) {
+                            const item = creditClassification[dataPointIndex];
+                            return `
+                                <div style="padding: 8px 12px; background: white; border: 1px solid #e5e7eb; border-radius: 6px;">
+                                    <div style="font-weight: 600; margin-bottom: 4px;">${item.name}</div>
+                                    <div style="font-size: 11px; color: #6b7280;">
+                                        <div>Deals: ${item.count}</div>
+                                        <div>Total TFA: ${formatCurrency(item.tfa)}</div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }
+                };
+                
+                creditClassChartEl.innerHTML = '';
+                const creditClassChart = new ApexCharts(creditClassChartEl, treemapOptions);
+                creditClassChart.render();
+            }
             const productCountChartEl = document.getElementById('newDealsYTDProductCountChart');
             if (productCountChartEl && topProducts && topProducts.length > 0) {
                 const productCountChartHeight = Math.max(280, topProducts.length * 34);
@@ -15885,6 +15985,7 @@
                 topProducts,
                 topUnderwriters,
                 weeklyTrend,
+                creditClassification,
                 prevMonthFacilities,
                 prevMonthTFA,
                 currentCount,
@@ -16128,7 +16229,7 @@
                 weeklyChart.render();
             }
             
-            // 5. Product Donut Chart
+            // 5. Product Donut Chart (legends on right)
             const productChartEl = document.getElementById('newDealsMTDProductChart');
             if (productChartEl && topProducts && topProducts.length > 0) {
                 const colors = ['#465fff', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', '#ec4899', '#14b8a6', '#f97316', '#6366f1'];
@@ -16188,7 +16289,7 @@
                     },
                     legend: {
                         show: true,
-                        position: 'bottom',
+                        position: 'right',
                         horizontalAlign: 'center',
                         fontFamily: 'Outfit, sans-serif',
                         fontSize: '12px',
@@ -16224,104 +16325,73 @@
                 productDonutChart.render();
             }
             
-            // 6. Product Deal Count Chart
-            const productCountChartEl = document.getElementById('newDealsMTDProductCountChart');
-            if (productCountChartEl && topProducts && topProducts.length > 0) {
-                const productCountChartHeight = Math.max(280, topProducts.length * 34);
-                const productCountOptions = {
-                    series: [{
-                        name: 'Deal Count',
-                        data: topProducts.map(p => p.count)
-                    }],
-                    chart: {
-                        type: 'bar',
-                        height: productCountChartHeight,
-                        fontFamily: 'Outfit, sans-serif',
-                        toolbar: { show: false },
-                        parentHeightOffset: 0
+            // 6. Credit Classification Treemap (replaces Product Deal Count Chart)
+            const creditClassChartEl = document.getElementById('newDealsMTDCreditClassChart');
+            if (creditClassChartEl && creditClassification && creditClassification.length > 0) {
+                const treemapOptions = {
+                    series: [
+                        {
+                            data: creditClassification.map(c => ({
+                                x: c.name,
+                                y: c.count
+                            }))
+                        }
+                    ],
+                    legend: {
+                        show: false
                     },
-                    colors: ['#10b981'],
+                    chart: {
+                        height: 380,
+                        type: 'treemap',
+                        fontFamily: 'Outfit, sans-serif',
+                        toolbar: { show: false }
+                    },
+                    title: {
+                        text: undefined
+                    },
+                    colors: ['#465fff'],
                     plotOptions: {
-                        bar: {
-                            borderRadius: 6,
-                            horizontal: true,
-                            distributed: false,
-                            dataLabels: { position: 'right' },
-                            barHeight: '70%'
+                        treemap: {
+                            distributed: true,
+                            enableShades: true
                         }
                     },
                     dataLabels: {
                         enabled: true,
-                        textAnchor: 'start',
-                        offsetX: 16,
                         style: {
-                            fontSize: '11px',
-                            fontWeight: 500,
-                            colors: ['#374151']
+                            fontSize: '14px',
+                            fontWeight: 700,
+                            colors: ['#fff']
                         },
-                        background: {
-                            enabled: true,
-                            foreColor: '#374151',
-                            backgroundColor: '#F3F4F6',
-                            borderRadius: 12,
-                            padding: 8,
-                            opacity: 1,
-                            borderWidth: 0
-                        }
-                    },
-                    xaxis: {
-                        categories: topProducts.map(p => p.name),
-                        labels: {
-                            style: {
-                                colors: "#6B7280",
-                                fontSize: "12px",
-                                fontFamily: "Outfit, sans-serif",
-                            },
+                        formatter: function(text, op) {
+                            const item = creditClassification[op.dataPointIndex];
+                            return [text, `${item.count} deals`];
                         },
-                        axisBorder: { show: false },
-                        axisTicks: { show: false },
-                    },
-                    yaxis: {
-                        labels: {
-                            align: 'left',
-                            offsetX: -10,
-                            style: {
-                                colors: "#6B7280",
-                                fontSize: "12px",
-                                fontFamily: "Outfit, sans-serif",
-                            },
-                            maxWidth: 180
-                        },
-                    },
-                    grid: {
-                        borderColor: '#E5E7EB',
-                        strokeDashArray: 4,
-                        xaxis: { lines: { show: true } },
-                        yaxis: { lines: { show: false } },
-                        padding: {
-                            top: 4,
-                            right: 0,
-                            bottom: 0,
-                            left: 0
-                        }
+                        offsetY: -4
                     },
                     tooltip: {
                         theme: 'light',
-                        y: {
-                            formatter: function(val, opts) {
-                                const tfa = topProducts[opts.dataPointIndex].tfa;
-                                return val + ` deals (${formatCurrency(tfa)})`;
-                            }
+                        custom: function({ seriesIndex, dataPointIndex, w }) {
+                            const item = creditClassification[dataPointIndex];
+                            return `
+                                <div style="padding: 8px 12px; background: white; border: 1px solid #e5e7eb; border-radius: 6px;">
+                                    <div style="font-weight: 600; margin-bottom: 4px;">${item.name}</div>
+                                    <div style="font-size: 11px; color: #6b7280;">
+                                        <div>Deals: ${item.count}</div>
+                                        <div>Total TFA: ${formatCurrency(item.tfa)}</div>
+                                    </div>
+                                </div>
+                            `;
                         }
                     }
                 };
                 
-                productCountChartEl.innerHTML = '';
-                const productCountChart = new ApexCharts(productCountChartEl, productCountOptions);
-                productCountChart.render();
+                creditClassChartEl.innerHTML = '';
+                const creditClassChart = new ApexCharts(creditClassChartEl, treemapOptions);
+                creditClassChart.render();
             }
             
-            // 6. Underwriter Table
+            // 7. Top Underwriters Table
             const underwriterTableEl = document.getElementById('newDealsMTDUnderwriterTable');
             if (underwriterTableEl) {
                 let tableHTML = `
@@ -16688,7 +16758,6 @@
                     { name: 'APAC', ...(regional.APAC || {count: 0, tfa: 0, direct: 0}) },
                     { name: 'EMEA', ...(regional.EMEA || {count: 0, tfa: 0, direct: 0}) },
                     { name: 'NAM', ...(regional.NAM || {count: 0, tfa: 0, direct: 0}) },
-                    { name: 'AMER', ...(regional.AMER || {count: 0, tfa: 0, direct: 0}) },
                     { name: 'LATAM', ...(regional.LATAM || {count: 0, tfa: 0, direct: 0}) }
                 ].sort((a, b) => b.direct - a.direct);
                 
@@ -16814,7 +16883,6 @@
                         'APAC': 'bg-blue-50 text-blue-600',
                         'EMEA': 'bg-green-50 text-green-600',
                         'NAM': 'bg-orange-50 text-orange-600',
-                        'AMER': 'bg-orange-50 text-orange-600',
                         'LATAM': 'bg-purple-50 text-purple-600'
                     };
                     const regionColor = regionColors[rel.region] || 'bg-gray-50 text-gray-600';
@@ -17587,14 +17655,14 @@
                         </div>
                     </div>
                     
-                    <!-- Product Performance by Deal Count -->
+                    <!-- Credit Classification by Deal Count -->
                     <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-base font-semibold text-gray-900">Product Performance by Deal Count</h3>
-                            <p class="text-xs text-gray-500 mt-1">Number of deals by product</p>
+                            <h3 class="text-base font-semibold text-gray-900">Credit Classification by Deal Count</h3>
+                            <p class="text-xs text-gray-500 mt-1">Distribution by Management Status</p>
                         </div>
                         <div class="p-6">
-                            <div id="newDealsYTDProductCountChart" style="min-height: 300px;"></div>
+                            <div id="newDealsYTDCreditClassChart" style="min-height: 380px;"></div>
                         </div>
                     </div>
                 </div>
@@ -17673,14 +17741,14 @@
                         </div>
                     </div>
                     
-                    <!-- Product Performance by Deal Count -->
+                    <!-- Credit Classification by Deal Count -->
                     <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-base font-semibold text-gray-900">Product Performance by Deal Count</h3>
-                            <p class="text-xs text-gray-500 mt-1">Number of deals by product</p>
+                            <h3 class="text-base font-semibold text-gray-900">Credit Classification by Deal Count</h3>
+                            <p class="text-xs text-gray-500 mt-1">Distribution by Management Status</p>
                         </div>
                         <div class="p-6">
-                            <div id="newDealsMTDProductCountChart" style="min-height: 300px;"></div>
+                            <div id="newDealsMTDCreditClassChart" style="min-height: 380px;"></div>
                         </div>
                     </div>
                 </div>
@@ -18217,7 +18285,6 @@
                 APAC: {count: 0, tfa: 0, direct: 0}, 
                 EMEA: {count: 0, tfa: 0, direct: 0}, 
                 NAM: {count: 0, tfa: 0, direct: 0},
-                AMER: {count: 0, tfa: 0, direct: 0},
                 LATAM: {count: 0, tfa: 0, direct: 0}
             };
             topRelationships.forEach(rel => {
@@ -18442,7 +18509,7 @@
             const belowTarget = topRelationships.filter(r => r.avgROTCE < 8).length;
             
             // Regional performance
-            const regionalPerformance = { AMER: [], EMEA: [], APAC: [] };
+            const regionalPerformance = { NAM: [], LATAM: [], EMEA: [], APAC: [] };
             topRelationships.forEach(rel => {
                 const region = rel.region;
                 if (regionalPerformance[region]) {
@@ -18638,7 +18705,7 @@
             });
             
             // Collect comprehensive data for current view
-            const regionalData = { AMER: {count: 0, facilities: new Set()}, EMEA: {count: 0, facilities: new Set()}, APAC: {count: 0, facilities: new Set()} };
+            const regionalData = { NAM: {count: 0, facilities: new Set()}, LATAM: {count: 0, facilities: new Set()}, EMEA: {count: 0, facilities: new Set()}, APAC: {count: 0, facilities: new Set()} };
             const productData = {};
             const categoryData = {};
             const underwriterData = {};

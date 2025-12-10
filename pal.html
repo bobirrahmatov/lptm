@@ -12530,10 +12530,10 @@
             const period = selectedPeriod || 'current';
             
             // Initialize empty data structures
-            const regionalData = { AMER: {count: 0, tfa: 0}, EMEA: {count: 0, tfa: 0}, APAC: {count: 0, tfa: 0} };
+            const regionalData = { APAC: {count: 0, tfa: 0}, EMEA: {count: 0, tfa: 0}, NAM: {count: 0, tfa: 0}, LATAM: {count: 0, tfa: 0} };
             const topProducts = [];
-            const topUnderwriters = [];
-            const weeklyData = [];
+            const topFacilities = [];
+            const underwriterDeals = {};
             
             // Find the most recent Report_Date
             let mostRecentReportDate = null;
@@ -12562,15 +12562,15 @@
                 
                 // Collect data
                 const productData = {};
-                const underwriterData = {};
+                const facilitiesData = [];
                 const newFacilities = new Set();
-                const weeklyDataMap = {};
                 
                 dataSource.forEach(row => {
                     const region = (row.Region || "Unknown").toUpperCase();
                     const product = row.Product_Program || "Unknown";
                     const underwriter = row.Lead_Underwriter || "Unknown";
                     const facilityId = row.Facility_ID;
+                    const relationship = row.Relationship_Name || row.Relationship_ID || "Unknown";
                     
                     // Use Facility_First_Approval_Date for all regions
                     // Note: For APAC, new facilities are identified via month-end file comparison in ETL
@@ -12579,35 +12579,39 @@
                     if (!facilityId) return;
                     
                     if (approvalDate && approvalDate >= targetStartDate && approvalDate <= targetEndDate) {
-                        newFacilities.add(facilityId);
-                        const amount = parseNumber(row.Facility_Amount);
-                        
-                        if (!regionalData[region]) regionalData[region] = {count: 0, tfa: 0};
-                        regionalData[region].count++;
-                        regionalData[region].tfa += amount;
-                        
-                        if (!productData[product]) productData[product] = { count: 0, tfa: 0 };
-                        productData[product].count++;
-                        productData[product].tfa += amount;
-                        
-                        if (!underwriterData[underwriter]) underwriterData[underwriter] = { facilities: new Set(), tfa: 0, region: region };
-                        underwriterData[underwriter].facilities.add(facilityId);
-                        underwriterData[underwriter].tfa += amount;
-                        
-                        // Collect weekly data for timeline
-                        const weekStart = new Date(approvalDate);
-                        weekStart.setDate(approvalDate.getDate() - approvalDate.getDay()); // Start of week (Sunday)
-                        const weekKey = weekStart.toISOString().split('T')[0];
-                        if (!weeklyDataMap[weekKey]) {
-                            weeklyDataMap[weekKey] = { date: weekStart, count: 0, tfa: 0 };
+                        if (!newFacilities.has(facilityId)) {
+                            newFacilities.add(facilityId);
+                            const amount = parseNumber(row.Facility_Amount);
+                            
+                            // Regional data
+                            if (!regionalData[region]) regionalData[region] = {count: 0, tfa: 0};
+                            regionalData[region].count++;
+                            regionalData[region].tfa += amount;
+                            
+                            // Product data
+                            if (!productData[product]) productData[product] = { count: 0, tfa: 0 };
+                            productData[product].count++;
+                            productData[product].tfa += amount;
+                            
+                            // Underwriter deals count
+                            if (!underwriterDeals[underwriter]) {
+                                underwriterDeals[underwriter] = { name: underwriter, deals: 0, region: region };
+                            }
+                            underwriterDeals[underwriter].deals++;
+                            
+                            // Facility details for top 10
+                            facilitiesData.push({
+                                facilityId: facilityId,
+                                relationship: relationship,
+                                underwriter: underwriter,
+                                product: product,
+                                region: region,
+                                approvalDate: approvalDate.toLocaleDateString(),
+                                tfa: amount
+                            });
                         }
-                        weeklyDataMap[weekKey].count++;
-                        weeklyDataMap[weekKey].tfa += amount;
                     }
                 });
-                
-                // Convert weekly data to sorted array
-                weeklyData.push(...Object.values(weeklyDataMap).sort((a, b) => a.date - b.date));
                 
                 // Convert to arrays and sort
                 topProducts.push(...Object.entries(productData)
@@ -12615,14 +12619,19 @@
                     .sort((a, b) => b.tfa - a.tfa)
                     .slice(0, 10));
                 
-                topUnderwriters.push(...Object.entries(underwriterData)
-                    .map(([name, data]) => ({name, facilities: data.facilities.size, tfa: data.tfa, region: data.region}))
+                // Sort facilities by TFA and get top 10
+                topFacilities.push(...facilitiesData
                     .sort((a, b) => b.tfa - a.tfa)
                     .slice(0, 10));
             }
             
+            // Convert underwriter deals to array and sort by deals count
+            const topUnderwritersByDeals = Object.values(underwriterDeals)
+                .sort((a, b) => b.deals - a.deals)
+                .slice(0, 10);
+            
             // Always render the views, even with empty data
-            renderNewFacilitiesExpandedViews(regionalData, topProducts, topUnderwriters, weeklyData);
+            renderNewFacilitiesExpandedViews(regionalData, topProducts, topFacilities, topUnderwritersByDeals);
         }
         
         // Initialize Expiring Chart - processes data and renders
@@ -13092,10 +13101,220 @@
         
         // Initialize Top Relationships Chart - processes data and renders
         function initializeTopRelationshipsChart(dataSource) {
-            // For now, use the embedded script approach (to be refactored later)
-            setTimeout(() => {
-                if (window.topRelationshipsExpandedData) renderTopRelationshipsExpandedViews();
-            }, 150);
+            // Get Top N filter value
+            const topN = parseInt(document.getElementById("topNFilter").value) || 10;
+            
+            // Collect relationship data
+            const relationshipData = new Map();
+            const productByRelationship = new Map();
+            const facilityTypeByRelationship = new Map();
+            const underwriterByRelationship = new Map();
+            
+            dataSource.forEach(row => {
+                const relId = row.Relationship_Name || row.Relationship_ID;
+                const region = (row.Region || "Unknown").toUpperCase();
+                const product = row.Product_Program || "Unknown";
+                const facilityType = row.Facility_Type || "Unknown";
+                const underwriter = row.Lead_Underwriter || "Unknown";
+                
+                if (!relId) return;
+                
+                // Relationship totals
+                if (!relationshipData.has(relId)) {
+                    relationshipData.set(relId, {
+                        name: relId,
+                        region: region,
+                        tfa: 0,
+                        direct: 0,
+                        contingent: 0,
+                        pse: 0,
+                        totalOS: 0,
+                        osuc: 0,
+                        unused: 0,
+                        facilities: new Set(),
+                        rotce: []
+                    });
+                }
+                
+                const data = relationshipData.get(relId);
+                data.tfa += parseNumber(row.Fac_Amount || row.Facility_Amount);
+                data.direct += parseNumber(row.Direct_OS);
+                data.contingent += parseNumber(row.Contingent_OS);
+                data.pse += parseNumber(row.PSE_OS);
+                data.totalOS += parseNumber(row.Total_OS);
+                data.osuc += parseNumber(row.OSUC);
+                data.unused += parseNumber(row.Unused_Committed);
+                if (row.Facility_ID) data.facilities.add(row.Facility_ID);
+                
+                // ROTCE values
+                const rotce = parsePercentage(row.ROTCE);
+                if (!isNaN(rotce)) {
+                    data.rotce.push(rotce);
+                }
+                
+                // Product breakdown by relationship
+                if (!productByRelationship.has(relId)) {
+                    productByRelationship.set(relId, {});
+                }
+                const prodMap = productByRelationship.get(relId);
+                if (!prodMap[product]) {
+                    prodMap[product] = { tfa: 0, count: 0 };
+                }
+                prodMap[product].tfa += parseNumber(row.Fac_Amount || row.Facility_Amount);
+                prodMap[product].count++;
+                
+                // Facility type breakdown
+                if (!facilityTypeByRelationship.has(relId)) {
+                    facilityTypeByRelationship.set(relId, {});
+                }
+                const typeMap = facilityTypeByRelationship.get(relId);
+                if (!typeMap[facilityType]) {
+                    typeMap[facilityType] = { tfa: 0, count: 0 };
+                }
+                typeMap[facilityType].tfa += parseNumber(row.Fac_Amount || row.Facility_Amount);
+                typeMap[facilityType].count++;
+                
+                // Underwriter
+                if (!underwriterByRelationship.has(relId)) {
+                    underwriterByRelationship.set(relId, underwriter);
+                }
+            });
+            
+            // Calculate averages and prepare data
+            relationshipData.forEach((data, relId) => {
+                data.facilityCount = data.facilities.size;
+                data.avgROTCE = data.rotce.length > 0 
+                    ? data.rotce.reduce((sum, val) => sum + val, 0) / data.rotce.length 
+                    : 0;
+                data.avgDealSize = data.facilityCount > 0 ? data.tfa / data.facilityCount : 0;
+            });
+            
+            // Sort by Direct OS (default) and get top N
+            const topRelationships = Array.from(relationshipData.values())
+                .sort((a, b) => b.direct - a.direct)
+                .slice(0, topN);
+            
+            // Calculate regional distribution
+            const regionalData = { 
+                APAC: {count: 0, tfa: 0, direct: 0}, 
+                EMEA: {count: 0, tfa: 0, direct: 0}, 
+                NAM: {count: 0, tfa: 0, direct: 0},
+                AMER: {count: 0, tfa: 0, direct: 0},
+                LATAM: {count: 0, tfa: 0, direct: 0}
+            };
+            topRelationships.forEach(rel => {
+                const region = rel.region;
+                if (!regionalData[region]) {
+                    regionalData[region] = {count: 0, tfa: 0, direct: 0};
+                }
+                regionalData[region].count++;
+                regionalData[region].tfa += rel.tfa;
+                regionalData[region].direct += rel.direct;
+            });
+            
+            // Get exposure type breakdown for top relationships
+            const exposureBreakdown = topRelationships.map(rel => ({
+                name: rel.name,
+                direct: rel.direct,
+                contingent: rel.contingent,
+                pse: rel.pse,
+                totalOS: rel.totalOS
+            })).slice(0, 10); // Top 10 for chart
+            
+            // Get top products across all top relationships (for bar chart)
+            const productAggregation = {};
+            topRelationships.forEach(rel => {
+                const relId = rel.name;
+                const prodMap = productByRelationship.get(relId);
+                if (prodMap) {
+                    Object.entries(prodMap).forEach(([product, data]) => {
+                        if (!productAggregation[product]) {
+                            productAggregation[product] = { tfa: 0, count: 0 };
+                        }
+                        productAggregation[product].tfa += data.tfa;
+                        productAggregation[product].count += data.count;
+                    });
+                }
+            });
+            
+            const topProducts = Object.entries(productAggregation)
+                .map(([name, data]) => ({ name, tfa: data.tfa, count: data.count }))
+                .sort((a, b) => b.tfa - a.tfa)
+                .slice(0, 10);
+            
+            // Get product-level data for treemap (all products, sorted by TFA)
+            const productTreemapData = Object.entries(productAggregation)
+                .map(([name, data]) => ({ 
+                    product: name, 
+                    tfa: data.tfa, 
+                    count: data.count 
+                }))
+                .sort((a, b) => b.tfa - a.tfa);
+            
+            // Get top underwriters
+            const underwriterAggregation = {};
+            dataSource.forEach(row => {
+                const relId = row.Relationship_Name || row.Relationship_ID;
+                if (!relId) return;
+                
+                // Check if this relationship is in top N
+                const isTopRelationship = topRelationships.some(r => r.name === relId);
+                if (!isTopRelationship) return;
+                
+                const underwriter = row.Lead_Underwriter || "Unknown";
+                const region = (row.Region || "Unknown").toUpperCase();
+                const facilityId = row.Facility_ID;
+                
+                if (!underwriterAggregation[underwriter]) {
+                    underwriterAggregation[underwriter] = {
+                        name: underwriter,
+                        region: region,
+                        relationships: new Set(),
+                        facilities: new Set(),
+                        tfa: 0
+                    };
+                }
+                
+                underwriterAggregation[underwriter].relationships.add(relId);
+                if (facilityId) underwriterAggregation[underwriter].facilities.add(facilityId);
+                underwriterAggregation[underwriter].tfa += parseNumber(row.Fac_Amount || row.Facility_Amount);
+            });
+            
+            const topUnderwriters = Object.values(underwriterAggregation)
+                .map(u => ({
+                    name: u.name,
+                    region: u.region,
+                    relationships: u.relationships.size,
+                    facilities: u.facilities.size,
+                    tfa: u.tfa
+                }))
+                .sort((a, b) => b.tfa - a.tfa)
+                .slice(0, 10);
+            
+            // Store data for rendering
+            window.topRelationshipsExpandedData = {
+                relationships: topRelationships.map(r => ({
+                    name: r.name,
+                    region: r.region,
+                    tfa: r.tfa,
+                    direct: r.direct,
+                    contingent: r.contingent,
+                    pse: r.pse,
+                    totalOS: r.totalOS,
+                    osuc: r.osuc,
+                    facilities: r.facilityCount,
+                    avgROTCE: r.avgROTCE,
+                    avgDealSize: r.avgDealSize
+                })),
+                regional: regionalData,
+                exposureBreakdown: exposureBreakdown,
+                products: topProducts,
+                productTreemapData: productTreemapData,
+                underwriters: topUnderwriters
+            };
+            
+            // Call render with all computed data
+            renderTopRelationshipsExpandedViews();
         }
         
         // Initialize ROTCE Chart - processes data and renders
@@ -14807,15 +15026,15 @@
         }
         
         // Render New Facilities Expanded Analysis Views
-        function renderNewFacilitiesExpandedViews(regional, products, underwriters, weeklyData) {
+        function renderNewFacilitiesExpandedViews(regional, products, facilities, underwriters) {
             if (typeof ApexCharts === 'undefined') return;
             
             // Use parameters if provided, otherwise fall back to window variable for backward compatibility
             if (!regional && window.newFacilitiesExpandedData) {
                 regional = window.newFacilitiesExpandedData.regional;
                 products = window.newFacilitiesExpandedData.products;
-                underwriters = window.newFacilitiesExpandedData.underwriters;
-                weeklyData = window.newFacilitiesExpandedData.weeklyData || [];
+                facilities = window.newFacilitiesExpandedData.facilities || [];
+                underwriters = window.newFacilitiesExpandedData.underwriters || [];
             }
             
             if (!regional) return;
@@ -14831,7 +15050,7 @@
             // Update KPI cards
             const totalFacilities = regionEntries.reduce((sum, r) => sum + r.data.count, 0);
             const totalTFA = regionEntries.reduce((sum, r) => sum + r.data.tfa, 0);
-            const activeRegions = regionEntries.length;
+            const activeRegions = regionEntries.filter(r => r.data.count > 0).length;
             const totalUnderwriters = underwriters ? underwriters.length : 0;
             
             const facilitiesCountEl = document.getElementById('newFacilitiesCount');
@@ -14890,114 +15109,98 @@
                 regionalTableEl.innerHTML = tableHTML;
             }
             
-            // 2. Approval Timeline Chart - weekly trend of new facilities
+            // 2. Approval Timeline Chart - Top 10 Underwriters by Deal Count (horizontal bar)
             const timelineChartEl = document.getElementById('newFacilitiesSizeChart');
             if (timelineChartEl) {
-                if (weeklyData && weeklyData.length > 0) {
+                if (underwriters && underwriters.length > 0) {
+                    const chartHeight = Math.max(280, underwriters.length * 34);
                     const timelineOptions = {
                         series: [{
-                            name: 'Facilities',
-                            data: weeklyData.map(w => w.count)
-                        }, {
-                            name: 'TFA',
-                            data: weeklyData.map(w => w.tfa)
+                            name: 'Deals',
+                            data: underwriters.map(u => u.deals)
                         }],
                         chart: {
-                            type: 'line',
-                            height: 300,
+                            type: 'bar',
+                            height: chartHeight,
                             fontFamily: 'Outfit, sans-serif',
-                            toolbar: { show: false }
+                            toolbar: { show: false },
+                            parentHeightOffset: 0
                         },
-                        colors: ['#3b82f6', '#10b981'],
-                        stroke: {
-                            width: [3, 3],
-                            curve: 'smooth'
-                        },
-                        markers: {
-                            size: 4,
-                            strokeWidth: 0,
-                            hover: {
-                                size: 6
+                        colors: ['#465fff'],
+                        plotOptions: {
+                            bar: {
+                                borderRadius: 6,
+                                horizontal: true,
+                                distributed: false,
+                                dataLabels: { position: 'right' },
+                                barHeight: '70%'
                             }
                         },
                         dataLabels: {
-                            enabled: false
+                            enabled: true,
+                            textAnchor: 'start',
+                            offsetX: 16,
+                            formatter: function(val) {
+                                return val + ' deals';
+                            },
+                            style: {
+                                fontSize: '11px',
+                                fontWeight: 500,
+                                colors: ['#374151']
+                            },
+                            background: {
+                                enabled: true,
+                                foreColor: '#374151',
+                                backgroundColor: '#F3F4F6',
+                                borderRadius: 12,
+                                padding: 8,
+                                opacity: 1,
+                                borderWidth: 0
+                            }
                         },
                         xaxis: {
-                            categories: weeklyData.map(w => {
-                                const date = new Date(w.date);
-                                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                            }),
+                            categories: underwriters.map(u => u.name),
                             labels: {
                                 style: {
-                                    fontSize: '11px',
-                                    colors: '#6B7280'
-                                }
-                            }
-                        },
-                        yaxis: [{
-                            title: {
-                                text: 'Number of Facilities',
-                                style: {
-                                    fontSize: '11px',
-                                    fontWeight: 500,
-                                    color: '#3b82f6'
-                                }
-                            },
-                            labels: {
-                                style: {
-                                    fontSize: '11px',
-                                    colors: '#6B7280'
-                                }
-                            }
-                        }, {
-                            opposite: true,
-                            title: {
-                                text: 'TFA Amount',
-                                style: {
-                                    fontSize: '11px',
-                                    fontWeight: 500,
-                                    color: '#10b981'
-                                }
-                            },
-                            labels: {
-                                formatter: function(val) {
-                                    return formatCurrency(val);
+                                    colors: "#6B7280",
+                                    fontSize: "12px",
+                                    fontFamily: "Outfit, sans-serif",
                                 },
+                            },
+                            axisBorder: { show: false },
+                            axisTicks: { show: false },
+                        },
+                        yaxis: {
+                            labels: {
+                                align: 'left',
+                                offsetX: -10,
                                 style: {
-                                    fontSize: '11px',
-                                    colors: '#6B7280'
-                                }
-                            }
-                        }],
+                                    colors: "#6B7280",
+                                    fontSize: "12px",
+                                    fontFamily: "Outfit, sans-serif",
+                                },
+                                maxWidth: 180
+                            },
+                        },
                         grid: {
                             borderColor: '#E5E7EB',
                             strokeDashArray: 4,
-                            xaxis: { lines: { show: false } },
-                            yaxis: { lines: { show: true } }
-                        },
-                        legend: {
-                            position: 'top',
-                            horizontalAlign: 'right',
-                            fontSize: '12px',
-                            fontWeight: 500,
-                            markers: {
-                                width: 10,
-                                height: 10,
-                                radius: 10
+                            xaxis: { lines: { show: true } },
+                            yaxis: { lines: { show: false } },
+                            padding: {
+                                top: 4,
+                                right: 0,
+                                bottom: 0,
+                                left: 0
                             }
                         },
                         tooltip: {
                             theme: 'light',
-                            y: [{
+                            y: {
                                 formatter: function(val) {
-                                    return val + ' facilities';
+                                    return val + ' deals';
                                 }
-                            }, {
-                                formatter: function(val) {
-                                    return formatCurrency(val);
-                                }
-                            }]
+                            }
                         }
                     };
                     
@@ -15005,61 +15208,59 @@
                     const timelineChart = new ApexCharts(timelineChartEl, timelineOptions);
                     timelineChart.render();
                 } else {
-                    // Show "No data" message if no weekly data
-                    timelineChartEl.innerHTML = '<div class="flex items-center justify-center h-full"><p class="text-sm text-gray-500">No approval data available for this period</p></div>';
+                    // Show "No data" message if no underwriter data
+                    timelineChartEl.innerHTML = '<div class="flex items-center justify-center h-full"><p class="text-sm text-gray-500">No underwriter data available for this period</p></div>';
                 }
             }
             
-            // 3. Underwriter Table - matches Expiring modal style with badges
-            const underwriterTableEl = document.getElementById('newFacilitiesUnderwriterTable');
-            if (underwriterTableEl) {
+            // 3. Top 10 Facilities Table - showing facilities with highest TFA approved
+            const facilitiesTableEl = document.getElementById('newFacilitiesUnderwriterTable');
+            if (facilitiesTableEl) {
                 let tableHTML = `
                     <table class="min-w-full">
                         <thead>
                             <tr class="bg-gray-50">
-                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Underwriter</th>
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Facility ID</th>
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Relationship</th>
                                 <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Region</th>
-                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Facilities</th>
-                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Total TFA</th>
-                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Avg per Facility</th>
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Underwriter</th>
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Product</th>
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Approval Date</th>
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">TFA Approved</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
                 `;
                 
-                if (underwriters && underwriters.length > 0) {
-                    underwriters.forEach((uw, index) => {
-                        const avg = uw.facilities > 0 ? uw.tfa / uw.facilities : 0;
+                if (facilities && facilities.length > 0) {
+                    facilities.forEach((fac, index) => {
                         const regionColor = {
                             'APAC': 'bg-blue-100 text-blue-700',
                             'EMEA': 'bg-green-100 text-green-700',
                             'NAM': 'bg-purple-100 text-purple-700',
-                            'LATAM': 'bg-orange-100 text-orange-700',
-                            'AMER': 'bg-indigo-100 text-indigo-700'
-                        }[uw.region] || 'bg-gray-100 text-gray-700';
+                            'LATAM': 'bg-orange-100 text-orange-700'
+                        }[fac.region] || 'bg-gray-100 text-gray-700';
                         
                         tableHTML += `
                             <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 text-center text-sm font-medium text-gray-900">${uw.name}</td>
+                                <td class="px-6 py-4 text-center text-sm font-medium text-gray-900">${fac.facilityId}</td>
+                                <td class="px-6 py-4 text-center text-sm text-gray-700">${fac.relationship}</td>
                                 <td class="px-6 py-4 text-center">
                                     <span class="inline-flex items-center justify-center rounded-full ${regionColor} px-2.5 py-0.5 text-xs font-medium">
-                                        ${uw.region}
+                                        ${fac.region}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-center">
-                                    <span class="inline-flex items-center justify-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
-                                        ${uw.facilities}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap font-semibold text-gray-900">${formatCurrency(uw.tfa)}</td>
-                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-600">${formatCurrency(avg)}</td>
+                                <td class="px-6 py-4 text-center text-sm text-gray-700">${fac.underwriter}</td>
+                                <td class="px-6 py-4 text-center text-sm text-gray-700">${fac.product}</td>
+                                <td class="px-6 py-4 text-center text-sm text-gray-700">${fac.approvalDate}</td>
+                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap font-semibold text-gray-900">${formatCurrency(fac.tfa)}</td>
                             </tr>
                         `;
                     });
                 } else {
                     tableHTML += `
                         <tr>
-                            <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">No data available</td>
+                            <td colspan="7" class="px-6 py-8 text-center text-sm text-gray-500">No facilities data available</td>
                         </tr>
                     `;
                 }
@@ -15068,7 +15269,110 @@
                     </tbody>
                 </table>
                 `;
-                underwriterTableEl.innerHTML = tableHTML;
+                facilitiesTableEl.innerHTML = tableHTML;
+            }
+            
+            // 4. Product Distribution Chart
+            const productChartEl = document.getElementById('newFacilitiesProductChart');
+            if (productChartEl && products && products.length > 0) {
+                const productChartHeight = Math.max(280, products.length * 34);
+                const productOptions = {
+                    series: [{
+                        name: 'TFA',
+                        data: products.map(p => p.tfa)
+                    }],
+                    chart: {
+                        type: 'bar',
+                        height: productChartHeight,
+                        fontFamily: 'Outfit, sans-serif',
+                        toolbar: { show: false },
+                        parentHeightOffset: 0
+                    },
+                    colors: ['#465fff'],
+                    plotOptions: {
+                        bar: {
+                            borderRadius: 6,
+                            horizontal: true,
+                            distributed: false,
+                            dataLabels: { position: 'right' },
+                            barHeight: '70%'
+                        }
+                    },
+                    dataLabels: {
+                        enabled: true,
+                        textAnchor: 'start',
+                        offsetX: 16,
+                        formatter: function(val) {
+                            return formatCurrency(val);
+                        },
+                        style: {
+                            fontSize: '11px',
+                            fontWeight: 500,
+                            colors: ['#374151']
+                        },
+                        background: {
+                            enabled: true,
+                            foreColor: '#374151',
+                            backgroundColor: '#F3F4F6',
+                            borderRadius: 12,
+                            padding: 8,
+                            opacity: 1,
+                            borderWidth: 0
+                        }
+                    },
+                    xaxis: {
+                        categories: products.map(p => p.name),
+                        labels: {
+                            formatter: function(val) {
+                                return formatCurrency(val);
+                            },
+                            style: {
+                                colors: "#6B7280",
+                                fontSize: "12px",
+                                fontFamily: "Outfit, sans-serif",
+                            },
+                        },
+                        axisBorder: { show: false },
+                        axisTicks: { show: false },
+                    },
+                    yaxis: {
+                        labels: {
+                            align: 'left',
+                            offsetX: -10,
+                            style: {
+                                colors: "#6B7280",
+                                fontSize: "12px",
+                                fontFamily: "Outfit, sans-serif",
+                            },
+                            maxWidth: 180
+                        },
+                    },
+                    grid: {
+                        borderColor: '#E5E7EB',
+                        strokeDashArray: 4,
+                        xaxis: { lines: { show: true } },
+                        yaxis: { lines: { show: false } },
+                        padding: {
+                            top: 4,
+                            right: 0,
+                            bottom: 0,
+                            left: 0
+                        }
+                    },
+                    tooltip: {
+                        theme: 'light',
+                        y: {
+                            formatter: function(val, opts) {
+                                const count = products[opts.dataPointIndex].count;
+                                return formatCurrency(val) + ` (${count} facilities)`;
+                            }
+                        }
+                    }
+                };
+                
+                productChartEl.innerHTML = '';
+                const productChart = new ApexCharts(productChartEl, productOptions);
+                productChart.render();
             }
         }
         
@@ -15302,8 +15606,8 @@
                     grid: {
                         borderColor: '#E5E7EB',
                         strokeDashArray: 4,
-                        xaxis: { lines: { show: true } },
-                        yaxis: { lines: { show: false } },
+                        xaxis: { lines: { show: false } },
+                        yaxis: { lines: { show: true } },
                         padding: {
                             top: 4,
                             right: 0,
@@ -15321,23 +15625,119 @@
                 monthlyChart.render();
             }
             
-            // 5. Product Chart
+            // 5. Product Donut Chart
             const productChartEl = document.getElementById('newDealsYTDProductChart');
             if (productChartEl && topProducts && topProducts.length > 0) {
-                const productChartHeight = Math.max(280, topProducts.length * 34);
-                const productOptions = {
+                const colors = ['#465fff', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', '#ec4899', '#14b8a6', '#f97316', '#6366f1'];
+                const productDonutOptions = {
+                    series: topProducts.map(p => p.tfa),
+                    chart: {
+                        type: 'donut',
+                        height: 380,
+                        fontFamily: 'Outfit, sans-serif',
+                        toolbar: { show: false }
+                    },
+                    labels: topProducts.map(p => p.name),
+                    colors: colors.slice(0, topProducts.length),
+                    plotOptions: {
+                        pie: {
+                            donut: {
+                                size: '65%',
+                                labels: {
+                                    show: true,
+                                    name: {
+                                        show: true,
+                                        fontSize: '14px',
+                                        fontFamily: 'Outfit, sans-serif',
+                                        fontWeight: 500,
+                                        color: '#374151',
+                                        offsetY: -10
+                                    },
+                                    value: {
+                                        show: true,
+                                        fontSize: '24px',
+                                        fontFamily: 'Outfit, sans-serif',
+                                        fontWeight: 700,
+                                        color: '#111827',
+                                        offsetY: 10,
+                                        formatter: function(val) {
+                                            return formatCurrency(val);
+                                        }
+                                    },
+                                    total: {
+                                        show: true,
+                                        label: 'Total TFA',
+                                        fontSize: '14px',
+                                        fontFamily: 'Outfit, sans-serif',
+                                        fontWeight: 500,
+                                        color: '#6B7280',
+                                        formatter: function(w) {
+                                            const total = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                                            return formatCurrency(total);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    legend: {
+                        show: true,
+                        position: 'bottom',
+                        horizontalAlign: 'center',
+                        fontFamily: 'Outfit, sans-serif',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                        markers: {
+                            size: 6,
+                            shape: 'circle',
+                            radius: 12,
+                            strokeWidth: 0
+                        },
+                        itemMargin: {
+                            horizontal: 8,
+                            vertical: 4
+                        },
+                        formatter: function(seriesName, opts) {
+                            const value = opts.w.globals.series[opts.seriesIndex];
+                            return seriesName + ': ' + formatCurrency(value);
+                        }
+                    },
+                    tooltip: {
+                        theme: 'light',
+                        y: {
+                            formatter: function(val, opts) {
+                                const count = topProducts[opts.seriesIndex].count;
+                                return formatCurrency(val) + ` (${count} deals)`;
+                            }
+                        }
+                    }
+                };
+                
+                productChartEl.innerHTML = '';
+                const productDonutChart = new ApexCharts(productChartEl, productDonutOptions);
+                productDonutChart.render();
+            }
+            
+            // 6. Product Deal Count Chart
+            const productCountChartEl = document.getElementById('newDealsYTDProductCountChart');
+            if (productCountChartEl && topProducts && topProducts.length > 0) {
+                const productCountChartHeight = Math.max(280, topProducts.length * 34);
+                const productCountOptions = {
                     series: [{
-                        name: 'TFA',
-                        data: topProducts.map(p => p.tfa)
+                        name: 'Deal Count',
+                        data: topProducts.map(p => p.count)
                     }],
                     chart: {
                         type: 'bar',
-                        height: productChartHeight,
+                        height: productCountChartHeight,
                         fontFamily: 'Outfit, sans-serif',
                         toolbar: { show: false },
                         parentHeightOffset: 0
                     },
-                    colors: ['#465fff'],
+                    colors: ['#10b981'],
                     plotOptions: {
                         bar: {
                             borderRadius: 6,
@@ -15351,9 +15751,6 @@
                         enabled: true,
                         textAnchor: 'start',
                         offsetX: 16,
-                        formatter: function(val) {
-                            return formatCurrency(val);
-                        },
                         style: {
                             fontSize: '11px',
                             fontWeight: 500,
@@ -15372,9 +15769,6 @@
                     xaxis: {
                         categories: topProducts.map(p => p.name),
                         labels: {
-                            formatter: function(val) {
-                                return formatCurrency(val);
-                            },
                             style: {
                                 colors: "#6B7280",
                                 fontSize: "12px",
@@ -15412,16 +15806,16 @@
                         theme: 'light',
                         y: {
                             formatter: function(val, opts) {
-                                const count = topProducts[opts.dataPointIndex].count;
-                                return formatCurrency(val) + ` (${count} deals)`;
+                                const tfa = topProducts[opts.dataPointIndex].tfa;
+                                return val + ` deals (${formatCurrency(tfa)})`;
                             }
                         }
                     }
                 };
                 
-                productChartEl.innerHTML = '';
-                const productChart = new ApexCharts(productChartEl, productOptions);
-                productChart.render();
+                productCountChartEl.innerHTML = '';
+                const productCountChart = new ApexCharts(productCountChartEl, productCountOptions);
+                productCountChart.render();
             }
             
             // 6. Underwriter Table
@@ -15715,8 +16109,8 @@
                     grid: {
                         borderColor: '#E5E7EB',
                         strokeDashArray: 4,
-                        xaxis: { lines: { show: true } },
-                        yaxis: { lines: { show: false } },
+                        xaxis: { lines: { show: false } },
+                        yaxis: { lines: { show: true } },
                         padding: {
                             top: 4,
                             right: 0,
@@ -15734,23 +16128,119 @@
                 weeklyChart.render();
             }
             
-            // 5. Product Chart
+            // 5. Product Donut Chart
             const productChartEl = document.getElementById('newDealsMTDProductChart');
             if (productChartEl && topProducts && topProducts.length > 0) {
-                const productChartHeight = Math.max(280, topProducts.length * 34);
-                const productOptions = {
+                const colors = ['#465fff', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4', '#ec4899', '#14b8a6', '#f97316', '#6366f1'];
+                const productDonutOptions = {
+                    series: topProducts.map(p => p.tfa),
+                    chart: {
+                        type: 'donut',
+                        height: 380,
+                        fontFamily: 'Outfit, sans-serif',
+                        toolbar: { show: false }
+                    },
+                    labels: topProducts.map(p => p.name),
+                    colors: colors.slice(0, topProducts.length),
+                    plotOptions: {
+                        pie: {
+                            donut: {
+                                size: '65%',
+                                labels: {
+                                    show: true,
+                                    name: {
+                                        show: true,
+                                        fontSize: '14px',
+                                        fontFamily: 'Outfit, sans-serif',
+                                        fontWeight: 500,
+                                        color: '#374151',
+                                        offsetY: -10
+                                    },
+                                    value: {
+                                        show: true,
+                                        fontSize: '24px',
+                                        fontFamily: 'Outfit, sans-serif',
+                                        fontWeight: 700,
+                                        color: '#111827',
+                                        offsetY: 10,
+                                        formatter: function(val) {
+                                            return formatCurrency(val);
+                                        }
+                                    },
+                                    total: {
+                                        show: true,
+                                        label: 'Total TFA',
+                                        fontSize: '14px',
+                                        fontFamily: 'Outfit, sans-serif',
+                                        fontWeight: 500,
+                                        color: '#6B7280',
+                                        formatter: function(w) {
+                                            const total = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                                            return formatCurrency(total);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    legend: {
+                        show: true,
+                        position: 'bottom',
+                        horizontalAlign: 'center',
+                        fontFamily: 'Outfit, sans-serif',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                        markers: {
+                            size: 6,
+                            shape: 'circle',
+                            radius: 12,
+                            strokeWidth: 0
+                        },
+                        itemMargin: {
+                            horizontal: 8,
+                            vertical: 4
+                        },
+                        formatter: function(seriesName, opts) {
+                            const value = opts.w.globals.series[opts.seriesIndex];
+                            return seriesName + ': ' + formatCurrency(value);
+                        }
+                    },
+                    tooltip: {
+                        theme: 'light',
+                        y: {
+                            formatter: function(val, opts) {
+                                const count = topProducts[opts.seriesIndex].count;
+                                return formatCurrency(val) + ` (${count} deals)`;
+                            }
+                        }
+                    }
+                };
+                
+                productChartEl.innerHTML = '';
+                const productDonutChart = new ApexCharts(productChartEl, productDonutOptions);
+                productDonutChart.render();
+            }
+            
+            // 6. Product Deal Count Chart
+            const productCountChartEl = document.getElementById('newDealsMTDProductCountChart');
+            if (productCountChartEl && topProducts && topProducts.length > 0) {
+                const productCountChartHeight = Math.max(280, topProducts.length * 34);
+                const productCountOptions = {
                     series: [{
-                        name: 'TFA',
-                        data: topProducts.map(p => p.tfa)
+                        name: 'Deal Count',
+                        data: topProducts.map(p => p.count)
                     }],
                     chart: {
                         type: 'bar',
-                        height: productChartHeight,
+                        height: productCountChartHeight,
                         fontFamily: 'Outfit, sans-serif',
                         toolbar: { show: false },
                         parentHeightOffset: 0
                     },
-                    colors: ['#465fff'],
+                    colors: ['#10b981'],
                     plotOptions: {
                         bar: {
                             borderRadius: 6,
@@ -15764,9 +16254,6 @@
                         enabled: true,
                         textAnchor: 'start',
                         offsetX: 16,
-                        formatter: function(val) {
-                            return formatCurrency(val);
-                        },
                         style: {
                             fontSize: '11px',
                             fontWeight: 500,
@@ -15785,9 +16272,6 @@
                     xaxis: {
                         categories: topProducts.map(p => p.name),
                         labels: {
-                            formatter: function(val) {
-                                return formatCurrency(val);
-                            },
                             style: {
                                 colors: "#6B7280",
                                 fontSize: "12px",
@@ -15825,16 +16309,16 @@
                         theme: 'light',
                         y: {
                             formatter: function(val, opts) {
-                                const count = topProducts[opts.dataPointIndex].count;
-                                return formatCurrency(val) + ` (${count} deals)`;
+                                const tfa = topProducts[opts.dataPointIndex].tfa;
+                                return val + ` deals (${formatCurrency(tfa)})`;
                             }
                         }
                     }
                 };
                 
-                productChartEl.innerHTML = '';
-                const productChart = new ApexCharts(productChartEl, productOptions);
-                productChart.render();
+                productCountChartEl.innerHTML = '';
+                const productCountChart = new ApexCharts(productCountChartEl, productCountOptions);
+                productCountChart.render();
             }
             
             // 6. Underwriter Table
@@ -16194,160 +16678,182 @@
         function renderTopRelationshipsExpandedViews() {
             if (!window.topRelationshipsExpandedData || typeof ApexCharts === 'undefined') return;
             
-            const { relationships, regional, exposureBreakdown } = window.topRelationshipsExpandedData;
+            const { relationships, regional, exposureBreakdown, products, productTreemapData, underwriters } = window.topRelationshipsExpandedData;
             
             // 1. Regional Summary Table
             const regionalTableEl = document.getElementById('topRelationshipsRegionalTable');
             if (regionalTableEl && regional) {
-                const regions = Object.keys(regional).filter(r => regional[r].count > 0);
+                // Always show all regions, sorted by Direct OS (highest to lowest)
+                const regionEntries = [
+                    { name: 'APAC', ...(regional.APAC || {count: 0, tfa: 0, direct: 0}) },
+                    { name: 'EMEA', ...(regional.EMEA || {count: 0, tfa: 0, direct: 0}) },
+                    { name: 'NAM', ...(regional.NAM || {count: 0, tfa: 0, direct: 0}) },
+                    { name: 'AMER', ...(regional.AMER || {count: 0, tfa: 0, direct: 0}) },
+                    { name: 'LATAM', ...(regional.LATAM || {count: 0, tfa: 0, direct: 0}) }
+                ].sort((a, b) => b.direct - a.direct);
+                
                 let tableHTML = `
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="border-b border-gray-200">
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Region</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Relationships</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Direct OS</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Avg per Client</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
+                    <table class="w-full h-full">
+                        <thead>
+                            <tr class="border-b border-gray-200 bg-gray-50">
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700">Region</th>
+                                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700">Relationships</th>
+                                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700">Direct OS</th>
+                                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700">Avg per Client</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
                 `;
                 
-                regions.forEach(region => {
-                    const data = regional[region];
-                    const avg = data.count > 0 ? data.direct / data.count : 0;
+                let totalCount = 0, totalDirect = 0;
+                regionEntries.forEach(region => {
+                    const avg = region.count > 0 ? region.direct / region.count : 0;
+                    totalCount += region.count;
+                    totalDirect += region.direct;
                     
                     tableHTML += `
                         <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-sm font-medium text-gray-900">${region}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-700">${data.count}</td>
-                            <td class="px-4 py-3 text-sm text-right font-medium text-gray-900">${formatCurrency(data.direct)}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-600">${formatCurrency(avg)}</td>
+                            <td class="px-6 py-4 text-sm font-medium text-gray-900">${region.name}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-700">${region.count}</td>
+                            <td class="px-6 py-4 text-sm text-right font-medium text-gray-900">${formatCurrency(region.direct)}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-600">${formatCurrency(avg)}</td>
                         </tr>
                     `;
                 });
                 
+                const avgTotal = totalCount > 0 ? totalDirect / totalCount : 0;
                 tableHTML += `
+                        <tr class="bg-gray-50 font-semibold border-t-2 border-gray-300">
+                            <td class="px-6 py-4 text-sm text-gray-900">Total</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-900">${totalCount}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-900">${formatCurrency(totalDirect)}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-900">${formatCurrency(avgTotal)}</td>
+                        </tr>
                     </tbody>
                 </table>
-            </div>
                 `;
                 regionalTableEl.innerHTML = tableHTML;
             }
             
-            // 2. Exposure Type Breakdown Chart
-            const exposureChartEl = document.getElementById('topRelationshipsExposureChart');
-            if (exposureChartEl && exposureBreakdown && exposureBreakdown.length > 0) {
-                const exposureOptions = {
+            // 2. Product Level Breakdown Treemap
+            const treemapChartEl = document.getElementById('topRelationshipsProductTreemap');
+            if (treemapChartEl && productTreemapData && productTreemapData.length > 0) {
+                const treemapOptions = {
                     series: [
                         {
-                            name: 'Direct OS',
-                            data: exposureBreakdown.map(r => r.direct)
-                        },
-                        {
-                            name: 'Contingent OS',
-                            data: exposureBreakdown.map(r => r.contingent)
-                        },
-                        {
-                            name: 'PSE OS',
-                            data: exposureBreakdown.map(r => r.pse)
+                            data: productTreemapData.map(p => ({
+                                x: p.product,
+                                y: p.tfa
+                            }))
                         }
                     ],
+                    legend: {
+                        show: false
+                    },
                     chart: {
-                        type: 'bar',
-                        height: 300,
-                        stacked: true,
+                        height: 350,
+                        type: 'treemap',
                         fontFamily: 'Outfit, sans-serif',
                         toolbar: { show: false }
                     },
-                    colors: ['#3b82f6', '#f59e0b', '#8b5cf6'],
+                    title: {
+                        text: undefined
+                    },
+                    colors: ['#465fff'],
                     plotOptions: {
-                        bar: {
-                            horizontal: true,
-                            borderRadius: 4
+                        treemap: {
+                            distributed: true,
+                            enableShades: true
                         }
                     },
                     dataLabels: {
-                        enabled: false
-                    },
-                    xaxis: {
-                        categories: exposureBreakdown.map(r => r.name.substring(0, 20) + (r.name.length > 20 ? '...' : '')),
-                        labels: {
-                            formatter: function(val) {
-                                return formatCurrency(val);
-                            }
-                        }
-                    },
-                    yaxis: {
-                        labels: {
-                            maxWidth: 120
-                        }
-                    },
-                    legend: {
-                        position: 'top',
-                        horizontalAlign: 'left'
-                    },
-                    grid: {
-                        borderColor: '#f1f5f9',
-                        strokeDashArray: 4
+                        enabled: true,
+                        style: {
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            colors: ['#fff']
+                        },
+                        formatter: function(text, op) {
+                            const product = productTreemapData[op.dataPointIndex];
+                            return [text, `${product.count} (${formatCurrency(product.tfa)})`];
+                        },
+                        offsetY: -4
                     },
                     tooltip: {
-                        y: {
-                            formatter: function(val) {
-                                return formatCurrency(val);
-                            }
+                        theme: 'light',
+                        custom: function({ seriesIndex, dataPointIndex, w }) {
+                            const product = productTreemapData[dataPointIndex];
+                            return `
+                                <div style="padding: 8px 12px; background: white; border: 1px solid #e5e7eb; border-radius: 6px;">
+                                    <div style="font-weight: 600; margin-bottom: 4px;">${product.product}</div>
+                                    <div style="font-size: 11px; color: #6b7280;">
+                                        <div>Facilities: ${product.count}</div>
+                                        <div>Total TFA: ${formatCurrency(product.tfa)}</div>
+                                    </div>
+                                </div>
+                            `;
                         }
                     }
                 };
                 
-                exposureChartEl.innerHTML = '';
-                const exposureChart = new ApexCharts(exposureChartEl, exposureOptions);
-                exposureChart.render();
+                treemapChartEl.innerHTML = '';
+                const treemapChart = new ApexCharts(treemapChartEl, treemapOptions);
+                treemapChart.render();
             }
             
-            // 3. Detailed Relationship Table
-            const detailTableEl = document.getElementById('topRelationshipsDetailTable');
-            if (detailTableEl && relationships && relationships.length > 0) {
-                let tableHTML = `
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="border-b border-gray-200">
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Rank</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Relationship</th>
-                                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700">Region</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Facilities</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Direct OS</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Total OS</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">OSUC</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Avg ROTCE</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
-                `;
+            // 3. Relationship Details Table (matching CAs Expiring structure)
+            const tableBodyEl = document.getElementById('topRelationshipsTableBody');
+            if (tableBodyEl && relationships && relationships.length > 0) {
+                let html = '';
                 
-                relationships.forEach((rel, index) => {
-                    tableHTML += `
+                // Limit to top 10
+                const displayRelationships = relationships.slice(0, 10);
+                
+                displayRelationships.forEach(rel => {
+                    const regionColors = {
+                        'APAC': 'bg-blue-50 text-blue-600',
+                        'EMEA': 'bg-green-50 text-green-600',
+                        'NAM': 'bg-orange-50 text-orange-600',
+                        'AMER': 'bg-orange-50 text-orange-600',
+                        'LATAM': 'bg-purple-50 text-purple-600'
+                    };
+                    const regionColor = regionColors[rel.region] || 'bg-gray-50 text-gray-600';
+                    
+                    // ROTCE status color
+                    const rotceColor = rel.avgROTCE >= 12 
+                        ? 'bg-green-100 text-green-700' 
+                        : rel.avgROTCE >= 8 
+                            ? 'bg-amber-100 text-amber-700' 
+                            : 'bg-red-100 text-red-700';
+                    
+                    html += `
                         <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-sm text-gray-600">${index + 1}</td>
-                            <td class="px-4 py-3 text-sm font-medium text-gray-900">${rel.name}</td>
-                            <td class="px-4 py-3 text-sm text-center text-gray-700">${rel.region}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-700">${rel.facilities}</td>
-                            <td class="px-4 py-3 text-sm text-right font-medium text-gray-900">${formatCurrency(rel.direct)}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-700">${formatCurrency(rel.totalOS)}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-700">${formatCurrency(rel.osuc)}</td>
-                            <td class="px-4 py-3 text-sm text-right ${rel.avgROTCE >= 12 ? 'text-green-600 font-semibold' : rel.avgROTCE >= 8 ? 'text-amber-600' : 'text-red-600 font-semibold'}">${rel.avgROTCE.toFixed(1)}%</td>
+                            <td class="px-6 py-4 text-center text-sm font-medium text-gray-900">${rel.name}</td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="${regionColor} rounded-full px-2 py-0.5 text-xs font-medium">
+                                    ${rel.region}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="bg-gray-100 rounded-full px-2 py-0.5 text-xs font-medium text-gray-700">
+                                    ${rel.facilities}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-center text-sm font-semibold text-gray-900">${formatCurrency(rel.direct)}</td>
+                            <td class="px-6 py-4 text-center text-sm text-gray-700">${formatCurrency(rel.totalOS)}</td>
+                            <td class="px-6 py-4 text-center text-sm text-gray-700">${formatCurrency(rel.osuc)}</td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="${rotceColor} rounded-full px-2 py-0.5 text-xs font-medium">
+                                    ${rel.avgROTCE.toFixed(1)}%
+                                </span>
+                            </td>
                         </tr>
                     `;
                 });
                 
-                tableHTML += `
-                    </tbody>
-                </table>
-            </div>
-                `;
-                detailTableEl.innerHTML = tableHTML;
+                tableBodyEl.innerHTML = html;
+            } else if (tableBodyEl) {
+                tableBodyEl.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-sm text-gray-500">No relationship data available</td></tr>';
             }
         }
         
@@ -17068,14 +17574,28 @@
                     </div>
                 </div>
                 
-                <!-- Product Programs -->
-                <div class="rounded-xl border border-gray-200 bg-white mb-6">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">Top Product Programs</h3>
-                        <p class="text-xs text-gray-500 mt-1">By TFA</p>
+                <!-- Product Programs - Split into 2 boxes -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <!-- Product Distribution by TFA (Donut) -->
+                    <div class="rounded-xl border border-gray-200 bg-white">
+                        <div class="border-b border-gray-200 px-6 py-4">
+                            <h3 class="text-base font-semibold text-gray-900">Product Distribution by TFA</h3>
+                            <p class="text-xs text-gray-500 mt-1">Total facility amount by product</p>
+                        </div>
+                        <div class="p-6">
+                            <div id="newDealsYTDProductChart" style="min-height: 380px;"></div>
+                        </div>
                     </div>
-                    <div class="p-6">
-                        <div id="newDealsYTDProductChart" style="min-height: 300px;"></div>
+                    
+                    <!-- Product Performance by Deal Count -->
+                    <div class="rounded-xl border border-gray-200 bg-white">
+                        <div class="border-b border-gray-200 px-6 py-4">
+                            <h3 class="text-base font-semibold text-gray-900">Product Performance by Deal Count</h3>
+                            <p class="text-xs text-gray-500 mt-1">Number of deals by product</p>
+                        </div>
+                        <div class="p-6">
+                            <div id="newDealsYTDProductCountChart" style="min-height: 300px;"></div>
+                        </div>
                     </div>
                 </div>
                 
@@ -17140,14 +17660,28 @@
                     </div>
                 </div>
                 
-                <!-- Product Programs -->
-                <div class="rounded-xl border border-gray-200 bg-white mb-6">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">Top Product Programs</h3>
-                        <p class="text-xs text-gray-500 mt-1">By TFA</p>
+                <!-- Product Programs - Split into 2 boxes -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <!-- Product Distribution by TFA (Donut) -->
+                    <div class="rounded-xl border border-gray-200 bg-white">
+                        <div class="border-b border-gray-200 px-6 py-4">
+                            <h3 class="text-base font-semibold text-gray-900">Product Distribution by TFA</h3>
+                            <p class="text-xs text-gray-500 mt-1">Total facility amount by product</p>
+                        </div>
+                        <div class="p-6">
+                            <div id="newDealsMTDProductChart" style="min-height: 380px;"></div>
+                        </div>
                     </div>
-                    <div class="p-6">
-                        <div id="newDealsMTDProductChart" style="min-height: 300px;"></div>
+                    
+                    <!-- Product Performance by Deal Count -->
+                    <div class="rounded-xl border border-gray-200 bg-white">
+                        <div class="border-b border-gray-200 px-6 py-4">
+                            <h3 class="text-base font-semibold text-gray-900">Product Performance by Deal Count</h3>
+                            <p class="text-xs text-gray-500 mt-1">Number of deals by product</p>
+                        </div>
+                        <div class="p-6">
+                            <div id="newDealsMTDProductCountChart" style="min-height: 300px;"></div>
+                        </div>
                     </div>
                 </div>
                 
@@ -17562,8 +18096,8 @@
                     <!-- Approval Timeline Chart -->
                     <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-base font-semibold text-gray-900">Approval Timeline</h3>
-                            <p class="text-xs text-gray-500 mt-1">Weekly facility approval trend</p>
+                            <h3 class="text-base font-semibold text-gray-900">Top 10 Underwriters by Deal Count</h3>
+                            <p class="text-xs text-gray-500 mt-1">Lead underwriters with most deals approved</p>
                         </div>
                         <div class="p-6">
                             <div id="newFacilitiesSizeChart" style="min-height: 300px;"></div>
@@ -17571,11 +18105,11 @@
                     </div>
                 </div>
                 
-                <!-- Underwriter Breakdown -->
+                <!-- Top 10 Facilities -->
                 <div class="rounded-2xl border border-gray-200 bg-white mb-6">
                     <div class="px-6 py-4">
-                        <h3 class="text-lg font-semibold text-gray-800">Top Underwriters (Top 10)</h3>
-                        <p class="text-xs text-gray-500 mt-1">Lead underwriters with most new facilities approved</p>
+                        <h3 class="text-lg font-semibold text-gray-800">Top 10 Facilities by TFA Approved</h3>
+                        <p class="text-xs text-gray-500 mt-1">Facilities with highest TFA approved in the period</p>
                     </div>
                     <div class="custom-scrollbar overflow-x-auto">
                         <div id="newFacilitiesUnderwriterTable"></div>
@@ -17679,7 +18213,13 @@
                 .slice(0, topN);
             
             // Calculate regional distribution
-            const regionalData = { AMER: {count: 0, tfa: 0, direct: 0}, EMEA: {count: 0, tfa: 0, direct: 0}, APAC: {count: 0, tfa: 0, direct: 0} };
+            const regionalData = { 
+                APAC: {count: 0, tfa: 0, direct: 0}, 
+                EMEA: {count: 0, tfa: 0, direct: 0}, 
+                NAM: {count: 0, tfa: 0, direct: 0},
+                AMER: {count: 0, tfa: 0, direct: 0},
+                LATAM: {count: 0, tfa: 0, direct: 0}
+            };
             topRelationships.forEach(rel => {
                 const region = rel.region;
                 if (!regionalData[region]) {
@@ -17772,64 +18312,53 @@
                 <!-- Analysis Row -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <!-- Regional Distribution -->
-                    <div class="rounded-xl border border-gray-200 bg-white">
+                    <div class="rounded-xl border border-gray-200 bg-white flex flex-col">
                         <div class="border-b border-gray-200 px-6 py-4">
                             <h3 class="text-base font-semibold text-gray-900">Regional Distribution</h3>
                             <p class="text-xs text-gray-500 mt-1">Top relationships by region</p>
                         </div>
-                        <div class="p-6">
-                            <div id="topRelationshipsRegionalTable"></div>
+                        <div class="flex-1 overflow-hidden">
+                            <div id="topRelationshipsRegionalTable" class="h-full"></div>
                         </div>
                     </div>
                     
-                    <!-- Exposure Type Breakdown -->
+                    <!-- Product Level Breakdown -->
                     <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-base font-semibold text-gray-900">Exposure Type Breakdown</h3>
-                            <p class="text-xs text-gray-500 mt-1">Direct, Contingent, PSE composition</p>
+                            <h3 class="text-base font-semibold text-gray-900">Product Level Breakdown</h3>
+                            <p class="text-xs text-gray-500 mt-1">Products by TFA across top relationships</p>
                         </div>
                         <div class="p-6">
-                            <div id="topRelationshipsExposureChart" style="min-height: 300px;"></div>
+                            <div id="topRelationshipsProductTreemap" style="min-height: 350px;"></div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Detailed Relationship Table -->
-                <div class="rounded-xl border border-gray-200 bg-white mb-6">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">Relationship Details</h3>
-                        <p class="text-xs text-gray-500 mt-1">Comprehensive metrics for top ${topN} relationships</p>
+                <!-- Relationship Details Table -->
+                <div class="rounded-2xl border border-gray-200 bg-white" id="topRelationshipsTable">
+                    <div class="px-6 py-4">
+                        <h3 class="text-lg font-semibold text-gray-800">Top Relationships Details (Top 10)</h3>
+                        <p class="text-xs text-gray-500 mt-1">Comprehensive metrics for largest client relationships</p>
                     </div>
-                    <div class="p-6">
-                        <div id="topRelationshipsDetailTable"></div>
+                    <div class="custom-scrollbar overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Relationship</th>
+                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Region</th>
+                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Facilities</th>
+                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Direct OS</th>
+                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Total OS</th>
+                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">OSUC</th>
+                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Avg ROTCE</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topRelationshipsTableBody" class="divide-y divide-gray-200">
+                                <tr><td colspan="7" class="px-6 py-8 text-center text-sm text-gray-500">Loading data...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                
-                <script>
-                    // Store data for rendering
-                    window.topRelationshipsExpandedData = {
-                        relationships: ${JSON.stringify(topRelationships.map(r => ({
-                            name: r.name,
-                            region: r.region,
-                            tfa: r.tfa,
-                            direct: r.direct,
-                            contingent: r.contingent,
-                            pse: r.pse,
-                            totalOS: r.totalOS,
-                            osuc: r.osuc,
-                            facilities: r.facilityCount,
-                            avgROTCE: r.avgROTCE,
-                            avgDealSize: r.avgDealSize
-                        })))},
-                        regional: ${JSON.stringify(regionalData)},
-                        exposureBreakdown: ${JSON.stringify(exposureBreakdown)}
-                    };
-                    
-                    // Render views after a short delay
-                    setTimeout(() => {
-                        renderTopRelationshipsExpandedViews();
-                    }, 100);
-                <\/script>
             `;
         }
         

@@ -10805,19 +10805,42 @@
                 columnFilterOps: {},
                 columnFilterMin: {},
                 columnFilterMax: {},
-                columnFilterExact: {}
+                columnFilterExact: {},
+                searchTerm: ''
             };
             
             return `
                 <div class="rounded-2xl border border-gray-200 bg-white">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h3 class="text-lg font-semibold text-gray-800">${chartName} - Underlying Data</h3>
-                        <p class="text-xs text-gray-500 mt-1">${data.length.toLocaleString()} total records</p>
+                    <!-- Header with Search -->
+                    <div class="mb-4 flex flex-col gap-2 px-5 sm:flex-row sm:items-center sm:justify-between sm:px-6 py-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">${chartName}</h3>
+                            <p class="text-xs text-gray-500 mt-1">${data.length.toLocaleString()} total records</p>
+                        </div>
+
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                            <form onsubmit="event.preventDefault();">
+                                <div class="relative">
+                                    <span class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2">
+                                        <svg class="fill-gray-500" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path fill-rule="evenodd" clip-rule="evenodd" d="M3.04199 9.37381C3.04199 5.87712 5.87735 3.04218 9.37533 3.04218C12.8733 3.04218 15.7087 5.87712 15.7087 9.37381C15.7087 12.8705 12.8733 15.7055 9.37533 15.7055C5.87735 15.7055 3.04199 12.8705 3.04199 9.37381ZM9.37533 1.54218C5.04926 1.54218 1.54199 5.04835 1.54199 9.37381C1.54199 13.6993 5.04926 17.2055 9.37533 17.2055C11.2676 17.2055 13.0032 16.5346 14.3572 15.4178L17.1773 18.2381C17.4702 18.531 17.945 18.5311 18.2379 18.2382C18.5308 17.9453 18.5309 17.4704 18.238 17.1775L15.4182 14.3575C16.5367 13.0035 17.2087 11.2671 17.2087 9.37381C17.2087 5.04835 13.7014 1.54218 9.37533 1.54218Z" fill=""/>
+                                        </svg>
+                                    </span>
+                                    <input
+                                        type="text"
+                                        id="dataGlobalSearch"
+                                        placeholder="Search all columns..."
+                                        oninput="window.handleGlobalSearch(this.value)"
+                                        class="h-[42px] w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pr-4 pl-[42px] text-sm text-gray-800 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none xl:w-[300px]"
+                                    />
+                                </div>
+                            </form>
+                        </div>
                     </div>
                     
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead>
+                    <div class="custom-scrollbar max-w-full overflow-x-auto overflow-y-visible px-5 sm:px-6">
+                        <table class="min-w-full">
+                            <thead class="border-y border-gray-100 py-3">
                                 <tr id="chartDataTableHeader">
                                     <!-- Headers will be inserted here -->
                                 </tr>
@@ -10825,45 +10848,59 @@
                                     <!-- Filters will be inserted here -->
                                 </tr>
                             </thead>
-                            <tbody id="chartDataTableBody" class="bg-white divide-y divide-gray-200">
+                            <tbody id="chartDataTableBody" class="divide-y divide-gray-100">
                                 <!-- Data rows will be inserted here -->
                             </tbody>
                         </table>
                     </div>
                     
                     <!-- Pagination Controls -->
-                    <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-                        <div class="flex items-center gap-2 text-sm text-gray-600">
-                            <span>Showing</span>
-                            <span id="dataRowsStart" class="font-medium">0</span>
-                            <span>to</span>
-                            <span id="dataRowsEnd" class="font-medium">0</span>
-                            <span>of</span>
-                            <span id="dataTotalRows" class="font-medium">0</span>
-                            <span>records</span>
+                    <div class="border-t border-gray-200 px-6 py-4">
+                        <div class="flex items-center justify-between">
+                            <button id="dataPrevBtn"
+                                class="shadow-theme-xs flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-2 py-2 font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 sm:px-3.5 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                                <svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M2.58301 9.99868C2.58272 10.1909 2.65588 10.3833 2.80249 10.53L7.79915 15.5301C8.09194 15.8231 8.56682 15.8233 8.85981 15.5305C9.15281 15.2377 9.15297 14.7629 8.86018 14.4699L5.14009 10.7472L16.6675 10.7472C17.0817 10.7472 17.4175 10.4114 17.4175 9.99715C17.4175 9.58294 17.0817 9.24715 16.6675 9.24715L5.14554 9.24715L8.86017 5.53016C9.15297 5.23717 9.15282 4.7623 8.85983 4.4695C8.56684 4.1767 8.09197 4.17685 7.79917 4.46984L2.84167 9.43049C2.68321 9.568 2.58301 9.77087 2.58301 9.99715C2.58301 9.99766 2.58301 9.99817 2.58301 9.99868Z" fill=""/>
+                                </svg>
+                                <span class="hidden sm:inline">Previous</span>
+                            </button>
+
+                            <span class="block text-sm font-medium text-gray-700 sm:hidden">
+                                Page <span id="dataCurrentPage">1</span> of <span id="dataTotalPages">1</span>
+                            </span>
+
+                            <ul class="hidden items-center gap-0.5 sm:flex" id="dataPaginationNumbers">
+                                <!-- Page numbers will be inserted here -->
+                            </ul>
+
+                            <button id="dataNextBtn"
+                                class="shadow-theme-xs flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-2 py-2 font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-800 sm:px-3.5 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span class="hidden sm:inline">Next</span>
+                                <svg class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M17.4175 9.9986C17.4178 10.1909 17.3446 10.3832 17.198 10.53L12.2013 15.5301C11.9085 15.8231 11.4337 15.8233 11.1407 15.5305C10.8477 15.2377 10.8475 14.7629 11.1403 14.4699L14.8604 10.7472L3.33301 10.7472C2.91879 10.7472 2.58301 10.4114 2.58301 9.99715C2.58301 9.58294 2.91879 9.24715 3.33301 9.24715L14.8549 9.24715L11.1403 5.53016C10.8475 5.23717 10.8477 4.7623 11.1407 4.4695C11.4336 4.1767 11.9085 4.17685 12.2013 4.46984L17.1588 9.43049C17.3173 9.568 17.4175 9.77087 17.4175 9.99715C17.4175 9.99763 17.4175 9.99812 17.4175 9.9986Z" fill=""/>
+                                </svg>
+                            </button>
                         </div>
                         
-                        <div class="flex items-center gap-4">
+                        <div class="mt-3 flex items-center justify-between text-sm text-gray-600">
+                            <div class="flex items-center gap-2">
+                                <span>Showing</span>
+                                <span id="dataRowsStart" class="font-medium">0</span>
+                                <span>to</span>
+                                <span id="dataRowsEnd" class="font-medium">0</span>
+                                <span>of</span>
+                                <span id="dataTotalRows" class="font-medium">0</span>
+                                <span>records</span>
+                            </div>
+                            
                             <div class="flex items-center gap-2">
                                 <label class="text-sm text-gray-600">Rows per page:</label>
-                                <select id="dataPageSize" class="px-3 py-1 border border-gray-300 rounded-lg text-sm">
+                                <select id="dataPageSize" onchange="window.changePageSize(parseInt(this.value))" class="px-3 py-1 border border-gray-300 rounded-lg text-sm bg-white">
                                     <option value="25">25</option>
                                     <option value="50" selected>50</option>
                                     <option value="100">100</option>
                                     <option value="250">250</option>
                                 </select>
-                            </div>
-                            
-                            <div class="flex items-center gap-2">
-                                <button id="dataPrevBtn" class="px-3 py-1 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    Previous
-                                </button>
-                                <span class="text-sm text-gray-600">
-                                    Page <span id="dataCurrentPage" class="font-medium">1</span> of <span id="dataTotalPages" class="font-medium">1</span>
-                                </span>
-                                <button id="dataNextBtn" class="px-3 py-1 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    Next
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -10918,9 +10955,33 @@
         function buildTableHeader(tableHeader) {
             if (!window.tableState) return;
             tableHeader.innerHTML = window.tableState.columns
-                .map(col => `<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 tracking-wider bg-gray-50">${col.replace(/_/g, ' ')}</th>`)
+                .map(col => `<th class="py-3 pr-5 font-normal whitespace-nowrap sm:pr-6">
+                    <div class="flex items-center">
+                        <p class="text-sm text-gray-500">${col.replace(/_/g, ' ')}</p>
+                    </div>
+                </th>`)
                 .join("");
         }
+        
+        // Global search handler
+        window.handleGlobalSearch = function(searchTerm) {
+            if (!window.tableState) return;
+            
+            window.tableState.searchTerm = searchTerm.toLowerCase().trim();
+            applyTableFilters();
+            renderTablePage(document.getElementById('chartDataTableBody'));
+            setupPaginationControls();
+        };
+        
+        // Change page size handler
+        window.changePageSize = function(newSize) {
+            if (!window.tableState) return;
+            
+            window.tableState.pageSize = newSize;
+            window.tableState.currentPage = 1;
+            renderTablePage(document.getElementById('chartDataTableBody'));
+            setupPaginationControls();
+        };
 
         function buildFilterRow() {
             if (!window.tableState) return;
@@ -10989,9 +11050,18 @@
         function applyTableFilters() {
             if (!window.tableState) return;
             
-            const { data, columnFilters } = window.tableState;
+            const { data, columnFilters, searchTerm } = window.tableState;
             
             window.tableState.filteredData = data.filter(row => {
+                // Apply global search first
+                if (searchTerm && searchTerm.length > 0) {
+                    const rowText = Object.values(row).join(' ').toLowerCase();
+                    if (!rowText.includes(searchTerm)) {
+                        return false;
+                    }
+                }
+                
+                // Apply column filters
                 for (const [col, filterValue] of Object.entries(columnFilters)) {
                     const cellValue = String(row[col] || '').toLowerCase();
                     if (!cellValue.includes(filterValue)) {
@@ -11241,7 +11311,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-xs text-gray-500">Largest Facility</p>
+                                <p class="text-xs text-gray-500">Largest Facility TFA</p>
                                 <h3 class="text-xl font-bold text-gray-900">${formatCurrency(largestFacility)}</h3>
                             </div>
                         </div>
@@ -11256,7 +11326,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-xs text-gray-500">Top 10 Concentration</p>
+                                <p class="text-xs text-gray-500">Top 10 Concentration by TFA</p>
                                 <h3 class="text-xl font-bold text-gray-900">${concentrationPct.toFixed(1)}%</h3>
                             </div>
                         </div>
@@ -13822,7 +13892,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-xs text-gray-500">Largest Facility</p>
+                                <p class="text-xs text-gray-500">Largest Facility OSUC</p>
                                 <h3 class="text-xl font-bold text-gray-900">${formatCurrency(largestFacility)}</h3>
                             </div>
                         </div>
@@ -13837,7 +13907,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-xs text-gray-500">Top 10 Concentration</p>
+                                <p class="text-xs text-gray-500">Top 10 Concentration by OSUC</p>
                                 <h3 class="text-xl font-bold text-gray-900">${concentrationPct.toFixed(1)}%</h3>
                             </div>
                         </div>
@@ -14083,7 +14153,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-xs text-gray-500">Largest Facility</p>
+                                <p class="text-xs text-gray-500">Largest Facility Outstanding</p>
                                 <h3 class="text-xl font-bold text-gray-900">${formatCurrency(largestFacility)}</h3>
                             </div>
                         </div>
@@ -14098,7 +14168,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-xs text-gray-500">Top 10 Concentration</p>
+                                <p class="text-xs text-gray-500">Top 10 Concentration by Outstanding</p>
                                 <h3 class="text-xl font-bold text-gray-900">${concentrationPct.toFixed(1)}%</h3>
                             </div>
                         </div>

@@ -5005,6 +5005,8 @@
                     },
                 },
                 grid: {
+                    borderColor: '#E5E7EB',
+                    strokeDashArray: 4,
                     xaxis: {
                         lines: {
                             show: true,
@@ -5360,6 +5362,8 @@
                     },
                 },
                 grid: {
+                    borderColor: '#E5E7EB',
+                    strokeDashArray: 4,
                     xaxis: {
                         lines: {
                             show: true,
@@ -7111,6 +7115,8 @@
                     },
                 },
                 grid: {
+                    borderColor: '#E5E7EB',
+                    strokeDashArray: 4,
                     yaxis: {
                         lines: {
                             show: true,
@@ -7598,6 +7604,8 @@
                     },
                 },
                 grid: {
+                    borderColor: '#E5E7EB',
+                    strokeDashArray: 4,
                     xaxis: {
                         lines: {
                             show: true,
@@ -7922,6 +7930,8 @@
                     },
                 },
                 grid: {
+                    borderColor: '#E5E7EB',
+                    strokeDashArray: 4,
                     yaxis: {
                         lines: {
                             show: true,
@@ -8296,6 +8306,8 @@
                     },
                 },
                 grid: {
+                    borderColor: '#E5E7EB',
+                    strokeDashArray: 4,
                     yaxis: {
                         lines: {
                             show: true,
@@ -8900,6 +8912,8 @@
                     },
                 },
                 grid: {
+                    borderColor: '#E5E7EB',
+                    strokeDashArray: 4,
                     xaxis: {
                         lines: {
                             show: true,
@@ -10137,6 +10151,7 @@
                 },
                 grid: {
                     borderColor: "#E5E7EB",
+                    strokeDashArray: 4,
                     xaxis: { lines: { show: true } },
                     yaxis: { lines: { show: false } },
                 },
@@ -10463,6 +10478,7 @@
                 },
                 grid: {
                     borderColor: "#E5E7EB",
+                    strokeDashArray: 4,
                     xaxis: { lines: { show: true } },
                     yaxis: { lines: { show: false } },
                 },
@@ -11681,6 +11697,8 @@
                     },
                 },
                 grid: {
+                    borderColor: '#E5E7EB',
+                    strokeDashArray: 4,
                     xaxis: {
                         lines: {
                             show: true,
@@ -12368,7 +12386,7 @@
                 },
                 grid: {
                     borderColor: "#E5E7EB",
-                    strokeDashArray: 5
+                    strokeDashArray: 4
                 },
                 tooltip: {
                     theme: "light",
@@ -12486,7 +12504,7 @@
                 },
                 grid: {
                     borderColor: "#E5E7EB",
-                    strokeDashArray: 5
+                    strokeDashArray: 4
                 },
                 tooltip: {
                     theme: "light",
@@ -12511,6 +12529,12 @@
         function initializeNewFacilitiesChart(dataSource) {
             const period = selectedPeriod || 'current';
             
+            // Initialize empty data structures
+            const regionalData = { AMER: {count: 0, tfa: 0}, EMEA: {count: 0, tfa: 0}, APAC: {count: 0, tfa: 0} };
+            const topProducts = [];
+            const topUnderwriters = [];
+            const weeklyData = [];
+            
             // Find the most recent Report_Date
             let mostRecentReportDate = null;
             for (let i = 0; i < dataSource.length; i++) {
@@ -12520,69 +12544,85 @@
                 }
             }
             
-            if (!mostRecentReportDate) return;
-            
-            // Calculate date range based on period
-            let targetStartDate, targetEndDate;
-            if (period === "current") {
-                targetStartDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth(), 1);
-                targetStartDate.setHours(0, 0, 0, 0);
-                targetEndDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth() + 1, 0);
-                targetEndDate.setHours(23, 59, 59, 999);
-            } else {
-                targetStartDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth() - 1, 1);
-                targetStartDate.setHours(0, 0, 0, 0);
-                targetEndDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth(), 0);
-                targetEndDate.setHours(23, 59, 59, 999);
+            // Only process data if we have a report date
+            if (mostRecentReportDate) {
+                // Calculate date range based on period
+                let targetStartDate, targetEndDate;
+                if (period === "current") {
+                    targetStartDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth(), 1);
+                    targetStartDate.setHours(0, 0, 0, 0);
+                    targetEndDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth() + 1, 0);
+                    targetEndDate.setHours(23, 59, 59, 999);
+                } else {
+                    targetStartDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth() - 1, 1);
+                    targetStartDate.setHours(0, 0, 0, 0);
+                    targetEndDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth(), 0);
+                    targetEndDate.setHours(23, 59, 59, 999);
+                }
+                
+                // Collect data
+                const productData = {};
+                const underwriterData = {};
+                const newFacilities = new Set();
+                const weeklyDataMap = {};
+                
+                dataSource.forEach(row => {
+                    const region = (row.Region || "Unknown").toUpperCase();
+                    const product = row.Product_Program || "Unknown";
+                    const underwriter = row.Lead_Underwriter || "Unknown";
+                    const facilityId = row.Facility_ID;
+                    
+                    // Use Facility_First_Approval_Date for all regions
+                    // Note: For APAC, new facilities are identified via month-end file comparison in ETL
+                    const approvalDate = parseDate(row.Facility_First_Approval_Date);
+                    
+                    if (!facilityId) return;
+                    
+                    if (approvalDate && approvalDate >= targetStartDate && approvalDate <= targetEndDate) {
+                        newFacilities.add(facilityId);
+                        const amount = parseNumber(row.Facility_Amount);
+                        
+                        if (!regionalData[region]) regionalData[region] = {count: 0, tfa: 0};
+                        regionalData[region].count++;
+                        regionalData[region].tfa += amount;
+                        
+                        if (!productData[product]) productData[product] = { count: 0, tfa: 0 };
+                        productData[product].count++;
+                        productData[product].tfa += amount;
+                        
+                        if (!underwriterData[underwriter]) underwriterData[underwriter] = { facilities: new Set(), tfa: 0, region: region };
+                        underwriterData[underwriter].facilities.add(facilityId);
+                        underwriterData[underwriter].tfa += amount;
+                        
+                        // Collect weekly data for timeline
+                        const weekStart = new Date(approvalDate);
+                        weekStart.setDate(approvalDate.getDate() - approvalDate.getDay()); // Start of week (Sunday)
+                        const weekKey = weekStart.toISOString().split('T')[0];
+                        if (!weeklyDataMap[weekKey]) {
+                            weeklyDataMap[weekKey] = { date: weekStart, count: 0, tfa: 0 };
+                        }
+                        weeklyDataMap[weekKey].count++;
+                        weeklyDataMap[weekKey].tfa += amount;
+                    }
+                });
+                
+                // Convert weekly data to sorted array
+                weeklyData.push(...Object.values(weeklyDataMap).sort((a, b) => a.date - b.date));
+                
+                // Convert to arrays and sort
+                topProducts.push(...Object.entries(productData)
+                    .map(([name, data]) => ({name, ...data}))
+                    .sort((a, b) => b.tfa - a.tfa)
+                    .slice(0, 10));
+                
+                topUnderwriters.push(...Object.entries(underwriterData)
+                    .map(([name, data]) => ({name, facilities: data.facilities.size, tfa: data.tfa, region: data.region}))
+                    .sort((a, b) => b.tfa - a.tfa)
+                    .slice(0, 10));
             }
             
-            // Collect data
-            const regionalData = { AMER: {count: 0, tfa: 0}, EMEA: {count: 0, tfa: 0}, APAC: {count: 0, tfa: 0} };
-            const productData = {};
-            const underwriterData = {};
-            const newFacilities = new Set();
-            
-            dataSource.forEach(row => {
-                const region = (row.Region || "Unknown").toUpperCase();
-                const product = row.Product_Program || "Unknown";
-                const underwriter = row.Lead_Underwriter || "Unknown";
-                const facilityId = row.Facility_ID;
-                
-                const approvalDate = region === "EMEA" 
-                    ? parseDate(row.Origination_Date)
-                    : parseDate(row.Facility_First_Approval_Date);
-                
-                if (!facilityId) return;
-                
-                if (approvalDate && approvalDate >= targetStartDate && approvalDate <= targetEndDate) {
-                    newFacilities.add(facilityId);
-                    const amount = parseNumber(row.Facility_Amount);
-                    
-                    if (!regionalData[region]) regionalData[region] = {count: 0, tfa: 0};
-                    regionalData[region].count++;
-                    regionalData[region].tfa += amount;
-                    
-                    if (!productData[product]) productData[product] = { count: 0, tfa: 0 };
-                    productData[product].count++;
-                    productData[product].tfa += amount;
-                    
-                    if (!underwriterData[underwriter]) underwriterData[underwriter] = { facilities: new Set(), tfa: 0, region: region };
-                    underwriterData[underwriter].facilities.add(facilityId);
-                    underwriterData[underwriter].tfa += amount;
-                }
-            });
-            
-            const topProducts = Object.entries(productData)
-                .map(([name, data]) => ({name, ...data}))
-                .sort((a, b) => b.tfa - a.tfa)
-                .slice(0, 10);
-            
-            const topUnderwriters = Object.entries(underwriterData)
-                .map(([name, data]) => ({name, facilities: data.facilities.size, tfa: data.tfa, region: data.region}))
-                .sort((a, b) => b.tfa - a.tfa)
-                .slice(0, 10);
-            
-            renderNewFacilitiesExpandedViews(regionalData, topProducts, topUnderwriters);
+            // Always render the views, even with empty data
+            renderNewFacilitiesExpandedViews(regionalData, topProducts, topUnderwriters, weeklyData);
         }
         
         // Initialize Expiring Chart - processes data and renders
@@ -12810,18 +12850,236 @@
         
         // Initialize New Deals YTD Chart - processes data and renders
         function initializeNewDealsYTDChart(dataSource) {
-            // For now, use the embedded script approach (to be refactored later)
-            setTimeout(() => {
-                if (window.newDealsYTDExpandedData) renderNewDealsYTDExpandedViews();
-            }, 150);
+            // Get reporting month range
+            const { monthStart, monthEnd, reportingMonth: repMonth } = getReportingMonthRange();
+            const currentYear = repMonth.getFullYear();
+            const yearStartDate = new Date(currentYear, 0, 1);
+            yearStartDate.setHours(0, 0, 0, 0);
+            
+            // Calculate previous year same period for variance
+            const prevYearStart = new Date(currentYear - 1, 0, 1);
+            prevYearStart.setHours(0, 0, 0, 0);
+            const prevYearEnd = new Date(currentYear - 1, repMonth.getMonth(), repMonth.getDate());
+            prevYearEnd.setHours(23, 59, 59, 999);
+            
+            // Initialize data structures
+            const regionalData = { APAC: {count: 0, tfa: 0}, EMEA: {count: 0, tfa: 0}, NAM: {count: 0, tfa: 0}, LATAM: {count: 0, tfa: 0} };
+            const productData = {};
+            const underwriterData = {};
+            const monthlyData = {};
+            const currentYearFacilities = new Set();
+            let currentYearTFA = 0;
+            
+            // Collect previous year data for variance
+            const prevYearFacilities = new Set();
+            let prevYearTFA = 0;
+            
+            dataSource.forEach(row => {
+                const originationDate = parseDate(row.Origination_Date);
+                const facilityId = row.Facility_ID;
+                const region = (row.Region || "Unknown").toUpperCase();
+                const product = row.Product_Program || "Unknown";
+                const underwriter = row.Lead_Underwriter || "Unknown";
+                const amount = parseNumber(row.Facility_Amount);
+                
+                if (!facilityId || !originationDate) return;
+                
+                // Current year YTD data
+                if (originationDate >= yearStartDate && originationDate <= repMonth) {
+                    if (!currentYearFacilities.has(facilityId)) {
+                        currentYearFacilities.add(facilityId);
+                        currentYearTFA += amount;
+                        
+                        // Regional data
+                        if (!regionalData[region]) regionalData[region] = {count: 0, tfa: 0};
+                        regionalData[region].count++;
+                        regionalData[region].tfa += amount;
+                        
+                        // Product data
+                        if (!productData[product]) productData[product] = { count: 0, tfa: 0 };
+                        productData[product].count++;
+                        productData[product].tfa += amount;
+                        
+                        // Underwriter data
+                        if (!underwriterData[underwriter]) underwriterData[underwriter] = { facilities: new Set(), tfa: 0, region: region };
+                        underwriterData[underwriter].facilities.add(facilityId);
+                        underwriterData[underwriter].tfa += amount;
+                        
+                        // Monthly data
+                        const monthKey = originationDate.toLocaleDateString("en-US", { month: "short" });
+                        if (!monthlyData[monthKey]) monthlyData[monthKey] = { count: 0, tfa: 0, month: originationDate.getMonth() };
+                        monthlyData[monthKey].count++;
+                        monthlyData[monthKey].tfa += amount;
+                    }
+                }
+                
+                // Previous year same period data
+                if (originationDate >= prevYearStart && originationDate <= prevYearEnd) {
+                    if (!prevYearFacilities.has(facilityId)) {
+                        prevYearFacilities.add(facilityId);
+                        prevYearTFA += amount;
+                    }
+                }
+            });
+            
+            // Calculate variances
+            const countVariance = currentYearFacilities.size - prevYearFacilities.size;
+            const countVariancePercent = prevYearFacilities.size > 0 ? (countVariance / prevYearFacilities.size) * 100 : 0;
+            const tfaVariance = currentYearTFA - prevYearTFA;
+            const tfaVariancePercent = prevYearTFA > 0 ? (tfaVariance / prevYearTFA) * 100 : 0;
+            
+            // Convert to arrays and sort
+            const topProducts = Object.entries(productData)
+                .map(([name, data]) => ({name, ...data}))
+                .sort((a, b) => b.tfa - a.tfa)
+                .slice(0, 10);
+            
+            const topUnderwriters = Object.entries(underwriterData)
+                .map(([name, data]) => ({name, facilities: data.facilities.size, tfa: data.tfa, region: data.region}))
+                .sort((a, b) => b.tfa - a.tfa)
+                .slice(0, 10);
+            
+            const monthlyTrend = Object.entries(monthlyData)
+                .map(([name, data]) => ({name, ...data}))
+                .sort((a, b) => a.month - b.month);
+            
+            // Store data for rendering
+            window.newDealsYTDExpandedData = {
+                regionalData,
+                topProducts,
+                topUnderwriters,
+                monthlyTrend,
+                prevYearFacilities: prevYearFacilities.size,
+                prevYearTFA,
+                currentCount: currentYearFacilities.size,
+                currentTFA: currentYearTFA,
+                countVariance,
+                countVariancePercent,
+                tfaVariance,
+                tfaVariancePercent,
+                currentYear,
+                reportingMonth: repMonth
+            };
+            
+            // Call render with all computed data
+            renderNewDealsYTDExpandedViews();
         }
         
         // Initialize New Deals MTD Chart - processes data and renders
         function initializeNewDealsMTDChart(dataSource) {
-            // For now, use the embedded script approach (to be refactored later)
-            setTimeout(() => {
-                if (window.newDealsMTDExpandedData) renderNewDealsMTDExpandedViews();
-            }, 150);
+            // Get reporting month range
+            const { monthStart, monthEnd, reportingMonth: repMonth } = getReportingMonthRange();
+            const currentYear = repMonth.getFullYear();
+            const currentMonth = repMonth.getMonth();
+            
+            // Calculate previous month for variance
+            const prevMonthStart = new Date(currentYear, currentMonth - 1, 1);
+            prevMonthStart.setHours(0, 0, 0, 0);
+            const prevMonthEnd = new Date(currentYear, currentMonth, 0);
+            prevMonthEnd.setHours(23, 59, 59, 999);
+            
+            // Initialize data structures
+            const regionalData = { APAC: {count: 0, tfa: 0}, EMEA: {count: 0, tfa: 0}, NAM: {count: 0, tfa: 0}, LATAM: {count: 0, tfa: 0} };
+            const productData = {};
+            const underwriterData = {};
+            const weeklyData = {};
+            const currentMonthFacilities = new Set();
+            let currentMonthTFA = 0;
+            
+            // Collect previous month data for variance
+            const prevMonthFacilities = new Set();
+            let prevMonthTFA = 0;
+            
+            dataSource.forEach(row => {
+                const originationDate = parseDate(row.Origination_Date);
+                const facilityId = row.Facility_ID;
+                const region = (row.Region || "Unknown").toUpperCase();
+                const product = row.Product_Program || "Unknown";
+                const underwriter = row.Lead_Underwriter || "Unknown";
+                const amount = parseNumber(row.Facility_Amount);
+                
+                if (!facilityId || !originationDate) return;
+                
+                // Current month data
+                if (originationDate >= monthStart && originationDate <= monthEnd) {
+                    if (!currentMonthFacilities.has(facilityId)) {
+                        currentMonthFacilities.add(facilityId);
+                        currentMonthTFA += amount;
+                        
+                        // Regional data
+                        if (!regionalData[region]) regionalData[region] = {count: 0, tfa: 0};
+                        regionalData[region].count++;
+                        regionalData[region].tfa += amount;
+                        
+                        // Product data
+                        if (!productData[product]) productData[product] = { count: 0, tfa: 0 };
+                        productData[product].count++;
+                        productData[product].tfa += amount;
+                        
+                        // Underwriter data
+                        if (!underwriterData[underwriter]) underwriterData[underwriter] = { facilities: new Set(), tfa: 0, region: region };
+                        underwriterData[underwriter].facilities.add(facilityId);
+                        underwriterData[underwriter].tfa += amount;
+                        
+                        // Weekly data
+                        const weekNumber = Math.ceil(originationDate.getDate() / 7);
+                        const weekKey = `Week ${weekNumber}`;
+                        if (!weeklyData[weekKey]) weeklyData[weekKey] = { count: 0, tfa: 0, week: weekNumber };
+                        weeklyData[weekKey].count++;
+                        weeklyData[weekKey].tfa += amount;
+                    }
+                }
+                
+                // Previous month data
+                if (originationDate >= prevMonthStart && originationDate <= prevMonthEnd) {
+                    if (!prevMonthFacilities.has(facilityId)) {
+                        prevMonthFacilities.add(facilityId);
+                        prevMonthTFA += amount;
+                    }
+                }
+            });
+            
+            // Calculate variances
+            const countVariance = currentMonthFacilities.size - prevMonthFacilities.size;
+            const countVariancePercent = prevMonthFacilities.size > 0 ? (countVariance / prevMonthFacilities.size) * 100 : 0;
+            const tfaVariance = currentMonthTFA - prevMonthTFA;
+            const tfaVariancePercent = prevMonthTFA > 0 ? (tfaVariance / prevMonthTFA) * 100 : 0;
+            
+            // Convert to arrays and sort
+            const topProducts = Object.entries(productData)
+                .map(([name, data]) => ({name, ...data}))
+                .sort((a, b) => b.tfa - a.tfa)
+                .slice(0, 10);
+            
+            const topUnderwriters = Object.entries(underwriterData)
+                .map(([name, data]) => ({name, facilities: data.facilities.size, tfa: data.tfa, region: data.region}))
+                .sort((a, b) => b.tfa - a.tfa)
+                .slice(0, 10);
+            
+            const weeklyTrend = Object.entries(weeklyData)
+                .map(([name, data]) => ({name, ...data}))
+                .sort((a, b) => a.week - b.week);
+            
+            // Store data for rendering
+            window.newDealsMTDExpandedData = {
+                regionalData,
+                topProducts,
+                topUnderwriters,
+                weeklyTrend,
+                prevMonthFacilities: prevMonthFacilities.size,
+                prevMonthTFA,
+                currentCount: currentMonthFacilities.size,
+                currentTFA: currentMonthTFA,
+                countVariance,
+                countVariancePercent,
+                tfaVariance,
+                tfaVariancePercent,
+                currentMonth: repMonth,
+                prevMonth: prevMonthStart
+            };
+            
+            // Call render with all computed data
+            renderNewDealsMTDExpandedViews();
         }
         
         // Initialize Pipeline Chart - processes data and renders
@@ -14188,13 +14446,13 @@
                 <!-- Analysis Row - Regional & Categorical Breakdowns -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6" id="expiringAnalysis">
                     <!-- Regional Summary -->
-                    <div class="rounded-xl border border-gray-200 bg-white">
+                    <div class="rounded-xl border border-gray-200 bg-white flex flex-col">
                         <div class="border-b border-gray-200 px-6 py-4">
                             <h3 class="text-base font-semibold text-gray-900">Regional Distribution</h3>
                             <p class="text-xs text-gray-500 mt-1">Breakdown by region for expiring items</p>
                         </div>
-                        <div class="p-6">
-                            <div id="regionalSummaryTable"></div>
+                        <div class="flex-1 overflow-hidden">
+                            <div id="regionalSummaryTable" class="h-full"></div>
                         </div>
                     </div>
                     
@@ -14211,12 +14469,12 @@
                 </div>
                 
                 <!-- Underwriter Breakdown -->
-                <div class="rounded-xl border border-gray-200 bg-white mb-6">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">Top Underwriters</h3>
+                <div class="rounded-2xl border border-gray-200 bg-white mb-6">
+                    <div class="px-6 py-4">
+                        <h3 class="text-lg font-semibold text-gray-800">Top Underwriters (Top 10)</h3>
                         <p class="text-xs text-gray-500 mt-1">Lead underwriters with most expiring items</p>
                     </div>
-                    <div class="p-6">
+                    <div class="custom-scrollbar overflow-x-auto">
                         <div id="underwriterTable"></div>
                     </div>
                 </div>
@@ -14341,17 +14599,16 @@
                 ].sort((a, b) => b.tfa - a.tfa);
                 
                 let tableHTML = `
-                    <div class="overflow-x-auto w-full h-full">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="border-b border-gray-200">
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Region</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">CAs</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Facilities</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Total TFA</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
+                    <table class="w-full h-full">
+                        <thead>
+                            <tr class="border-b border-gray-200 bg-gray-50">
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700">Region</th>
+                                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700">CAs</th>
+                                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700">Facilities</th>
+                                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700">Total TFA</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
                 `;
                 
                 let totalCAs = 0, totalFacilities = 0, totalTFA = 0;
@@ -14360,26 +14617,25 @@
                     totalFacilities += region.facilities;
                     totalTFA += region.tfa;
                     
-                    tableHTML += `
+                        tableHTML += `
                         <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-sm font-medium text-gray-900">${region.name}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-700">${region.cas}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-700">${region.facilities}</td>
-                            <td class="px-4 py-3 text-sm text-right font-medium text-gray-900">${formatCurrency(region.tfa)}</td>
+                            <td class="px-6 py-4 text-sm font-medium text-gray-900">${region.name}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-700">${region.cas}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-700">${region.facilities}</td>
+                            <td class="px-6 py-4 text-sm text-right font-medium text-gray-900">${formatCurrency(region.tfa)}</td>
                         </tr>
                     `;
                 });
                 
                 tableHTML += `
                         <tr class="bg-gray-50 font-semibold border-t-2 border-gray-300">
-                            <td class="px-4 py-3 text-sm text-gray-900">Total</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-900">${totalCAs}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-900">${totalFacilities}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-900">${formatCurrency(totalTFA)}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900">Total</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-900">${totalCAs}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-900">${totalFacilities}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-900">${formatCurrency(totalTFA)}</td>
                         </tr>
                     </tbody>
                 </table>
-            </div>
                 `;
                 regionalTableEl.innerHTML = tableHTML;
             }
@@ -14462,6 +14718,8 @@
                         grid: {
                             borderColor: '#E5E7EB',
                             strokeDashArray: 4,
+                            xaxis: { lines: { show: true } },
+                            yaxis: { lines: { show: false } },
                             padding: {
                                 top: 4,
                                 right: 0,
@@ -14486,47 +14744,70 @@
             
             // 3. Underwriter Table
             const underwriterTableEl = document.getElementById('underwriterTable');
-            if (underwriterTableEl && underwriterData && underwriterData.length > 0) {
+            if (underwriterTableEl) {
                 let tableHTML = `
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="border-b border-gray-200">
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Rank</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Underwriter</th>
-                                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700">Region</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">CAs</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Facilities</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Total TFA</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
+                    <table class="min-w-full">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Underwriter</th>
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Region</th>
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">CAs</th>
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Facilities</th>
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Total TFA</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
                 `;
                 
-                underwriterData.forEach((uw, index) => {
+                if (underwriterData && underwriterData.length > 0) {
+                    underwriterData.forEach((uw, index) => {
+                        const regionColor = {
+                            'APAC': 'bg-blue-100 text-blue-700',
+                            'EMEA': 'bg-green-100 text-green-700',
+                            'NAM': 'bg-purple-100 text-purple-700',
+                            'LATAM': 'bg-orange-100 text-orange-700'
+                        }[uw.region] || 'bg-gray-100 text-gray-700';
+                        
+                        tableHTML += `
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 text-center text-sm font-medium text-gray-900">${uw.name}</td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="inline-flex items-center justify-center rounded-full ${regionColor} px-2.5 py-0.5 text-xs font-medium">
+                                        ${uw.region}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="inline-flex items-center justify-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
+                                        ${uw.cas}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="inline-flex items-center justify-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
+                                        ${uw.facilities}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap font-semibold text-gray-900">${formatCurrency(uw.tfa)}</td>
+                            </tr>
+                        `;
+                    });
+                } else {
                     tableHTML += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-sm text-gray-600">${index + 1}</td>
-                            <td class="px-4 py-3 text-sm font-medium text-gray-900">${uw.name}</td>
-                            <td class="px-4 py-3 text-sm text-center text-gray-700">${uw.region}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-700">${uw.cas}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-700">${uw.facilities}</td>
-                            <td class="px-4 py-3 text-sm text-right font-medium text-gray-900">${formatCurrency(uw.tfa)}</td>
+                        <tr>
+                            <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">No data available</td>
                         </tr>
                     `;
-                });
+                }
                 
                 tableHTML += `
                     </tbody>
                 </table>
-            </div>
                 `;
                 underwriterTableEl.innerHTML = tableHTML;
             }
         }
         
         // Render New Facilities Expanded Analysis Views
-        function renderNewFacilitiesExpandedViews(regional, products, underwriters) {
+        function renderNewFacilitiesExpandedViews(regional, products, underwriters, weeklyData) {
             if (typeof ApexCharts === 'undefined') return;
             
             // Use parameters if provided, otherwise fall back to window variable for backward compatibility
@@ -14534,41 +14815,63 @@
                 regional = window.newFacilitiesExpandedData.regional;
                 products = window.newFacilitiesExpandedData.products;
                 underwriters = window.newFacilitiesExpandedData.underwriters;
+                weeklyData = window.newFacilitiesExpandedData.weeklyData || [];
             }
             
             if (!regional) return;
             
-            // 1. Regional Summary Table
+            // Prepare regions - always show all regions, sorted by TFA
+            const regionEntries = [
+                { name: 'APAC', data: regional.APAC || {count: 0, tfa: 0} },
+                { name: 'EMEA', data: regional.EMEA || {count: 0, tfa: 0} },
+                { name: 'NAM', data: regional.NAM || {count: 0, tfa: 0} },
+                { name: 'LATAM', data: regional.LATAM || {count: 0, tfa: 0} }
+            ].sort((a, b) => b.data.tfa - a.data.tfa);
+            
+            // Update KPI cards
+            const totalFacilities = regionEntries.reduce((sum, r) => sum + r.data.count, 0);
+            const totalTFA = regionEntries.reduce((sum, r) => sum + r.data.tfa, 0);
+            const activeRegions = regionEntries.length;
+            const totalUnderwriters = underwriters ? underwriters.length : 0;
+            
+            const facilitiesCountEl = document.getElementById('newFacilitiesCount');
+            const facilitiesTotalTFAEl = document.getElementById('newFacilitiesTotalTFA');
+            const facilitiesRegionsEl = document.getElementById('newFacilitiesRegions');
+            const facilitiesUnderwritersEl = document.getElementById('newFacilitiesUnderwriters');
+            
+            if (facilitiesCountEl) facilitiesCountEl.textContent = totalFacilities;
+            if (facilitiesTotalTFAEl) facilitiesTotalTFAEl.textContent = formatCurrency(totalTFA);
+            if (facilitiesRegionsEl) facilitiesRegionsEl.textContent = activeRegions;
+            if (facilitiesUnderwritersEl) facilitiesUnderwritersEl.textContent = totalUnderwriters;
+            
+            // 1. Regional Summary Table - matches Expiring modal style
             const regionalTableEl = document.getElementById('newFacilitiesRegionalTable');
-            if (regionalTableEl && regional) {
-                const regions = ['AMER', 'EMEA', 'APAC'];
+            if (regionalTableEl) {
                 let tableHTML = `
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="border-b border-gray-200">
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Region</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">New Facilities</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Total TFA</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Avg per Facility</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
+                    <table class="w-full h-full">
+                        <thead>
+                            <tr class="border-b border-gray-200 bg-gray-50">
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700">Region</th>
+                                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700">Facilities</th>
+                                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700">Total TFA</th>
+                                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700">Avg per Facility</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
                 `;
                 
                 let totalCount = 0, totalTFA = 0;
-                regions.forEach(region => {
-                    const data = regional[region] || {count: 0, tfa: 0};
-                    totalCount += data.count;
-                    totalTFA += data.tfa;
-                    const avg = data.count > 0 ? data.tfa / data.count : 0;
+                regionEntries.forEach(region => {
+                    totalCount += region.data.count;
+                    totalTFA += region.data.tfa;
+                    const avg = region.data.count > 0 ? region.data.tfa / region.data.count : 0;
                     
                     tableHTML += `
                         <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-sm font-medium text-gray-900">${region}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-700">${data.count}</td>
-                            <td class="px-4 py-3 text-sm text-right font-medium text-gray-900">${formatCurrency(data.tfa)}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-600">${formatCurrency(avg)}</td>
+                            <td class="px-6 py-4 text-sm font-medium text-gray-900">${region.name}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-700">${region.data.count}</td>
+                            <td class="px-6 py-4 text-sm text-right font-medium text-gray-900">${formatCurrency(region.data.tfa)}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-600">${formatCurrency(avg)}</td>
                         </tr>
                     `;
                 });
@@ -14576,121 +14879,194 @@
                 const avgTotal = totalCount > 0 ? totalTFA / totalCount : 0;
                 tableHTML += `
                         <tr class="bg-gray-50 font-semibold border-t-2 border-gray-300">
-                            <td class="px-4 py-3 text-sm text-gray-900">Total</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-900">${totalCount}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-900">${formatCurrency(totalTFA)}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-900">${formatCurrency(avgTotal)}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900">Total</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-900">${totalCount}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-900">${formatCurrency(totalTFA)}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-900">${formatCurrency(avgTotal)}</td>
                         </tr>
                     </tbody>
                 </table>
-            </div>
                 `;
                 regionalTableEl.innerHTML = tableHTML;
             }
             
-            // 2. Product Category Chart
-            const productChartEl = document.getElementById('newFacilitiesProductChart');
-            if (productChartEl && products && products.length > 0) {
-                const productOptions = {
-                    series: [{
-                        name: 'TFA',
-                        data: products.map(p => p.tfa)
-                    }],
-                    chart: {
-                        type: 'bar',
-                        height: 300,
-                        fontFamily: 'Outfit, sans-serif',
-                        toolbar: { show: false }
-                    },
-                    colors: ['#3641f5'],
-                    plotOptions: {
-                        bar: {
-                            borderRadius: 6,
-                            horizontal: true,
-                            distributed: false,
-                            dataLabels: { position: 'right' }
-                        }
-                    },
-                    dataLabels: {
-                        enabled: true,
-                        formatter: function(val) {
-                            return formatCurrency(val);
+            // 2. Approval Timeline Chart - weekly trend of new facilities
+            const timelineChartEl = document.getElementById('newFacilitiesSizeChart');
+            if (timelineChartEl) {
+                if (weeklyData && weeklyData.length > 0) {
+                    const timelineOptions = {
+                        series: [{
+                            name: 'Facilities',
+                            data: weeklyData.map(w => w.count)
+                        }, {
+                            name: 'TFA',
+                            data: weeklyData.map(w => w.tfa)
+                        }],
+                        chart: {
+                            type: 'line',
+                            height: 300,
+                            fontFamily: 'Outfit, sans-serif',
+                            toolbar: { show: false }
                         },
-                        offsetX: 5,
-                        style: {
-                            fontSize: '10px',
-                            colors: ['#374151']
-                        }
-                    },
-                    xaxis: {
-                        categories: products.map(p => p.name),
-                        labels: {
-                            formatter: function(val) {
-                                return formatCurrency(val);
+                        colors: ['#3b82f6', '#10b981'],
+                        stroke: {
+                            width: [3, 3],
+                            curve: 'smooth'
+                        },
+                        markers: {
+                            size: 4,
+                            strokeWidth: 0,
+                            hover: {
+                                size: 6
                             }
-                        }
-                    },
-                    yaxis: {
-                        labels: {
-                            maxWidth: 120
-                        }
-                    },
-                    grid: {
-                        borderColor: '#f1f5f9',
-                        strokeDashArray: 4
-                    },
-                    tooltip: {
-                        y: {
-                            formatter: function(val, opts) {
-                                const count = products[opts.dataPointIndex].count;
-                                return formatCurrency(val) + ` (${count} facilities)`;
+                        },
+                        dataLabels: {
+                            enabled: false
+                        },
+                        xaxis: {
+                            categories: weeklyData.map(w => {
+                                const date = new Date(w.date);
+                                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                            }),
+                            labels: {
+                                style: {
+                                    fontSize: '11px',
+                                    colors: '#6B7280'
+                                }
                             }
+                        },
+                        yaxis: [{
+                            title: {
+                                text: 'Number of Facilities',
+                                style: {
+                                    fontSize: '11px',
+                                    fontWeight: 500,
+                                    color: '#3b82f6'
+                                }
+                            },
+                            labels: {
+                                style: {
+                                    fontSize: '11px',
+                                    colors: '#6B7280'
+                                }
+                            }
+                        }, {
+                            opposite: true,
+                            title: {
+                                text: 'TFA Amount',
+                                style: {
+                                    fontSize: '11px',
+                                    fontWeight: 500,
+                                    color: '#10b981'
+                                }
+                            },
+                            labels: {
+                                formatter: function(val) {
+                                    return formatCurrency(val);
+                                },
+                                style: {
+                                    fontSize: '11px',
+                                    colors: '#6B7280'
+                                }
+                            }
+                        }],
+                        grid: {
+                            borderColor: '#E5E7EB',
+                            strokeDashArray: 4,
+                            xaxis: { lines: { show: false } },
+                            yaxis: { lines: { show: true } }
+                        },
+                        legend: {
+                            position: 'top',
+                            horizontalAlign: 'right',
+                            fontSize: '12px',
+                            fontWeight: 500,
+                            markers: {
+                                width: 10,
+                                height: 10,
+                                radius: 10
+                            }
+                        },
+                        tooltip: {
+                            theme: 'light',
+                            y: [{
+                                formatter: function(val) {
+                                    return val + ' facilities';
+                                }
+                            }, {
+                                formatter: function(val) {
+                                    return formatCurrency(val);
+                                }
+                            }]
                         }
-                    }
-                };
-                
-                productChartEl.innerHTML = '';
-                const productChart = new ApexCharts(productChartEl, productOptions);
-                productChart.render();
+                    };
+                    
+                    timelineChartEl.innerHTML = '';
+                    const timelineChart = new ApexCharts(timelineChartEl, timelineOptions);
+                    timelineChart.render();
+                } else {
+                    // Show "No data" message if no weekly data
+                    timelineChartEl.innerHTML = '<div class="flex items-center justify-center h-full"><p class="text-sm text-gray-500">No approval data available for this period</p></div>';
+                }
             }
             
-            // 3. Underwriter Table
+            // 3. Underwriter Table - matches Expiring modal style with badges
             const underwriterTableEl = document.getElementById('newFacilitiesUnderwriterTable');
-            if (underwriterTableEl && underwriters && underwriters.length > 0) {
+            if (underwriterTableEl) {
                 let tableHTML = `
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="border-b border-gray-200">
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Rank</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Underwriter</th>
-                                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700">Region</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">New Facilities</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Total TFA</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Avg per Facility</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
+                    <table class="min-w-full">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Underwriter</th>
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Region</th>
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Facilities</th>
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Total TFA</th>
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Avg per Facility</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
                 `;
                 
-                underwriters.forEach((uw, index) => {
-                    const avg = uw.facilities > 0 ? uw.tfa / uw.facilities : 0;
+                if (underwriters && underwriters.length > 0) {
+                    underwriters.forEach((uw, index) => {
+                        const avg = uw.facilities > 0 ? uw.tfa / uw.facilities : 0;
+                        const regionColor = {
+                            'APAC': 'bg-blue-100 text-blue-700',
+                            'EMEA': 'bg-green-100 text-green-700',
+                            'NAM': 'bg-purple-100 text-purple-700',
+                            'LATAM': 'bg-orange-100 text-orange-700',
+                            'AMER': 'bg-indigo-100 text-indigo-700'
+                        }[uw.region] || 'bg-gray-100 text-gray-700';
+                        
+                        tableHTML += `
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 text-center text-sm font-medium text-gray-900">${uw.name}</td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="inline-flex items-center justify-center rounded-full ${regionColor} px-2.5 py-0.5 text-xs font-medium">
+                                        ${uw.region}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="inline-flex items-center justify-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
+                                        ${uw.facilities}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap font-semibold text-gray-900">${formatCurrency(uw.tfa)}</td>
+                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-600">${formatCurrency(avg)}</td>
+                            </tr>
+                        `;
+                    });
+                } else {
                     tableHTML += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-sm text-gray-600">${index + 1}</td>
-                            <td class="px-4 py-3 text-sm font-medium text-gray-900">${uw.name}</td>
-                            <td class="px-4 py-3 text-sm text-center text-gray-700">${uw.region}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-700">${uw.facilities}</td>
-                            <td class="px-4 py-3 text-sm text-right font-medium text-gray-900">${formatCurrency(uw.tfa)}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-600">${formatCurrency(avg)}</td>
+                        <tr>
+                            <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">No data available</td>
                         </tr>
                     `;
-                });
+                }
                 
                 tableHTML += `
                     </tbody>
                 </table>
-            </div>
                 `;
                 underwriterTableEl.innerHTML = tableHTML;
             }
@@ -14700,39 +15076,158 @@
         function renderNewDealsYTDExpandedViews() {
             if (!window.newDealsYTDExpandedData || typeof ApexCharts === 'undefined') return;
             
-            const { regional, products, underwriters, monthly } = window.newDealsYTDExpandedData;
+            const {
+                regionalData,
+                topProducts,
+                topUnderwriters,
+                monthlyTrend,
+                prevYearFacilities,
+                prevYearTFA,
+                currentCount,
+                currentTFA,
+                countVariance,
+                countVariancePercent,
+                tfaVariance,
+                tfaVariancePercent,
+                currentYear,
+                reportingMonth
+            } = window.newDealsYTDExpandedData;
             
-            // 1. Regional Summary Table
+            // 1. Update KPI Cards
+            const kpisEl = document.getElementById('newDealsYTDKPIs');
+            if (kpisEl) {
+                const avgDealSize = currentCount > 0 ? currentTFA / currentCount : 0;
+                const productCount = topProducts ? topProducts.length : 0;
+                
+                kpisEl.innerHTML = `
+                    <div class="rounded-xl border border-gray-200 bg-white p-5">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100">
+                                <svg class="h-5 w-5 shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500">New Deals YTD</p>
+                                <h3 class="text-2xl font-bold text-gray-900">${currentCount}</h3>
+                                <div class="flex items-center gap-1 mt-1">
+                                    <span class="text-xs ${countVariance >= 0 ? 'text-green-600' : 'text-red-600'}">${countVariance >= 0 ? '↑' : '↓'} ${Math.abs(countVariancePercent).toFixed(1)}%</span>
+                                    <span class="text-xs text-gray-500">vs PY</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="rounded-xl border border-gray-200 bg-white p-5">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-100">
+                                <svg class="h-5 w-5 shrink-0 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500">Total TFA YTD</p>
+                                <h3 class="text-xl font-bold text-gray-900">${formatCurrency(currentTFA)}</h3>
+                                <div class="flex items-center gap-1 mt-1">
+                                    <span class="text-xs ${tfaVariance >= 0 ? 'text-green-600' : 'text-red-600'}">${tfaVariance >= 0 ? '↑' : '↓'} ${Math.abs(tfaVariancePercent).toFixed(1)}%</span>
+                                    <span class="text-xs text-gray-500">vs PY</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="rounded-xl border border-gray-200 bg-white p-5">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-100">
+                                <svg class="h-5 w-5 shrink-0 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500">Avg Deal Size</p>
+                                <h3 class="text-xl font-bold text-gray-900">${formatCurrency(avgDealSize)}</h3>
+                                <p class="text-xs text-gray-500 mt-1">Per facility</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="rounded-xl border border-gray-200 bg-white p-5">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100">
+                                <svg class="h-5 w-5 shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500">Product Programs</p>
+                                <h3 class="text-2xl font-bold text-gray-900">${productCount}</h3>
+                                <p class="text-xs text-gray-500 mt-1">Categories</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // 2. Update Year-over-Year Comparison
+            const yoyEl = document.getElementById('newDealsYTDYoYComparison');
+            if (yoyEl) {
+                yoyEl.innerHTML = `
+                    <h3 class="text-base font-semibold text-gray-900 mb-4">Year-over-Year Performance</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600 mb-2">${currentYear} YTD</p>
+                            <p class="text-3xl font-bold text-blue-600">${currentCount}</p>
+                            <p class="text-sm text-gray-500 mt-1">${formatCurrency(currentTFA)}</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600 mb-2">${currentYear - 1} Same Period</p>
+                            <p class="text-3xl font-bold text-gray-600">${prevYearFacilities}</p>
+                            <p class="text-sm text-gray-500 mt-1">${formatCurrency(prevYearTFA)}</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600 mb-2">Variance</p>
+                            <p class="text-3xl font-bold ${countVariance >= 0 ? 'text-green-600' : 'text-red-600'}">${countVariance >= 0 ? '+' : ''}${countVariance}</p>
+                            <p class="text-sm ${tfaVariance >= 0 ? 'text-green-600' : 'text-red-600'} mt-1">${tfaVariance >= 0 ? '+' : ''}${formatCurrency(tfaVariance)}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // 3. Regional Summary Table
             const regionalTableEl = document.getElementById('newDealsYTDRegionalTable');
-            if (regionalTableEl && regional) {
-                const regions = ['AMER', 'EMEA', 'APAC'];
+            if (regionalTableEl && regionalData) {
+                const regionEntries = [
+                    { name: 'APAC', ...regionalData.APAC || {count: 0, tfa: 0} },
+                    { name: 'EMEA', ...regionalData.EMEA || {count: 0, tfa: 0} },
+                    { name: 'NAM', ...regionalData.NAM || {count: 0, tfa: 0} },
+                    { name: 'LATAM', ...regionalData.LATAM || {count: 0, tfa: 0} }
+                ].sort((a, b) => b.tfa - a.tfa);
+                
                 let tableHTML = `
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="border-b border-gray-200">
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Region</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">New Deals</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Total TFA</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Avg per Deal</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
+                    <table class="w-full h-full">
+                        <thead>
+                            <tr class="border-b border-gray-200 bg-gray-50">
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700">Region</th>
+                                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700">New Deals</th>
+                                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700">Total TFA</th>
+                                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700">Avg per Deal</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
                 `;
                 
                 let totalCount = 0, totalTFA = 0;
-                regions.forEach(region => {
-                    const data = regional[region] || {count: 0, tfa: 0};
-                    totalCount += data.count;
-                    totalTFA += data.tfa;
-                    const avg = data.count > 0 ? data.tfa / data.count : 0;
+                regionEntries.forEach(region => {
+                    totalCount += region.count;
+                    totalTFA += region.tfa;
+                    const avg = region.count > 0 ? region.tfa / region.count : 0;
                     
                     tableHTML += `
                         <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-sm font-medium text-gray-900">${region}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-700">${data.count}</td>
-                            <td class="px-4 py-3 text-sm text-right font-medium text-gray-900">${formatCurrency(data.tfa)}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-600">${formatCurrency(avg)}</td>
+                            <td class="px-6 py-4 text-sm font-medium text-gray-900">${region.name}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-700">${region.count}</td>
+                            <td class="px-6 py-4 text-sm text-right font-medium text-gray-900">${formatCurrency(region.tfa)}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-600">${formatCurrency(avg)}</td>
                         </tr>
                     `;
                 });
@@ -14740,33 +15235,33 @@
                 const avgTotal = totalCount > 0 ? totalTFA / totalCount : 0;
                 tableHTML += `
                         <tr class="bg-gray-50 font-semibold border-t-2 border-gray-300">
-                            <td class="px-4 py-3 text-sm text-gray-900">Total</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-900">${totalCount}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-900">${formatCurrency(totalTFA)}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-900">${formatCurrency(avgTotal)}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900">Total</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-900">${totalCount}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-900">${formatCurrency(totalTFA)}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-900">${formatCurrency(avgTotal)}</td>
                         </tr>
                     </tbody>
                 </table>
-            </div>
                 `;
                 regionalTableEl.innerHTML = tableHTML;
             }
             
-            // 2. Monthly Trend Chart
+            // 4. Monthly Trend Chart
             const monthlyChartEl = document.getElementById('newDealsYTDMonthlyChart');
-            if (monthlyChartEl && monthly && monthly.length > 0) {
+            if (monthlyChartEl && monthlyTrend && monthlyTrend.length > 0) {
                 const monthlyOptions = {
                     series: [{
                         name: 'Deals',
-                        data: monthly.map(m => m.count)
+                        data: monthlyTrend.map(m => m.count)
                     }],
                     chart: {
                         type: 'bar',
                         height: 300,
                         fontFamily: 'Outfit, sans-serif',
-                        toolbar: { show: false }
+                        toolbar: { show: false },
+                        parentHeightOffset: 0
                     },
-                    colors: ['#3b82f6'],
+                    colors: ['#465fff'],
                     plotOptions: {
                         bar: {
                             borderRadius: 6,
@@ -14779,20 +15274,45 @@
                         offsetY: -20,
                         style: {
                             fontSize: '11px',
+                            fontWeight: 500,
                             colors: ['#374151']
                         }
                     },
                     xaxis: {
-                        categories: monthly.map(m => m.name),
+                        categories: monthlyTrend.map(m => m.name),
+                        labels: {
+                            style: {
+                                colors: "#6B7280",
+                                fontSize: "12px",
+                                fontFamily: "Outfit, sans-serif",
+                            },
+                        },
                         axisBorder: { show: false },
                         axisTicks: { show: false }
                     },
                     yaxis: {
-                        title: { text: 'Number of Deals' }
+                        labels: {
+                            style: {
+                                colors: "#6B7280",
+                                fontSize: "12px",
+                                fontFamily: "Outfit, sans-serif",
+                            },
+                        },
                     },
                     grid: {
-                        borderColor: '#f1f5f9',
-                        strokeDashArray: 4
+                        borderColor: '#E5E7EB',
+                        strokeDashArray: 4,
+                        xaxis: { lines: { show: true } },
+                        yaxis: { lines: { show: false } },
+                        padding: {
+                            top: 4,
+                            right: 0,
+                            bottom: 0,
+                            left: 0
+                        }
+                    },
+                    tooltip: {
+                        theme: 'light'
                     }
                 };
                 
@@ -14801,60 +15321,98 @@
                 monthlyChart.render();
             }
             
-            // 3. Product Chart
+            // 5. Product Chart
             const productChartEl = document.getElementById('newDealsYTDProductChart');
-            if (productChartEl && products && products.length > 0) {
+            if (productChartEl && topProducts && topProducts.length > 0) {
+                const productChartHeight = Math.max(280, topProducts.length * 34);
                 const productOptions = {
                     series: [{
                         name: 'TFA',
-                        data: products.map(p => p.tfa)
+                        data: topProducts.map(p => p.tfa)
                     }],
                     chart: {
                         type: 'bar',
-                        height: 300,
+                        height: productChartHeight,
                         fontFamily: 'Outfit, sans-serif',
-                        toolbar: { show: false }
+                        toolbar: { show: false },
+                        parentHeightOffset: 0
                     },
-                    colors: ['#10b981'],
+                    colors: ['#465fff'],
                     plotOptions: {
                         bar: {
                             borderRadius: 6,
                             horizontal: true,
-                            dataLabels: { position: 'right' }
+                            distributed: false,
+                            dataLabels: { position: 'right' },
+                            barHeight: '70%'
                         }
                     },
                     dataLabels: {
                         enabled: true,
+                        textAnchor: 'start',
+                        offsetX: 16,
                         formatter: function(val) {
                             return formatCurrency(val);
                         },
-                        offsetX: 5,
                         style: {
-                            fontSize: '10px',
+                            fontSize: '11px',
+                            fontWeight: 500,
                             colors: ['#374151']
+                        },
+                        background: {
+                            enabled: true,
+                            foreColor: '#374151',
+                            backgroundColor: '#F3F4F6',
+                            borderRadius: 12,
+                            padding: 8,
+                            opacity: 1,
+                            borderWidth: 0
                         }
                     },
                     xaxis: {
-                        categories: products.map(p => p.name),
+                        categories: topProducts.map(p => p.name),
                         labels: {
                             formatter: function(val) {
                                 return formatCurrency(val);
-                            }
-                        }
+                            },
+                            style: {
+                                colors: "#6B7280",
+                                fontSize: "12px",
+                                fontFamily: "Outfit, sans-serif",
+                            },
+                        },
+                        axisBorder: { show: false },
+                        axisTicks: { show: false },
                     },
                     yaxis: {
                         labels: {
-                            maxWidth: 120
-                        }
+                            align: 'left',
+                            offsetX: -10,
+                            style: {
+                                colors: "#6B7280",
+                                fontSize: "12px",
+                                fontFamily: "Outfit, sans-serif",
+                            },
+                            maxWidth: 180
+                        },
                     },
                     grid: {
-                        borderColor: '#f1f5f9',
-                        strokeDashArray: 4
+                        borderColor: '#E5E7EB',
+                        strokeDashArray: 4,
+                        xaxis: { lines: { show: true } },
+                        yaxis: { lines: { show: false } },
+                        padding: {
+                            top: 4,
+                            right: 0,
+                            bottom: 0,
+                            left: 0
+                        }
                     },
                     tooltip: {
+                        theme: 'light',
                         y: {
                             formatter: function(val, opts) {
-                                const count = products[opts.dataPointIndex].count;
+                                const count = topProducts[opts.dataPointIndex].count;
                                 return formatCurrency(val) + ` (${count} deals)`;
                             }
                         }
@@ -14866,43 +15424,59 @@
                 productChart.render();
             }
             
-            // 4. Underwriter Table
+            // 6. Underwriter Table
             const underwriterTableEl = document.getElementById('newDealsYTDUnderwriterTable');
-            if (underwriterTableEl && underwriters && underwriters.length > 0) {
+            if (underwriterTableEl) {
                 let tableHTML = `
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="border-b border-gray-200">
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Rank</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Underwriter</th>
-                                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700">Region</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">New Deals</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Total TFA</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Avg per Deal</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
+                    <table class="min-w-full">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Underwriter</th>
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Region</th>
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">New Deals</th>
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Total TFA</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
                 `;
                 
-                underwriters.forEach((uw, index) => {
-                    const avg = uw.facilities > 0 ? uw.tfa / uw.facilities : 0;
+                if (topUnderwriters && topUnderwriters.length > 0) {
+                    topUnderwriters.forEach((uw, index) => {
+                        const regionColor = {
+                            'APAC': 'bg-blue-100 text-blue-700',
+                            'EMEA': 'bg-green-100 text-green-700',
+                            'NAM': 'bg-purple-100 text-purple-700',
+                            'LATAM': 'bg-orange-100 text-orange-700'
+                        }[uw.region] || 'bg-gray-100 text-gray-700';
+                        
+                        tableHTML += `
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 text-center text-sm font-medium text-gray-900">${uw.name}</td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="inline-flex items-center justify-center rounded-full ${regionColor} px-2.5 py-0.5 text-xs font-medium">
+                                        ${uw.region}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="inline-flex items-center justify-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
+                                        ${uw.facilities}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap font-semibold text-gray-900">${formatCurrency(uw.tfa)}</td>
+                            </tr>
+                        `;
+                    });
+                } else {
                     tableHTML += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-sm text-gray-600">${index + 1}</td>
-                            <td class="px-4 py-3 text-sm font-medium text-gray-900">${uw.name}</td>
-                            <td class="px-4 py-3 text-sm text-center text-gray-700">${uw.region}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-700">${uw.facilities}</td>
-                            <td class="px-4 py-3 text-sm text-right font-medium text-gray-900">${formatCurrency(uw.tfa)}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-600">${formatCurrency(avg)}</td>
+                        <tr>
+                            <td colspan="4" class="px-6 py-8 text-center text-sm text-gray-500">No data available</td>
                         </tr>
                     `;
-                });
+                }
                 
                 tableHTML += `
                     </tbody>
                 </table>
-            </div>
                 `;
                 underwriterTableEl.innerHTML = tableHTML;
             }
@@ -14912,39 +15486,161 @@
         function renderNewDealsMTDExpandedViews() {
             if (!window.newDealsMTDExpandedData || typeof ApexCharts === 'undefined') return;
             
-            const { regional, products, underwriters, weekly } = window.newDealsMTDExpandedData;
+            const {
+                regionalData,
+                topProducts,
+                topUnderwriters,
+                weeklyTrend,
+                prevMonthFacilities,
+                prevMonthTFA,
+                currentCount,
+                currentTFA,
+                countVariance,
+                countVariancePercent,
+                tfaVariance,
+                tfaVariancePercent,
+                currentMonth,
+                prevMonth
+            } = window.newDealsMTDExpandedData;
             
-            // 1. Regional Summary Table
+            const monthLabel = currentMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+            const prevMonthLabel = prevMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+            
+            // 1. Update KPI Cards
+            const kpisEl = document.getElementById('newDealsMTDKPIs');
+            if (kpisEl) {
+                const avgDealSize = currentCount > 0 ? currentTFA / currentCount : 0;
+                const productCount = topProducts ? topProducts.length : 0;
+                
+                kpisEl.innerHTML = `
+                    <div class="rounded-xl border border-gray-200 bg-white p-5">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100">
+                                <svg class="h-5 w-5 shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500">New Deals MTD</p>
+                                <h3 class="text-2xl font-bold text-gray-900">${currentCount}</h3>
+                                <div class="flex items-center gap-1 mt-1">
+                                    <span class="text-xs ${countVariance >= 0 ? 'text-green-600' : 'text-red-600'}">${countVariance >= 0 ? '↑' : '↓'} ${Math.abs(countVariancePercent).toFixed(1)}%</span>
+                                    <span class="text-xs text-gray-500">vs PM</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="rounded-xl border border-gray-200 bg-white p-5">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-100">
+                                <svg class="h-5 w-5 shrink-0 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500">Total TFA MTD</p>
+                                <h3 class="text-xl font-bold text-gray-900">${formatCurrency(currentTFA)}</h3>
+                                <div class="flex items-center gap-1 mt-1">
+                                    <span class="text-xs ${tfaVariance >= 0 ? 'text-green-600' : 'text-red-600'}">${tfaVariance >= 0 ? '↑' : '↓'} ${Math.abs(tfaVariancePercent).toFixed(1)}%</span>
+                                    <span class="text-xs text-gray-500">vs PM</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="rounded-xl border border-gray-200 bg-white p-5">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-100">
+                                <svg class="h-5 w-5 shrink-0 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500">Avg Deal Size</p>
+                                <h3 class="text-xl font-bold text-gray-900">${formatCurrency(avgDealSize)}</h3>
+                                <p class="text-xs text-gray-500 mt-1">Per facility</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="rounded-xl border border-gray-200 bg-white p-5">
+                        <div class="flex items-start gap-3">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100">
+                                <svg class="h-5 w-5 shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs text-gray-500">Product Programs</p>
+                                <h3 class="text-2xl font-bold text-gray-900">${productCount}</h3>
+                                <p class="text-xs text-gray-500 mt-1">Categories</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // 2. Update Month-over-Month Comparison
+            const momEl = document.getElementById('newDealsMTDMoMComparison');
+            if (momEl) {
+                momEl.innerHTML = `
+                    <h3 class="text-base font-semibold text-gray-900 mb-4">Month-over-Month Performance</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600 mb-2">${monthLabel}</p>
+                            <p class="text-3xl font-bold text-blue-600">${currentCount}</p>
+                            <p class="text-sm text-gray-500 mt-1">${formatCurrency(currentTFA)}</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600 mb-2">${prevMonthLabel}</p>
+                            <p class="text-3xl font-bold text-gray-600">${prevMonthFacilities}</p>
+                            <p class="text-sm text-gray-500 mt-1">${formatCurrency(prevMonthTFA)}</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600 mb-2">Variance</p>
+                            <p class="text-3xl font-bold ${countVariance >= 0 ? 'text-green-600' : 'text-red-600'}">${countVariance >= 0 ? '+' : ''}${countVariance}</p>
+                            <p class="text-sm ${tfaVariance >= 0 ? 'text-green-600' : 'text-red-600'} mt-1">${tfaVariance >= 0 ? '+' : ''}${formatCurrency(tfaVariance)}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // 3. Regional Summary Table
             const regionalTableEl = document.getElementById('newDealsMTDRegionalTable');
-            if (regionalTableEl && regional) {
-                const regions = ['AMER', 'EMEA', 'APAC'];
+            if (regionalTableEl && regionalData) {
+                const regionEntries = [
+                    { name: 'APAC', ...regionalData.APAC || {count: 0, tfa: 0} },
+                    { name: 'EMEA', ...regionalData.EMEA || {count: 0, tfa: 0} },
+                    { name: 'NAM', ...regionalData.NAM || {count: 0, tfa: 0} },
+                    { name: 'LATAM', ...regionalData.LATAM || {count: 0, tfa: 0} }
+                ].sort((a, b) => b.tfa - a.tfa);
+                
                 let tableHTML = `
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="border-b border-gray-200">
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Region</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">New Deals</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Total TFA</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Avg per Deal</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
+                    <table class="w-full h-full">
+                        <thead>
+                            <tr class="border-b border-gray-200 bg-gray-50">
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700">Region</th>
+                                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700">New Deals</th>
+                                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700">Total TFA</th>
+                                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700">Avg per Deal</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
                 `;
                 
                 let totalCount = 0, totalTFA = 0;
-                regions.forEach(region => {
-                    const data = regional[region] || {count: 0, tfa: 0};
-                    totalCount += data.count;
-                    totalTFA += data.tfa;
-                    const avg = data.count > 0 ? data.tfa / data.count : 0;
+                regionEntries.forEach(region => {
+                    totalCount += region.count;
+                    totalTFA += region.tfa;
+                    const avg = region.count > 0 ? region.tfa / region.count : 0;
                     
                     tableHTML += `
                         <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-sm font-medium text-gray-900">${region}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-700">${data.count}</td>
-                            <td class="px-4 py-3 text-sm text-right font-medium text-gray-900">${formatCurrency(data.tfa)}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-600">${formatCurrency(avg)}</td>
+                            <td class="px-6 py-4 text-sm font-medium text-gray-900">${region.name}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-700">${region.count}</td>
+                            <td class="px-6 py-4 text-sm text-right font-medium text-gray-900">${formatCurrency(region.tfa)}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-600">${formatCurrency(avg)}</td>
                         </tr>
                     `;
                 });
@@ -14952,33 +15648,33 @@
                 const avgTotal = totalCount > 0 ? totalTFA / totalCount : 0;
                 tableHTML += `
                         <tr class="bg-gray-50 font-semibold border-t-2 border-gray-300">
-                            <td class="px-4 py-3 text-sm text-gray-900">Total</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-900">${totalCount}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-900">${formatCurrency(totalTFA)}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-900">${formatCurrency(avgTotal)}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900">Total</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-900">${totalCount}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-900">${formatCurrency(totalTFA)}</td>
+                            <td class="px-6 py-4 text-sm text-right text-gray-900">${formatCurrency(avgTotal)}</td>
                         </tr>
                     </tbody>
                 </table>
-            </div>
                 `;
                 regionalTableEl.innerHTML = tableHTML;
             }
             
-            // 2. Weekly Trend Chart
+            // 4. Weekly Trend Chart
             const weeklyChartEl = document.getElementById('newDealsMTDWeeklyChart');
-            if (weeklyChartEl && weekly && weekly.length > 0) {
+            if (weeklyChartEl && weeklyTrend && weeklyTrend.length > 0) {
                 const weeklyOptions = {
                     series: [{
                         name: 'Deals',
-                        data: weekly.map(w => w.count)
+                        data: weeklyTrend.map(w => w.count)
                     }],
                     chart: {
                         type: 'bar',
                         height: 300,
                         fontFamily: 'Outfit, sans-serif',
-                        toolbar: { show: false }
+                        toolbar: { show: false },
+                        parentHeightOffset: 0
                     },
-                    colors: ['#3b82f6'],
+                    colors: ['#465fff'],
                     plotOptions: {
                         bar: {
                             borderRadius: 6,
@@ -14991,20 +15687,45 @@
                         offsetY: -20,
                         style: {
                             fontSize: '11px',
+                            fontWeight: 500,
                             colors: ['#374151']
                         }
                     },
                     xaxis: {
-                        categories: weekly.map(w => w.name),
+                        categories: weeklyTrend.map(w => w.name),
+                        labels: {
+                            style: {
+                                colors: "#6B7280",
+                                fontSize: "12px",
+                                fontFamily: "Outfit, sans-serif",
+                            },
+                        },
                         axisBorder: { show: false },
                         axisTicks: { show: false }
                     },
                     yaxis: {
-                        title: { text: 'Number of Deals' }
+                        labels: {
+                            style: {
+                                colors: "#6B7280",
+                                fontSize: "12px",
+                                fontFamily: "Outfit, sans-serif",
+                            },
+                        },
                     },
                     grid: {
-                        borderColor: '#f1f5f9',
-                        strokeDashArray: 4
+                        borderColor: '#E5E7EB',
+                        strokeDashArray: 4,
+                        xaxis: { lines: { show: true } },
+                        yaxis: { lines: { show: false } },
+                        padding: {
+                            top: 4,
+                            right: 0,
+                            bottom: 0,
+                            left: 0
+                        }
+                    },
+                    tooltip: {
+                        theme: 'light'
                     }
                 };
                 
@@ -15013,60 +15734,98 @@
                 weeklyChart.render();
             }
             
-            // 3. Product Chart
+            // 5. Product Chart
             const productChartEl = document.getElementById('newDealsMTDProductChart');
-            if (productChartEl && products && products.length > 0) {
+            if (productChartEl && topProducts && topProducts.length > 0) {
+                const productChartHeight = Math.max(280, topProducts.length * 34);
                 const productOptions = {
                     series: [{
                         name: 'TFA',
-                        data: products.map(p => p.tfa)
+                        data: topProducts.map(p => p.tfa)
                     }],
                     chart: {
                         type: 'bar',
-                        height: 300,
+                        height: productChartHeight,
                         fontFamily: 'Outfit, sans-serif',
-                        toolbar: { show: false }
+                        toolbar: { show: false },
+                        parentHeightOffset: 0
                     },
-                    colors: ['#10b981'],
+                    colors: ['#465fff'],
                     plotOptions: {
                         bar: {
                             borderRadius: 6,
                             horizontal: true,
-                            dataLabels: { position: 'right' }
+                            distributed: false,
+                            dataLabels: { position: 'right' },
+                            barHeight: '70%'
                         }
                     },
                     dataLabels: {
                         enabled: true,
+                        textAnchor: 'start',
+                        offsetX: 16,
                         formatter: function(val) {
                             return formatCurrency(val);
                         },
-                        offsetX: 5,
                         style: {
-                            fontSize: '10px',
+                            fontSize: '11px',
+                            fontWeight: 500,
                             colors: ['#374151']
+                        },
+                        background: {
+                            enabled: true,
+                            foreColor: '#374151',
+                            backgroundColor: '#F3F4F6',
+                            borderRadius: 12,
+                            padding: 8,
+                            opacity: 1,
+                            borderWidth: 0
                         }
                     },
                     xaxis: {
-                        categories: products.map(p => p.name),
+                        categories: topProducts.map(p => p.name),
                         labels: {
                             formatter: function(val) {
                                 return formatCurrency(val);
-                            }
-                        }
+                            },
+                            style: {
+                                colors: "#6B7280",
+                                fontSize: "12px",
+                                fontFamily: "Outfit, sans-serif",
+                            },
+                        },
+                        axisBorder: { show: false },
+                        axisTicks: { show: false },
                     },
                     yaxis: {
                         labels: {
-                            maxWidth: 120
-                        }
+                            align: 'left',
+                            offsetX: -10,
+                            style: {
+                                colors: "#6B7280",
+                                fontSize: "12px",
+                                fontFamily: "Outfit, sans-serif",
+                            },
+                            maxWidth: 180
+                        },
                     },
                     grid: {
-                        borderColor: '#f1f5f9',
-                        strokeDashArray: 4
+                        borderColor: '#E5E7EB',
+                        strokeDashArray: 4,
+                        xaxis: { lines: { show: true } },
+                        yaxis: { lines: { show: false } },
+                        padding: {
+                            top: 4,
+                            right: 0,
+                            bottom: 0,
+                            left: 0
+                        }
                     },
                     tooltip: {
+                        theme: 'light',
                         y: {
                             formatter: function(val, opts) {
-                                const count = products[opts.dataPointIndex].count;
+                                const count = topProducts[opts.dataPointIndex].count;
                                 return formatCurrency(val) + ` (${count} deals)`;
                             }
                         }
@@ -15078,43 +15837,59 @@
                 productChart.render();
             }
             
-            // 4. Underwriter Table
+            // 6. Underwriter Table
             const underwriterTableEl = document.getElementById('newDealsMTDUnderwriterTable');
-            if (underwriterTableEl && underwriters && underwriters.length > 0) {
+            if (underwriterTableEl) {
                 let tableHTML = `
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="border-b border-gray-200">
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Rank</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700">Underwriter</th>
-                                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700">Region</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">New Deals</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Total TFA</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700">Avg per Deal</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
+                    <table class="min-w-full">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Underwriter</th>
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Region</th>
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">New Deals</th>
+                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Total TFA</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
                 `;
                 
-                underwriters.forEach((uw, index) => {
-                    const avg = uw.facilities > 0 ? uw.tfa / uw.facilities : 0;
+                if (topUnderwriters && topUnderwriters.length > 0) {
+                    topUnderwriters.forEach((uw, index) => {
+                        const regionColor = {
+                            'APAC': 'bg-blue-100 text-blue-700',
+                            'EMEA': 'bg-green-100 text-green-700',
+                            'NAM': 'bg-purple-100 text-purple-700',
+                            'LATAM': 'bg-orange-100 text-orange-700'
+                        }[uw.region] || 'bg-gray-100 text-gray-700';
+                        
+                        tableHTML += `
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 text-center text-sm font-medium text-gray-900">${uw.name}</td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="inline-flex items-center justify-center rounded-full ${regionColor} px-2.5 py-0.5 text-xs font-medium">
+                                        ${uw.region}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="inline-flex items-center justify-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
+                                        ${uw.facilities}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap font-semibold text-gray-900">${formatCurrency(uw.tfa)}</td>
+                            </tr>
+                        `;
+                    });
+                } else {
                     tableHTML += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-sm text-gray-600">${index + 1}</td>
-                            <td class="px-4 py-3 text-sm font-medium text-gray-900">${uw.name}</td>
-                            <td class="px-4 py-3 text-sm text-center text-gray-700">${uw.region}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-700">${uw.facilities}</td>
-                            <td class="px-4 py-3 text-sm text-right font-medium text-gray-900">${formatCurrency(uw.tfa)}</td>
-                            <td class="px-4 py-3 text-sm text-right text-gray-600">${formatCurrency(avg)}</td>
+                        <tr>
+                            <td colspan="4" class="px-6 py-8 text-center text-sm text-gray-500">No data available</td>
                         </tr>
                     `;
-                });
+                }
                 
                 tableHTML += `
                     </tbody>
                 </table>
-            </div>
                 `;
                 underwriterTableEl.innerHTML = tableHTML;
             }
@@ -16246,106 +17021,10 @@
         }
         
         function generateNewDealsYTDExpandedView(dataSource) {
-            // Get reporting month range
+            // This function now only returns the HTML template
+            // Data processing is done in initializeNewDealsYTDChart()
             const { monthStart, monthEnd, reportingMonth: repMonth } = getReportingMonthRange();
             const currentYear = repMonth.getFullYear();
-            const yearStartDate = new Date(currentYear, 0, 1);
-            yearStartDate.setHours(0, 0, 0, 0);
-            
-            // Calculate previous year same period for variance
-            const prevYearStart = new Date(currentYear - 1, 0, 1);
-            prevYearStart.setHours(0, 0, 0, 0);
-            const prevYearEnd = new Date(currentYear - 1, repMonth.getMonth(), repMonth.getDate());
-            prevYearEnd.setHours(23, 59, 59, 999);
-            
-            // Collect current year data
-            const regionalData = { AMER: {count: 0, tfa: 0}, EMEA: {count: 0, tfa: 0}, APAC: {count: 0, tfa: 0} };
-            const productData = {};
-            const underwriterData = {};
-            const monthlyData = {};
-            const currentYearFacilities = new Set();
-            let currentYearTFA = 0;
-            
-            // Collect previous year data for variance
-            const prevYearFacilities = new Set();
-            let prevYearTFA = 0;
-            
-            dataSource.forEach(row => {
-                const originationDate = parseDate(row.Origination_Date);
-                const facilityId = row.Facility_ID;
-                const region = (row.Region || "Unknown").toUpperCase();
-                const product = row.Product_Program || "Unknown";
-                const underwriter = row.Lead_Underwriter || "Unknown";
-                const amount = parseNumber(row.Facility_Amount);
-                
-                if (!facilityId || !originationDate) return;
-                
-                // Current year YTD data
-                if (originationDate >= yearStartDate && originationDate <= repMonth) {
-                    if (!currentYearFacilities.has(facilityId)) {
-                        currentYearFacilities.add(facilityId);
-                        currentYearTFA += amount;
-                        
-                        // Regional data
-                        if (!regionalData[region]) {
-                            regionalData[region] = {count: 0, tfa: 0};
-                        }
-                        regionalData[region].count++;
-                        regionalData[region].tfa += amount;
-                        
-                        // Product data
-                        if (!productData[product]) {
-                            productData[product] = { count: 0, tfa: 0 };
-                        }
-                        productData[product].count++;
-                        productData[product].tfa += amount;
-                        
-                        // Underwriter data
-                        if (!underwriterData[underwriter]) {
-                            underwriterData[underwriter] = { facilities: new Set(), tfa: 0, region: region };
-                        }
-                        underwriterData[underwriter].facilities.add(facilityId);
-                        underwriterData[underwriter].tfa += amount;
-                        
-                        // Monthly data
-                        const monthKey = originationDate.toLocaleDateString("en-US", { month: "short" });
-                        if (!monthlyData[monthKey]) {
-                            monthlyData[monthKey] = { count: 0, tfa: 0, month: originationDate.getMonth() };
-                        }
-                        monthlyData[monthKey].count++;
-                        monthlyData[monthKey].tfa += amount;
-                    }
-                }
-                
-                // Previous year same period data
-                if (originationDate >= prevYearStart && originationDate <= prevYearEnd) {
-                    if (!prevYearFacilities.has(facilityId)) {
-                        prevYearFacilities.add(facilityId);
-                        prevYearTFA += amount;
-                    }
-                }
-            });
-            
-            // Calculate variances
-            const countVariance = currentYearFacilities.size - prevYearFacilities.size;
-            const countVariancePercent = prevYearFacilities.size > 0 ? (countVariance / prevYearFacilities.size) * 100 : 0;
-            const tfaVariance = currentYearTFA - prevYearTFA;
-            const tfaVariancePercent = prevYearTFA > 0 ? (tfaVariance / prevYearTFA) * 100 : 0;
-            
-            // Convert to arrays and sort
-            const topProducts = Object.entries(productData)
-                .map(([name, data]) => ({name, ...data}))
-                .sort((a, b) => b.tfa - a.tfa)
-                .slice(0, 10);
-            
-            const topUnderwriters = Object.entries(underwriterData)
-                .map(([name, data]) => ({name, facilities: data.facilities.size, tfa: data.tfa, region: data.region}))
-                .sort((a, b) => b.tfa - a.tfa)
-                .slice(0, 10);
-            
-            const monthlyTrend = Object.entries(monthlyData)
-                .map(([name, data]) => ({name, ...data}))
-                .sort((a, b) => a.month - b.month);
             
             return `
                 <!-- Title Section -->
@@ -16355,106 +17034,25 @@
                 </div>
                 
                 <!-- Summary KPIs with Variance -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                    <div class="rounded-xl border border-gray-200 bg-white p-5">
-                        <div class="flex items-start gap-3">
-                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100">
-                                <svg class="h-5 w-5 shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                </svg>
-                            </div>
-                            <div class="flex-1">
-                                <p class="text-xs text-gray-500">New Deals YTD</p>
-                                <h3 class="text-2xl font-bold text-gray-900">${currentYearFacilities.size}</h3>
-                                <div class="flex items-center gap-1 mt-1">
-                                    <span class="text-xs ${countVariance >= 0 ? 'text-green-600' : 'text-red-600'}">${countVariance >= 0 ? '↑' : '↓'} ${Math.abs(countVariancePercent).toFixed(1)}%</span>
-                                    <span class="text-xs text-gray-500">vs PY</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="rounded-xl border border-gray-200 bg-white p-5">
-                        <div class="flex items-start gap-3">
-                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-100">
-                                <svg class="h-5 w-5 shrink-0 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                            <div class="flex-1">
-                                <p class="text-xs text-gray-500">Total TFA YTD</p>
-                                <h3 class="text-xl font-bold text-gray-900">${formatCurrency(currentYearTFA)}</h3>
-                                <div class="flex items-center gap-1 mt-1">
-                                    <span class="text-xs ${tfaVariance >= 0 ? 'text-green-600' : 'text-red-600'}">${tfaVariance >= 0 ? '↑' : '↓'} ${Math.abs(tfaVariancePercent).toFixed(1)}%</span>
-                                    <span class="text-xs text-gray-500">vs PY</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="rounded-xl border border-gray-200 bg-white p-5">
-                        <div class="flex items-start gap-3">
-                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-100">
-                                <svg class="h-5 w-5 shrink-0 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                                </svg>
-                            </div>
-                            <div class="flex-1">
-                                <p class="text-xs text-gray-500">Avg Deal Size</p>
-                                <h3 class="text-xl font-bold text-gray-900">${formatCurrency(currentYearFacilities.size > 0 ? currentYearTFA / currentYearFacilities.size : 0)}</h3>
-                                <p class="text-xs text-gray-500 mt-1">Per facility</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="rounded-xl border border-gray-200 bg-white p-5">
-                        <div class="flex items-start gap-3">
-                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100">
-                                <svg class="h-5 w-5 shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                                </svg>
-                            </div>
-                            <div class="flex-1">
-                                <p class="text-xs text-gray-500">Product Programs</p>
-                                <h3 class="text-2xl font-bold text-gray-900">${Object.keys(productData).length}</h3>
-                                <p class="text-xs text-gray-500 mt-1">Categories</p>
-                            </div>
-                        </div>
-                    </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6" id="newDealsYTDKPIs">
+                    <!-- KPIs will be populated by renderNewDealsYTDExpandedViews -->
                 </div>
                 
                 <!-- Year-over-Year Comparison -->
-                <div class="rounded-xl border border-gray-200 bg-white p-6 mb-6">
-                    <h3 class="text-base font-semibold text-gray-900 mb-4">Year-over-Year Performance</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="text-center">
-                            <p class="text-sm text-gray-600 mb-2">${currentYear} YTD</p>
-                            <p class="text-3xl font-bold text-blue-600">${currentYearFacilities.size}</p>
-                            <p class="text-sm text-gray-500 mt-1">${formatCurrency(currentYearTFA)}</p>
-                        </div>
-                        <div class="text-center">
-                            <p class="text-sm text-gray-600 mb-2">${currentYear - 1} Same Period</p>
-                            <p class="text-3xl font-bold text-gray-600">${prevYearFacilities.size}</p>
-                            <p class="text-sm text-gray-500 mt-1">${formatCurrency(prevYearTFA)}</p>
-                        </div>
-                        <div class="text-center">
-                            <p class="text-sm text-gray-600 mb-2">Variance</p>
-                            <p class="text-3xl font-bold ${countVariance >= 0 ? 'text-green-600' : 'text-red-600'}">${countVariance >= 0 ? '+' : ''}${countVariance}</p>
-                            <p class="text-sm ${tfaVariance >= 0 ? 'text-green-600' : 'text-red-600'} mt-1">${tfaVariance >= 0 ? '+' : ''}${formatCurrency(tfaVariance)}</p>
-                        </div>
-                    </div>
+                <div class="rounded-xl border border-gray-200 bg-white p-6 mb-6" id="newDealsYTDYoYComparison">
+                    <!-- YoY comparison will be populated by renderNewDealsYTDExpandedViews -->
                 </div>
                 
                 <!-- Analysis Row -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <!-- Regional Distribution -->
-                    <div class="rounded-xl border border-gray-200 bg-white">
+                    <div class="rounded-xl border border-gray-200 bg-white flex flex-col">
                         <div class="border-b border-gray-200 px-6 py-4">
                             <h3 class="text-base font-semibold text-gray-900">Regional Distribution</h3>
                             <p class="text-xs text-gray-500 mt-1">YTD deals by region</p>
                         </div>
-                        <div class="p-6">
-                            <div id="newDealsYTDRegionalTable"></div>
+                        <div class="flex-1 overflow-hidden">
+                            <div id="newDealsYTDRegionalTable" class="h-full"></div>
                         </div>
                     </div>
                     
@@ -16482,137 +17080,23 @@
                 </div>
                 
                 <!-- Underwriter Breakdown -->
-                <div class="rounded-xl border border-gray-200 bg-white mb-6">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">Top Underwriters</h3>
+                <div class="rounded-2xl border border-gray-200 bg-white mb-6">
+                    <div class="px-6 py-4">
+                        <h3 class="text-lg font-semibold text-gray-800">Top Underwriters (Top 10)</h3>
                         <p class="text-xs text-gray-500 mt-1">Lead underwriters YTD performance</p>
                     </div>
-                    <div class="p-6">
+                    <div class="custom-scrollbar overflow-x-auto">
                         <div id="newDealsYTDUnderwriterTable"></div>
                     </div>
                 </div>
-                
-                <script>
-                    // Store data for rendering
-                    window.newDealsYTDExpandedData = {
-                        regional: ${JSON.stringify(regionalData)},
-                        products: ${JSON.stringify(topProducts)},
-                        underwriters: ${JSON.stringify(topUnderwriters)},
-                        monthly: ${JSON.stringify(monthlyTrend)}
-                    };
-                    
-                    // Render views after a short delay
-                    setTimeout(() => {
-                        renderNewDealsYTDExpandedViews();
-                    }, 100);
-                <\/script>
             `;
         }
         
         function generateNewDealsMTDExpandedView(dataSource) {
-            // Get reporting month range
+            // This function now only returns the HTML template
+            // Data processing is done in initializeNewDealsMTDChart()
             const { monthStart, monthEnd, reportingMonth: repMonth } = getReportingMonthRange();
-            const currentYear = repMonth.getFullYear();
-            const currentMonth = repMonth.getMonth();
-            
-            // Calculate previous month for variance
-            const prevMonthStart = new Date(currentYear, currentMonth - 1, 1);
-            prevMonthStart.setHours(0, 0, 0, 0);
-            const prevMonthEnd = new Date(currentYear, currentMonth, 0);
-            prevMonthEnd.setHours(23, 59, 59, 999);
-            
-            // Collect current month data
-            const regionalData = { AMER: {count: 0, tfa: 0}, EMEA: {count: 0, tfa: 0}, APAC: {count: 0, tfa: 0} };
-            const productData = {};
-            const underwriterData = {};
-            const weeklyData = {};
-            const currentMonthFacilities = new Set();
-            let currentMonthTFA = 0;
-            
-            // Collect previous month data for variance
-            const prevMonthFacilities = new Set();
-            let prevMonthTFA = 0;
-            
-            dataSource.forEach(row => {
-                const originationDate = parseDate(row.Origination_Date);
-                const facilityId = row.Facility_ID;
-                const region = (row.Region || "Unknown").toUpperCase();
-                const product = row.Product_Program || "Unknown";
-                const underwriter = row.Lead_Underwriter || "Unknown";
-                const amount = parseNumber(row.Facility_Amount);
-                
-                if (!facilityId || !originationDate) return;
-                
-                // Current month data
-                if (originationDate >= monthStart && originationDate <= monthEnd) {
-                    if (!currentMonthFacilities.has(facilityId)) {
-                        currentMonthFacilities.add(facilityId);
-                        currentMonthTFA += amount;
-                        
-                        // Regional data
-                        if (!regionalData[region]) {
-                            regionalData[region] = {count: 0, tfa: 0};
-                        }
-                        regionalData[region].count++;
-                        regionalData[region].tfa += amount;
-                        
-                        // Product data
-                        if (!productData[product]) {
-                            productData[product] = { count: 0, tfa: 0 };
-                        }
-                        productData[product].count++;
-                        productData[product].tfa += amount;
-                        
-                        // Underwriter data
-                        if (!underwriterData[underwriter]) {
-                            underwriterData[underwriter] = { facilities: new Set(), tfa: 0, region: region };
-                        }
-                        underwriterData[underwriter].facilities.add(facilityId);
-                        underwriterData[underwriter].tfa += amount;
-                        
-                        // Weekly data
-                        const weekNumber = Math.ceil(originationDate.getDate() / 7);
-                        const weekKey = `Week ${weekNumber}`;
-                        if (!weeklyData[weekKey]) {
-                            weeklyData[weekKey] = { count: 0, tfa: 0, week: weekNumber };
-                        }
-                        weeklyData[weekKey].count++;
-                        weeklyData[weekKey].tfa += amount;
-                    }
-                }
-                
-                // Previous month data
-                if (originationDate >= prevMonthStart && originationDate <= prevMonthEnd) {
-                    if (!prevMonthFacilities.has(facilityId)) {
-                        prevMonthFacilities.add(facilityId);
-                        prevMonthTFA += amount;
-                    }
-                }
-            });
-            
-            // Calculate variances
-            const countVariance = currentMonthFacilities.size - prevMonthFacilities.size;
-            const countVariancePercent = prevMonthFacilities.size > 0 ? (countVariance / prevMonthFacilities.size) * 100 : 0;
-            const tfaVariance = currentMonthTFA - prevMonthTFA;
-            const tfaVariancePercent = prevMonthTFA > 0 ? (tfaVariance / prevMonthTFA) * 100 : 0;
-            
-            // Convert to arrays and sort
-            const topProducts = Object.entries(productData)
-                .map(([name, data]) => ({name, ...data}))
-                .sort((a, b) => b.tfa - a.tfa)
-                .slice(0, 10);
-            
-            const topUnderwriters = Object.entries(underwriterData)
-                .map(([name, data]) => ({name, facilities: data.facilities.size, tfa: data.tfa, region: data.region}))
-                .sort((a, b) => b.tfa - a.tfa)
-                .slice(0, 10);
-            
-            const weeklyTrend = Object.entries(weeklyData)
-                .map(([name, data]) => ({name, ...data}))
-                .sort((a, b) => a.week - b.week);
-            
             const monthLabel = repMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-            const prevMonthLabel = prevMonthStart.toLocaleDateString("en-US", { month: "long", year: "numeric" });
             
             return `
                 <!-- Title Section -->
@@ -16622,106 +17106,25 @@
                 </div>
                 
                 <!-- Summary KPIs with Variance -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                    <div class="rounded-xl border border-gray-200 bg-white p-5">
-                        <div class="flex items-start gap-3">
-                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100">
-                                <svg class="h-5 w-5 shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                </svg>
-                            </div>
-                            <div class="flex-1">
-                                <p class="text-xs text-gray-500">New Deals MTD</p>
-                                <h3 class="text-2xl font-bold text-gray-900">${currentMonthFacilities.size}</h3>
-                                <div class="flex items-center gap-1 mt-1">
-                                    <span class="text-xs ${countVariance >= 0 ? 'text-green-600' : 'text-red-600'}">${countVariance >= 0 ? '↑' : '↓'} ${Math.abs(countVariancePercent).toFixed(1)}%</span>
-                                    <span class="text-xs text-gray-500">vs PM</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="rounded-xl border border-gray-200 bg-white p-5">
-                        <div class="flex items-start gap-3">
-                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-100">
-                                <svg class="h-5 w-5 shrink-0 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                            <div class="flex-1">
-                                <p class="text-xs text-gray-500">Total TFA MTD</p>
-                                <h3 class="text-xl font-bold text-gray-900">${formatCurrency(currentMonthTFA)}</h3>
-                                <div class="flex items-center gap-1 mt-1">
-                                    <span class="text-xs ${tfaVariance >= 0 ? 'text-green-600' : 'text-red-600'}">${tfaVariance >= 0 ? '↑' : '↓'} ${Math.abs(tfaVariancePercent).toFixed(1)}%</span>
-                                    <span class="text-xs text-gray-500">vs PM</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="rounded-xl border border-gray-200 bg-white p-5">
-                        <div class="flex items-start gap-3">
-                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-100">
-                                <svg class="h-5 w-5 shrink-0 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                                </svg>
-                            </div>
-                            <div class="flex-1">
-                                <p class="text-xs text-gray-500">Avg Deal Size</p>
-                                <h3 class="text-xl font-bold text-gray-900">${formatCurrency(currentMonthFacilities.size > 0 ? currentMonthTFA / currentMonthFacilities.size : 0)}</h3>
-                                <p class="text-xs text-gray-500 mt-1">Per facility</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="rounded-xl border border-gray-200 bg-white p-5">
-                        <div class="flex items-start gap-3">
-                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100">
-                                <svg class="h-5 w-5 shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                                </svg>
-                            </div>
-                            <div class="flex-1">
-                                <p class="text-xs text-gray-500">Product Programs</p>
-                                <h3 class="text-2xl font-bold text-gray-900">${Object.keys(productData).length}</h3>
-                                <p class="text-xs text-gray-500 mt-1">Categories</p>
-                            </div>
-                        </div>
-                    </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6" id="newDealsMTDKPIs">
+                    <!-- KPIs will be populated by renderNewDealsMTDExpandedViews -->
                 </div>
                 
                 <!-- Month-over-Month Comparison -->
-                <div class="rounded-xl border border-gray-200 bg-white p-6 mb-6">
-                    <h3 class="text-base font-semibold text-gray-900 mb-4">Month-over-Month Performance</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="text-center">
-                            <p class="text-sm text-gray-600 mb-2">${monthLabel}</p>
-                            <p class="text-3xl font-bold text-blue-600">${currentMonthFacilities.size}</p>
-                            <p class="text-sm text-gray-500 mt-1">${formatCurrency(currentMonthTFA)}</p>
-                        </div>
-                        <div class="text-center">
-                            <p class="text-sm text-gray-600 mb-2">${prevMonthLabel}</p>
-                            <p class="text-3xl font-bold text-gray-600">${prevMonthFacilities.size}</p>
-                            <p class="text-sm text-gray-500 mt-1">${formatCurrency(prevMonthTFA)}</p>
-                        </div>
-                        <div class="text-center">
-                            <p class="text-sm text-gray-600 mb-2">Variance</p>
-                            <p class="text-3xl font-bold ${countVariance >= 0 ? 'text-green-600' : 'text-red-600'}">${countVariance >= 0 ? '+' : ''}${countVariance}</p>
-                            <p class="text-sm ${tfaVariance >= 0 ? 'text-green-600' : 'text-red-600'} mt-1">${tfaVariance >= 0 ? '+' : ''}${formatCurrency(tfaVariance)}</p>
-                        </div>
-                    </div>
+                <div class="rounded-xl border border-gray-200 bg-white p-6 mb-6" id="newDealsMTDMoMComparison">
+                    <!-- MoM comparison will be populated by renderNewDealsMTDExpandedViews -->
                 </div>
                 
                 <!-- Analysis Row -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <!-- Regional Distribution -->
-                    <div class="rounded-xl border border-gray-200 bg-white">
+                    <div class="rounded-xl border border-gray-200 bg-white flex flex-col">
                         <div class="border-b border-gray-200 px-6 py-4">
                             <h3 class="text-base font-semibold text-gray-900">Regional Distribution</h3>
                             <p class="text-xs text-gray-500 mt-1">MTD deals by region</p>
                         </div>
-                        <div class="p-6">
-                            <div id="newDealsMTDRegionalTable"></div>
+                        <div class="flex-1 overflow-hidden">
+                            <div id="newDealsMTDRegionalTable" class="h-full"></div>
                         </div>
                     </div>
                     
@@ -16749,30 +17152,15 @@
                 </div>
                 
                 <!-- Underwriter Breakdown -->
-                <div class="rounded-xl border border-gray-200 bg-white mb-6">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">Top Underwriters</h3>
+                <div class="rounded-2xl border border-gray-200 bg-white mb-6">
+                    <div class="px-6 py-4">
+                        <h3 class="text-lg font-semibold text-gray-800">Top Underwriters (Top 10)</h3>
                         <p class="text-xs text-gray-500 mt-1">Lead underwriters MTD performance</p>
                     </div>
-                    <div class="p-6">
+                    <div class="custom-scrollbar overflow-x-auto">
                         <div id="newDealsMTDUnderwriterTable"></div>
                     </div>
                 </div>
-                
-                <script>
-                    // Store data for rendering
-                    window.newDealsMTDExpandedData = {
-                        regional: ${JSON.stringify(regionalData)},
-                        products: ${JSON.stringify(topProducts)},
-                        underwriters: ${JSON.stringify(topUnderwriters)},
-                        weekly: ${JSON.stringify(weeklyTrend)}
-                    };
-                    
-                    // Render views after a short delay
-                    setTimeout(() => {
-                        renderNewDealsMTDExpandedViews();
-                    }, 100);
-                <\/script>
             `;
         }
         function generatePipelineExpandedView(dataSource) {
@@ -17100,105 +17488,18 @@
             `;
         }
         function generateNewFacilitiesExpandedView(dataSource) {
-            // Get the selected period (current or previous)
-            const period = selectedPeriod || 'current';
-            
-            // Find the most recent Report_Date
-            let mostRecentReportDate = null;
-            for (let i = 0; i < dataSource.length; i++) {
-                const reportDate = parseDate(dataSource[i].Report_Date);
-                if (reportDate && (!mostRecentReportDate || reportDate > mostRecentReportDate)) {
-                    mostRecentReportDate = reportDate;
-                }
-            }
-            
-            if (!mostRecentReportDate) {
-                return '<p class="text-gray-500">No report date found</p>';
-            }
-            
-            // Calculate date range based on period
-            let targetStartDate, targetEndDate, periodLabel;
-            if (period === "current") {
-                targetStartDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth(), 1);
-                targetStartDate.setHours(0, 0, 0, 0);
-                targetEndDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth() + 1, 0);
-                targetEndDate.setHours(23, 59, 59, 999);
-                periodLabel = targetStartDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-            } else {
-                targetStartDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth() - 1, 1);
-                targetStartDate.setHours(0, 0, 0, 0);
-                targetEndDate = new Date(mostRecentReportDate.getFullYear(), mostRecentReportDate.getMonth(), 0);
-                targetEndDate.setHours(23, 59, 59, 999);
-                periodLabel = targetStartDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-            }
-            
-            // Collect data for analysis
-            const regionalData = { AMER: {count: 0, tfa: 0}, EMEA: {count: 0, tfa: 0}, APAC: {count: 0, tfa: 0} };
-            const productData = {};
-            const underwriterData = {};
-            const newFacilities = new Set();
-            
-            dataSource.forEach(row => {
-                const region = (row.Region || "Unknown").toUpperCase();
-                const product = row.Product_Program || "Unknown";
-                const underwriter = row.Lead_Underwriter || "Unknown";
-                const facilityId = row.Facility_ID;
-                
-                // For EMEA, use Origination_Date; for others, use Facility_First_Approval_Date
-                const approvalDate = region === "EMEA" 
-                    ? parseDate(row.Origination_Date)
-                    : parseDate(row.Facility_First_Approval_Date);
-                
-                if (!facilityId) return;
-                
-                // Check if facility is new in the target period
-                if (approvalDate && approvalDate >= targetStartDate && approvalDate <= targetEndDate) {
-                    newFacilities.add(facilityId);
-                    const amount = parseNumber(row.Facility_Amount);
-                    
-                    // Regional data
-                    if (!regionalData[region]) {
-                        regionalData[region] = {count: 0, tfa: 0};
-                    }
-                    regionalData[region].count++;
-                    regionalData[region].tfa += amount;
-                    
-                    // Product data
-                    if (!productData[product]) {
-                        productData[product] = { count: 0, tfa: 0 };
-                    }
-                    productData[product].count++;
-                    productData[product].tfa += amount;
-                    
-                    // Underwriter data
-                    if (!underwriterData[underwriter]) {
-                        underwriterData[underwriter] = { facilities: new Set(), tfa: 0, region: region };
-                    }
-                    underwriterData[underwriter].facilities.add(facilityId);
-                    underwriterData[underwriter].tfa += amount;
-                }
-            });
-            
-            // Convert to arrays and sort
-            const topProducts = Object.entries(productData)
-                .map(([name, data]) => ({name, ...data}))
-                .sort((a, b) => b.tfa - a.tfa)
-                .slice(0, 10);
-            
-            const topUnderwriters = Object.entries(underwriterData)
-                .map(([name, data]) => ({name, facilities: data.facilities.size, tfa: data.tfa, region: data.region}))
-                .sort((a, b) => b.tfa - a.tfa)
-                .slice(0, 10);
+            // This function now only returns the HTML template
+            // Data processing is done in initializeNewFacilitiesChart()
             
             return `
                 <!-- Title Section -->
                 <div class="mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900">New Facilities Approved - ${periodLabel}</h3>
-                    <p class="text-sm text-gray-500 mt-1">Detailed analysis of newly approved facilities</p>
+                    <h3 class="text-lg font-semibold text-gray-900">New Facilities Approved</h3>
+                    <p class="text-sm text-gray-500 mt-1">Analysis of newly approved facilities for the selected period</p>
                 </div>
                 
                 <!-- Summary KPIs -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6" id="newFacilitiesKPIs">
                     <div class="rounded-xl border border-gray-200 bg-white p-5">
                         <div class="flex items-start gap-3">
                             <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100">
@@ -17208,8 +17509,8 @@
                             </div>
                             <div>
                                 <p class="text-xs text-gray-500">Total New Facilities</p>
-                                <h3 class="text-2xl font-bold text-gray-900">${newFacilities.size}</h3>
-                                <p class="text-xs text-gray-500 mt-1">${formatCurrency(Object.values(regionalData).reduce((sum, r) => sum + r.tfa, 0))}</p>
+                                <h3 class="text-2xl font-bold text-gray-900" id="newFacilitiesCount">0</h3>
+                                <p class="text-xs text-gray-500 mt-1" id="newFacilitiesTotalTFA">$0</p>
                             </div>
                         </div>
                     </div>
@@ -17222,9 +17523,9 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-xs text-gray-500">Product Programs</p>
-                                <h3 class="text-2xl font-bold text-gray-900">${Object.keys(productData).length}</h3>
-                                <p class="text-xs text-gray-500 mt-1">Distinct categories</p>
+                                <p class="text-xs text-gray-500">Regions Active</p>
+                                <h3 class="text-2xl font-bold text-gray-900" id="newFacilitiesRegions">0</h3>
+                                <p class="text-xs text-gray-500 mt-1">Geographic coverage</p>
                             </div>
                         </div>
                     </div>
@@ -17238,7 +17539,7 @@
                             </div>
                             <div>
                                 <p class="text-xs text-gray-500">Underwriters Involved</p>
-                                <h3 class="text-2xl font-bold text-gray-900">${Object.keys(underwriterData).length}</h3>
+                                <h3 class="text-2xl font-bold text-gray-900" id="newFacilitiesUnderwriters">0</h3>
                                 <p class="text-xs text-gray-500 mt-1">Lead underwriters</p>
                             </div>
                         </div>
@@ -17248,35 +17549,35 @@
                 <!-- Analysis Row -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <!-- Regional Distribution -->
-                    <div class="rounded-xl border border-gray-200 bg-white">
+                    <div class="rounded-xl border border-gray-200 bg-white flex flex-col">
                         <div class="border-b border-gray-200 px-6 py-4">
                             <h3 class="text-base font-semibold text-gray-900">Regional Distribution</h3>
                             <p class="text-xs text-gray-500 mt-1">New facilities by region</p>
                         </div>
-                        <div class="p-6">
-                            <div id="newFacilitiesRegionalTable"></div>
+                        <div class="flex-1 overflow-hidden">
+                            <div id="newFacilitiesRegionalTable" class="h-full"></div>
                         </div>
                     </div>
                     
-                    <!-- Product Category Chart -->
+                    <!-- Approval Timeline Chart -->
                     <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-base font-semibold text-gray-900">Top Product Programs</h3>
-                            <p class="text-xs text-gray-500 mt-1">By TFA</p>
+                            <h3 class="text-base font-semibold text-gray-900">Approval Timeline</h3>
+                            <p class="text-xs text-gray-500 mt-1">Weekly facility approval trend</p>
                         </div>
                         <div class="p-6">
-                            <div id="newFacilitiesProductChart" style="min-height: 300px;"></div>
+                            <div id="newFacilitiesSizeChart" style="min-height: 300px;"></div>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Underwriter Breakdown -->
-                <div class="rounded-xl border border-gray-200 bg-white mb-6">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">Top Underwriters</h3>
+                <div class="rounded-2xl border border-gray-200 bg-white mb-6">
+                    <div class="px-6 py-4">
+                        <h3 class="text-lg font-semibold text-gray-800">Top Underwriters (Top 10)</h3>
                         <p class="text-xs text-gray-500 mt-1">Lead underwriters with most new facilities approved</p>
                     </div>
-                    <div class="p-6">
+                    <div class="custom-scrollbar overflow-x-auto">
                         <div id="newFacilitiesUnderwriterTable"></div>
                     </div>
                 </div>
@@ -19866,7 +20167,7 @@
                                     </svg>
                                     <h5 class="font-semibold text-gray-900">What This Chart Shows:</h5>
                                 </div>
-                                <p class="text-gray-600">Distribution of newly approved facilities by Product Program for the selected reporting period.</p>
+                                <p class="text-gray-600">Detailed analysis of newly approved facilities based on Facility First Approval Date, showing regional distribution, approval timeline trends, and underwriter performance.</p>
                             </div>
                             
                             <div>
@@ -19879,9 +20180,22 @@
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
                                     <li><strong>Current Period:</strong> Facilities where Facility_First_Approval_Date falls within the current reporting month (1st to last day)</li>
                                     <li><strong>Previous Period:</strong> Facilities where Facility_First_Approval_Date falls within the previous month</li>
-                                    <li><strong>Grouping:</strong> Aggregated by Product_Program</li>
-                                    <li><strong>Count:</strong> Number of unique facilities per product program</li>
+                                    <li><strong>Grouping:</strong> Aggregated by Region, Product_Program, and Lead_Underwriter</li>
+                                    <li><strong>Count:</strong> Number of unique facilities per grouping</li>
+                                    <li><strong>Timeline:</strong> Weekly aggregation showing approval trend throughout the period</li>
                                 </ul>
+                            </div>
+                            
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                <div class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div>
+                                        <h5 class="font-semibold text-blue-900 mb-1">APAC Region Note:</h5>
+                                        <p class="text-sm text-blue-800">For APAC, new facilities are identified via month-end file comparison in the ETL process. The system compares current month-end data against previous month-end data to identify facilities not present in the prior period.</p>
+                                    </div>
+                                </div>
                             </div>
                             
                             <div>
@@ -19892,10 +20206,13 @@
                                     <h5 class="font-semibold text-gray-900">Key Columns Used:</h5>
                                 </div>
                                 <ul class="list-disc list-inside space-y-1 text-gray-600">
-                                    <li><code class="bg-gray-100 px-1 rounded">Facility_First_Approval_Date</code> - Determines if facility is "new"</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Facility_First_Approval_Date</code> - Determines if facility is "new" for all regions</li>
                                     <li><code class="bg-gray-100 px-1 rounded">Report_Date</code> - Identifies the current reporting month</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Region</code> - Groups facilities by geographic region</li>
                                     <li><code class="bg-gray-100 px-1 rounded">Product_Program</code> - Groups facilities by product type</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Lead_Underwriter</code> - Identifies responsible underwriter</li>
                                     <li><code class="bg-gray-100 px-1 rounded">Facility_ID</code> - Counts unique new facilities</li>
+                                    <li><code class="bg-gray-100 px-1 rounded">Facility_Amount</code> - Calculates total TFA</li>
                                 </ul>
                             </div>
                             

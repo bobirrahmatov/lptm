@@ -11696,15 +11696,18 @@
 
         // Populate values in the expand modal with tabs
         function populateExpandModalValues(chartType) {
-            // For Covenants and CCM, use their specific data sources (they have their own Region-only filtering)
-            // For other charts, use filteredData (respects all filters)
+            // All charts should respect user filters by using filtered data
             let dataSource;
             if (chartType === 'covenantMonitoring' || chartType === 'covenantRegional') {
-                dataSource = window.covenantsData || [];
-                console.log('📊 Using covenant data source:', dataSource.length, 'records');
+                // Apply covenant-specific filters (Region, Underwriter, Product Program only)
+                const rawCovenantData = window.covenantsData || [];
+                dataSource = applyCovenantFilters(rawCovenantData);
+                console.log('📊 Using filtered covenant data source:', dataSource.length, 'of', rawCovenantData.length, 'records');
             } else if (chartType === 'ccmRegionalChart') {
-                dataSource = window.ccmData || [];
-                console.log('📊 Using CCM data source:', dataSource.length, 'records');
+                // CCM data should also use covenant-specific filters (similar structure)
+                const rawCCMData = window.ccmData || [];
+                dataSource = applyCovenantFilters(rawCCMData);
+                console.log('📊 Using filtered CCM data source:', dataSource.length, 'of', rawCCMData.length, 'records');
             } else {
                 // Use filteredData if it exists and has records, otherwise use portfolioData
                 // This handles the case when page loads or filters are cleared
@@ -11739,23 +11742,38 @@
             
             // Defer rendering for performance
             setTimeout(() => {
-                // Generate insights content  
-                const htmlContent = generateExpandedView(chartType, dataSource);
-                insightsContent.innerHTML = htmlContent;
-                
-                // Extract and execute any embedded scripts (for charts not yet refactored)
-                const scriptRegex = /<script>([\s\S]*?)<\\?\/script>/gi;
-                let match;
-                while ((match = scriptRegex.exec(htmlContent)) !== null) {
-                    try {
-                        eval(match[1]);
-                    } catch (e) {
-                        console.error(`Error executing embedded script for ${chartType}:`, e);
+                try {
+                    // Generate insights content  
+                    const htmlContent = generateExpandedView(chartType, dataSource);
+                    insightsContent.innerHTML = htmlContent;
+                    
+                    // Extract and execute any embedded scripts (for charts not yet refactored)
+                    const scriptRegex = /<script>([\s\S]*?)<\\?\/script>/gi;
+                    let match;
+                    while ((match = scriptRegex.exec(htmlContent)) !== null) {
+                        try {
+                            eval(match[1]);
+                        } catch (e) {
+                            console.error(`Error executing embedded script for ${chartType}:`, e);
+                        }
                     }
+                    
+                    // Initialize any charts if needed
+                    initializeExpandCharts(chartType, dataSource);
+                } catch (error) {
+                    console.error('❌ Error generating expanded view for', chartType, error);
+                    insightsContent.innerHTML = `
+                        <div class="flex items-center justify-center h-full min-h-[400px]">
+                            <div class="text-center">
+                                <svg class="mx-auto h-12 w-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                                <h3 class="mt-2 text-sm font-medium text-gray-900">Error loading expanded view</h3>
+                                <p class="mt-1 text-sm text-gray-500">${error.message}</p>
+                            </div>
+                        </div>
+                    `;
                 }
-                
-                // Initialize any charts if needed
-                initializeExpandCharts(chartType, dataSource);
             }, 50);
         }
         
@@ -12432,6 +12450,67 @@
                 });
             }
             
+            return filtered;
+        }
+        
+        // Helper function to apply covenant-specific filters (only Region, Underwriter, Product Program)
+        function applyCovenantFilters(dataSource) {
+            if (!dataSource || dataSource.length === 0) {
+                console.log('⚠️ applyCovenantFilters - No data source provided');
+                return [];
+            }
+            
+            let filtered = [...dataSource]; // Clone array
+            
+            console.log('🔍 applyCovenantFilters - Starting with:', filtered.length, 'records');
+            
+            // Apply region filter (Covenant data has Region field)
+            if (selectedRegion && selectedRegion !== 'all') {
+                const beforeFilter = filtered.length;
+                filtered = filtered.filter(row => {
+                    const region = (row.Region || "").toUpperCase();
+                    return region === selectedRegion.toUpperCase();
+                });
+                console.log('🔍 Region filter applied:', selectedRegion, '- Reduced from', beforeFilter, 'to', filtered.length);
+            }
+            
+            // Get advanced filter values from activeFilters (if set)
+            const underwriterFilter = activeFilters?.underwriter || "";
+            const productProgramFilter = activeFilters?.productProgram || "";
+            
+            // Apply Underwriter filter (Covenant data has Lead_Underwriter field)
+            if (underwriterFilter && underwriterFilter.trim() !== '') {
+                const beforeFilter = filtered.length;
+                filtered = filtered.filter(row => {
+                    const underwriter = (row.Lead_Underwriter || "").toLowerCase();
+                    return underwriter.includes(underwriterFilter.toLowerCase());
+                });
+                console.log('🔍 Underwriter filter applied:', underwriterFilter, '- Reduced from', beforeFilter, 'to', filtered.length);
+            }
+            
+            // Apply Product Program filter (Covenant data has Product_Program field)
+            if (productProgramFilter && productProgramFilter.trim() !== '') {
+                const beforeFilter = filtered.length;
+                filtered = filtered.filter(row => {
+                    const productProgram = (row.Product_Program || "").toLowerCase();
+                    return productProgram.includes(productProgramFilter.toLowerCase());
+                });
+                console.log('🔍 Product Program filter applied:', productProgramFilter, '- Reduced from', beforeFilter, 'to', filtered.length);
+            }
+            
+            // Apply search filter
+            if (selectedSearchTerm && selectedSearchTerm.trim() !== '') {
+                const beforeFilter = filtered.length;
+                const searchLower = selectedSearchTerm.toLowerCase();
+                filtered = filtered.filter(row => {
+                    return Object.values(row).some(val => 
+                        String(val).toLowerCase().includes(searchLower)
+                    );
+                });
+                console.log('🔍 Search filter applied:', selectedSearchTerm, '- Reduced from', beforeFilter, 'to', filtered.length);
+            }
+            
+            console.log('✅ applyCovenantFilters - Final count:', filtered.length, 'records');
             return filtered;
         }
         
@@ -19797,7 +19876,7 @@
                                 <p class="text-sm font-medium text-gray-800 flex-1">${product.name}</p>
                                 <p class="text-sm font-semibold text-gray-900">${product.count}</p>
                             </div>
-                        `;
+                `;
                     }).join('');
                 }
             }
@@ -20166,10 +20245,10 @@
             
             let html = '';
             const regionColors = {
-                'NAM': 'bg-orange-50 text-orange-600',
-                'LATAM': 'bg-purple-50 text-purple-600'
-            };
-            
+                            'NAM': 'bg-orange-50 text-orange-600',
+                            'LATAM': 'bg-purple-50 text-purple-600'
+                        };
+                        
             displayItems.forEach(item => {
                 const regionColor = regionColors[item.region] || 'bg-gray-50 text-gray-600';
                 
@@ -20188,14 +20267,14 @@
                 }
                 
                 html += `
-                    <tr class="hover:bg-gray-50">
+                            <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 text-center text-sm whitespace-nowrap font-medium text-gray-900">${item.facilityId}</td>
                         <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-900">${item.relationship}</td>
                         <td class="px-6 py-4 text-center">
                             <span class="${regionColor} rounded-full px-2 py-0.5 text-xs font-medium">
                                 ${item.region}
                             </span>
-                        </td>
+                                </td>
                         <td class="px-6 py-4 text-center text-sm text-gray-700">${item.product}</td>
                         <td class="px-6 py-4 text-center text-sm text-gray-700">${item.facilityType}</td>
                         <td class="px-6 py-4 text-center text-sm text-gray-700">${item.underwriter}</td>
@@ -20205,10 +20284,10 @@
                             <span class="${agingBadgeClass} rounded-full px-2 py-0.5 text-xs font-semibold min-w-[60px] inline-block">
                                 ${item.agingCategory}
                             </span>
-                        </td>
-                    </tr>
-                `;
-            });
+                                </td>
+                            </tr>
+                        `;
+                    });
             
             tbody.innerHTML = html;
         }
@@ -22216,7 +22295,7 @@
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800">Deals Pending Closure Details</h3>
                             <p class="text-xs text-gray-500 mt-1">All pending deals awaiting closure</p>
-                        </div>
+                    </div>
                         <div class="flex items-center gap-3">
                             <!-- Search Input -->
                             <div class="relative">
@@ -23113,21 +23192,40 @@
         }
         
         function generateCovenantExpandedView(dataSource) {
-            console.log('🔍 generateCovenantExpandedView called');
-            // Use covenant data if available
-            const covenantDataSource = window.covenantsData && window.covenantsData.length > 0 ? window.covenantsData : dataSource;
-            console.log('Covenant data source length:', covenantDataSource.length);
+            console.log('🔍 generateCovenantExpandedView called with dataSource:', dataSource ? dataSource.length : 0, 'records');
+            
+            // Use filtered data from dataSource to respect user filters
+            const covenantDataSource = dataSource && dataSource.length > 0 ? dataSource : (window.covenantsData || []);
+            console.log('📊 Covenant data source length:', covenantDataSource.length);
+            
+            if (!covenantDataSource || covenantDataSource.length === 0) {
+                console.warn('⚠️ No covenant data available');
+                return `<div class="flex items-center justify-center h-full min-h-[400px]">
+                    <div class="text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900">No covenant data available</h3>
+                        <p class="mt-1 text-sm text-gray-500">There are no covenants matching your current filters.</p>
+                    </div>
+                </div>`;
+            }
             
             // Get current view type (pastDue or comingDue) from global state
             const viewType = window.currentCovenantViewType || 'pastDue';
             const isPastDue = viewType === 'pastDue';
             const title = isPastDue ? 'Past Due Covenants' : 'Coming Due Covenants';
             
+            console.log('📊 Current view type:', viewType, '(isPastDue:', isPastDue, ')');
+            
             // Filter by view type
             const filteredCovenants = covenantDataSource.filter(row => {
                 const status = String(row.Coming_Due_Past_Due || "").trim().toLowerCase();
-                return isPastDue ? status === 'past due' : status === 'coming due';
+                const matches = isPastDue ? status === 'past due' : status === 'coming due';
+                return matches;
             });
+            
+            console.log('📊 Filtered covenants by view type:', filteredCovenants.length, 'records');
             
             // Calculate KPIs
             const totalCovenants = filteredCovenants.length;
@@ -23183,7 +23281,7 @@
                     if (category.includes('1-45')) byUnderwriter[underwriter].days_1_45++;
                     else if (category.includes('46-60')) byUnderwriter[underwriter].days_46_60++;
                     else if (category.includes('61-90')) byUnderwriter[underwriter].days_61_90++;
-                    else if (category.includes('90+')) byUnderwriter[underwriter].days_90_plus++;
+                    else if (category.includes('>90')) byUnderwriter[underwriter].days_90_plus++;
                 } else {
                     byUnderwriter[underwriter].coming_due++;
                 }
@@ -23257,6 +23355,8 @@
             
             // Group by Relationship for detailed table
             const detailedTableData = {};
+            let debugAgingCounts = { '1-45': 0, '46-60': 0, '61-90': 0, '>90': 0 };
+            
             filteredCovenants.forEach(row => {
                 const relationshipID = row.Relationship_ID || 'Unknown';
                 const relationshipName = row.Relationship_Name || row.Borrowers_Name || 'Unknown';
@@ -23284,10 +23384,23 @@
                 const status = String(row.Coming_Due_Past_Due || "").trim().toLowerCase();
                 if (status === 'past due') {
                     const category = row.Past_Due_Category || '';
-                    if (category.includes('1-45')) detailedTableData[key].days_1_45++;
-                    else if (category.includes('46-60')) detailedTableData[key].days_46_60++;
-                    else if (category.includes('61-90')) detailedTableData[key].days_61_90++;
-                    else if (category.includes('90+')) detailedTableData[key].days_90_plus++;
+                    if (category.includes('1-45')) {
+                        detailedTableData[key].days_1_45++;
+                        debugAgingCounts['1-45']++;
+                    }
+                    else if (category.includes('46-60')) {
+                        detailedTableData[key].days_46_60++;
+                        debugAgingCounts['46-60']++;
+                    }
+                    else if (category.includes('61-90')) {
+                        detailedTableData[key].days_61_90++;
+                        debugAgingCounts['61-90']++;
+                    }
+                    else if (category.includes('>90')) {
+                        detailedTableData[key].days_90_plus++;
+                        debugAgingCounts['>90']++;
+                        console.log('📊 Found >90 Days covenant:', { relationshipName, underwriter, category });
+                    }
                 } else if (status === 'coming due') {
                     detailedTableData[key].coming_due++;
                     // Store the earliest due date and most common frequency
@@ -23299,6 +23412,8 @@
                     }
                 }
             });
+            
+            console.log('📊 Covenant Aging Bucket Counts:', debugAgingCounts);
             
             // Multi-level sorting: 90+ (desc), 61-90 (desc), 46-60 (desc), 1-45 (desc)
             const detailedTableRows = Object.values(detailedTableData)
@@ -23312,6 +23427,17 @@
                     // Level 4: 1-45 Days (largest to smallest)
                     return b.days_1_45 - a.days_1_45;
                 });
+            
+            console.log('📊 Top 5 rows after sorting (by >90 Days):', 
+                detailedTableRows.slice(0, 5).map(r => ({
+                    relationship: r.relationshipName,
+                    underwriter: r.underwriter,
+                    '90+': r.days_90_plus,
+                    '61-90': r.days_61_90,
+                    '46-60': r.days_46_60,
+                    '1-45': r.days_1_45
+                }))
+            );
             
             return `
                 <!-- Title Section -->

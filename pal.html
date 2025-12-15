@@ -3163,24 +3163,43 @@
                 });
             }
             
+            console.log('📦 Generating dummy data for Pipeline (Deals Pending Closure)...');
+            
             // Add specific dummy data for Pipeline (Deals Pending Closure)
             // Criteria: No Origination_Date, Has Facility_First_Approval_Date (2024), NAM/LATAM only, non-PSE
             const pipelineProducts = ['Corporate Lending', 'Trade Finance', 'Working Capital', 'Project Finance', 'Asset Based Lending', 'Equipment Finance'];
             const pipelineFacilityTypes = ['Revolver', 'Term Loan', 'Bridge Loan', 'LOC', 'Guarantee', 'SBLC'];
-            const pipelineUnderwriters = ['John Smith', 'Sarah Johnson', 'David Lee', 'Carlos Rodriguez', 'Robert Brown'];
+            const pipelineUnderwriters = ['John Smith', 'Sarah Johnson', 'David Lee', 'Carlos Rodriguez', 'Robert Brown', 'Maria Garcia', 'Michael Chen', 'Jennifer Martinez', 'James Wilson', 'Patricia Anderson'];
             const pipelineRegions = ['NAM', 'LATAM'];
+            const pipelineRelationships = ['TechCorp Industries', 'Global Manufacturing', 'Energy Solutions Inc', 'Retail Holdings LLC', 'Healthcare Systems', 'Financial Services Co', 'Transportation Group', 'Construction Partners', 'Telecom Networks', 'Food & Beverage Corp'];
             
-            for (let i = 1; i <= 15; i++) {
+            // Create 45 pending deals for better pagination testing
+            for (let i = 1; i <= 45; i++) {
                 const region = pipelineRegions[i % pipelineRegions.length];
                 const productProgram = pipelineProducts[i % pipelineProducts.length];
                 const facilityType = pipelineFacilityTypes[i % pipelineFacilityTypes.length];
                 const underwriter = pipelineUnderwriters[i % pipelineUnderwriters.length];
-                const baseAmount = (i * 2000000) + (Math.random() * 8000000);
+                const relationship = pipelineRelationships[i % pipelineRelationships.length];
+                const baseAmount = (i * 1500000) + (Math.random() * 10000000); // Vary amounts more
                 
-                // Create approval dates throughout 2024 (various months for variety)
-                const approvalMonth = i % 11; // 0-10 (Jan-Nov 2024)
-                const approvalDay = Math.floor(Math.random() * 25) + 1;
-                const facilityFirstApprovalDate = `2024-${(approvalMonth + 1).toString().padStart(2, '0')}-${approvalDay.toString().padStart(2, '0')}`;
+                // Create approval dates throughout 2024 with different aging buckets
+                // Distribute across: 1-30 days (25%), 31-60 days (25%), 61-90 days (25%), >90 days (25%)
+                let daysOld;
+                if (i % 4 === 0) {
+                    daysOld = Math.floor(Math.random() * 30) + 1; // 1-30 days
+                } else if (i % 4 === 1) {
+                    daysOld = Math.floor(Math.random() * 30) + 31; // 31-60 days
+                } else if (i % 4 === 2) {
+                    daysOld = Math.floor(Math.random() * 30) + 61; // 61-90 days
+                } else {
+                    daysOld = Math.floor(Math.random() * 90) + 91; // 91-180 days
+                }
+                
+                // Calculate approval date based on daysOld
+                const today = new Date('2024-11-30');
+                const approvalDate = new Date(today);
+                approvalDate.setDate(approvalDate.getDate() - daysOld);
+                const facilityFirstApprovalDate = approvalDate.toISOString().split('T')[0];
                 
                 // Future maturity dates (not expiring/expired)
                 const futureYear = 2026 + (i % 2);
@@ -3196,8 +3215,8 @@
                     Lead_Underwriter: underwriter,
                     Product_Underwriter: pipelineUnderwriters[(i + 1) % pipelineUnderwriters.length],
                     Relationship_ID: 'PIPELINE_REL' + i.toString().padStart(3, '0'),
-                    Relationship_Name: `${region} Pending Deal ${i}`,
-                    Borrowers_Name: `Pipeline Borrower ${i}`,
+                    Relationship_Name: `${relationship} - ${region}`,
+                    Borrowers_Name: relationship,
                     CA_Number: 'PIPELINECA2024' + i.toString().padStart(3, '0'),
                     Facility_ID: 'PIPELINEFAC2024' + i.toString().padStart(3, '0'),
                     Facility_Number: 'PF' + i.toString().padStart(3, '0'),
@@ -3224,6 +3243,9 @@
                     ROTCE: 12 + Math.random() * 8
                 });
             }
+            
+            console.log('✅ Generated 45 Pipeline (Deals Pending Closure) dummy records');
+            console.log('📊 Sample pipeline deal:', portfolioData.filter(d => d.Facility_ID && d.Facility_ID.startsWith('PIPELINEFAC'))[0]);
             
             // Add covenants data (100 covenant records with better distribution)
             covenantsData = [];
@@ -15055,6 +15077,8 @@
         
         // Initialize Pipeline Chart - processes data and renders
         function initializePipelineChart(dataSource) {
+            console.log('🔄 initializePipelineChart called with', dataSource ? dataSource.length : 0, 'records');
+            
             const currentYear = new Date().getFullYear();
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -15161,6 +15185,15 @@
             // Sort deals by days old (oldest first)
             const sortedDeals = allPendingDeals.sort((a, b) => b.daysOld - a.daysOld);
             
+            console.log('✅ Pipeline data processed:', {
+                regional: regionalData,
+                productsCount: topProducts.length,
+                underwritersCount: topUnderwriters.length,
+                dealsCount: sortedDeals.length,
+                totalFacilities: allPendingFacilities.size,
+                totalTFA: totalTFA
+            });
+            
             // Store data for rendering
             window.pipelineExpandedData = {
                 regional: regionalData,
@@ -15171,6 +15204,8 @@
                 totalTFA: totalTFA,
                 currentYear: currentYear
             };
+            
+            console.log('💾 Data stored in window.pipelineExpandedData');
             
             // Directly render the views
             renderPipelineExpandedViews();
@@ -19626,9 +19661,29 @@
         
         // Render Pipeline (Deals Pending Closure) Expanded Analysis Views
         function renderPipelineExpandedViews() {
-            if (!window.pipelineExpandedData || typeof ApexCharts === 'undefined') return;
+            console.log('🔄 renderPipelineExpandedViews called', {
+                hasData: !!window.pipelineExpandedData,
+                hasApexCharts: typeof ApexCharts !== 'undefined'
+            });
+            
+            if (!window.pipelineExpandedData || typeof ApexCharts === 'undefined') {
+                console.error('❌ Missing requirements:', {
+                    pipelineExpandedData: !!window.pipelineExpandedData,
+                    ApexCharts: typeof ApexCharts !== 'undefined'
+                });
+                return;
+            }
             
             const { regional, topProducts, topUnderwriters, allDeals, totalFacilities, totalTFA, currentYear } = window.pipelineExpandedData;
+            
+            console.log('📊 Pipeline expanded data:', {
+                regional,
+                topProducts: topProducts ? topProducts.length : 0,
+                topUnderwriters: topUnderwriters ? topUnderwriters.length : 0,
+                allDeals: allDeals ? allDeals.length : 0,
+                totalFacilities,
+                totalTFA
+            });
             
             // Update KPIs
             document.getElementById('pipelineTotalFacilities').textContent = totalFacilities;
@@ -19815,15 +19870,34 @@
         
         // Render Pipeline Details Table with pagination, filters, and search
         function renderPipelineDetailsTable() {
-            const tbody = document.getElementById('pipelineTableBody');
-            const thead = document.getElementById('pipelineTableHeader');
+            console.log('🔄 renderPipelineDetailsTable called');
+            const tbody = document.getElementById('pipelineDetailsTableBody');
+            const thead = document.getElementById('pipelineDetailsTableHeader');
             
-            if (!tbody || !thead || !window.pipelineExpandedData) return;
+            if (!tbody) {
+                console.error('❌ pipelineDetailsTableBody element not found');
+                return;
+            }
+            if (!thead) {
+                console.error('❌ pipelineDetailsTableHeader element not found');
+                return;
+            }
+            if (!window.pipelineExpandedData) {
+                console.error('❌ window.pipelineExpandedData not found');
+                return;
+            }
             
             const state = window.pipelineTableState;
             const { allDeals } = window.pipelineExpandedData;
             
+            console.log('📊 Pipeline data:', {
+                hasData: !!window.pipelineExpandedData,
+                allDealsCount: allDeals ? allDeals.length : 0,
+                sampleDeal: allDeals && allDeals[0]
+            });
+            
             if (!allDeals || allDeals.length === 0) {
+                console.warn('⚠️ No deals data available');
                 tbody.innerHTML = '<tr><td colspan="9" class="px-6 py-8 text-center text-sm text-gray-500">No pending deals data available</td></tr>';
                 return;
             }
@@ -22131,11 +22205,11 @@
                     <div class="custom-scrollbar overflow-x-auto" style="min-height: 500px;">
                         <table class="min-w-full">
                             <thead>
-                                <tr class="bg-gray-50" id="pipelineTableHeader">
+                                <tr class="bg-gray-50" id="pipelineDetailsTableHeader">
                                     <!-- Headers will be dynamically rendered -->
                                 </tr>
                             </thead>
-                            <tbody id="pipelineTableBody" class="divide-y divide-gray-200">
+                            <tbody id="pipelineDetailsTableBody" class="divide-y divide-gray-200">
                                 <tr><td colspan="9" class="px-6 py-8 text-center text-sm text-gray-500">Loading data...</td></tr>
                             </tbody>
                         </table>

@@ -14770,6 +14770,7 @@
             const expiredProductData = {};
             const expiredDetailedData = []; // For backward compatibility
             const expiredFacilityDetails = []; // New: detailed facility data for table
+            const expiredAgingData = { '1-30': 0, '31-60': 0, '61-90': 0, '>90': 0 }; // Aging buckets
             
             dataSource.forEach(row => {
                 const region = (row.Region || "Unknown").toUpperCase();
@@ -14870,6 +14871,17 @@
                     }
                     expiredProductData[product].facilities++;
                     expiredProductData[product].tfa += amount;
+                    
+                    // Categorize by aging bucket
+                    if (daysPastDue >= 1 && daysPastDue <= 30) {
+                        expiredAgingData['1-30']++;
+                    } else if (daysPastDue >= 31 && daysPastDue <= 60) {
+                        expiredAgingData['31-60']++;
+                    } else if (daysPastDue >= 61 && daysPastDue <= 90) {
+                        expiredAgingData['61-90']++;
+                    } else if (daysPastDue > 90) {
+                        expiredAgingData['>90']++;
+                    }
                     
                     // Add to detailed data for backward compatibility
                     expiredDetailedData.push({
@@ -17148,11 +17160,15 @@
             `;
         }
         function generateExpiringExpandedView(dataSource) {
-            // Apply all active filters to dataSource
-            const filteredDataSource = applyAllFilters(dataSource);
+            // NOTE: This function only generates the HTML structure
+            // The actual data processing and chart rendering is done by initializeExpiringChart()
+            // which is called after this HTML is inserted into the DOM
             
             // State for filter (default to 'cas', no 'both' option)
             const filterState = window.expiringFilterState || 'cas';
+            
+            // Apply all active filters to dataSource (for KPI calculations only)
+            const filteredDataSource = applyAllFilters(dataSource);
             
             // Get report date
             const reportDates = filteredDataSource.map(row => parseDate(row.Report_Date)).filter(d => d);
@@ -17484,7 +17500,7 @@
                     <!-- Product Category Chart -->
                     <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-base font-semibold text-gray-900">Facilities Expired by Product Program</h3>
+                            <h3 class="text-base font-semibold text-gray-900">Expired Facilities by Product Program</h3>
                             <p class="text-xs text-gray-500 mt-1">Distribution across product programs</p>
                         </div>
                         <div class="p-6 flex items-center justify-center" style="min-height: 400px;">

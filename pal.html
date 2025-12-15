@@ -3025,6 +3025,30 @@
         let ccmData = []; // CCM (Credit Committee Memos) data from CCM_current.xlsx
         let ccmDataPrevious = []; // Previous month CCM data from CCM_previous.xlsx
         let filteredData = [];
+        
+        // Global constant for excluded facility types (used across multiple charts)
+        const EXCLUDED_FACILITY_TYPES = [
+            'Cash Management-DOL',
+            'Cash Management-ACH',
+            'Settlement',
+            'Overdraft Line',
+            'Collateral Monitoring Line',
+            'Outgoing TPC',
+            'Credit Card',
+            'Guaranty',
+            'Cash Management-Other',
+            'B&I Margin Loan',
+            'Cash Management-BACS',
+            'SAFE - Prime Finance',
+            'Clearing',
+            'Agency Clearing',
+            'SAFE - Financing',
+            'B&I Short Market Values',
+            'Term Loan',
+            'Residential First Mortgage-Standard',
+            'B&I Non-Purpose Loan',
+            'Unallocated'
+        ];
 
         // ===== DUMMY DATA FOR TESTING =====
         // Uncomment this section to test with dummy data without loading from Confluence
@@ -7078,29 +7102,8 @@
             const currentYear = today.getFullYear();
             console.log('Pipeline Table - Current Year:', currentYear);
 
-            // Define excluded facility types
-            const excludedFacilityTypes = [
-                'Cash Management-DOL',
-                'Cash Management-ACH',
-                'Settlement',
-                'Overdraft Line',
-                'Collateral Monitoring Line',
-                'Outgoing TPC',
-                'Credit Card',
-                'Guaranty',
-                'Cash Management-Other',
-                'B&I Margin Loan',
-                'Cash Management-BACS',
-                'SAFE - Prime Finance',
-                'Clearing',
-                'Agency Clearing',
-                'SAFE - Financing',
-                'B&I Short Market Values',
-                'Term Loan',
-                'Residential First Mortgage-Standard',
-                'B&I Non-Purpose Loan',
-                'Unallocated'
-            ];
+            // Use global excluded facility types constant
+            const excludedFacilityTypes = EXCLUDED_FACILITY_TYPES;
 
             // Define aging buckets (in days) - Always show these 4 rows
             const buckets = [
@@ -12873,11 +12876,8 @@
             // For Pipeline - Only return deals pending closure
             if (chartType === 'pipeline') {
                 const currentYear = new Date().getFullYear();
-                const excludedFacilityTypes = [
-                    "Uncommitted Advised Lines",
-                    "Credit Cards",
-                    "Overdraft Protection"
-                ];
+                // Use global excluded facility types constant
+                const excludedFacilityTypes = EXCLUDED_FACILITY_TYPES;
                 
                 const filtered = dataSource.filter(row => {
                     // Exclude PSE
@@ -13018,13 +13018,11 @@
             dataSource.forEach(row => {
                 const underwriter = row.Lead_Underwriter || 'Unknown';
                 const region = row.Region || 'Unknown';
-                const product = row.Product_Program || 'Unknown';
                 
                 if (!detailedData[underwriter]) {
                     detailedData[underwriter] = {
                         underwriter,
                         region,
-                        product,
                         tfa: 0,
                         facilities: new Set(),
                         relationships: new Set()
@@ -13168,7 +13166,6 @@
                                 <tr class="bg-gray-50">
                                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Underwriter</th>
                                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Region</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Product Program</th>
                                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">TFA</th>
                                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Share %</th>
                                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Facilities</th>
@@ -13194,7 +13191,6 @@
                                                     ${row.region}
                                                 </span>
                                             </td>
-                                            <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-700">${row.product}</td>
                                             <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-700">${formatCurrency(row.tfa)}</td>
                                             <td class="px-6 py-4 text-center">
                                                 <div class="flex items-center justify-center gap-2">
@@ -15063,12 +15059,8 @@
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             
-            // Excluded facility types
-            const excludedFacilityTypes = [
-                "Uncommitted Advised Lines",
-                "Credit Cards",
-                "Overdraft Protection"
-            ];
+            // Use global excluded facility types constant
+            const excludedFacilityTypes = EXCLUDED_FACILITY_TYPES;
             
             // Initialize regional data for all regions (show all even if 0)
             const regionalData = { 
@@ -15952,13 +15944,11 @@
             dataSource.forEach(row => {
                 const underwriter = row.Lead_Underwriter || 'Unknown';
                 const region = row.Region || 'Unknown';
-                const product = row.Product_Program || 'Unknown';
                 
                 if (!detailedData[underwriter]) {
                     detailedData[underwriter] = {
                         underwriter,
                         region,
-                        product,
                         osuc: 0,
                         facilities: new Set(),
                         relationships: new Set()
@@ -16101,7 +16091,6 @@
                                 <tr class="bg-gray-50">
                                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Underwriter</th>
                                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Region</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Product Program</th>
                                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">OSUC</th>
                                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Share %</th>
                                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Facilities</th>
@@ -16127,7 +16116,6 @@
                                                     ${row.region}
                                                 </span>
                                             </td>
-                                            <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-700">${row.product}</td>
                                             <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-700">${formatCurrency(row.osuc)}</td>
                                             <td class="px-6 py-4 text-center">
                                                 <div class="flex items-center justify-center gap-2">
@@ -16215,13 +16203,11 @@
             dataSource.forEach(row => {
                 const underwriter = row.Lead_Underwriter || 'Unknown';
                 const region = row.Region || 'Unknown';
-                const product = row.Product_Program || 'Unknown';
                 
                 if (!detailedData[underwriter]) {
                     detailedData[underwriter] = {
                         underwriter,
                         region,
-                        product,
                         os: 0,
                         facilities: new Set(),
                         relationships: new Set()
@@ -16364,7 +16350,6 @@
                                 <tr class="bg-gray-50">
                                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Underwriter</th>
                                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Region</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Product Program</th>
                                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Outstanding</th>
                                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Share %</th>
                                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Facilities</th>
@@ -16390,7 +16375,6 @@
                                                     ${row.region}
                                                 </span>
                                             </td>
-                                            <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-700">${row.product}</td>
                                             <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-700">${formatCurrency(row.os)}</td>
                                             <td class="px-6 py-4 text-center">
                                                 <div class="flex items-center justify-center gap-2">

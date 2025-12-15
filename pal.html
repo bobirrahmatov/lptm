@@ -11659,6 +11659,19 @@
             modalTitle.textContent = details.title;
             modalSubtitle.textContent = details.subtitle;
             
+            // Hide Data tab for global KPI charts (TFA, OSUC, Outstanding, Facilities, Relationships)
+            const globalKPITypes = ['tfa', 'osuc', 'outstanding', 'facilities', 'relationships'];
+            const dataTabButton = document.getElementById('dataTab');
+            if (dataTabButton) {
+                if (globalKPITypes.includes(chartType)) {
+                    dataTabButton.style.display = 'none';
+                    console.log('📊 Data tab hidden for global KPI:', chartType);
+                } else {
+                    dataTabButton.style.display = 'inline-flex';
+                    console.log('📊 Data tab visible for:', chartType);
+                }
+            }
+            
             // Reset to insights tab
             switchExpandTab('insights');
 
@@ -12349,6 +12362,13 @@
         // Switch between tabs in expanded modal
         function switchExpandTab(tabName) {
             console.log('🔄 switchExpandTab called with:', tabName);
+            
+            // Prevent switching to Data tab for global KPI charts
+            const globalKPITypes = ['tfa', 'osuc', 'outstanding', 'facilities', 'relationships'];
+            if (tabName === 'data' && globalKPITypes.includes(currentExpandType)) {
+                console.log('⚠️ Data tab not available for global KPI:', currentExpandType);
+                return; // Don't allow switching to data tab
+            }
             
             const insightsTab = document.getElementById('insightsTab');
             const dataTab = document.getElementById('dataTab');
@@ -17596,47 +17616,64 @@
         // Render expiring analysis views - Regional, Product, and Underwriter breakdowns
         function renderExpiringAnalysis(expiringData) {
             console.log('🔄 renderExpiringAnalysis called', expiringData ? 'with data' : 'without data');
-            const data = expiringData || window.expiringData;
-            if (!data) {
-                console.error('❌ No expiring data available');
-                return;
-            }
             
-            // If no data, replace ENTIRE modal content with no-data message
-            if (data.hasData === false) {
-                const insightsContent = document.getElementById('insightsContent');
-                if (insightsContent) {
-                    insightsContent.innerHTML = generateNoDataMessage('CAs & Facilities Expiring');
+            try {
+                const data = expiringData || window.expiringData;
+                if (!data) {
+                    console.error('❌ No expiring data available');
+                    return;
                 }
-                return; // Don't render anything else
-            }
+                
+                // If no data, replace ENTIRE modal content with no-data message
+                if (data.hasData === false) {
+                    const insightsContent = document.getElementById('insightsContent');
+                    if (insightsContent) {
+                        insightsContent.innerHTML = generateNoDataMessage('CAs & Facilities Expiring');
+                    }
+                    return; // Don't render anything else
+                }
+                
+                if (typeof ApexCharts === 'undefined') {
+                    console.error('❌ ApexCharts is not defined');
+                    return;
+                }
+                
+                console.log('✅ Data and ApexCharts available, rendering...', {
+                    hasRegionalData: !!data.regionalData,
+                    hasProductData: !!data.productData,
+                    hasUnderwriterData: !!data.underwriterData,
+                    hasExpiredFacilityDetails: !!data.expiredFacilityDetails
+                });
+                
+                const { regionalData, productData, underwriterData, expiredProductData, expiredAgingData } = data;
             
-            if (typeof ApexCharts === 'undefined') {
-                console.error('❌ ApexCharts is not defined');
-                return;
-            }
-            
-            console.log('✅ Data and ApexCharts available, rendering...', {
-                hasRegionalData: !!data.regionalData,
-                hasProductData: !!data.productData,
-                hasUnderwriterData: !!data.underwriterData,
-                hasExpiredFacilityDetails: !!data.expiredFacilityDetails
+            console.log('🎨 renderExpiringAnalysis - Data received:', {
+                hasRegionalData: !!regionalData,
+                hasProductData: !!productData,
+                hasExpiredProductData: !!expiredProductData,
+                hasExpiredAgingData: !!expiredAgingData,
+                expiredProductDataKeys: expiredProductData ? Object.keys(expiredProductData).length : 0,
+                expiredAgingData: expiredAgingData
             });
-            
-            const { regionalData, productData, underwriterData, expiredProductData, expiredAgingData } = data;
             
             // 1. Expired Facilities by Aging - Bar Chart
             const agingChartEl = document.getElementById('expiredAgingChart');
             if (agingChartEl && expiredAgingData) {
                 const agingCategories = ['1-30 Days', '31-60 Days', '61-90 Days', '> 90 Days'];
                 const agingValues = [
-                    expiredAgingData['1-30'],
-                    expiredAgingData['31-60'],
-                    expiredAgingData['61-90'],
-                    expiredAgingData['>90']
+                    expiredAgingData['1-30'] || 0,
+                    expiredAgingData['31-60'] || 0,
+                    expiredAgingData['61-90'] || 0,
+                    expiredAgingData['>90'] || 0
                 ];
                 
-                const agingOptions = {
+                const totalExpired = agingValues.reduce((a, b) => a + b, 0);
+                
+                console.log('📊 Aging chart data:', { agingValues, totalExpired });
+                
+                // Only render chart if there's data
+                if (totalExpired > 0) {
+                    const agingOptions = {
                     series: [{
                         name: 'Facilities',
                         data: agingValues
@@ -17713,124 +17750,150 @@
                     tooltip: {
                         theme: 'light'
                     }
-                };
-                
-                agingChartEl.innerHTML = '';
-                const agingChart = new ApexCharts(agingChartEl, agingOptions);
-                agingChart.render();
+                    };
+                    
+                    agingChartEl.innerHTML = '';
+                    const agingChart = new ApexCharts(agingChartEl, agingOptions);
+                    agingChart.render();
+                } else {
+                    // Show "no data" message for aging chart
+                    agingChartEl.innerHTML = '<div class="flex items-center justify-center h-full py-12 text-sm text-gray-500">No expired facilities</div>';
+                }
             }
             
             // 2. Product Category Chart - Donut Chart (EXPIRED Facilities Count Only)
             const productChartEl = document.getElementById('productCategoryChart');
             const productListEl = document.getElementById('productCategoryList');
             
-            if (productChartEl && expiredProductData) {
+            if (productChartEl && expiredProductData && Object.keys(expiredProductData).length > 0) {
                 // Convert expired product data to array and sort by facilities count descending
                 const sortedProducts = Object.entries(expiredProductData)
                     .map(([name, data]) => ({ name, facilities: data.facilities || 0 }))
+                    .filter(p => p.facilities > 0) // Only include products with expired facilities
                     .sort((a, b) => b.facilities - a.facilities);
                 
-                const productLabels = sortedProducts.map(p => p.name);
-                const productValues = sortedProducts.map(p => p.facilities);
-                const totalFacilities = productValues.reduce((a, b) => a + b, 0);
+                console.log('📊 Product chart data:', { sortedProducts });
                 
-                // Donut chart colors (matching TFA by Product Program style)
-                const donutColors = [
-                    "#3641f5",  // Primary blue
-                    "#7592ff",  // Light blue
-                    "#dde9ff",  // Lighter blue
-                    "#ff6b6b",  // Red
-                    "#ffd93d",  // Yellow
-                    "#6bcf7f",  // Green
-                    "#c084fc",  // Purple
-                ];
-                
-                // Product Donut Chart Options (matching TailAdmin pie chart style)
-                const productChartOptions = {
-                    series: productValues,
-                    colors: donutColors.slice(0, productLabels.length),
-                    labels: productLabels,
-                    chart: {
-                        fontFamily: "Outfit, sans-serif",
-                        type: "donut",
-                        width: 300,
-                        height: 300,
-                    },
-                    stroke: {
-                        show: false,
-                    },
-                    plotOptions: {
-                        pie: {
-                            donut: {
-                                size: "65%",
-                                background: "transparent",
-                                labels: {
-                                    show: true,
-                                    name: {
+                if (sortedProducts.length > 0) {
+                    const productLabels = sortedProducts.map(p => p.name);
+                    const productValues = sortedProducts.map(p => p.facilities);
+                    const totalFacilities = productValues.reduce((a, b) => a + b, 0);
+                    
+                    // Donut chart colors (matching TFA by Product Program style)
+                    const donutColors = [
+                        "#3641f5",  // Primary blue
+                        "#7592ff",  // Light blue
+                        "#dde9ff",  // Lighter blue
+                        "#ff6b6b",  // Red
+                        "#ffd93d",  // Yellow
+                        "#6bcf7f",  // Green
+                        "#c084fc",  // Purple
+                    ];
+                    
+                    // Product Donut Chart Options (matching TailAdmin pie chart style)
+                    const productChartOptions = {
+                        series: productValues,
+                        colors: donutColors.slice(0, productLabels.length),
+                        labels: productLabels,
+                        chart: {
+                            fontFamily: "Outfit, sans-serif",
+                            type: "donut",
+                            width: 300,
+                            height: 300,
+                        },
+                        stroke: {
+                            show: false,
+                        },
+                        plotOptions: {
+                            pie: {
+                                donut: {
+                                    size: "65%",
+                                    background: "transparent",
+                                    labels: {
                                         show: true,
-                                        offsetY: -10,
-                                        color: "#1D2939",
-                                        fontSize: "14px",
-                                        fontWeight: "600",
-                                    },
-                                    value: {
-                                        show: true,
-                                        offsetY: 10,
-                                        color: "#667085",
-                                        fontSize: "16px",
-                                        fontWeight: "700",
-                                        formatter: (val) => val,
-                                    },
-                                    total: {
-                                        show: true,
-                                        label: "Total",
-                                        color: "#111827",
-                                        fontSize: "16px",
-                                        fontWeight: "700",
-                                        formatter: () => totalFacilities,
+                                        name: {
+                                            show: true,
+                                            offsetY: -10,
+                                            color: "#1D2939",
+                                            fontSize: "14px",
+                                            fontWeight: "600",
+                                        },
+                                        value: {
+                                            show: true,
+                                            offsetY: 10,
+                                            color: "#667085",
+                                            fontSize: "16px",
+                                            fontWeight: "700",
+                                            formatter: (val) => val,
+                                        },
+                                        total: {
+                                            show: true,
+                                            label: "Total",
+                                            color: "#111827",
+                                            fontSize: "16px",
+                                            fontWeight: "700",
+                                            formatter: () => totalFacilities,
+                                        },
                                     },
                                 },
                             },
                         },
-                    },
-                    dataLabels: {
-                        enabled: false,
-                    },
-                    legend: {
-                        show: false, // Hide built-in legend, using custom HTML legend
-                    },
-                    tooltip: {
-                        enabled: true,
-                        theme: "light",
-                        y: {
-                            formatter: function(val, opts) {
-                                const percentage = ((val / totalFacilities) * 100).toFixed(1);
-                                return val + ' facilities (' + percentage + '%)';
+                        dataLabels: {
+                            enabled: false,
+                        },
+                        legend: {
+                            show: false, // Hide built-in legend, using custom HTML legend
+                        },
+                        tooltip: {
+                            enabled: true,
+                            theme: "light",
+                            y: {
+                                formatter: function(val, opts) {
+                                    const percentage = ((val / totalFacilities) * 100).toFixed(1);
+                                    return val + ' facilities (' + percentage + '%)';
+                                }
                             }
-                        }
-                    },
-                };
-                
-                // Render the donut chart
-                productChartEl.innerHTML = '';
-                const productChart = new ApexCharts(productChartEl, productChartOptions);
-                productChart.render();
-                
-                // Generate custom legend list
-                if (productListEl) {
-                    const legendHTML = sortedProducts.map((product, index) => {
-                        const color = donutColors[index % donutColors.length];
-                        const percentage = ((product.facilities / totalFacilities) * 100).toFixed(1);
-                        return `
-                            <div class="flex items-center gap-3 py-2">
-                                <div class="w-4 h-4 rounded-sm flex-shrink-0" style="background-color: ${color};"></div>
-                                <p class="text-sm font-medium text-gray-800 flex-1">${product.name}</p>
-                                <p class="text-sm font-semibold text-gray-900">${product.facilities} <span class="text-gray-500 font-normal">• ${percentage}%</span></p>
-                            </div>
-                        `;
-                    }).join('');
-                    productListEl.innerHTML = legendHTML;
+                        },
+                    };
+                    
+                    // Render the donut chart
+                    productChartEl.innerHTML = '';
+                    const productChart = new ApexCharts(productChartEl, productChartOptions);
+                    productChart.render();
+                    
+                    // Generate custom legend list
+                    if (productListEl) {
+                        const legendHTML = sortedProducts.map((product, index) => {
+                            const color = donutColors[index % donutColors.length];
+                            const percentage = ((product.facilities / totalFacilities) * 100).toFixed(1);
+                            return `
+                                <div class="flex items-center gap-3 py-2">
+                                    <div class="w-4 h-4 rounded-sm flex-shrink-0" style="background-color: ${color};"></div>
+                                    <p class="text-sm font-medium text-gray-800 flex-1">${product.name}</p>
+                                    <p class="text-sm font-semibold text-gray-900">${product.facilities} <span class="text-gray-500 font-normal">• ${percentage}%</span></p>
+                                </div>
+                            `;
+                        }).join('');
+                        productListEl.innerHTML = legendHTML;
+                    }
+                } else {
+                    // No expired products with facilities
+                    const noDataMsg = '<div class="flex items-center justify-center h-full py-12 text-sm text-gray-500">No expired facilities</div>';
+                    if (productChartEl) productChartEl.innerHTML = noDataMsg;
+                    if (productListEl) productListEl.innerHTML = '';
                 }
+            } else {
+                // No expired product data at all
+                const noDataMsg = '<div class="flex items-center justify-center h-full py-12 text-sm text-gray-500">No expired facilities</div>';
+                if (productChartEl) productChartEl.innerHTML = noDataMsg;
+                if (productListEl) productListEl.innerHTML = '';
+            }
+            
+            console.log('✅ renderExpiringAnalysis completed successfully');
+            
+            } catch (error) {
+                console.error('❌ Error in renderExpiringAnalysis:', error);
+                console.error('Error stack:', error.stack);
             }
         }
         

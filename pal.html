@@ -1608,8 +1608,8 @@
                         </div>
                     </div>
 
-                    <!-- Tabs Navigation -->
-                    <div class="border-b border-gray-200 px-6 flex-shrink-0">
+                    <!-- Tabs Navigation - Hidden for Expiring modal (only Insights tab) -->
+                    <div class="border-b border-gray-200 px-6 flex-shrink-0" style="display: none;">
                         <nav class="-mb-px flex space-x-2 overflow-x-auto">
                             <button
                                 id="insightsTab"
@@ -3037,7 +3037,7 @@
 
         // ===== DUMMY DATA FOR TESTING =====
         // Uncomment this section to test with dummy data without loading from Confluence
-        const ENABLE_DUMMY_DATA = false; // Set to false to use real data from Confluence
+        const ENABLE_DUMMY_DATA = true; // Set to false to use real data from Confluence
         
         if (ENABLE_DUMMY_DATA) {
             // Generate comprehensive dummy data for testing
@@ -11661,14 +11661,28 @@
             
             // Hide Data tab for global KPI charts (TFA, OSUC, Outstanding, Facilities, Relationships)
             const globalKPITypes = ['tfa', 'osuc', 'outstanding', 'facilities', 'relationships'];
+            const expiringType = 'expiring';
             const dataTabButton = document.getElementById('dataTab');
-            if (dataTabButton) {
-                if (globalKPITypes.includes(chartType)) {
-                    dataTabButton.style.display = 'none';
-                    console.log('📊 Data tab hidden for global KPI:', chartType);
+            const tabsNav = document.querySelector('.border-b.border-gray-200.px-6.flex-shrink-0');
+            
+            // Hide entire tabs navigation for expiring modal
+            if (tabsNav) {
+                if (chartType === expiringType) {
+                    tabsNav.style.display = 'none';
+                    console.log('📊 Tabs navigation hidden for expiring modal');
                 } else {
-                    dataTabButton.style.display = 'inline-flex';
-                    console.log('📊 Data tab visible for:', chartType);
+                    tabsNav.style.display = 'block';
+                    
+                    // Show/hide data tab for other modals
+                    if (dataTabButton) {
+                        if (globalKPITypes.includes(chartType)) {
+                            dataTabButton.style.display = 'none';
+                            console.log('📊 Data tab hidden for global KPI:', chartType);
+                        } else {
+                            dataTabButton.style.display = 'inline-flex';
+                            console.log('📊 Data tab visible for:', chartType);
+                        }
+                    }
                 }
             }
             
@@ -12363,10 +12377,12 @@
         function switchExpandTab(tabName) {
             console.log('🔄 switchExpandTab called with:', tabName);
             
-            // Prevent switching to Data tab for global KPI charts
+            // Prevent switching to Data tab for global KPI charts and expiring modal
             const globalKPITypes = ['tfa', 'osuc', 'outstanding', 'facilities', 'relationships'];
-            if (tabName === 'data' && globalKPITypes.includes(currentExpandType)) {
-                console.log('⚠️ Data tab not available for global KPI:', currentExpandType);
+            const noDataTabTypes = [...globalKPITypes, 'expiring']; // expiring modal has no Data tab
+            
+            if (tabName === 'data' && noDataTabTypes.includes(currentExpandType)) {
+                console.log('⚠️ Data tab not available for:', currentExpandType);
                 return; // Don't allow switching to data tab
             }
             
@@ -14944,7 +14960,7 @@
             // Delay rendering to ensure DOM is ready
             setTimeout(() => {
                 renderExpiringAnalysis(expiringData);
-                renderExpiringTable(dataSource, filterState);
+                renderExpiringTable(dataSource);
             }, 100);
         }
         
@@ -17521,113 +17537,395 @@
                     </div>
                 </div>
                 
-                <!-- CAs Table -->
-                <div class="rounded-2xl border border-gray-200 bg-white ${filterState === 'cas' ? '' : 'hidden'}" id="expiringTableCAs">
-                    <div class="flex items-center justify-between px-6 py-4">
+                <!-- Combined Expiring Table with Filters and Pagination -->
+                <div class="rounded-2xl border border-gray-200 bg-white" id="expiringTableContainer">
+                    <!-- Header with Filters -->
+                    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-800">CAs Expiring Details (Top 10)</h3>
-                            <p class="text-xs text-gray-500 mt-1">Credit Agreements approaching expiration</p>
+                            <h3 class="text-lg font-semibold text-gray-800" id="expiringTableTitle">CAs & Facilities Details</h3>
+                            <p class="text-xs text-gray-500 mt-1">Expiring and expired items</p>
                         </div>
-                        <!-- Filter Buttons -->
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-medium text-gray-500 tracking-wider">View:</span>
-                            <div class="inline-flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
-                                <button id="btnExpiringCAs" onclick="updateExpiringFilter('cas')" 
-                                    class="min-w-[60px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white">
-                                    CAs
-                                </button>
-                                <button id="btnExpiringFacilities" onclick="updateExpiringFilter('facilities')" 
-                                    class="min-w-[90px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
-                                    Facilities
-                                </button>
+                        <div class="flex items-center gap-3">
+                            <!-- Search Input -->
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    id="expiringTableSearch" 
+                                    placeholder="Search..." 
+                                    onkeyup="updateExpiringTableSearch(this.value)"
+                                    class="w-48 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                />
+                                <svg class="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
                             </div>
+                            
+                            <!-- View Filter (CAs / Facilities) -->
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-medium text-gray-500 tracking-wider">View:</span>
+                                <div class="inline-flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
+                                    <button id="btnExpiringCAs" onclick="updateExpiringFilter('cas', 'view')" 
+                                        class="min-w-[60px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white">
+                                        CAs
+                                    </button>
+                                    <button id="btnExpiringFacilities" onclick="updateExpiringFilter('facilities', 'view')" 
+                                        class="min-w-[90px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
+                                        Facilities
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Category Filter (Expiring / Expired) -->
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-medium text-gray-500 tracking-wider">Category:</span>
+                                <div class="inline-flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
+                                    <button id="btnCategoryExpiring" onclick="updateExpiringFilter('expiring', 'category')" 
+                                        class="min-w-[70px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white">
+                                        Expiring
+                                    </button>
+                                    <button id="btnCategoryExpired" onclick="updateExpiringFilter('expired', 'category')" 
+                                        class="min-w-[70px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
+                                        Expired
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Clear All Filters Button -->
+                            <button 
+                                id="btnClearAllExpiringFilters"
+                                onclick="clearAllExpiringFilters()"
+                                style="display: none;"
+                                class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Clear Filters
+                            </button>
+                            
+                            <!-- Export Button -->
+                            <button 
+                                id="btnExportExpiringTable"
+                                onclick="exportExpiringTableToCSV()"
+                                class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 border border-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Export
+                            </button>
                         </div>
                     </div>
-                    <div class="custom-scrollbar overflow-x-auto">
+                    
+                    <!-- Table -->
+                    <div class="custom-scrollbar overflow-x-auto" style="min-height: 500px;">
                         <table class="min-w-full">
                             <thead>
-                                <tr class="bg-gray-50">
-                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Relationship</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Region</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Underwriter</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Product Program</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">CA Expiry Date</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">TFA</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Status</th>
+                                <tr class="bg-gray-50" id="expiringTableHeader">
+                                    <!-- Headers will be dynamically rendered -->
                                 </tr>
                             </thead>
-                            <tbody id="expiringTableBodyCAs" class="divide-y divide-gray-200">
-                                <tr><td colspan="7" class="px-6 py-8 text-center text-sm text-gray-500">Loading data...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                
-                <!-- Facilities Table -->
-                <div class="rounded-2xl border border-gray-200 bg-white ${filterState === 'facilities' ? '' : 'hidden'}" id="expiringTableFacilities">
-                    <div class="flex items-center justify-between px-6 py-4">
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-800">Facilities Expiring Details (Top 10)</h3>
-                            <p class="text-xs text-gray-500 mt-1">Facilities approaching maturity</p>
-                        </div>
-                        <!-- Filter Buttons -->
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-medium text-gray-500 tracking-wider">View:</span>
-                            <div class="inline-flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
-                                <button id="btnExpiringCAs2" onclick="updateExpiringFilter('cas')" 
-                                    class="min-w-[60px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
-                                    CAs
-                                </button>
-                                <button id="btnExpiringFacilities2" onclick="updateExpiringFilter('facilities')" 
-                                    class="min-w-[90px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white">
-                                    Facilities
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="custom-scrollbar overflow-x-auto">
-                        <table class="min-w-full">
-                            <thead>
-                                <tr class="bg-gray-50">
-                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Relationship</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Region</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Underwriter</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Product Program</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Facility Number</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Maturity Date</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">TFA</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="expiringTableBodyFacilities" class="divide-y divide-gray-200">
+                            <tbody id="expiringTableBody" class="divide-y divide-gray-200">
                                 <tr><td colspan="8" class="px-6 py-8 text-center text-sm text-gray-500">Loading data...</td></tr>
                             </tbody>
                         </table>
+                    </div>
+                    
+                    <!-- Footer with Pagination -->
+                    <div class="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
+                        <div class="flex items-center gap-4">
+                            <div class="text-sm text-gray-700" id="expiringTableInfo">
+                                Showing <span class="font-medium" id="expiringTableStart">0</span> to <span class="font-medium" id="expiringTableEnd">0</span> of <span class="font-medium" id="expiringTableTotal">0</span> items
+                            </div>
+                            <select 
+                                id="expiringTablePerPage" 
+                                onchange="updateExpiringTablePerPage(parseInt(this.value))"
+                                class="text-sm border border-gray-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="10" selected>10 per page</option>
+                                <option value="20">20 per page</option>
+                                <option value="50">50 per page</option>
+                                <option value="100">100 per page</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button 
+                                id="expiringTablePrevBtn"
+                                onclick="changeExpiringTablePage('prev')" 
+                                disabled
+                                class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                Previous
+                            </button>
+                            <div class="text-sm text-gray-700">
+                                Page <span class="font-medium" id="expiringTableCurrentPage">1</span> of <span class="font-medium" id="expiringTableTotalPages">1</span>
+                            </div>
+                            <button 
+                                id="expiringTableNextBtn"
+                                onclick="changeExpiringTablePage('next')" 
+                                disabled
+                                class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                Next
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
         }
         
+        // Initialize expiring table state
+        window.expiringTableState = {
+            viewFilter: 'cas', // 'cas' or 'facilities'
+            categoryFilter: 'expiring', // 'expiring' or 'expired'
+            searchQuery: '',
+            currentPage: 1,
+            perPage: 10,
+            allData: [],
+            columnFilters: {},
+            sortColumn: '',
+            sortDirection: 'asc',
+            openFilterColumn: null // Track which filter dropdown is open
+        };
+        
         // Update expiring filter and refresh view
-        function updateExpiringFilter(filterType) {
-            window.expiringFilterState = filterType;
-            
-            // Show/hide appropriate tables
-            const casTable = document.getElementById('expiringTableCAs');
-            const facilitiesTable = document.getElementById('expiringTableFacilities');
-            
-            if (filterType === 'cas') {
-                if (casTable) casTable.classList.remove('hidden');
-                if (facilitiesTable) facilitiesTable.classList.add('hidden');
-            } else if (filterType === 'facilities') {
-                if (casTable) casTable.classList.add('hidden');
-                if (facilitiesTable) facilitiesTable.classList.remove('hidden');
+        function updateExpiringFilter(filterValue, filterType) {
+            if (filterType === 'view') {
+                window.expiringTableState.viewFilter = filterValue;
+                
+                // Update button states
+                const casBtn = document.getElementById('btnExpiringCAs');
+                const facilBtn = document.getElementById('btnExpiringFacilities');
+                
+                if (filterValue === 'cas') {
+                    casBtn.className = 'min-w-[60px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white';
+                    facilBtn.className = 'min-w-[90px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900';
+                } else {
+                    casBtn.className = 'min-w-[60px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900';
+                    facilBtn.className = 'min-w-[90px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white';
+                }
+                
+                // Reset column filters when changing view
+                window.expiringTableState.columnFilters = {};
+                window.expiringTableState.sortColumn = '';
+            } else if (filterType === 'category') {
+                window.expiringTableState.categoryFilter = filterValue;
+                
+                // Update button states
+                const expiringBtn = document.getElementById('btnCategoryExpiring');
+                const expiredBtn = document.getElementById('btnCategoryExpired');
+                
+                if (filterValue === 'expiring') {
+                    expiringBtn.className = 'min-w-[70px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white';
+                    expiredBtn.className = 'min-w-[70px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900';
+                } else {
+                    expiringBtn.className = 'min-w-[70px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900';
+                    expiredBtn.className = 'min-w-[70px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white';
+                }
+                
+                // Reset column filters when changing category
+                window.expiringTableState.columnFilters = {};
+                window.expiringTableState.sortColumn = '';
             }
             
-            // Re-render the table data
+            // Reset to page 1
+            window.expiringTableState.currentPage = 1;
+            
+            // Re-render the table
             const dataSource = filteredData.length > 0 ? filteredData : portfolioData;
-            renderExpiringTable(dataSource, filterType);
+            renderExpiringTable(dataSource);
         }
+        
+        // Update search query
+        function updateExpiringTableSearch(query) {
+            window.expiringTableState.searchQuery = query.toLowerCase();
+            window.expiringTableState.currentPage = 1;
+            const dataSource = filteredData.length > 0 ? filteredData : portfolioData;
+            renderExpiringTable(dataSource);
+        }
+        
+        // Update per page
+        function updateExpiringTablePerPage(perPage) {
+            window.expiringTableState.perPage = perPage;
+            window.expiringTableState.currentPage = 1;
+            const dataSource = filteredData.length > 0 ? filteredData : portfolioData;
+            renderExpiringTable(dataSource);
+        }
+        
+        // Change page
+        function changeExpiringTablePage(direction) {
+            if (direction === 'prev' && window.expiringTableState.currentPage > 1) {
+                window.expiringTableState.currentPage--;
+            } else if (direction === 'next') {
+                const totalPages = Math.ceil(window.expiringTableState.allData.length / window.expiringTableState.perPage);
+                if (window.expiringTableState.currentPage < totalPages) {
+                    window.expiringTableState.currentPage++;
+                }
+            }
+            const dataSource = filteredData.length > 0 ? filteredData : portfolioData;
+            renderExpiringTable(dataSource);
+        }
+        
+        // Sort expiring table by column
+        function sortExpiringTable(column) {
+            const state = window.expiringTableState;
+            if (state.sortColumn === column) {
+                state.sortDirection = state.sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                state.sortColumn = column;
+                state.sortDirection = 'asc';
+            }
+            const dataSource = filteredData.length > 0 ? filteredData : portfolioData;
+            renderExpiringTable(dataSource);
+        }
+        
+        // Toggle column filter dropdown
+        function toggleExpiringFilterDropdown(column, event) {
+            event.stopPropagation();
+            const state = window.expiringTableState;
+            if (state.openFilterColumn === column) {
+                state.openFilterColumn = null;
+            } else {
+                state.openFilterColumn = column;
+            }
+            const dataSource = filteredData.length > 0 ? filteredData : portfolioData;
+            renderExpiringTable(dataSource);
+        }
+        
+        // Toggle filter value for a column
+        function toggleExpiringColumnFilter(column, value) {
+            const state = window.expiringTableState;
+            if (!state.columnFilters[column]) {
+                state.columnFilters[column] = [];
+            }
+            const index = state.columnFilters[column].indexOf(value);
+            if (index > -1) {
+                state.columnFilters[column].splice(index, 1);
+            } else {
+                state.columnFilters[column].push(value);
+            }
+            state.currentPage = 1;
+            state.openFilterColumn = null;
+            const dataSource = filteredData.length > 0 ? filteredData : portfolioData;
+            renderExpiringTable(dataSource);
+        }
+        
+        // Clear column filter
+        function clearExpiringColumnFilter(column) {
+            const state = window.expiringTableState;
+            state.columnFilters[column] = [];
+            state.currentPage = 1;
+            state.openFilterColumn = null;
+            const dataSource = filteredData.length > 0 ? filteredData : portfolioData;
+            renderExpiringTable(dataSource);
+        }
+        
+        // Clear all column filters
+        function clearAllExpiringFilters() {
+            const state = window.expiringTableState;
+            state.columnFilters = {};
+            state.sortColumn = '';
+            state.sortDirection = 'asc';
+            state.currentPage = 1;
+            const dataSource = filteredData.length > 0 ? filteredData : portfolioData;
+            renderExpiringTable(dataSource);
+        }
+        
+        // Filter dropdown values based on search input
+        function filterExpiringDropdownValues(columnKey) {
+            const searchInput = document.getElementById(`filterSearch_${columnKey}`);
+            if (!searchInput) return;
+            
+            const searchTerm = searchInput.value.toLowerCase();
+            const filterContainer = document.getElementById(`filterValues_${columnKey}`);
+            if (!filterContainer) return;
+            
+            const items = filterContainer.querySelectorAll('.filter-value-item');
+            items.forEach(item => {
+                const itemValue = item.getAttribute('data-value');
+                if (itemValue.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+        
+        // Export expiring table to CSV
+        function exportExpiringTableToCSV() {
+            const state = window.expiringTableState;
+            const data = state.allData; // Use filtered data
+            
+            if (!data || data.length === 0) {
+                alert('No data to export');
+                return;
+            }
+            
+            const viewFilter = state.viewFilter;
+            const categoryFilter = state.categoryFilter;
+            
+            // Define CSV headers based on view and category
+            let headers = [];
+            if (viewFilter === 'cas') {
+                headers = ['Relationship', 'Region', 'Underwriter', 'Product Program', 
+                          categoryFilter === 'expiring' ? 'CA Expiry Date' : 'Expired Date', 
+                          'Aging', 'TFA'];
+            } else {
+                headers = ['Relationship', 'Region', 'Underwriter', 'Product Program', 
+                          'Facility Number', 
+                          categoryFilter === 'expiring' ? 'Maturity Date' : 'Matured Date', 
+                          'Aging', 'TFA'];
+            }
+            
+            // Build CSV rows
+            const csvRows = [headers.join(',')];
+            
+            data.forEach(item => {
+                const row = [];
+                row.push(`"${item.relationship}"`);
+                row.push(`"${item.region}"`);
+                row.push(`"${item.underwriter}"`);
+                row.push(`"${item.product}"`);
+                
+                if (viewFilter === 'cas') {
+                    row.push(`"${item.expiryDate}"`);
+                } else {
+                    row.push(`"${item.facilityId}"`);
+                    row.push(`"${item.maturityDate}"`);
+                }
+                
+                row.push(`"${item.agingCategory}"`);
+                row.push(item.tfa); // Number, no quotes
+                
+                csvRows.push(row.join(','));
+            });
+            
+            // Create and download file
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            // Generate filename with current view/category
+            const timestamp = new Date().toISOString().slice(0, 10);
+            const viewLabel = viewFilter === 'cas' ? 'CAs' : 'Facilities';
+            const categoryLabel = categoryFilter === 'expiring' ? 'Expiring' : 'Expired';
+            const filename = `${viewLabel}_${categoryLabel}_${timestamp}.csv`;
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // Close filter dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.expiring-filter-dropdown')) {
+                const state = window.expiringTableState;
+                if (state.openFilterColumn) {
+                    state.openFilterColumn = null;
+                    const dataSource = filteredData.length > 0 ? filteredData : portfolioData;
+                    renderExpiringTable(dataSource);
+                }
+            }
+        });
         
         // Render expiring analysis views - Regional, Product, and Underwriter breakdowns
         function renderExpiringAnalysis(expiringData) {
@@ -20831,31 +21129,33 @@
         
         // Old CCM rendering function removed - now using direct initialization in generateCCMExpandedView
         
-        // Render expiring table
-        function renderExpiringTable(dataSourceParam, filterStateParam) {
+        // Render expiring table with pagination and search
+        function renderExpiringTable(dataSourceParam) {
             const dataSource = dataSourceParam || (filteredData.length > 0 ? filteredData : portfolioData);
-            const filterState = filterStateParam || window.expiringFilterState || 'cas';
-            const tbody = filterState === 'cas' 
-                ? document.getElementById('expiringTableBodyCAs')
-                : document.getElementById('expiringTableBodyFacilities');
+            const tbody = document.getElementById('expiringTableBody');
+            const thead = document.getElementById('expiringTableHeader');
             
-            if (!tbody || !dataSource) return;
+            if (!tbody || !thead || !dataSource) return;
+            
+            const state = window.expiringTableState;
+            const viewFilter = state.viewFilter; // 'cas' or 'facilities'
+            const categoryFilter = state.categoryFilter; // 'expiring' or 'expired'
             
             // Get report date
             const reportDates = dataSource.map(row => parseDate(row.Report_Date)).filter(d => d);
             const maxReportDate = reportDates.length > 0 ? new Date(Math.max(...reportDates)) : new Date();
             maxReportDate.setHours(0, 0, 0, 0);
             
-            // Calculate date ranges for next 3 months ONLY
+            // Calculate date ranges for next 3 months
             const next3MonthsEnd = new Date(maxReportDate);
             next3MonthsEnd.setMonth(next3MonthsEnd.getMonth() + 3);
             next3MonthsEnd.setHours(23, 59, 59, 999);
             
-            // Collect items based on filter
+            // Collect items based on filters
             const items = [];
             
-            // Add CAs if filter allows (CM only) - ONLY EXPIRING IN NEXT 3 MONTHS
-            if (filterState === 'cas') {
+            // Process CAs if viewFilter is 'cas'
+            if (viewFilter === 'cas') {
                 dataSource.forEach(row => {
                     const caExpirationDate = row.CA_Expiration_Date;
                     const managementStatus = (row.Management_Status || "").toUpperCase();
@@ -20871,26 +21171,76 @@
                         
                         const amount = parseNumber(row.Fac_Amount || row.Facility_Amount);
                         
-                        // ONLY show items expiring in the next 3 months (not expired, not beyond 3 months)
-                        if (dateObj >= maxReportDate && dateObj <= next3MonthsEnd) {
-                            items.push({
-                                type: 'CA',
-                                region: row.Region || 'Unknown',
-                                relationship: row.Relationship_Name || row.Relationship_ID || 'Unknown',
-                                underwriter: row.Lead_Underwriter || 'Unknown',
-                                product: row.Product_Program || 'Unknown',
-                                idOrDate: dateObj.toLocaleDateString(),
-                                date: dateObj,
-                                tfa: amount,
-                                status: 'Expiring'
-                            });
+                        // Collect based on category filter
+                        if (categoryFilter === 'expiring') {
+                            // Expiring: items in next 3 months
+                            if (dateObj >= maxReportDate && dateObj <= next3MonthsEnd) {
+                                const daysToExpiry = Math.ceil((dateObj - maxReportDate) / (1000 * 60 * 60 * 24));
+                                
+                                // Categorize by aging bucket
+                                let agingCategory = '';
+                                if (daysToExpiry >= 1 && daysToExpiry <= 30) {
+                                    agingCategory = '1-30 Days';
+                                } else if (daysToExpiry >= 31 && daysToExpiry <= 60) {
+                                    agingCategory = '31-60 Days';
+                                } else if (daysToExpiry >= 61 && daysToExpiry <= 90) {
+                                    agingCategory = '61-90 Days';
+                                } else if (daysToExpiry > 90) {
+                                    agingCategory = '> 90 Days';
+                                }
+                                
+                                items.push({
+                                    type: 'CA',
+                                    region: row.Region || 'Unknown',
+                                    relationship: row.Relationship_Name || row.Relationship_ID || 'Unknown',
+                                    underwriter: row.Lead_Underwriter || 'Unknown',
+                                    product: row.Product_Program || 'Unknown',
+                                    expiryDate: dateObj.toLocaleDateString(),
+                                    date: dateObj,
+                                    tfa: amount,
+                                    status: 'Expiring',
+                                    daysToExpiry: daysToExpiry,
+                                    agingCategory: agingCategory
+                                });
+                            }
+                        } else {
+                            // Expired: items before report date
+                            if (dateObj < maxReportDate) {
+                                const daysPastDue = Math.floor((maxReportDate - dateObj) / (1000 * 60 * 60 * 24));
+                                
+                                // Categorize by aging bucket
+                                let agingCategory = '';
+                                if (daysPastDue >= 1 && daysPastDue <= 30) {
+                                    agingCategory = '1-30 Days';
+                                } else if (daysPastDue >= 31 && daysPastDue <= 60) {
+                                    agingCategory = '31-60 Days';
+                                } else if (daysPastDue >= 61 && daysPastDue <= 90) {
+                                    agingCategory = '61-90 Days';
+                                } else if (daysPastDue > 90) {
+                                    agingCategory = '> 90 Days';
+                                }
+                                
+                                items.push({
+                                    type: 'CA',
+                                    region: row.Region || 'Unknown',
+                                    relationship: row.Relationship_Name || row.Relationship_ID || 'Unknown',
+                                    underwriter: row.Lead_Underwriter || 'Unknown',
+                                    product: row.Product_Program || 'Unknown',
+                                    expiryDate: dateObj.toLocaleDateString(),
+                                    date: dateObj,
+                                    tfa: amount,
+                                    status: 'Expired',
+                                    daysPastDue: daysPastDue,
+                                    agingCategory: agingCategory
+                                });
+                            }
                         }
                     }
                 });
             }
             
-            // Add Facilities if filter allows (NO DM exclusion) - ONLY EXPIRING IN NEXT 3 MONTHS
-            if (filterState === 'facilities') {
+            // Process Facilities if viewFilter is 'facilities'
+            if (viewFilter === 'facilities') {
                 dataSource.forEach(row => {
                     const maturityDate = row.Maturity_Date;
                     const facilityId = row.Facility_ID;
@@ -20901,51 +21251,349 @@
                         
                         const amount = parseNumber(row.Fac_Amount || row.Facility_Amount);
                         
-                        // ONLY show items expiring in the next 3 months (not expired, not beyond 3 months)
-                        if (dateObj >= maxReportDate && dateObj <= next3MonthsEnd) {
-                            items.push({
-                                type: 'Facility',
-                                region: row.Region || 'Unknown',
-                                relationship: row.Relationship_Name || 'Unknown',
-                                underwriter: row.Lead_Underwriter || 'Unknown',
-                                product: row.Product_Program || 'Unknown',
-                                idOrDate: filterState === 'facilities' ? facilityId : `${facilityId} / ${dateObj.toLocaleDateString()}`,
-                                facilityId: facilityId,
-                                maturityDate: dateObj.toLocaleDateString(),
-                                date: dateObj,
-                                tfa: amount,
-                                status: 'Expiring'
-                            });
+                        // Collect based on category filter
+                        if (categoryFilter === 'expiring') {
+                            // Expiring: items in next 3 months
+                            if (dateObj >= maxReportDate && dateObj <= next3MonthsEnd) {
+                                const daysToExpiry = Math.ceil((dateObj - maxReportDate) / (1000 * 60 * 60 * 24));
+                                
+                                // Categorize by aging bucket
+                                let agingCategory = '';
+                                if (daysToExpiry >= 1 && daysToExpiry <= 30) {
+                                    agingCategory = '1-30 Days';
+                                } else if (daysToExpiry >= 31 && daysToExpiry <= 60) {
+                                    agingCategory = '31-60 Days';
+                                } else if (daysToExpiry >= 61 && daysToExpiry <= 90) {
+                                    agingCategory = '61-90 Days';
+                                } else if (daysToExpiry > 90) {
+                                    agingCategory = '> 90 Days';
+                                }
+                                
+                                items.push({
+                                    type: 'Facility',
+                                    region: row.Region || 'Unknown',
+                                    relationship: row.Relationship_Name || 'Unknown',
+                                    underwriter: row.Lead_Underwriter || 'Unknown',
+                                    product: row.Product_Program || 'Unknown',
+                                    facilityId: facilityId,
+                                    maturityDate: dateObj.toLocaleDateString(),
+                                    date: dateObj,
+                                    tfa: amount,
+                                    status: 'Expiring',
+                                    daysToExpiry: daysToExpiry,
+                                    agingCategory: agingCategory
+                                });
+                            }
+                        } else {
+                            // Expired: items before report date
+                            if (dateObj < maxReportDate) {
+                                const daysPastDue = Math.floor((maxReportDate - dateObj) / (1000 * 60 * 60 * 24));
+                                
+                                // Categorize by aging bucket
+                                let agingCategory = '';
+                                if (daysPastDue >= 1 && daysPastDue <= 30) {
+                                    agingCategory = '1-30 Days';
+                                } else if (daysPastDue >= 31 && daysPastDue <= 60) {
+                                    agingCategory = '31-60 Days';
+                                } else if (daysPastDue >= 61 && daysPastDue <= 90) {
+                                    agingCategory = '61-90 Days';
+                                } else if (daysPastDue > 90) {
+                                    agingCategory = '> 90 Days';
+                                }
+                                
+                                items.push({
+                                    type: 'Facility',
+                                    region: row.Region || 'Unknown',
+                                    relationship: row.Relationship_Name || 'Unknown',
+                                    underwriter: row.Lead_Underwriter || 'Unknown',
+                                    product: row.Product_Program || 'Unknown',
+                                    facilityId: facilityId,
+                                    maturityDate: dateObj.toLocaleDateString(),
+                                    date: dateObj,
+                                    tfa: amount,
+                                    status: 'Expired',
+                                    daysPastDue: daysPastDue,
+                                    agingCategory: agingCategory
+                                });
+                            }
                         }
                     }
                 });
             }
             
-            // Sort by date (closest first)
-            items.sort((a, b) => a.date - b.date);
+            // Sort by date (closest first for expiring, most overdue first for expired)
+            if (categoryFilter === 'expiring') {
+                items.sort((a, b) => a.date - b.date);
+            } else {
+                items.sort((a, b) => b.daysPastDue - a.daysPastDue);
+            }
             
-            // Limit to top 10 items (changed from 50)
-            const displayItems = items.slice(0, 10);
+            // Store items before filtering for header unique values
+            const itemsBeforeFilters = items;
             
+            // Apply search filter
+            let filteredItems = items;
+            if (state.searchQuery) {
+                filteredItems = items.filter(item => {
+                    const searchStr = `${item.relationship} ${item.region} ${item.underwriter} ${item.product} ${item.facilityId || ''}`.toLowerCase();
+                    return searchStr.includes(state.searchQuery);
+                });
+            }
+            
+            // Apply column filters
+            if (state.columnFilters && Object.keys(state.columnFilters).length > 0) {
+                filteredItems = filteredItems.filter(item => {
+                    for (const [column, filters] of Object.entries(state.columnFilters)) {
+                        if (filters && filters.length > 0) {
+                            let itemValue = item[column];
+                            if (!filters.includes(itemValue)) {
+                                return false;
+                            }
+                        }
+                    }
+                    return true;
+                });
+            }
+            
+            // Apply sorting
+            if (state.sortColumn) {
+                filteredItems.sort((a, b) => {
+                    const modifier = state.sortDirection === 'asc' ? 1 : -1;
+                    const aVal = a[state.sortColumn];
+                    const bVal = b[state.sortColumn];
+                    
+                    // Handle numeric comparison for TFA
+                    if (state.sortColumn === 'tfa') {
+                        return (aVal - bVal) * modifier;
+                    }
+                    
+                    // Handle date comparison
+                    if (state.sortColumn === 'date') {
+                        return (aVal - bVal) * modifier;
+                    }
+                    
+                    // String comparison
+                    if (aVal < bVal) return -1 * modifier;
+                    if (aVal > bVal) return 1 * modifier;
+                    return 0;
+                });
+            }
+            
+            // Store all filtered data
+            state.allData = filteredItems;
+            
+            // Calculate pagination
+            const totalItems = filteredItems.length;
+            const totalPages = Math.ceil(totalItems / state.perPage);
+            const startIdx = (state.currentPage - 1) * state.perPage;
+            const endIdx = Math.min(startIdx + state.perPage, totalItems);
+            const displayItems = filteredItems.slice(startIdx, endIdx);
+            
+            // Update pagination info
+            document.getElementById('expiringTableStart').textContent = totalItems > 0 ? startIdx + 1 : 0;
+            document.getElementById('expiringTableEnd').textContent = endIdx;
+            document.getElementById('expiringTableTotal').textContent = totalItems;
+            document.getElementById('expiringTableCurrentPage').textContent = state.currentPage;
+            document.getElementById('expiringTableTotalPages').textContent = totalPages || 1;
+            
+            // Update pagination buttons
+            const prevBtn = document.getElementById('expiringTablePrevBtn');
+            const nextBtn = document.getElementById('expiringTableNextBtn');
+            if (prevBtn) prevBtn.disabled = state.currentPage === 1;
+            if (nextBtn) nextBtn.disabled = state.currentPage >= totalPages;
+            
+            // Update Clear All Filters button visibility and count
+            const clearAllBtn = document.getElementById('btnClearAllExpiringFilters');
+            const activeFiltersCount = Object.values(state.columnFilters).filter(f => f && f.length > 0).length;
+            const hasSorting = state.sortColumn !== '';
+            const hasActiveFilters = activeFiltersCount > 0 || hasSorting;
+            
+            if (clearAllBtn) {
+                if (hasActiveFilters) {
+                    clearAllBtn.style.display = 'flex';
+                    const badge = activeFiltersCount > 0 ? ` (${activeFiltersCount})` : '';
+                    clearAllBtn.innerHTML = `
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Clear Filters${badge}
+                    `;
+                } else {
+                    clearAllBtn.style.display = 'none';
+                }
+            }
+            
+            // Helper function to create header cell with filter and sort
+            function createHeaderCell(label, columnKey, columnIndex, totalColumns) {
+                const hasFilter = state.columnFilters[columnKey] && state.columnFilters[columnKey].length > 0;
+                const isSorted = state.sortColumn === columnKey;
+                const isFilterOpen = state.openFilterColumn === columnKey;
+                
+                // Smart positioning: last 3 columns align right, others align left
+                const alignRight = columnIndex >= totalColumns - 3;
+                
+                // Get unique values for this column from items before column filters
+                const uniqueValues = new Set();
+                itemsBeforeFilters.forEach(item => {
+                    if (item[columnKey] !== undefined && item[columnKey] !== null) {
+                        uniqueValues.add(item[columnKey]);
+                    }
+                });
+                const sortedValues = Array.from(uniqueValues).sort((a, b) => {
+                    if (typeof a === 'string') return a.localeCompare(b);
+                    return a - b;
+                });
+                
+                // For TFA column, format display values
+                const displayValues = sortedValues.map(val => {
+                    if (columnKey === 'tfa') {
+                        return { raw: val, display: formatCurrency(val) };
+                    }
+                    return { raw: val, display: val };
+                });
+                
+                // Generate unique ID for search input
+                const searchId = `filterSearch_${columnKey}`;
+                
+                return `
+                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">
+                        <div class="flex items-center justify-center gap-2">
+                            <span>${label}</span>
+                            <div class="flex items-center gap-1">
+                                <!-- Filter Icon -->
+                                <div class="relative expiring-filter-dropdown">
+                                    <button onclick="toggleExpiringFilterDropdown('${columnKey}', event)" 
+                                        class="p-1 hover:bg-gray-100 rounded relative">
+                                        <svg class="h-4 w-4 ${hasFilter ? 'text-blue-500' : 'text-gray-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                                        </svg>
+                                        ${hasFilter ? '<span class="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-blue-500"></span>' : ''}
+                                    </button>
+                                    ${isFilterOpen ? `
+                                        <div class="absolute top-full ${alignRight ? 'right-0' : 'left-0'} z-[9999] w-72 mt-2 rounded-2xl border border-gray-200 bg-white p-4 shadow-2xl">
+                                            <p class="text-sm font-semibold text-gray-800 mb-3">Filter by ${label}</p>
+                                            <div class="mb-3">
+                                                <input type="text" 
+                                                    id="${searchId}"
+                                                    oninput="filterExpiringDropdownValues('${columnKey}')"
+                                                    placeholder="Search values..." 
+                                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none" />
+                                            </div>
+                                            <div id="filterValues_${columnKey}" class="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2 bg-gray-50">
+                                                ${displayValues.map(valObj => {
+                                                    const valStr = String(valObj.display).toLowerCase();
+                                                    return `
+                                                    <label class="flex items-center gap-2 py-1.5 hover:bg-white rounded-lg px-2 cursor-pointer transition-colors filter-value-item" data-value="${valStr}">
+                                                        <input type="checkbox" 
+                                                            ${state.columnFilters[columnKey] && state.columnFilters[columnKey].includes(valObj.raw) ? 'checked' : ''}
+                                                            onchange="toggleExpiringColumnFilter('${columnKey}', ${typeof valObj.raw === 'string' ? `'${String(valObj.raw).replace(/'/g, "\\'")}'` : valObj.raw})"
+                                                            class="rounded border-gray-300 text-blue-500 focus:ring-blue-500" />
+                                                        <span class="text-sm text-gray-700">${valObj.display}</span>
+                                                    </label>
+                                                `}).join('')}
+                                            </div>
+                                            <button onclick="clearExpiringColumnFilter('${columnKey}')" 
+                                                class="w-full mt-3 px-3 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">
+                                                Clear Filter
+                                            </button>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                <!-- Sort Icon -->
+                                <button onclick="sortExpiringTable('${columnKey}')" class="flex flex-col gap-0.5 p-1">
+                                    <svg class="${isSorted && state.sortDirection === 'asc' ? 'fill-blue-500' : 'fill-gray-300'}" width="8" height="5" viewBox="0 0 8 5">
+                                        <path d="M4.40962 0.585167C4.21057 0.300808 3.78943 0.300807 3.59038 0.585166L1.05071 4.21327C0.81874 4.54466 1.05582 5 1.46033 5H6.53967C6.94418 5 7.18126 4.54466 6.94929 4.21327L4.40962 0.585167Z"/>
+                                    </svg>
+                                    <svg class="${isSorted && state.sortDirection === 'desc' ? 'fill-blue-500' : 'fill-gray-300'}" width="8" height="5" viewBox="0 0 8 5">
+                                        <path d="M4.40962 4.41483C4.21057 4.69919 3.78943 4.69919 3.59038 4.41483L1.05071 0.786732C0.81874 0.455343 1.05582 0 1.46033 0H6.53967C6.94418 0 7.18126 0.455342 6.94929 0.786731L4.40962 4.41483Z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </th>
+                `;
+            }
+            
+            // Render table headers based on view and category
+            let headers = '';
+            const totalCols = viewFilter === 'cas' ? 7 : 8;
+            
+            if (viewFilter === 'cas') {
+                if (categoryFilter === 'expiring') {
+                    headers = createHeaderCell('Relationship', 'relationship', 0, totalCols) +
+                              createHeaderCell('Region', 'region', 1, totalCols) +
+                              createHeaderCell('Underwriter', 'underwriter', 2, totalCols) +
+                              createHeaderCell('Product Program', 'product', 3, totalCols) +
+                              createHeaderCell('CA Expiry Date', 'expiryDate', 4, totalCols) +
+                              createHeaderCell('Aging', 'agingCategory', 5, totalCols) +
+                              createHeaderCell('TFA', 'tfa', 6, totalCols);
+                } else {
+                    headers = createHeaderCell('Relationship', 'relationship', 0, totalCols) +
+                              createHeaderCell('Region', 'region', 1, totalCols) +
+                              createHeaderCell('Underwriter', 'underwriter', 2, totalCols) +
+                              createHeaderCell('Product Program', 'product', 3, totalCols) +
+                              createHeaderCell('Expired Date', 'expiryDate', 4, totalCols) +
+                              createHeaderCell('Aging', 'agingCategory', 5, totalCols) +
+                              createHeaderCell('TFA', 'tfa', 6, totalCols);
+                }
+            } else {
+                if (categoryFilter === 'expiring') {
+                    headers = createHeaderCell('Relationship', 'relationship', 0, totalCols) +
+                              createHeaderCell('Region', 'region', 1, totalCols) +
+                              createHeaderCell('Underwriter', 'underwriter', 2, totalCols) +
+                              createHeaderCell('Product Program', 'product', 3, totalCols) +
+                              createHeaderCell('Facility Number', 'facilityId', 4, totalCols) +
+                              createHeaderCell('Maturity Date', 'maturityDate', 5, totalCols) +
+                              createHeaderCell('Aging', 'agingCategory', 6, totalCols) +
+                              createHeaderCell('TFA', 'tfa', 7, totalCols);
+                } else {
+                    headers = createHeaderCell('Relationship', 'relationship', 0, totalCols) +
+                              createHeaderCell('Region', 'region', 1, totalCols) +
+                              createHeaderCell('Underwriter', 'underwriter', 2, totalCols) +
+                              createHeaderCell('Product Program', 'product', 3, totalCols) +
+                              createHeaderCell('Facility Number', 'facilityId', 4, totalCols) +
+                              createHeaderCell('Matured Date', 'maturityDate', 5, totalCols) +
+                              createHeaderCell('Aging', 'agingCategory', 6, totalCols) +
+                              createHeaderCell('TFA', 'tfa', 7, totalCols);
+                }
+            }
+            thead.innerHTML = headers;
+            
+            // Render table rows
             if (displayItems.length === 0) {
-                const colspan = filterState === 'facilities' ? '8' : '7';
-                tbody.innerHTML = `<tr><td colspan="${colspan}" class="px-6 py-8 text-center text-sm text-gray-500">No items expiring in the next 3 months</td></tr>`;
+                const colspan = viewFilter === 'cas' ? '7' : '8';
+                tbody.innerHTML = `<tr><td colspan="${colspan}" class="px-6 py-8 text-center text-sm text-gray-500">No ${categoryFilter} ${viewFilter === 'cas' ? 'CAs' : 'facilities'} found</td></tr>`;
                 return;
             }
             
-            // Build table rows based on filter with TFA-style badges
             let html = '';
+            const regionColors = {
+                'APAC': 'bg-blue-50 text-blue-600',
+                'EMEA': 'bg-green-50 text-green-600',
+                'NAM': 'bg-orange-50 text-orange-600',
+                'LATAM': 'bg-purple-50 text-purple-600'
+            };
+            
             displayItems.forEach(item => {
-                const statusClass = 'bg-blue-100 text-blue-700'; // Only showing expiring items
-                const regionColors = {
-                    'APAC': 'bg-blue-50 text-blue-600',
-                    'EMEA': 'bg-green-50 text-green-600',
-                    'NAM': 'bg-orange-50 text-orange-600',
-                    'LATAM': 'bg-purple-50 text-purple-600'
-                };
                 const regionColor = regionColors[item.region] || 'bg-gray-50 text-gray-600';
                 
-                if (filterState === 'cas') {
+                // Determine badge color based on aging category
+                let agingBadgeClass = '';
+                const agingCat = item.agingCategory;
+                
+                if (agingCat === '1-30 Days') {
+                    agingBadgeClass = 'bg-blue-50 text-blue-700 border border-blue-200';
+                } else if (agingCat === '31-60 Days') {
+                    agingBadgeClass = 'bg-orange-50 text-orange-700 border border-orange-200';
+                } else if (agingCat === '61-90 Days') {
+                    agingBadgeClass = 'bg-red-50 text-red-700 border border-red-200';
+                } else if (agingCat === '> 90 Days') {
+                    agingBadgeClass = 'bg-red-100 text-red-900 border border-red-300';
+                }
+                
+                if (viewFilter === 'cas') {
+                    const dateLabel = categoryFilter === 'expiring' ? item.expiryDate : item.expiryDate;
+                    
                     html += `
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 text-center text-sm font-medium text-gray-900">${item.relationship}</td>
@@ -20956,16 +21604,18 @@
                             </td>
                             <td class="px-6 py-4 text-center text-sm text-gray-700">${item.underwriter}</td>
                             <td class="px-6 py-4 text-center text-sm text-gray-700">${item.product}</td>
-                            <td class="px-6 py-4 text-center text-sm text-gray-700">${item.idOrDate}</td>
-                            <td class="px-6 py-4 text-center text-sm font-semibold text-gray-900">${formatCurrency(item.tfa)}</td>
+                            <td class="px-6 py-4 text-center text-sm text-gray-700">${dateLabel}</td>
                             <td class="px-6 py-4 text-center">
-                                <span class="${statusClass} rounded-full px-2 py-0.5 text-xs font-medium">
-                                    ${item.status}
+                                <span class="${agingBadgeClass} rounded-full px-2 py-0.5 text-xs font-semibold min-w-[60px] inline-block">
+                                    ${item.agingCategory}
                                 </span>
                             </td>
+                            <td class="px-6 py-4 text-center text-sm font-semibold text-gray-900">${formatCurrency(item.tfa)}</td>
                         </tr>
                     `;
-                } else if (filterState === 'facilities') {
+                } else {
+                    const dateLabel = categoryFilter === 'expiring' ? item.maturityDate : item.maturityDate;
+                    
                     html += `
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 text-center text-sm font-medium text-gray-900">${item.relationship}</td>
@@ -20977,27 +21627,17 @@
                             <td class="px-6 py-4 text-center text-sm text-gray-700">${item.underwriter}</td>
                             <td class="px-6 py-4 text-center text-sm text-gray-700">${item.product}</td>
                             <td class="px-6 py-4 text-center text-sm text-gray-700">${item.facilityId}</td>
-                            <td class="px-6 py-4 text-center text-sm text-gray-700">${item.maturityDate}</td>
-                            <td class="px-6 py-4 text-center text-sm font-semibold text-gray-900">${formatCurrency(item.tfa)}</td>
+                            <td class="px-6 py-4 text-center text-sm text-gray-700">${dateLabel}</td>
                             <td class="px-6 py-4 text-center">
-                                <span class="${statusClass} rounded-full px-2 py-0.5 text-xs font-medium">
-                                    ${item.status}
+                                <span class="${agingBadgeClass} rounded-full px-2 py-0.5 text-xs font-semibold min-w-[60px] inline-block">
+                                    ${item.agingCategory}
                                 </span>
                             </td>
+                            <td class="px-6 py-4 text-center text-sm font-semibold text-gray-900">${formatCurrency(item.tfa)}</td>
                         </tr>
                     `;
                 }
             });
-            
-            if (items.length > 10) {
-                html += `
-                    <tr>
-                        <td colspan="${filterState === 'cas' ? '7' : '8'}" class="px-6 py-4 text-center text-xs text-gray-500 italic">
-                            Showing top 10 of ${items.length} items
-                        </td>
-                    </tr>
-                `;
-            }
             
             tbody.innerHTML = html;
         }

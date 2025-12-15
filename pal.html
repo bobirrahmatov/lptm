@@ -172,7 +172,7 @@
 <body class="bg-gray-50">
     <!-- Loading Overlay -->
     <div id="loadingOverlay"
-        class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-[10000] flex items-center justify-center hidden">
+        class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-[9999] flex items-center justify-center hidden">
         <div class="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-5 max-w-md mx-4 w-80">
             <!-- Spinning Circle -->
             <div class="relative">
@@ -446,7 +446,7 @@
                                     </svg>
                                 </button>
                                 <div x-show="open" @click.outside="open = false" x-cloak
-                                    class="absolute left-0 right-0 top-full z-[100] max-h-60 overflow-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                    class="absolute left-0 right-0 top-full z-[9999] max-h-60 overflow-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
                                     <template x-for="option in options" :key="option.value">
                                         <button type="button"
                                             @click="selected = option.text; open = false; document.getElementById('filterProductProgram').value = option.value; applyFilters();"
@@ -476,7 +476,7 @@
                                     </svg>
                                 </button>
                                 <div x-show="open" @click.outside="open = false" x-cloak
-                                    class="absolute left-0 right-0 top-full z-[100] max-h-60 overflow-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                    class="absolute left-0 right-0 top-full z-[9999] max-h-60 overflow-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
                                     <template x-for="option in options" :key="option.value">
                                         <button type="button"
                                             @click="selected = option.text; open = false; document.getElementById('filterExtendingUnit').value = option.value; applyFilters();"
@@ -506,7 +506,7 @@
                                     </svg>
                                 </button>
                                 <div x-show="open" @click.outside="open = false" x-cloak
-                                    class="absolute left-0 right-0 top-full z-[100] max-h-60 overflow-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                    class="absolute left-0 right-0 top-full z-[9999] max-h-60 overflow-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
                                     <template x-for="option in options" :key="option.value">
                                         <button type="button"
                                             @click="selected = option.text; open = false; document.getElementById('filterFacilityType').value = option.value; applyFilters();"
@@ -536,7 +536,7 @@
                                     </svg>
                                 </button>
                                 <div x-show="open" @click.outside="open = false" x-cloak
-                                    class="absolute left-0 right-0 top-full z-[100] max-h-60 overflow-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                    class="absolute left-0 right-0 top-full z-[9999] max-h-60 overflow-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
                                     <template x-for="option in options" :key="option.value">
                                         <button type="button"
                                             @click="selected = option.text; open = false; document.getElementById('filterCommitment').value = option.value; applyFilters();"
@@ -566,7 +566,7 @@
                                     </svg>
                                 </button>
                                 <div x-show="open" @click.outside="open = false" x-cloak
-                                    class="absolute left-0 right-0 top-full z-[100] max-h-60 overflow-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                    class="absolute left-0 right-0 top-full z-[9999] max-h-60 overflow-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
                                     <template x-for="option in options" :key="option.value">
                                         <button type="button"
                                             @click="selected = option.text; open = false; document.getElementById('filterTeamLead').value = option.value; applyFilters();"
@@ -596,7 +596,7 @@
                                     </svg>
                                 </button>
                                 <div x-show="open" @click.outside="open = false" x-cloak
-                                    class="absolute left-0 right-0 top-full z-[100] max-h-60 overflow-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                    class="absolute left-0 right-0 top-full z-[9999] max-h-60 overflow-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
                                     <template x-for="option in options" :key="option.value">
                                         <button type="button"
                                             @click="selected = option.text; open = false; document.getElementById('filterUnderwriter').value = option.value; applyFilters();"
@@ -633,7 +633,7 @@
                                     </svg>
                                 </button>
                                 <div x-show="open" @click.outside="open = false" x-cloak
-                                    class="absolute left-0 right-0 top-full z-[100] max-h-60 overflow-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                    class="absolute left-0 right-0 top-full z-[9999] max-h-60 overflow-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
                                     <template x-for="option in options" :key="option.value">
                                         <button type="button"
                                             @click="selected = option.text; open = false; document.getElementById('filterCAMaturity').value = option.value; applyFilters();"
@@ -675,7 +675,7 @@
                                     </svg>
                                 </button>
                                 <div x-show="open" @click.outside="open = false" x-cloak
-                                    class="absolute left-0 right-0 top-full z-[100] max-h-60 overflow-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                    class="absolute left-0 right-0 top-full z-[9999] max-h-60 overflow-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
                                     <template x-for="option in options" :key="option.value">
                                         <button type="button"
                                             @click="selected = option.text; open = false; document.getElementById('filterFacilityMaturity').value = option.value; applyFilters();"
@@ -1718,7 +1718,7 @@
                                                                     </button>
                                                                     <div x-show="filterOpen" x-cloak
                                                                         :class="index >= columns.length - 3 ? 'right-0' : 'left-0'"
-                                                                        class="absolute top-full z-[50] w-72 mt-2 rounded-2xl border border-gray-200 bg-white p-4 shadow-2xl">
+                                                                        class="absolute top-full z-[9999] w-72 mt-2 rounded-2xl border border-gray-200 bg-white p-4 shadow-2xl">
                                                                         <p class="text-sm font-semibold text-gray-800 mb-3" x-text="'Filter by ' + column.replace(/_/g, ' ')"></p>
                                                                         <div class="mb-3">
                                                                             <input type="text" 
@@ -1831,8 +1831,9 @@
                                                 onchange="window.changeFooterPerPage(parseInt(this.value))"
                                             >
                                                 <option value="10" class="text-gray-500">10</option>
-                                                <option value="25" class="text-gray-500">25</option>
+                                                <option value="20" selected class="text-gray-500">20</option>
                                                 <option value="50" class="text-gray-500">50</option>
+                                                <option value="100" class="text-gray-500">100</option>
                                             </select>
                                             <span class="absolute right-1.5 top-1/2 z-10 -translate-y-1/2 text-gray-500 pointer-events-none">
                                                 <svg class="stroke-current" width="12" height="12" viewBox="0 0 16 16" fill="none">
@@ -3017,11 +3018,13 @@
         // 3. RESULT CACHING: Cache filtered results to avoid re-filtering same queries
         // 4. SINGLE-PASS METRICS: Calculate all metrics in one loop instead of multiple passes
         // 5. OPTIMIZED CHARTS: Use Map() instead of objects, limit data points
-        // 6. DEBOUNCED SEARCH: 500ms delay to prevent filtering on every keystroke
-        // 7. LARGER PAGE SIZE: 50 rows per page (fewer renders = better performance)
+        // 6. DEBOUNCED SEARCH: 300ms delay to prevent filtering on every keystroke
+        // 7. LAZY LOADING: 20 rows per page by default (only render visible data)
         // 8. ASYNC RENDERING: Use requestAnimationFrame to prevent UI blocking
+        // 9. MEMOIZATION: Cache filtered/sorted results to avoid recomputation
         // 
         // Expected Performance: 40K rows should filter in 50-200ms (was 2-5 seconds)
+        // Data tab loads instantly with lazy pagination (only renders current page)
         // =====================================================
 
         // Global variables
@@ -3851,6 +3854,10 @@
                             // Initialize dashboard with data
                             buildIndexes();
                             populateFilterOptions();
+                            
+                            // Initialize filteredData with all data (no filters applied initially)
+                            filterData();
+                            
                             calculateMetrics();
                             updateReportDate(); // Update "Last Updated" display
                             
@@ -11677,7 +11684,9 @@
                 dataSource = window.ccmData || [];
                 console.log('📊 Using CCM data source:', dataSource.length, 'records');
             } else {
-                dataSource = filteredData;
+                // Use filteredData if it exists and has records, otherwise use portfolioData
+                // This handles the case when page loads or filters are cleared
+                dataSource = (filteredData && filteredData.length > 0) ? filteredData : portfolioData;
                 console.log('📊 Using filtered portfolio data:', dataSource.length, 'records');
             }
             
@@ -11732,7 +11741,7 @@
         window.datatableState = {
             data: [],
             isLoading: true,
-            perPage: 10,
+            perPage: 20, // Default to 20 items per page for better performance
             search: '',
             clearFilters: false,
             currentPage: 1,
@@ -11916,7 +11925,7 @@
                 sortColumn: "",
                 sortDirection: "asc",
                 currentPage: 1,
-                perPage: 10,
+                perPage: 20, // Default to 20 items per page for lazy loading
                 columnFilters: {},
                 updateTrigger: 0, // Local copy to watch
                 comingSoon: false, // Coming soon flag
@@ -11925,6 +11934,17 @@
                 // Reactive properties that will update when updateTrigger changes
                 data: [],
                 isLoading: true,
+                
+                // Cache for filtered data
+                _cachedFilteredData: null,
+                _cacheKey: '',
+                
+                // Cache for unique values
+                _uniqueValuesCache: {},
+                
+                // Debounce timer for search
+                _searchDebounceTimer: null,
+                _debouncedSearch: '',
                 
                 get columns() {
                     return this.data.length > 0 ? Object.keys(this.data[0]) : [];
@@ -11936,17 +11956,23 @@
                     // Initial load from global state
                     this.syncFromGlobalState();
                     
-                    // Poll for changes every 100ms (lightweight check)
+                    // Poll for changes every 250ms (lightweight check, optimized for performance)
                     setInterval(() => {
                         if (window.datatableState.updateTrigger !== this.updateTrigger) {
                             console.log('🔄 Detected state change, syncing...');
                             this.syncFromGlobalState();
                         }
-                    }, 100);
+                    }, 250);
                     
                     // Watch for data changes to reset pagination/filters
                     this.$watch('data', (newData) => {
                         console.log('📊 Data changed, resetting table state. New data length:', newData.length);
+                        
+                        // Clear caches when data changes
+                        this._cachedFilteredData = null;
+                        this._cacheKey = '';
+                        this._uniqueValuesCache = {};
+                        
                         if (newData.length > 0 && this.sortColumn === "") {
                             this.sortColumn = this.columns[0] || "";
                             this.columnFilters = this.columns.reduce((acc, col) => {
@@ -11955,6 +11981,17 @@
                             }, {});
                             this.currentPage = 1;
                         }
+                    });
+                    
+                    // Watch for search with debouncing
+                    this.$watch('search', (newSearch) => {
+                        clearTimeout(this._searchDebounceTimer);
+                        this._searchDebounceTimer = setTimeout(() => {
+                            this._debouncedSearch = newSearch;
+                            this._cachedFilteredData = null; // Clear cache
+                            this._cacheKey = '';
+                            this.currentPage = 1; // Reset to first page
+                        }, 300); // 300ms debounce
                     });
                     
                     // Watch for pagination changes to update footer
@@ -11968,9 +12005,15 @@
                 },
                 
                 syncFromGlobalState() {
-                    this.data = [...(window.datatableState.data || [])];
+                    // Use direct reference instead of copying for better performance
+                    // Only copy if data has actually changed
+                    const newData = window.datatableState.data || [];
+                    if (newData !== this.data && newData.length !== this.data.length) {
+                        this.data = newData;
+                    }
+                    
                     this.isLoading = window.datatableState.isLoading;
-                    this.perPage = window.datatableState.perPage || 10;
+                    this.perPage = window.datatableState.perPage || 20; // Default to 20 for lazy loading
                     this.comingSoon = window.datatableState.comingSoon || false;
                     this.comingSoonMessage = window.datatableState.comingSoonMessage || '';
                     
@@ -11986,7 +12029,7 @@
                             return acc;
                         }, {});
                         this.currentPage = 1;
-                        window.datatableState.clearFilters = false; // Reset the flag
+                        window.datatableState.clearFilters = false;
                         console.log('🧹 Cleared all column filters');
                     }
                     
@@ -12060,8 +12103,23 @@
                 },
 
                 getUniqueValues(column) {
-                    const values = [...new Set(this.data.map(item => item[column]))];
-                    return values.sort((a, b) => String(a).localeCompare(String(b)));
+                    // Check cache first
+                    if (this._uniqueValuesCache[column]) {
+                        return this._uniqueValuesCache[column];
+                    }
+                    
+                    // Compute unique values
+                    const uniqueSet = new Set();
+                    for (let i = 0; i < this.data.length; i++) {
+                        uniqueSet.add(this.data[i][column]);
+                    }
+                    const values = Array.from(uniqueSet).sort((a, b) => 
+                        String(a).localeCompare(String(b))
+                    );
+                    
+                    // Cache the result
+                    this._uniqueValuesCache[column] = values;
+                    return values;
                 },
 
                 toggleFilter(column, value) {
@@ -12076,11 +12134,16 @@
                         this.columnFilters[column].push(value);
                     }
                     
-                    this.currentPage = 1; // Reset to first page when filter changes
+                    // Clear cache and reset to first page when filter changes
+                    this._cachedFilteredData = null;
+                    this._cacheKey = '';
+                    this.currentPage = 1;
                 },
 
                 clearColumnFilter(column) {
                     this.columnFilters[column] = [];
+                    this._cachedFilteredData = null;
+                    this._cacheKey = '';
                     this.currentPage = 1;
                 },
 
@@ -12096,24 +12159,51 @@
                 },
 
                 get filteredData() {
-                    const searchLower = this.search.toLowerCase();
-                    return this.data
+                    // Use debounced search for filtering
+                    const searchTerm = this._debouncedSearch || this.search;
+                    
+                    // Create cache key from filter state
+                    const cacheKey = JSON.stringify({
+                        search: searchTerm,
+                        sortColumn: this.sortColumn,
+                        sortDirection: this.sortDirection,
+                        columnFilters: this.columnFilters,
+                        dataLength: this.data.length
+                    });
+                    
+                    // Return cached result if key matches
+                    if (this._cacheKey === cacheKey && this._cachedFilteredData) {
+                        return this._cachedFilteredData;
+                    }
+                    
+                    // Compute filtered data
+                    const searchLower = searchTerm.toLowerCase();
+                    const filtered = this.data
                         .filter((item) => {
                             // Search filter - search across all columns
-                            const matchesSearch = !searchLower || 
-                                this.columns.some(col => {
-                                    const value = item[col];
-                                    return value && String(value).toLowerCase().includes(searchLower);
-                                });
+                            if (searchLower) {
+                                let found = false;
+                                for (let i = 0; i < this.columns.length; i++) {
+                                    const value = item[this.columns[i]];
+                                    if (value && String(value).toLowerCase().includes(searchLower)) {
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                                if (!found) return false;
+                            }
                             
                             // Column filters
-                            const matchesColumnFilters = Object.keys(this.columnFilters).every(column => {
+                            for (const column in this.columnFilters) {
                                 const filters = this.columnFilters[column];
-                                if (!filters || filters.length === 0) return true;
-                                return filters.includes(item[column]);
-                            });
+                                if (filters && filters.length > 0) {
+                                    if (!filters.includes(item[column])) {
+                                        return false;
+                                    }
+                                }
+                            }
                             
-                            return matchesSearch && matchesColumnFilters;
+                            return true;
                         })
                         .sort((a, b) => {
                             let modifier = this.sortDirection === "asc" ? 1 : -1;
@@ -12130,11 +12220,22 @@
                             if (aVal > bVal) return 1 * modifier;
                             return 0;
                         });
+                    
+                    // Cache the result
+                    this._cachedFilteredData = filtered;
+                    this._cacheKey = cacheKey;
+                    
+                    return filtered;
                 },
 
                 get paginatedData() {
+                    // Lazy loading: Only return the current page of data
+                    // This ensures we only render what's visible
                     const start = (this.currentPage - 1) * this.perPage;
                     const end = start + this.perPage;
+                    
+                    // Use slice to get only the rows for the current page
+                    // This is much faster than rendering all data and hiding it
                     return this.filteredData.slice(start, end);
                 },
 
@@ -12157,19 +12258,26 @@
 
                 goToPage(page) {
                     if (page >= 1 && page <= this.totalPages) {
-                        this.currentPage = page;
+                        // Use requestAnimationFrame for smooth page transitions
+                        requestAnimationFrame(() => {
+                            this.currentPage = page;
+                        });
                     }
                 },
 
                 nextPage() {
                     if (this.currentPage < this.totalPages) {
-                        this.currentPage++;
+                        requestAnimationFrame(() => {
+                            this.currentPage++;
+                        });
                     }
                 },
 
                 prevPage() {
                     if (this.currentPage > 1) {
-                        this.currentPage--;
+                        requestAnimationFrame(() => {
+                            this.currentPage--;
+                        });
                     }
                 },
 
@@ -12180,6 +12288,10 @@
                         this.sortDirection = "asc";
                         this.sortColumn = column;
                     }
+                    
+                    // Clear cache when sort changes
+                    this._cachedFilteredData = null;
+                    this._cacheKey = '';
                 }
             };
         }
@@ -12196,37 +12308,41 @@
             
             // Get chart name and filtered data
             const chartName = getChartName(chartType);
-            const fullData = getFilteredData(chartType, dataSource);
             
-            console.log('📊 Data for table:', {
-                chartType,
-                chartName,
-                dataSourceLength: dataSource ? dataSource.length : 0,
-                fullDataLength: fullData ? fullData.length : 0
-            });
-            
-            if (!fullData || fullData.length === 0) {
-                console.warn('⚠️ No data returned from getFilteredData');
-                // Update global state to show no data
-                window.datatableState.data = [];
+            // Use requestAnimationFrame for non-blocking data processing
+            requestAnimationFrame(() => {
+                const fullData = getFilteredData(chartType, dataSource);
+                
+                console.log('📊 Data for table:', {
+                    chartType,
+                    chartName,
+                    dataSourceLength: dataSource ? dataSource.length : 0,
+                    fullDataLength: fullData ? fullData.length : 0
+                });
+                
+                if (!fullData || fullData.length === 0) {
+                    console.warn('⚠️ No data returned from getFilteredData');
+                    // Update global state to show no data
+                    window.datatableState.data = [];
+                    window.datatableState.isLoading = false;
+                    window.datatableState.comingSoon = false;
+                    window.datatableState.comingSoonMessage = '';
+                    window.datatableState.updateTrigger++;
+                    return;
+                }
+                
+                // Update global state - Alpine.js will react to this change
+                console.log('✅ Setting datatableState with', fullData.length, 'rows');
+                console.log('📋 First 3 rows:', fullData.slice(0, 3));
+                
+                window.datatableState.data = fullData;
                 window.datatableState.isLoading = false;
-                window.datatableState.comingSoon = false; // Reset coming soon flag
+                window.datatableState.comingSoon = false;
                 window.datatableState.comingSoonMessage = '';
                 window.datatableState.updateTrigger++;
-                return;
-            }
-            
-            // Update global state - Alpine.js will react to this change
-            console.log('✅ Setting datatableState with', fullData.length, 'rows');
-            console.log('📋 First 3 rows:', fullData.slice(0, 3));
-            
-            window.datatableState.data = fullData;
-            window.datatableState.isLoading = false;
-            window.datatableState.comingSoon = false; // Reset coming soon flag
-            window.datatableState.comingSoonMessage = '';
-            window.datatableState.updateTrigger++;
-            
-            console.log('✅ datatableState updated. Alpine.js will reactively update the table. Trigger:', window.datatableState.updateTrigger);
+                
+                console.log('✅ datatableState updated. Alpine.js will reactively update the table. Trigger:', window.datatableState.updateTrigger);
+            });
         }
         
         
@@ -12276,6 +12392,10 @@
                 const dataTableSubtitle = document.getElementById('dataTableSubtitle');
                 if (dataTableTitle && chartName) dataTableTitle.textContent = chartName;
                 if (dataTableSubtitle && chartSubtitle) dataTableSubtitle.textContent = chartSubtitle;
+                
+                // Show loading state temporarily
+                window.datatableState.isLoading = true;
+                window.datatableState.updateTrigger++;
                 
                 // Initialize the data table with current chart data
                 console.log('📊 Data tab activated, initializing datatable for:', currentExpandType);
@@ -12365,7 +12485,9 @@
                     dataSource = window.ccmData || [];
                     console.log('📊 Using CCM data source for table:', dataSource.length, 'records');
                 } else {
-                    dataSource = filteredData;
+                    // Use filteredData if it exists and has records, otherwise use portfolioData
+                    // This handles the case when page loads or filters are cleared
+                    dataSource = (filteredData && filteredData.length > 0) ? filteredData : portfolioData;
                     console.log('📊 Using filtered portfolio data for table:', dataSource.length, 'records');
                 }
                 
@@ -14780,6 +14902,7 @@
                 expiredProductData,
                 expiredDetailedData,
                 expiredFacilityDetails,
+                expiredAgingData,
                 next3Months
             };
             
@@ -17134,6 +17257,7 @@
             const expiredRegionalData = { NAM: 0, LATAM: 0, EMEA: 0, APAC: 0 };
             const expiredProductData = {};
             const expiredFacilityDetails = []; // New: detailed facility data for table
+            const expiredAgingData = { '1-30': 0, '31-60': 0, '61-90': 0, '>90': 0 }; // Aging buckets
             
             filteredDataSource.forEach(row => {
                 const region = (row.Region || "Unknown").toUpperCase();
@@ -17240,6 +17364,17 @@
                     }
                     expiredProductData[product].facilities++;
                     expiredProductData[product].tfa += amount;
+                    
+                    // Categorize by aging bucket
+                    if (daysPastDue >= 1 && daysPastDue <= 30) {
+                        expiredAgingData['1-30']++;
+                    } else if (daysPastDue >= 31 && daysPastDue <= 60) {
+                        expiredAgingData['31-60']++;
+                    } else if (daysPastDue >= 61 && daysPastDue <= 90) {
+                        expiredAgingData['61-90']++;
+                    } else if (daysPastDue > 90) {
+                        expiredAgingData['>90']++;
+                    }
                 }
             });
             
@@ -17315,21 +17450,21 @@
                 
                 <!-- Analysis Row - Regional & Categorical Breakdowns -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6" id="expiringAnalysis">
-                    <!-- Regional Summary -->
-                    <div class="rounded-xl border border-gray-200 bg-white flex flex-col">
+                    <!-- Expired Facilities by Aging -->
+                    <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-base font-semibold text-gray-900">Regional Distribution</h3>
-                            <p class="text-xs text-gray-500 mt-1">Breakdown by region for expiring items</p>
+                            <h3 class="text-base font-semibold text-gray-900">Expired Facilities by Aging</h3>
+                            <p class="text-xs text-gray-500 mt-1">Count of expired facilities by days past due</p>
                         </div>
-                        <div class="flex-1 overflow-hidden">
-                            <div id="regionalSummaryTable" class="h-full"></div>
+                        <div class="p-6">
+                            <div id="expiredAgingChart" style="min-height: 300px;"></div>
                         </div>
                     </div>
                     
                     <!-- Product Category Chart -->
                     <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-base font-semibold text-gray-900">Facilities Expiring by Product Program</h3>
+                            <h3 class="text-base font-semibold text-gray-900">Facilities Expired by Product Program</h3>
                             <p class="text-xs text-gray-500 mt-1">Distribution across product programs</p>
                         </div>
                         <div class="p-6 flex items-center justify-center" style="min-height: 400px;">
@@ -17347,31 +17482,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                
-                <!-- Expired Items Row -->
-                <div class="mb-6">
-                    <!-- Expired Facilities by Region & Product - Table -->
-                    <div class="rounded-xl border border-gray-200 bg-white">
-                        <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-base font-semibold text-gray-900">Expired Facilities by Region & Product (Top 10)</h3>
-                            <p class="text-xs text-gray-500 mt-1">Facilities past maturity date</p>
-                        </div>
-                        <div class="custom-scrollbar overflow-x-auto">
-                            <div id="expiredRegionalChart"></div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Underwriter Breakdown -->
-                <div class="rounded-2xl border border-gray-200 bg-white mb-6">
-                    <div class="px-6 py-4">
-                        <h3 class="text-lg font-semibold text-gray-800">Facilities by Underwriter (Top 10)</h3>
-                        <p class="text-xs text-gray-500 mt-1">Lead underwriters with most expiring items</p>
-                    </div>
-                    <div class="custom-scrollbar overflow-x-auto">
-                        <div id="underwriterTable"></div>
                     </div>
                 </div>
                 
@@ -17513,67 +17623,111 @@
                 hasExpiredFacilityDetails: !!data.expiredFacilityDetails
             });
             
-            const { regionalData, productData, underwriterData } = data;
+            const { regionalData, productData, underwriterData, expiredProductData, expiredAgingData } = data;
             
-            // 1. Regional Summary Table
-            const regionalTableEl = document.getElementById('regionalSummaryTable');
-            if (regionalTableEl && regionalData) {
-                // Convert to array and sort by total count (CAs + Facilities, highest to lowest)
-                const regionEntries = [
-                    { name: 'APAC', ...regionalData.APAC },
-                    { name: 'EMEA', ...regionalData.EMEA },
-                    { name: 'NAM', ...regionalData.NAM },
-                    { name: 'LATAM', ...regionalData.LATAM }
-                ].sort((a, b) => (b.cas + b.facilities) - (a.cas + a.facilities));
+            // 1. Expired Facilities by Aging - Bar Chart
+            const agingChartEl = document.getElementById('expiredAgingChart');
+            if (agingChartEl && expiredAgingData) {
+                const agingCategories = ['1-30 Days', '31-60 Days', '61-90 Days', '> 90 Days'];
+                const agingValues = [
+                    expiredAgingData['1-30'],
+                    expiredAgingData['31-60'],
+                    expiredAgingData['61-90'],
+                    expiredAgingData['>90']
+                ];
                 
-                let tableHTML = `
-                    <table class="w-full h-full">
-                        <thead>
-                            <tr class="border-b border-gray-200 bg-gray-50">
-                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700">Region</th>
-                                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700">CAs</th>
-                                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700">Facilities</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                `;
+                const agingOptions = {
+                    series: [{
+                        name: 'Facilities',
+                        data: agingValues
+                    }],
+                    chart: {
+                        type: 'bar',
+                        height: 300,
+                        fontFamily: 'Outfit, sans-serif',
+                        toolbar: { show: false },
+                        parentHeightOffset: 0
+                    },
+                    colors: ['#465fff'],
+                    plotOptions: {
+                        bar: {
+                            borderRadius: 6,
+                            columnWidth: '60%',
+                            dataLabels: { position: 'top' }
+                        }
+                    },
+                    dataLabels: {
+                        enabled: true,
+                        offsetY: -20,
+                        formatter: function(val) {
+                            return val;
+                        },
+                        style: {
+                            fontSize: '11px',
+                            fontWeight: 500,
+                            colors: ['#374151']
+                        },
+                        background: {
+                            enabled: true,
+                            foreColor: '#374151',
+                            backgroundColor: '#F3F4F6',
+                            borderRadius: 12,
+                            padding: 8,
+                            opacity: 1,
+                            borderWidth: 0
+                        }
+                    },
+                    xaxis: {
+                        categories: agingCategories,
+                        labels: {
+                            style: {
+                                colors: "#6B7280",
+                                fontSize: "12px",
+                                fontFamily: "Outfit, sans-serif",
+                            },
+                        },
+                        axisBorder: { show: false },
+                        axisTicks: { show: false }
+                    },
+                    yaxis: {
+                        labels: {
+                            style: {
+                                colors: "#6B7280",
+                                fontSize: "12px",
+                                fontFamily: "Outfit, sans-serif",
+                            },
+                        },
+                    },
+                    grid: {
+                        borderColor: '#E5E7EB',
+                        strokeDashArray: 4,
+                        xaxis: { lines: { show: false } },
+                        yaxis: { lines: { show: true } },
+                        padding: {
+                            top: 4,
+                            right: 0,
+                            bottom: 0,
+                            left: 0
+                        }
+                    },
+                    tooltip: {
+                        theme: 'light'
+                    }
+                };
                 
-                let totalCAs = 0, totalFacilities = 0;
-                regionEntries.forEach(region => {
-                    totalCAs += region.cas;
-                    totalFacilities += region.facilities;
-                });
-                
-                regionEntries.forEach(region => {
-                    tableHTML += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 text-sm font-medium text-gray-900">${region.name}</td>
-                            <td class="px-6 py-4 text-sm text-right text-gray-700">${region.cas}</td>
-                            <td class="px-6 py-4 text-sm text-right text-gray-700">${region.facilities}</td>
-                        </tr>
-                    `;
-                });
-                
-                tableHTML += `
-                        <tr class="bg-gray-50 font-semibold border-t-2 border-gray-300">
-                            <td class="px-6 py-4 text-sm text-gray-900 rounded-bl-xl">Total</td>
-                            <td class="px-6 py-4 text-sm text-right text-gray-900">${totalCAs}</td>
-                            <td class="px-6 py-4 text-sm text-right text-gray-900 rounded-br-xl">${totalFacilities}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                `;
-                regionalTableEl.innerHTML = tableHTML;
+                agingChartEl.innerHTML = '';
+                const agingChart = new ApexCharts(agingChartEl, agingOptions);
+                agingChart.render();
             }
             
-            // 2. Product Category Chart - Donut Chart (Facilities Count Only)
+            // 2. Product Category Chart - Donut Chart (EXPIRED Facilities Count Only)
             const productChartEl = document.getElementById('productCategoryChart');
             const productListEl = document.getElementById('productCategoryList');
             
-            if (productChartEl && productData && productData.length > 0) {
-                // Sort by facilities count descending
-                const sortedProducts = productData
-                    .map(p => ({ name: p.name, facilities: p.facilities || 0 }))
+            if (productChartEl && expiredProductData) {
+                // Convert expired product data to array and sort by facilities count descending
+                const sortedProducts = Object.entries(expiredProductData)
+                    .map(([name, data]) => ({ name, facilities: data.facilities || 0 }))
                     .sort((a, b) => b.facilities - a.facilities);
                 
                 const productLabels = sortedProducts.map(p => p.name);
@@ -17677,174 +17831,6 @@
                     }).join('');
                     productListEl.innerHTML = legendHTML;
                 }
-            }
-            
-            // 2a. Expired Facilities by Region & Product - Table (Top 10)
-            const expiredRegionalChartEl = document.getElementById('expiredRegionalChart');
-            if (expiredRegionalChartEl && data.expiredFacilityDetails) {
-                // Group by region-product combination
-                const grouped = {};
-                data.expiredFacilityDetails.forEach(item => {
-                    const key = `${item.region}|||${item.product}`;
-                    if (!grouped[key]) {
-                        grouped[key] = { 
-                            region: item.region, 
-                            product: item.product, 
-                            count: 0,
-                            tfa: 0,
-                            maxDaysPastDue: 0
-                        };
-                    }
-                    grouped[key].count++;
-                    grouped[key].tfa += item.tfa;
-                    if (item.daysPastDue > grouped[key].maxDaysPastDue) {
-                        grouped[key].maxDaysPastDue = item.daysPastDue;
-                    }
-                });
-                
-                // Convert to array and sort by days past due (descending), then limit to top 10
-                const tableData = Object.values(grouped)
-                    .sort((a, b) => b.maxDaysPastDue - a.maxDaysPastDue)
-                    .slice(0, 10);
-                
-                if (tableData.length > 0) {
-                    let tableHTML = `
-                        <table class="min-w-full">
-                            <thead>
-                                <tr class="bg-gray-50">
-                                    <th class="px-6 py-4 text-left text-sm font-medium whitespace-nowrap text-gray-500">Product Program</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Region</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Count of Facilities</th>
-                                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Days Past Due</th>
-                                    <th class="px-6 py-4 text-right text-sm font-medium whitespace-nowrap text-gray-500">TFA</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                    `;
-                    
-                    tableData.forEach((item, index) => {
-                        const regionColor = {
-                            'APAC': 'bg-blue-100 text-blue-700',
-                            'EMEA': 'bg-green-100 text-green-700',
-                            'NAM': 'bg-purple-100 text-purple-700',
-                            'LATAM': 'bg-orange-100 text-orange-700'
-                        }[item.region] || 'bg-gray-100 text-gray-700';
-                        
-                        // Determine severity color for days past due
-                        let pastDueColor = 'text-gray-900';
-                        let pastDueBg = '';
-                        if (item.maxDaysPastDue > 90) {
-                            pastDueColor = 'text-red-700';
-                            pastDueBg = 'bg-red-50';
-                        } else if (item.maxDaysPastDue > 60) {
-                            pastDueColor = 'text-orange-700';
-                            pastDueBg = 'bg-orange-50';
-                        } else if (item.maxDaysPastDue > 30) {
-                            pastDueColor = 'text-yellow-700';
-                            pastDueBg = 'bg-yellow-50';
-                        }
-                        
-                        tableHTML += `
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 text-left text-sm font-medium text-gray-900">${item.product}</td>
-                                <td class="px-6 py-4 text-center">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${regionColor}">
-                                        ${item.region}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-center text-sm font-semibold text-gray-900">${item.count}</td>
-                                <td class="px-6 py-4 text-center">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-semibold ${pastDueColor} ${pastDueBg}">
-                                        ${item.maxDaysPastDue} days
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-right text-sm font-semibold text-gray-900">${formatCurrency(item.tfa)}</td>
-                            </tr>
-                        `;
-                    });
-                    
-                    // Add totals row
-                    const totalCount = tableData.reduce((sum, item) => sum + item.count, 0);
-                    const totalTFA = tableData.reduce((sum, item) => sum + item.tfa, 0);
-                    const maxPastDue = Math.max(...tableData.map(item => item.maxDaysPastDue));
-                    
-                    tableHTML += `
-                            <tr class="bg-gray-50 font-semibold border-t-2 border-gray-300">
-                                <td class="px-6 py-4 text-left text-sm text-gray-900" colspan="2">Total</td>
-                                <td class="px-6 py-4 text-center text-sm text-gray-900">${totalCount}</td>
-                                <td class="px-6 py-4 text-center text-sm text-gray-900">${maxPastDue} days</td>
-                                <td class="px-6 py-4 text-right text-sm text-gray-900">${formatCurrency(totalTFA)}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    `;
-                    expiredRegionalChartEl.innerHTML = tableHTML;
-                } else {
-                    expiredRegionalChartEl.innerHTML = '<div class="flex items-center justify-center py-8 text-sm text-gray-500">No expired facilities</div>';
-                }
-            }
-            
-            // 3. Underwriter Table
-            const underwriterTableEl = document.getElementById('underwriterTable');
-            if (underwriterTableEl) {
-                let tableHTML = `
-                    <table class="min-w-full">
-                        <thead>
-                            <tr class="bg-gray-50">
-                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Underwriter</th>
-                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Region</th>
-                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">CAs</th>
-                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Facilities</th>
-                                <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Total TFA</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200">
-                `;
-                
-                if (underwriterData && underwriterData.length > 0) {
-                    underwriterData.forEach((uw, index) => {
-                        const regionColor = {
-                            'APAC': 'bg-blue-100 text-blue-700',
-                            'EMEA': 'bg-green-100 text-green-700',
-                            'NAM': 'bg-purple-100 text-purple-700',
-                            'LATAM': 'bg-orange-100 text-orange-700'
-                        }[uw.region] || 'bg-gray-100 text-gray-700';
-                        
-                        tableHTML += `
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 text-center text-sm font-medium text-gray-900">${uw.name}</td>
-                                <td class="px-6 py-4 text-center">
-                                    <span class="inline-flex items-center justify-center rounded-full ${regionColor} px-2.5 py-0.5 text-xs font-medium">
-                                        ${uw.region}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <span class="inline-flex items-center justify-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
-                                        ${uw.cas}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <span class="inline-flex items-center justify-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
-                                        ${uw.facilities}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap font-semibold text-gray-900">${formatCurrency(uw.tfa)}</td>
-                            </tr>
-                        `;
-                    });
-                } else {
-                    tableHTML += `
-                        <tr>
-                            <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">No data available</td>
-                        </tr>
-                    `;
-                }
-                
-                tableHTML += `
-                    </tbody>
-                </table>
-                `;
-                underwriterTableEl.innerHTML = tableHTML;
             }
         }
         
@@ -24255,7 +24241,7 @@
                                 </svg>
                             </button>
                             <div x-show="open${idx}" @click.outside="open${idx} = false"
-                                class="absolute z-[100] w-64 space-y-2 rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg mt-2">
+                                class="absolute z-[9999] w-64 space-y-2 rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg mt-2">
                                 <div class="text-xs font-semibold text-gray-700 mb-2">${col.replace(/_/g, ' ')}</div>
                                 
                                 <!-- Filter Type Selector -->
@@ -24367,7 +24353,7 @@
                                 </svg>
                             </button>
                             <div x-show="open${idx}" @click.outside="open${idx} = false"
-                                class="absolute z-[100] w-48 max-h-64 overflow-y-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                class="absolute z-[9999] w-48 max-h-64 overflow-y-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
                                 <button
                                     @click="selected${idx} = ''; open${idx} = false; window.applyColumnFilter('${col}', '');"
                                     :class="selected${idx} === '' ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"

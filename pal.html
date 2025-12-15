@@ -17490,6 +17490,18 @@
             openFilterColumn: null // Track which filter dropdown is open
         };
         
+        // Initialize pipeline table state
+        window.pipelineTableState = {
+            searchQuery: '',
+            currentPage: 1,
+            perPage: 10,
+            allData: [],
+            columnFilters: {},
+            sortColumn: 'tfa', // Default sort by TFA
+            sortDirection: 'desc', // Descending for highest first
+            openFilterColumn: null // Track which filter dropdown is open
+        };
+        
         // Update expiring filter and refresh view
         function updateExpiringFilter(filterValue, filterType) {
             if (filterType === 'view') {
@@ -17733,7 +17745,176 @@
                     renderExpiringTable(dataSource);
                 }
             }
+            
+            // Also handle pipeline table filter dropdowns
+            if (!e.target.closest('.pipeline-filter-dropdown')) {
+                const pipelineState = window.pipelineTableState;
+                if (pipelineState && pipelineState.openFilterColumn) {
+                    pipelineState.openFilterColumn = null;
+                    renderPipelineDetailsTable();
+                }
+            }
         });
+        
+        // ===== PIPELINE TABLE HELPER FUNCTIONS =====
+        
+        // Update search query for pipeline table
+        function updatePipelineTableSearch(query) {
+            window.pipelineTableState.searchQuery = query.toLowerCase();
+            window.pipelineTableState.currentPage = 1;
+            renderPipelineDetailsTable();
+        }
+        
+        // Update per page for pipeline table
+        function updatePipelineTablePerPage(perPage) {
+            window.pipelineTableState.perPage = perPage;
+            window.pipelineTableState.currentPage = 1;
+            renderPipelineDetailsTable();
+        }
+        
+        // Change page for pipeline table
+        function changePipelineTablePage(direction) {
+            if (direction === 'prev' && window.pipelineTableState.currentPage > 1) {
+                window.pipelineTableState.currentPage--;
+            } else if (direction === 'next') {
+                const state = window.pipelineTableState;
+                const totalPages = Math.ceil(state.allData.length / state.perPage);
+                if (state.currentPage < totalPages) {
+                    window.pipelineTableState.currentPage++;
+                }
+            }
+            renderPipelineDetailsTable();
+        }
+        
+        // Sort pipeline table by column
+        function sortPipelineTable(column) {
+            const state = window.pipelineTableState;
+            if (state.sortColumn === column) {
+                state.sortDirection = state.sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                state.sortColumn = column;
+                state.sortDirection = 'asc';
+            }
+            renderPipelineDetailsTable();
+        }
+        
+        // Toggle column filter dropdown for pipeline table
+        function togglePipelineFilterDropdown(column, event) {
+            event.stopPropagation();
+            const state = window.pipelineTableState;
+            if (state.openFilterColumn === column) {
+                state.openFilterColumn = null;
+            } else {
+                state.openFilterColumn = column;
+            }
+            renderPipelineDetailsTable();
+        }
+        
+        // Toggle filter value for a column in pipeline table
+        function togglePipelineColumnFilter(column, value) {
+            const state = window.pipelineTableState;
+            if (!state.columnFilters[column]) {
+                state.columnFilters[column] = [];
+            }
+            const index = state.columnFilters[column].indexOf(value);
+            if (index > -1) {
+                state.columnFilters[column].splice(index, 1);
+            } else {
+                state.columnFilters[column].push(value);
+            }
+            state.currentPage = 1;
+            state.openFilterColumn = null;
+            renderPipelineDetailsTable();
+        }
+        
+        // Clear column filter for pipeline table
+        function clearPipelineColumnFilter(column) {
+            const state = window.pipelineTableState;
+            delete state.columnFilters[column];
+            state.currentPage = 1;
+            state.openFilterColumn = null;
+            renderPipelineDetailsTable();
+        }
+        
+        // Clear all column filters for pipeline table
+        function clearAllPipelineFilters() {
+            const state = window.pipelineTableState;
+            state.columnFilters = {};
+            state.sortColumn = 'tfa';
+            state.sortDirection = 'desc';
+            state.currentPage = 1;
+            renderPipelineDetailsTable();
+        }
+        
+        // Filter dropdown values based on search input for pipeline table
+        function filterPipelineDropdownValues(column) {
+            const searchInput = document.getElementById(`pipelineFilterSearch_${column}`);
+            if (!searchInput) return;
+            
+            const searchValue = searchInput.value.toLowerCase();
+            const container = document.getElementById(`pipelineFilterValues_${column}`);
+            if (!container) return;
+            
+            const items = container.querySelectorAll('.pipeline-filter-value-item');
+            items.forEach(item => {
+                const value = item.dataset.value || '';
+                if (value.includes(searchValue)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+        
+        // Export pipeline table to CSV
+        function exportPipelineTableToCSV() {
+            const state = window.pipelineTableState;
+            const data = state.allData; // Use filtered data
+            
+            if (!data || data.length === 0) {
+                alert('No data to export');
+                return;
+            }
+            
+            // Define CSV headers
+            const headers = ['Facility ID', 'Relationship', 'Region', 'Product', 'Facility Type', 
+                           'Underwriter', 'TFA', 'Days', 'Aging'];
+            
+            // Build CSV rows
+            const csvRows = [headers.join(',')];
+            
+            data.forEach(item => {
+                const row = [];
+                row.push(`"${item.facilityId}"`);
+                row.push(`"${item.relationship}"`);
+                row.push(`"${item.region}"`);
+                row.push(`"${item.product}"`);
+                row.push(`"${item.facilityType}"`);
+                row.push(`"${item.underwriter}"`);
+                row.push(item.tfa); // Number, no quotes
+                row.push(item.daysOld);
+                row.push(`"${item.agingCategory}"`);
+                
+                csvRows.push(row.join(','));
+            });
+            
+            // Create and download file
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            // Generate filename with current date
+            const timestamp = new Date().toISOString().slice(0, 10);
+            const filename = `Deals_Pending_Closure_${timestamp}.csv`;
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
         
         // Render expiring analysis views - Regional, Product, and Underwriter breakdowns
         function renderExpiringAnalysis(expiringData) {
@@ -19628,75 +19809,290 @@
             }
             
             
-            // 3. Deals Close Details Table (Top 10 by TFA)
-            const detailsTableEl = document.getElementById('pipelineDetailsTable');
-            if (detailsTableEl) {
-                let tableHTML = `
-                <table class="min-w-full">
-                    <thead>
-                        <tr class="bg-gray-50">
-                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Facility ID</th>
-                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Relationship</th>
-                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Region</th>
-                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Product</th>
-                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Facility Type</th>
-                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Underwriter</th>
-                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">TFA</th>
-                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Days Old</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200">
-                `;
-                
-                if (allDeals && allDeals.length > 0) {
-                    // Sort by TFA (highest first) and take top 10
-                    const top10Deals = allDeals
-                        .sort((a, b) => b.tfa - a.tfa)
-                        .slice(0, 10);
+            // 3. Render the interactive details table with filters, sorting, and pagination
+            renderPipelineDetailsTable();
+        }
+        
+        // Render Pipeline Details Table with pagination, filters, and search
+        function renderPipelineDetailsTable() {
+            const tbody = document.getElementById('pipelineTableBody');
+            const thead = document.getElementById('pipelineTableHeader');
+            
+            if (!tbody || !thead || !window.pipelineExpandedData) return;
+            
+            const state = window.pipelineTableState;
+            const { allDeals } = window.pipelineExpandedData;
+            
+            if (!allDeals || allDeals.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="px-6 py-8 text-center text-sm text-gray-500">No pending deals data available</td></tr>';
+                return;
+            }
+            
+            // Add aging category to each deal
+            const dealsWithAging = allDeals.map(deal => {
+                let agingCategory = '';
+                if (deal.daysOld >= 1 && deal.daysOld <= 30) {
+                    agingCategory = '1-30 Days';
+                } else if (deal.daysOld >= 31 && deal.daysOld <= 60) {
+                    agingCategory = '31-60 Days';
+                } else if (deal.daysOld >= 61 && deal.daysOld <= 90) {
+                    agingCategory = '61-90 Days';
+                } else if (deal.daysOld > 90) {
+                    agingCategory = '> 90 Days';
+                }
+                return { ...deal, agingCategory };
+            });
+            
+            // Store items before filtering for header unique values
+            const itemsBeforeFilters = dealsWithAging;
+            
+            // Apply search filter
+            let filteredItems = dealsWithAging;
+            if (state.searchQuery) {
+                filteredItems = dealsWithAging.filter(item => {
+                    const searchStr = `${item.facilityId} ${item.relationship} ${item.region} ${item.product} ${item.facilityType} ${item.underwriter}`.toLowerCase();
+                    return searchStr.includes(state.searchQuery);
+                });
+            }
+            
+            // Apply column filters
+            if (state.columnFilters && Object.keys(state.columnFilters).length > 0) {
+                filteredItems = filteredItems.filter(item => {
+                    for (const [column, filters] of Object.entries(state.columnFilters)) {
+                        if (filters && filters.length > 0) {
+                            let itemValue = item[column];
+                            if (!filters.includes(itemValue)) {
+                                return false;
+                            }
+                        }
+                    }
+                    return true;
+                });
+            }
+            
+            // Apply sorting
+            if (state.sortColumn) {
+                filteredItems.sort((a, b) => {
+                    const modifier = state.sortDirection === 'asc' ? 1 : -1;
+                    const aVal = a[state.sortColumn];
+                    const bVal = b[state.sortColumn];
                     
-                    top10Deals.forEach(deal => {
-                        const regionBadgeColors = {
-                            'NAM': 'bg-orange-50 text-orange-600',
-                            'LATAM': 'bg-purple-50 text-purple-600'
-                        };
-                        
-                        // Age badge color
-                        let ageBadgeColor = 'bg-green-50 text-green-600';
-                        if (deal.daysOld > 90) ageBadgeColor = 'bg-red-50 text-red-600';
-                        else if (deal.daysOld > 60) ageBadgeColor = 'bg-orange-50 text-orange-600';
-                        else if (deal.daysOld > 30) ageBadgeColor = 'bg-amber-50 text-amber-600';
-                        
-                        tableHTML += `
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap font-medium text-gray-900">${deal.facilityId}</td>
-                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-900">${deal.relationship}</td>
-                                <td class="px-6 py-4 text-center whitespace-nowrap">
-                                    <span class="inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-medium ${regionBadgeColors[deal.region]}">${deal.region}</span>
-                                </td>
-                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-900">${deal.product}</td>
-                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-900">${deal.facilityType}</td>
-                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-900">${deal.underwriter}</td>
-                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap font-medium text-gray-900">${formatCurrency(deal.tfa)}</td>
-                                <td class="px-6 py-4 text-center whitespace-nowrap">
-                                    <span class="inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-medium ${ageBadgeColor}">${deal.daysOld}</span>
-                                </td>
-                            </tr>
-                        `;
-                    });
-                } else {
-                    tableHTML += `
-                        <tr>
-                            <td colspan="8" class="px-6 py-8 text-center text-sm text-gray-500">No pending deals data available</td>
-                        </tr>
+                    // Handle numeric comparison for TFA and daysOld
+                    if (state.sortColumn === 'tfa' || state.sortColumn === 'daysOld') {
+                        return (aVal - bVal) * modifier;
+                    }
+                    
+                    // String comparison
+                    if (aVal < bVal) return -1 * modifier;
+                    if (aVal > bVal) return 1 * modifier;
+                    return 0;
+                });
+            } else {
+                // Default sort by TFA descending
+                filteredItems.sort((a, b) => b.tfa - a.tfa);
+            }
+            
+            // Store all filtered data
+            state.allData = filteredItems;
+            
+            // Calculate pagination
+            const totalItems = filteredItems.length;
+            const totalPages = Math.ceil(totalItems / state.perPage);
+            const startIdx = (state.currentPage - 1) * state.perPage;
+            const endIdx = Math.min(startIdx + state.perPage, totalItems);
+            const displayItems = filteredItems.slice(startIdx, endIdx);
+            
+            // Update pagination info
+            document.getElementById('pipelineTableStart').textContent = totalItems > 0 ? startIdx + 1 : 0;
+            document.getElementById('pipelineTableEnd').textContent = endIdx;
+            document.getElementById('pipelineTableTotal').textContent = totalItems;
+            document.getElementById('pipelineTableCurrentPage').textContent = state.currentPage;
+            document.getElementById('pipelineTableTotalPages').textContent = totalPages || 1;
+            
+            // Update pagination buttons
+            const prevBtn = document.getElementById('pipelineTablePrevBtn');
+            const nextBtn = document.getElementById('pipelineTableNextBtn');
+            if (prevBtn) prevBtn.disabled = state.currentPage === 1;
+            if (nextBtn) nextBtn.disabled = state.currentPage >= totalPages;
+            
+            // Update Clear All Filters button visibility and count
+            const clearAllBtn = document.getElementById('btnClearAllPipelineFilters');
+            const activeFiltersCount = Object.values(state.columnFilters).filter(f => f && f.length > 0).length;
+            const hasSorting = state.sortColumn !== '';
+            const hasActiveFilters = activeFiltersCount > 0 || hasSorting;
+            
+            if (clearAllBtn) {
+                if (hasActiveFilters) {
+                    clearAllBtn.style.display = 'flex';
+                    const badge = activeFiltersCount > 0 ? ` (${activeFiltersCount})` : '';
+                    clearAllBtn.innerHTML = `
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Clear Filters${badge}
                     `;
+                } else {
+                    clearAllBtn.style.display = 'none';
+                }
+            }
+            
+            // Helper function to create header cell with filter and sort
+            function createHeaderCell(label, columnKey, columnIndex, totalColumns) {
+                const hasFilter = state.columnFilters[columnKey] && state.columnFilters[columnKey].length > 0;
+                const isSorted = state.sortColumn === columnKey;
+                const isFilterOpen = state.openFilterColumn === columnKey;
+                
+                // Smart positioning: last 3 columns align right, others align left
+                const alignRight = columnIndex >= totalColumns - 3;
+                
+                // Get unique values for this column from items before column filters
+                const uniqueValues = new Set();
+                itemsBeforeFilters.forEach(item => {
+                    if (item[columnKey] !== undefined && item[columnKey] !== null) {
+                        uniqueValues.add(item[columnKey]);
+                    }
+                });
+                const sortedValues = Array.from(uniqueValues).sort((a, b) => {
+                    if (typeof a === 'string') return a.localeCompare(b);
+                    return a - b;
+                });
+                
+                // For TFA column, format display values
+                const displayValues = sortedValues.map(val => {
+                    if (columnKey === 'tfa') {
+                        return { raw: val, display: formatCurrency(val) };
+                    }
+                    return { raw: val, display: val };
+                });
+                
+                // Generate unique ID for search input
+                const searchId = `pipelineFilterSearch_${columnKey}`;
+                
+                return `
+                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">
+                        <div class="flex items-center justify-center gap-2">
+                            <span>${label}</span>
+                            <div class="flex items-center gap-1">
+                                <!-- Filter Icon -->
+                                <div class="relative pipeline-filter-dropdown">
+                                    <button onclick="togglePipelineFilterDropdown('${columnKey}', event)" 
+                                        class="p-1 hover:bg-gray-100 rounded relative">
+                                        <svg class="h-4 w-4 ${hasFilter ? 'text-blue-500' : 'text-gray-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                                        </svg>
+                                        ${hasFilter ? '<span class="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-blue-500"></span>' : ''}
+                                    </button>
+                                    ${isFilterOpen ? `
+                                        <div class="absolute top-full ${alignRight ? 'right-0' : 'left-0'} z-[9999] w-72 mt-2 rounded-2xl border border-gray-200 bg-white p-4 shadow-2xl">
+                                            <p class="text-sm font-semibold text-gray-800 mb-3">Filter by ${label}</p>
+                                            <div class="mb-3">
+                                                <input type="text" 
+                                                    id="${searchId}"
+                                                    oninput="filterPipelineDropdownValues('${columnKey}')"
+                                                    placeholder="Search values..." 
+                                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none" />
+                                            </div>
+                                            <div id="pipelineFilterValues_${columnKey}" class="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2 bg-gray-50">
+                                                ${displayValues.map(valObj => {
+                                                    const valStr = String(valObj.display).toLowerCase();
+                                                    return `
+                                                    <label class="flex items-center gap-2 py-1.5 hover:bg-white rounded-lg px-2 cursor-pointer transition-colors pipeline-filter-value-item" data-value="${valStr}">
+                                                        <input type="checkbox" 
+                                                            ${state.columnFilters[columnKey] && state.columnFilters[columnKey].includes(valObj.raw) ? 'checked' : ''}
+                                                            onchange="togglePipelineColumnFilter('${columnKey}', ${typeof valObj.raw === 'string' ? `'${String(valObj.raw).replace(/'/g, "\\'")}'` : valObj.raw})"
+                                                            class="rounded border-gray-300 text-blue-500 focus:ring-blue-500" />
+                                                        <span class="text-sm text-gray-700">${valObj.display}</span>
+                                                    </label>
+                                                `}).join('')}
+                                            </div>
+                                            <button onclick="clearPipelineColumnFilter('${columnKey}')" 
+                                                class="w-full mt-3 px-3 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50">
+                                                Clear Filter
+                                            </button>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                <!-- Sort Icon -->
+                                <button onclick="sortPipelineTable('${columnKey}')" class="flex flex-col gap-0.5 p-1">
+                                    <svg class="${isSorted && state.sortDirection === 'asc' ? 'fill-blue-500' : 'fill-gray-300'}" width="8" height="5" viewBox="0 0 8 5">
+                                        <path d="M4.40962 0.585167C4.21057 0.300808 3.78943 0.300807 3.59038 0.585166L1.05071 4.21327C0.81874 4.54466 1.05582 5 1.46033 5H6.53967C6.94418 5 7.18126 4.54466 6.94929 4.21327L4.40962 0.585167Z"/>
+                                    </svg>
+                                    <svg class="${isSorted && state.sortDirection === 'desc' ? 'fill-blue-500' : 'fill-gray-300'}" width="8" height="5" viewBox="0 0 8 5">
+                                        <path d="M4.40962 4.41483C4.21057 4.69919 3.78943 4.69919 3.59038 4.41483L1.05071 0.786732C0.81874 0.455343 1.05582 0 1.46033 0H6.53967C6.94418 0 7.18126 0.455342 6.94929 0.786731L4.40962 4.41483Z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </th>
+                `;
+            }
+            
+            // Render table headers
+            const totalCols = 9;
+            const headers = createHeaderCell('Facility ID', 'facilityId', 0, totalCols) +
+                          createHeaderCell('Relationship', 'relationship', 1, totalCols) +
+                          createHeaderCell('Region', 'region', 2, totalCols) +
+                          createHeaderCell('Product', 'product', 3, totalCols) +
+                          createHeaderCell('Facility Type', 'facilityType', 4, totalCols) +
+                          createHeaderCell('Underwriter', 'underwriter', 5, totalCols) +
+                          createHeaderCell('TFA', 'tfa', 6, totalCols) +
+                          createHeaderCell('Days', 'daysOld', 7, totalCols) +
+                          createHeaderCell('Aging', 'agingCategory', 8, totalCols);
+            thead.innerHTML = headers;
+            
+            // Render table rows
+            if (displayItems.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="px-6 py-8 text-center text-sm text-gray-500">No pending deals found</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            const regionColors = {
+                'NAM': 'bg-orange-50 text-orange-600',
+                'LATAM': 'bg-purple-50 text-purple-600'
+            };
+            
+            displayItems.forEach(item => {
+                const regionColor = regionColors[item.region] || 'bg-gray-50 text-gray-600';
+                
+                // Determine badge color based on aging category
+                let agingBadgeClass = '';
+                const agingCat = item.agingCategory;
+                
+                if (agingCat === '1-30 Days') {
+                    agingBadgeClass = 'bg-green-50 text-green-700 border border-green-200';
+                } else if (agingCat === '31-60 Days') {
+                    agingBadgeClass = 'bg-amber-50 text-amber-700 border border-amber-200';
+                } else if (agingCat === '61-90 Days') {
+                    agingBadgeClass = 'bg-orange-50 text-orange-700 border border-orange-200';
+                } else if (agingCat === '> 90 Days') {
+                    agingBadgeClass = 'bg-red-50 text-red-700 border border-red-200';
                 }
                 
-                tableHTML += `
-                    </tbody>
-                </table>
+                html += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 text-center text-sm whitespace-nowrap font-medium text-gray-900">${item.facilityId}</td>
+                        <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-900">${item.relationship}</td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="${regionColor} rounded-full px-2 py-0.5 text-xs font-medium">
+                                ${item.region}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-center text-sm text-gray-700">${item.product}</td>
+                        <td class="px-6 py-4 text-center text-sm text-gray-700">${item.facilityType}</td>
+                        <td class="px-6 py-4 text-center text-sm text-gray-700">${item.underwriter}</td>
+                        <td class="px-6 py-4 text-center text-sm font-semibold text-gray-900">${formatCurrency(item.tfa)}</td>
+                        <td class="px-6 py-4 text-center text-sm text-gray-700">${item.daysOld}</td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="${agingBadgeClass} rounded-full px-2 py-0.5 text-xs font-semibold min-w-[60px] inline-block">
+                                ${item.agingCategory}
+                            </span>
+                        </td>
+                    </tr>
                 `;
-                detailsTableEl.innerHTML = tableHTML;
-            }
+            });
+            
+            tbody.innerHTML = html;
         }
         
         // Render Top Relationships Expanded Analysis Views
@@ -21683,14 +22079,103 @@
                     </div>
                 </div>
                 
-                <!-- Deals Close Details Table -->
-                <div class="rounded-2xl border border-gray-200 bg-white">
-                    <div class="px-6 py-4">
-                        <h3 class="text-lg font-semibold text-gray-800">Deals Pending Closure Details (Top 10)</h3>
-                        <p class="text-xs text-gray-500 mt-1">Largest pending deals by TFA</p>
+                <!-- Deals Pending Closure Details Table with Filters and Pagination -->
+                <div class="rounded-2xl border border-gray-200 bg-white" id="pipelineDetailsContainer">
+                    <!-- Header with Filters -->
+                    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">Deals Pending Closure Details</h3>
+                            <p class="text-xs text-gray-500 mt-1">All pending deals awaiting closure</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <!-- Search Input -->
+                            <div class="relative">
+                                <input 
+                                    type="text" 
+                                    id="pipelineTableSearch" 
+                                    placeholder="Search..." 
+                                    onkeyup="updatePipelineTableSearch(this.value)"
+                                    class="w-48 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                />
+                                <svg class="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                            
+                            <!-- Clear All Filters Button -->
+                            <button 
+                                id="btnClearAllPipelineFilters"
+                                onclick="clearAllPipelineFilters()"
+                                style="display: none;"
+                                class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Clear Filters
+                            </button>
+                            
+                            <!-- Export Button -->
+                            <button 
+                                id="btnExportPipelineTable"
+                                onclick="exportPipelineTableToCSV()"
+                                class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 border border-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Export
+                            </button>
+                        </div>
                     </div>
-                    <div class="custom-scrollbar overflow-x-auto">
-                        <div id="pipelineDetailsTable"></div>
+                    
+                    <!-- Table -->
+                    <div class="custom-scrollbar overflow-x-auto" style="min-height: 500px;">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr class="bg-gray-50" id="pipelineTableHeader">
+                                    <!-- Headers will be dynamically rendered -->
+                                </tr>
+                            </thead>
+                            <tbody id="pipelineTableBody" class="divide-y divide-gray-200">
+                                <tr><td colspan="9" class="px-6 py-8 text-center text-sm text-gray-500">Loading data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Footer with Pagination -->
+                    <div class="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
+                        <div class="flex items-center gap-4">
+                            <div class="text-sm text-gray-700" id="pipelineTableInfo">
+                                Showing <span class="font-medium" id="pipelineTableStart">0</span> to <span class="font-medium" id="pipelineTableEnd">0</span> of <span class="font-medium" id="pipelineTableTotal">0</span> items
+                            </div>
+                            <select 
+                                id="pipelineTablePerPage" 
+                                onchange="updatePipelineTablePerPage(parseInt(this.value))"
+                                class="text-sm border border-gray-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="10" selected>10 per page</option>
+                                <option value="20">20 per page</option>
+                                <option value="50">50 per page</option>
+                                <option value="100">100 per page</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button 
+                                id="pipelineTablePrevBtn"
+                                onclick="changePipelineTablePage('prev')" 
+                                disabled
+                                class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                Previous
+                            </button>
+                            <div class="text-sm text-gray-700">
+                                Page <span class="font-medium" id="pipelineTableCurrentPage">1</span> of <span class="font-medium" id="pipelineTableTotalPages">1</span>
+                            </div>
+                            <button 
+                                id="pipelineTableNextBtn"
+                                onclick="changePipelineTablePage('next')" 
+                                disabled
+                                class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                Next
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;

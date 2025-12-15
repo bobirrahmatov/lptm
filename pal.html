@@ -1067,16 +1067,16 @@
                                 Top Relationships
                             </h3>
                             <p class="mt-1 text-gray-500 text-sm" id="topRelationshipsSubtitle">
-                                Top relationships by exposure type - Direct OS
+                                Top relationships by exposure type - OSUC
                             </p>
                     </div>
                         <!-- Filters - Fixed Position at Top Right -->
                         <div class="absolute right-0 top-0 flex items-center gap-2">
                             <!-- Exposure Type Dropdown -->
-                            <div x-data="{openExposure: false, exposureType: 'direct', exposureLabels: {direct: 'Direct', contingent: 'Contingent', pse: 'PSE', osuc: 'OSUC', unused: 'Undrawn', tfa: 'TFA'}}" class="relative">
+                            <div x-data="{openExposure: false, exposureType: 'osuc', exposureLabels: {direct: 'Direct', contingent: 'Contingent', pse: 'PSE', osuc: 'OSUC', unused: 'Undrawn', tfa: 'TFA'}}" class="relative">
                                 <button @click="openExposure = !openExposure"
                                     class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <span x-text="exposureLabels[exposureType]">Direct</span>
+                                    <span x-text="exposureLabels[exposureType]">OSUC</span>
                                     <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                     </svg>
@@ -3044,7 +3044,6 @@
             'Agency Clearing',
             'SAFE - Financing',
             'B&I Short Market Values',
-            'Term Loan',
             'Residential First Mortgage-Standard',
             'B&I Non-Purpose Loan',
             'Unallocated'
@@ -3500,7 +3499,7 @@
         let selectedPSE = "all"; // all, PSE, non-PSE
         let selectedStatus = "all"; // all, CM, DM
         let selectedCommitmentStatus = "all"; // all, Committed, Uncommitted
-        let selectedAmountType = "direct"; // direct, contingent, pse, osuc, tfa (for metrics)
+        let selectedAmountType = "osuc"; // direct, contingent, pse, osuc, tfa (for metrics)
         let selectedPeriod = "current"; // current, previous (for New Facilities Approved  chart)
         let selectedSearchTerm = ""; // Global search filter
         
@@ -6425,7 +6424,7 @@
             selectedPSE = "all";
             selectedStatus = "all";
             selectedCommitmentStatus = "all";
-            selectedAmountType = "direct";
+            selectedAmountType = "osuc";
             selectedSearchTerm = ""; // Reset search
             
             // Clear search input
@@ -6449,7 +6448,13 @@
                 updateCommitmentButtonsUI("all");
             
                 // Reset amount type buttons UI - UI only
-                updateAmountTypeButtonsUI("direct");
+                updateAmountTypeButtonsUI("osuc");
+            
+                // Update Alpine.js dropdown state for exposure type
+                const exposureDropdown = document.querySelector('[x-data*="openExposure"]');
+                if (exposureDropdown && exposureDropdown.__x) {
+                    exposureDropdown.__x.$data.exposureType = 'osuc';
+                }
             
             // Reset search
             const searchInput = document.getElementById("searchInput");
@@ -19695,17 +19700,11 @@
             const avgDealSize = totalFacilities > 0 ? totalTFA / totalFacilities : 0;
             document.getElementById('pipelineAvgDealSize').textContent = formatCurrency(avgDealSize);
             
-            // 1. Regional Distribution - Donut Chart (matching Product Program Distribution style)
-            const regionalChartEl = document.getElementById('pipelineRegionalChart');
-            const regionalListEl = document.getElementById('pipelineRegionalList');
-            if (regionalChartEl && regional) {
-                // Filter regions with data and sort by count
-                const regionEntries = [
-                    { name: 'NAM', count: regional.NAM ? regional.NAM.facilities : 0 },
-                    { name: 'LATAM', count: regional.LATAM ? regional.LATAM.facilities : 0 }
-                ].filter(r => r.count > 0).sort((a, b) => b.count - a.count);
-                
-                const totalCount = regionEntries.reduce((sum, r) => sum + r.count, 0);
+            // 1. Product Program Distribution by Count - Donut Chart (matching Product Program Distribution style)
+            const productCountChartEl = document.getElementById('pipelineRegionalChart');
+            const productCountListEl = document.getElementById('pipelineRegionalList');
+            if (productCountChartEl && topProducts && topProducts.length > 0) {
+                const totalCount = topProducts.reduce((sum, p) => sum + p.count, 0);
                 const colors = [
                     "#3641f5",  // Primary blue
                     "#7592ff",  // Light blue
@@ -19719,10 +19718,10 @@
                     "#06b6d4"   // Cyan
                 ];
                 
-                const regionalDonutOptions = {
-                    series: regionEntries.map(r => r.count),
-                    colors: colors.slice(0, regionEntries.length),
-                    labels: regionEntries.map(r => r.name),
+                const productCountDonutOptions = {
+                    series: topProducts.map(p => p.count),
+                    colors: colors.slice(0, topProducts.length),
+                    labels: topProducts.map(p => p.name),
                     chart: {
                         fontFamily: "Outfit, sans-serif",
                         type: "donut",
@@ -19784,19 +19783,19 @@
                     },
                 };
                 
-                regionalChartEl.innerHTML = '';
-                const regionalChart = new ApexCharts(regionalChartEl, regionalDonutOptions);
-                regionalChart.render();
+                productCountChartEl.innerHTML = '';
+                const productCountChart = new ApexCharts(productCountChartEl, productCountDonutOptions);
+                productCountChart.render();
                 
                 // Populate legend list
-                if (regionalListEl) {
-                    regionalListEl.innerHTML = regionEntries.map((region, index) => {
+                if (productCountListEl) {
+                    productCountListEl.innerHTML = topProducts.map((product, index) => {
                         const color = colors[index % colors.length];
                         return `
                             <div class="flex items-center gap-3 py-2">
                                 <div class="w-4 h-4 rounded-sm flex-shrink-0" style="background-color: ${color};"></div>
-                                <p class="text-sm font-medium text-gray-800 flex-1">${region.name}</p>
-                                <p class="text-sm font-semibold text-gray-900">${region.count}</p>
+                                <p class="text-sm font-medium text-gray-800 flex-1">${product.name}</p>
+                                <p class="text-sm font-semibold text-gray-900">${product.count}</p>
                             </div>
                         `;
                     }).join('');
@@ -22163,11 +22162,11 @@
                 
                 <!-- Analysis Row -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <!-- Regional Distribution - Donut Chart with Legends -->
+                    <!-- Product Program Distribution by Count - Donut Chart with Legends -->
                     <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-base font-semibold text-gray-900">Regional Distribution</h3>
-                            <p class="text-xs text-gray-500 mt-1">Deals by region with count</p>
+                            <h3 class="text-base font-semibold text-gray-900">Product Program Distribution</h3>
+                            <p class="text-xs text-gray-500 mt-1">Deals by product program with count</p>
                         </div>
                         <div class="p-6 flex items-center justify-center" style="min-height: 400px;">
                             <div class="flex flex-row items-center justify-center gap-8">
@@ -22190,7 +22189,7 @@
                     <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
                             <h3 class="text-base font-semibold text-gray-900">Product Program Distribution</h3>
-                            <p class="text-xs text-gray-500 mt-1">Deals by product with count and TFA</p>
+                            <p class="text-xs text-gray-500 mt-1">Distribution of facility amounts by product</p>
                         </div>
                         <div class="p-6 flex items-center justify-center" style="min-height: 400px;">
                             <div class="flex flex-row items-center justify-center gap-8">

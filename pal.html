@@ -1664,8 +1664,22 @@
                                     </div>
                                 </div>
 
-                                <!-- Show no data message when not loading but no data -->
-                                <div x-show="!isLoading && data.length === 0" class="flex items-center justify-center h-full">
+                                <!-- Show coming soon message when comingSoon flag is true -->
+                                <div x-show="!isLoading && comingSoon" class="flex items-center justify-center h-full">
+                                    <div class="text-center py-12">
+                                        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-blue-50 mb-4">
+                                            <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                        </div>
+                                        <h3 class="text-2xl font-bold text-gray-900 mb-2">Coming Soon</h3>
+                                        <p class="text-gray-500 mb-1" x-text="comingSoonMessage"></p>
+                                        <p class="text-sm text-gray-400">We're working on bringing you detailed data views</p>
+                                    </div>
+                                </div>
+
+                                <!-- Show no data message when not loading but no data and not coming soon -->
+                                <div x-show="!isLoading && !comingSoon && data.length === 0" class="flex items-center justify-center h-full">
                                     <div class="text-center py-12">
                                         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
@@ -1674,12 +1688,17 @@
                                     </div>
                                 </div>
 
-                                <!-- Show datatable when data exists and not loading -->
-                                <div x-show="!isLoading && data.length > 0" class="h-full flex flex-col overflow-hidden">
+                                <!-- Show datatable when data exists and not loading and not coming soon -->
+                                <div x-show="!isLoading && !comingSoon && data.length > 0" class="h-full flex flex-col overflow-hidden">
                                     <div class="max-w-full overflow-x-auto overflow-y-auto flex-1">
-                                        <div class="min-w-[1102px]">
+                                        <div class="min-w-[1172px]">
                                             <!-- table header start -->
                                             <div class="flex bg-gray-50 sticky top-0 z-10">
+                                                <!-- Row Number Header -->
+                                                <div class="flex items-center justify-center border-r border-b border-gray-300 px-3 py-3 min-w-[70px] w-[70px] flex-shrink-0 bg-gray-50">
+                                                    <p class="text-theme-xs font-semibold text-gray-700">#</p>
+                                                </div>
+                                                
                                                 <template x-for="(column, index) in columns" :key="column">
                                                     <div class="flex items-center border-r border-b border-gray-300 px-4 py-3 min-w-[180px] w-[180px] flex-shrink-0 bg-gray-50" 
                                                          :class="index === columns.length - 1 ? 'border-r-0' : ''"
@@ -1745,15 +1764,37 @@
                                                 <template x-for="(item, rowIndex) in paginatedData" :key="rowIndex">
                                                     <!-- table item -->
                                                     <div class="flex hover:bg-gray-50">
+                                                        <!-- Row Number Cell -->
+                                                        <div class="flex items-center justify-center border-r border-b border-gray-300 px-3 py-[17.5px] min-w-[70px] w-[70px] flex-shrink-0">
+                                                            <p class="text-theme-sm font-medium text-gray-500" x-text="((currentPage - 1) * perPage) + rowIndex + 1"></p>
+                                                        </div>
+                                                        
                                                         <template x-for="(column, colIndex) in columns" :key="column">
                                                             <div class="flex items-center border-r border-b border-gray-300 px-4 py-[17.5px] min-w-[180px] w-[180px] flex-shrink-0"
                                                                  :class="colIndex === columns.length - 1 ? 'border-r-0' : ''">
-                                                                <p
-                                                                    :class="colIndex === 0 ? 'block text-theme-sm font-medium text-gray-800' : 'text-theme-sm text-gray-700'"
-                                                                    class="truncate w-full"
-                                                                    :title="String(item[column])"
-                                                                    x-text="item[column]"
-                                                                ></p>
+                                                                <!-- Region column with colored badge -->
+                                                                <template x-if="column === 'Region'">
+                                                                    <span 
+                                                                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                                                                        :class="{
+                                                                            'bg-blue-50 text-blue-600': item[column] === 'APAC',
+                                                                            'bg-green-50 text-green-600': item[column] === 'EMEA',
+                                                                            'bg-orange-50 text-orange-600': item[column] === 'NAM',
+                                                                            'bg-purple-50 text-purple-600': item[column] === 'LATAM',
+                                                                            'bg-gray-50 text-gray-600': !['APAC', 'EMEA', 'NAM', 'LATAM'].includes(item[column])
+                                                                        }"
+                                                                        x-text="item[column]"
+                                                                    ></span>
+                                                                </template>
+                                                                <!-- All other columns -->
+                                                                <template x-if="column !== 'Region'">
+                                                                    <p
+                                                                        :class="colIndex === 0 ? 'block text-theme-sm font-medium text-gray-800' : 'text-theme-sm text-gray-700'"
+                                                                        class="truncate w-full"
+                                                                        :title="String(item[column])"
+                                                                        x-text="item[column]"
+                                                                    ></p>
+                                                                </template>
                                                             </div>
                                                         </template>
                                                     </div>
@@ -2993,7 +3034,7 @@
 
         // ===== DUMMY DATA FOR TESTING =====
         // Uncomment this section to test with dummy data without loading from Confluence
-        const ENABLE_DUMMY_DATA = true; // Set to false to use real data from Confluence
+        const ENABLE_DUMMY_DATA = false; // Set to false to use real data from Confluence
         
         if (ENABLE_DUMMY_DATA) {
             // Generate comprehensive dummy data for testing
@@ -9836,6 +9877,12 @@
                 if (chartElement) {
                     chartElement.innerHTML = generateNoDataMessage('New Facilities Approved');
                 }
+                
+                // Clear the legend when there's no data
+                const legendElement = document.getElementById("creditClassificationLegend");
+                if (legendElement) {
+                    legendElement.innerHTML = "";
+                }
                 return;
             }
             
@@ -9856,6 +9903,12 @@
                 const chartElement = document.querySelector("#creditClassificationChart");
                 if (chartElement) {
                     chartElement.innerHTML = generateNoDataMessage('New Facilities Approved');
+                }
+                
+                // Clear the legend when there's no data
+                const legendElement = document.getElementById("creditClassificationLegend");
+                if (legendElement) {
+                    legendElement.innerHTML = "";
                 }
                 return;
             }
@@ -10159,6 +10212,12 @@
             if (typeof ApexCharts === "undefined") {
                 console.error("ApexCharts library not loaded");
                 chartElement.innerHTML = generateNoDataMessage('New Facilities Approved');
+                
+                // Clear the legend when there's no data
+                const legendElement = document.getElementById("creditClassificationLegend");
+                if (legendElement) {
+                    legendElement.innerHTML = "";
+                }
                 return;
             }
             
@@ -10205,6 +10264,12 @@
                     error
                 );
                 chartElement.innerHTML = generateNoDataMessage('New Facilities Approved');
+                
+                // Clear the legend when there's an error
+                const legendElement = document.getElementById("creditClassificationLegend");
+                if (legendElement) {
+                    legendElement.innerHTML = "";
+                }
             }
         }
 
@@ -10223,6 +10288,12 @@
                 const chartElement = document.querySelector("#creditClassificationChart");
                 if (chartElement) {
                     chartElement.innerHTML = generateNoDataMessage('New Facilities Approved');
+                }
+                
+                // Clear the legend when there's no data
+                const legendElement = document.getElementById("creditClassificationLegend");
+                if (legendElement) {
+                    legendElement.innerHTML = "";
                 }
                 return;
             }
@@ -10246,6 +10317,12 @@
                 );
                 if (chartElement) {
                     chartElement.innerHTML = generateNoDataMessage('New Facilities Approved');
+                }
+                
+                // Clear the legend when there's no data
+                const legendElement = document.getElementById("creditClassificationLegend");
+                if (legendElement) {
+                    legendElement.innerHTML = "";
                 }
                 return;
             }
@@ -10555,6 +10632,12 @@
             if (typeof ApexCharts === "undefined") {
                 console.error("ApexCharts library not loaded");
                 chartElement.innerHTML = generateNoDataMessage('New Facilities Approved');
+                
+                // Clear the legend when there's no data
+                const legendElement = document.getElementById("creditClassificationLegend");
+                if (legendElement) {
+                    legendElement.innerHTML = "";
+                }
                 return;
             }
             
@@ -10598,6 +10681,12 @@
                     error
                 );
                 chartElement.innerHTML = generateNoDataMessage('New Facilities Approved');
+                
+                // Clear the legend when there's an error
+                const legendElement = document.getElementById("creditClassificationLegend");
+                if (legendElement) {
+                    legendElement.innerHTML = "";
+                }
             }
         }
 
@@ -11530,6 +11619,16 @@
                 console.error('Expand modal element not found!');
                 return;
             }
+            
+            // Reset datatable state to clean slate
+            window.datatableState.data = [];
+            window.datatableState.isLoading = true;
+            window.datatableState.comingSoon = false;
+            window.datatableState.comingSoonMessage = '';
+            window.datatableState.currentPage = 1;
+            window.datatableState.search = '';
+            window.datatableState.clearFilters = true;
+            window.datatableState.updateTrigger++;
 
             // Get details for this chart type or use default
             let details = expandModalDetails[chartType] || {
@@ -11640,6 +11739,8 @@
             totalPages: 1,
             nextPage: false,
             prevPage: false,
+            comingSoon: false, // Flag for "Coming Soon" message
+            comingSoonMessage: '', // Custom message for "Coming Soon"
             updateTrigger: 0 // This will be incremented to force Alpine updates
         };
         
@@ -11818,6 +11919,8 @@
                 perPage: 10,
                 columnFilters: {},
                 updateTrigger: 0, // Local copy to watch
+                comingSoon: false, // Coming soon flag
+                comingSoonMessage: '', // Coming soon message
                 
                 // Reactive properties that will update when updateTrigger changes
                 data: [],
@@ -11868,6 +11971,8 @@
                     this.data = [...(window.datatableState.data || [])];
                     this.isLoading = window.datatableState.isLoading;
                     this.perPage = window.datatableState.perPage || 10;
+                    this.comingSoon = window.datatableState.comingSoon || false;
+                    this.comingSoonMessage = window.datatableState.comingSoonMessage || '';
                     
                     // Sync search value
                     if (window.datatableState.search !== undefined) {
@@ -12105,6 +12210,8 @@
                 // Update global state to show no data
                 window.datatableState.data = [];
                 window.datatableState.isLoading = false;
+                window.datatableState.comingSoon = false; // Reset coming soon flag
+                window.datatableState.comingSoonMessage = '';
                 window.datatableState.updateTrigger++;
                 return;
             }
@@ -12115,6 +12222,8 @@
             
             window.datatableState.data = fullData;
             window.datatableState.isLoading = false;
+            window.datatableState.comingSoon = false; // Reset coming soon flag
+            window.datatableState.comingSoonMessage = '';
             window.datatableState.updateTrigger++;
             
             console.log('✅ datatableState updated. Alpine.js will reactively update the table. Trigger:', window.datatableState.updateTrigger);
@@ -12171,7 +12280,32 @@
                 // Initialize the data table with current chart data
                 console.log('📊 Data tab activated, initializing datatable for:', currentExpandType);
                 
-                // Check if there's no data for Top Relationships or ROTCE (based on selected exposure)
+                // Check for "Coming Soon" chart types - use datatableState to show message within Alpine component
+                if (currentExpandType === 'facilities') {
+                    console.log('⚠️ Facilities - showing coming soon message in Data tab');
+                    // Set state to show coming soon message within Alpine component
+                    window.datatableState.data = [];
+                    window.datatableState.isLoading = false;
+                    window.datatableState.comingSoon = true;
+                    window.datatableState.comingSoonMessage = 'Facilities data table is under development';
+                    window.datatableState.updateTrigger++;
+                    console.log('✅ Switched to Data tab (coming soon)');
+                    return;
+                }
+                
+                if (currentExpandType === 'relationships') {
+                    console.log('⚠️ Relationships - showing coming soon message in Data tab');
+                    // Set state to show coming soon message within Alpine component
+                    window.datatableState.data = [];
+                    window.datatableState.isLoading = false;
+                    window.datatableState.comingSoon = true;
+                    window.datatableState.comingSoonMessage = 'Relationships data table is under development';
+                    window.datatableState.updateTrigger++;
+                    console.log('✅ Switched to Data tab (coming soon)');
+                    return;
+                }
+                
+                // Check if there's no data for any chart type (based on hasData flag)
                 if (currentExpandType === 'topRelationships' && window.topRelationshipsExpandedData && !window.topRelationshipsExpandedData.hasData) {
                     console.log('⚠️ No data for Top Relationships - showing no data message in Data tab');
                     dataContent.innerHTML = generateNoDataMessage('Top Relationships');
@@ -12182,6 +12316,41 @@
                 if (currentExpandType === 'rotce' && window.rotceExpandedData && !window.rotceExpandedData.hasData) {
                     console.log('⚠️ No data for ROTCE - showing no data message in Data tab');
                     dataContent.innerHTML = generateNoDataMessage('ROTCE Performance');
+                    console.log('✅ Switched to Data tab (no data)');
+                    return;
+                }
+                
+                if (currentExpandType === 'expiring' && window.expiringData && window.expiringData.hasData === false) {
+                    console.log('⚠️ No data for CAs & Facilities Expiring - showing no data message in Data tab');
+                    dataContent.innerHTML = generateNoDataMessage('CAs & Facilities Expiring');
+                    console.log('✅ Switched to Data tab (no data)');
+                    return;
+                }
+                
+                if (currentExpandType === 'newFacilities' && window.newFacilitiesExpandedData && window.newFacilitiesExpandedData.hasData === false) {
+                    console.log('⚠️ No data for New Facilities Approved - showing no data message in Data tab');
+                    dataContent.innerHTML = generateNoDataMessage('New Facilities Approved');
+                    console.log('✅ Switched to Data tab (no data)');
+                    return;
+                }
+                
+                if (currentExpandType === 'newDealsYTD' && window.newDealsYTDExpandedData && window.newDealsYTDExpandedData.hasData === false) {
+                    console.log('⚠️ No data for New Deals YTD - showing no data message in Data tab');
+                    dataContent.innerHTML = generateNoDataMessage('New Deals YTD');
+                    console.log('✅ Switched to Data tab (no data)');
+                    return;
+                }
+                
+                if (currentExpandType === 'newDealsMTD' && window.newDealsMTDExpandedData && window.newDealsMTDExpandedData.hasData === false) {
+                    console.log('⚠️ No data for New Deals MTD - showing no data message in Data tab');
+                    dataContent.innerHTML = generateNoDataMessage('New Deals MTD');
+                    console.log('✅ Switched to Data tab (no data)');
+                    return;
+                }
+                
+                if (currentExpandType === 'pipeline' && window.pipelineExpandedData && window.pipelineExpandedData.hasData === false) {
+                    console.log('⚠️ No data for Pipeline - showing no data message in Data tab');
+                    dataContent.innerHTML = generateNoDataMessage('Deals Pending Closure');
                     console.log('✅ Switched to Data tab (no data)');
                     return;
                 }
@@ -14586,7 +14755,13 @@
                 .sort((a, b) => b.tfa - a.tfa)
                 .slice(0, 10);
             
+            // Check if there's any data
+            const totalCAs = caData.expiring.count + caData.expired.count;
+            const totalFacilities = facilityData.expiring.count + facilityData.expired.count;
+            const hasData = totalCAs > 0 || totalFacilities > 0;
+            
             const expiringData = {
+                hasData: hasData,
                 filterState,
                 caData: {
                     expiring: { count: caData.expiring.count, tfa: caData.expiring.tfa, relationships: Array.from(caData.expiring.relationships) },
@@ -15466,10 +15641,10 @@
             
             // Regional data - initialize all regions
             const regionalData = {
-                APAC: {count: 0, direct: 0, avgRotce: []},
-                EMEA: {count: 0, direct: 0, avgRotce: []},
-                NAM: {count: 0, direct: 0, avgRotce: []},
-                LATAM: {count: 0, direct: 0, avgRotce: []}
+                APAC: {count: 0, direct: 0, exposure: 0, avgRotce: []},
+                EMEA: {count: 0, direct: 0, exposure: 0, avgRotce: []},
+                NAM: {count: 0, direct: 0, exposure: 0, avgRotce: []},
+                LATAM: {count: 0, direct: 0, exposure: 0, avgRotce: []}
             };
             
             topRelationships.forEach(rel => {
@@ -15478,6 +15653,18 @@
                     regionalData[region].count++;
                     regionalData[region].direct += rel.direct;
                     regionalData[region].avgRotce.push(rel.avgROTCE);
+                    
+                    // Add selected exposure type value
+                    switch(exposureType) {
+                        case "tfa": regionalData[region].exposure += rel.tfa; break;
+                        case "contingent": regionalData[region].exposure += rel.contingent; break;
+                        case "pse": regionalData[region].exposure += rel.pse; break;
+                        case "osuc": regionalData[region].exposure += rel.osuc; break;
+                        case "unused": regionalData[region].exposure += rel.unused; break;
+                        case "totalOS": regionalData[region].exposure += rel.totalOS; break;
+                        case "direct":
+                        default: regionalData[region].exposure += rel.direct; break;
+                    }
                 }
             });
             
@@ -15514,6 +15701,18 @@
                 }
             });
             
+            // Map exposure type to label
+            const exposureTypeLabels = {
+                "direct": "Direct OS",
+                "contingent": "Contingent OS",
+                "pse": "PSE OS",
+                "osuc": "OSUC",
+                "unused": "Unused Commitment",
+                "totalOS": "Total OS",
+                "tfa": "TFA"
+            };
+            const exposureLabel = exposureTypeLabels[exposureType] || "Direct OS";
+            
             // Store data for rendering
             window.rotceExpandedData = {
                 hasData: hasData,
@@ -15528,7 +15727,8 @@
                     acceptable: acceptable,
                     belowTarget: belowTarget
                 },
-                exposureType: exposureType
+                exposureType: exposureType,
+                exposureLabel: exposureLabel
             };
             
             // Directly render the views
@@ -16229,6 +16429,23 @@
         }
         
         function generateFacilitiesExpandedView(dataSource) {
+            return `
+                <div class="flex items-center justify-center min-h-[400px]">
+                    <div class="text-center">
+                        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-blue-50 mb-4">
+                            <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">Coming Soon</h3>
+                        <p class="text-gray-500 mb-1">Facilities expanded analytics are under development</p>
+                        <p class="text-sm text-gray-400">We're working on bringing you comprehensive insights and detailed charts</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function generateFacilitiesExpandedView_ORIGINAL(dataSource) {
             // Calculate facility metrics
             const totalFacilities = new Set(dataSource.map(row => row.Facility_ID)).size;
             const committedFacilities = dataSource.filter(row => 
@@ -16500,6 +16717,23 @@
         }
         
         function generateRelationshipsExpandedView(dataSource) {
+            return `
+                <div class="flex items-center justify-center min-h-[400px]">
+                    <div class="text-center">
+                        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-blue-50 mb-4">
+                            <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">Coming Soon</h3>
+                        <p class="text-gray-500 mb-1">Relationships expanded analytics are under development</p>
+                        <p class="text-sm text-gray-400">We're working on bringing you comprehensive insights and detailed charts</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function generateRelationshipsExpandedView_ORIGINAL(dataSource) {
             // Calculate relationship metrics using Relationship_ID for uniqueness
             const relationshipMap = {};
             
@@ -17257,6 +17491,16 @@
                 console.error('❌ No expiring data available');
                 return;
             }
+            
+            // If no data, replace ENTIRE modal content with no-data message
+            if (data.hasData === false) {
+                const insightsContent = document.getElementById('insightsContent');
+                if (insightsContent) {
+                    insightsContent.innerHTML = generateNoDataMessage('CAs & Facilities Expiring');
+                }
+                return; // Don't render anything else
+            }
+            
             if (typeof ApexCharts === 'undefined') {
                 console.error('❌ ApexCharts is not defined');
                 return;
@@ -19951,7 +20195,7 @@
         function renderROTCEExpandedViews() {
             if (!window.rotceExpandedData || typeof ApexCharts === 'undefined') return;
             
-            const { hasData, relationships, belowTargetRelationships, regional, portfolioAvg, topN, stats, exposureType } = window.rotceExpandedData;
+            const { hasData, relationships, belowTargetRelationships, regional, portfolioAvg, topN, stats, exposureType, exposureLabel } = window.rotceExpandedData;
             
             console.log('📊 Rendering ROTCE - Exposure:', exposureType, 'Has Data:', hasData);
             
@@ -19981,10 +20225,10 @@
             const regionalTableEl = document.getElementById('rotceRegionalTable');
             if (regionalTableEl && regional) {
                 const regionEntries = [
-                    { name: 'APAC', ...(regional.APAC || {count: 0, direct: 0, avgRotce: 0}) },
-                    { name: 'EMEA', ...(regional.EMEA || {count: 0, direct: 0, avgRotce: 0}) },
-                    { name: 'NAM', ...(regional.NAM || {count: 0, direct: 0, avgRotce: 0}) },
-                    { name: 'LATAM', ...(regional.LATAM || {count: 0, direct: 0, avgRotce: 0}) }
+                    { name: 'APAC', ...(regional.APAC || {count: 0, direct: 0, exposure: 0, avgRotce: 0}) },
+                    { name: 'EMEA', ...(regional.EMEA || {count: 0, direct: 0, exposure: 0, avgRotce: 0}) },
+                    { name: 'NAM', ...(regional.NAM || {count: 0, direct: 0, exposure: 0, avgRotce: 0}) },
+                    { name: 'LATAM', ...(regional.LATAM || {count: 0, direct: 0, exposure: 0, avgRotce: 0}) }
                 ].sort((a, b) => b.count - a.count);
                 
                 let tableHTML = `
@@ -19993,7 +20237,7 @@
                         <tr class="bg-gray-50">
                             <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Region</th>
                             <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Relationships</th>
-                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Direct OS</th>
+                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">${exposureLabel}</th>
                             <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Avg ROTCE</th>
                         </tr>
                     </thead>
@@ -20001,13 +20245,13 @@
                 `;
                 
                 let totalCount = 0;
-                let totalDirect = 0;
+                let totalExposure = 0;
                 let totalRotce = 0;
                 let regionsWithData = 0;
                 
                 regionEntries.forEach(region => {
                     totalCount += region.count;
-                    totalDirect += region.direct;
+                    totalExposure += region.exposure;
                     if (region.count > 0) {
                         totalRotce += region.avgRotce;
                         regionsWithData++;
@@ -20028,7 +20272,7 @@
                                 <span class="inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-medium ${regionBadgeColors[region.name]}">${region.name}</span>
                             </td>
                             <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-900">${region.count}</td>
-                            <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-900">${formatCurrency(region.direct)}</td>
+                            <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-900">${formatCurrency(region.exposure)}</td>
                             <td class="px-6 py-4 text-center text-sm whitespace-nowrap font-medium ${rotceColor}">${region.avgRotce > 0 ? region.avgRotce.toFixed(1) + '%' : '-'}</td>
                         </tr>
                     `;
@@ -20039,7 +20283,7 @@
                         <tr class="bg-gray-50 font-semibold border-t-2 border-gray-300">
                             <td class="px-6 py-4 text-center text-sm text-gray-900 rounded-bl-2xl">Total</td>
                             <td class="px-6 py-4 text-center text-sm text-gray-900">${totalCount}</td>
-                            <td class="px-6 py-4 text-center text-sm text-gray-900">${formatCurrency(totalDirect)}</td>
+                            <td class="px-6 py-4 text-center text-sm text-gray-900">${formatCurrency(totalExposure)}</td>
                             <td class="px-6 py-4 text-center text-sm font-medium rounded-br-2xl ${avgRotce >= 12 ? 'text-green-600' : avgRotce >= 8 ? 'text-amber-600' : 'text-red-600'}">${avgRotce.toFixed(1)}%</td>
                         </tr>
                     </tbody>

@@ -1608,8 +1608,8 @@
                         </div>
                     </div>
 
-                    <!-- Tabs Navigation - Hidden for Expiring modal (only Insights tab) -->
-                    <div class="border-b border-gray-200 px-6 flex-shrink-0" style="display: none;">
+                    <!-- Tabs Navigation -->
+                    <div class="border-b border-gray-200 px-6 flex-shrink-0">
                         <nav class="-mb-px flex space-x-2 overflow-x-auto">
                             <button
                                 id="insightsTab"
@@ -1619,15 +1619,6 @@
                                     <path fill-rule="evenodd" clip-rule="evenodd" d="M9.85954 4.0835C9.5834 4.0835 9.35954 4.30735 9.35954 4.5835V15.4161C9.35954 15.6922 9.5834 15.9161 9.85954 15.9161H10.1373C10.4135 15.9161 10.6373 15.6922 10.6373 15.4161V4.5835C10.6373 4.30735 10.4135 4.0835 10.1373 4.0835H9.85954ZM7.85954 4.5835C7.85954 3.47893 8.75497 2.5835 9.85954 2.5835H10.1373C11.2419 2.5835 12.1373 3.47893 12.1373 4.5835V15.4161C12.1373 16.5206 11.2419 17.4161 10.1373 17.4161H9.85954C8.75497 17.4161 7.85954 16.5206 7.85954 15.4161V4.5835ZM4.58203 8.9598C4.30589 8.9598 4.08203 9.18366 4.08203 9.4598V15.4168C4.08203 15.693 4.30589 15.9168 4.58203 15.9168H4.85981C5.13595 15.9168 5.35981 15.693 5.35981 15.4168V9.4598C5.35981 9.18366 5.13595 8.9598 4.85981 8.9598H4.58203ZM2.58203 9.4598C2.58203 8.35523 3.47746 7.4598 4.58203 7.4598H4.85981C5.96438 7.4598 6.85981 8.35523 6.85981 9.4598V15.4168C6.85981 16.5214 5.96438 17.4168 4.85981 17.4168H4.58203C3.47746 17.4168 2.58203 16.5214 2.58203 15.4168V9.4598ZM14.637 12.435C14.637 12.1589 14.8609 11.935 15.137 11.935H15.4148C15.691 11.935 15.9148 12.1589 15.9148 12.435V15.4168C15.9148 15.693 15.691 15.9168 15.4148 15.9168H15.137C14.8609 15.9168 14.637 15.693 14.637 15.4168V12.435ZM15.137 10.435C14.0325 10.435 13.137 11.3304 13.137 12.435V15.4168C13.137 16.5214 14.0325 17.4168 15.137 17.4168H15.4148C16.5194 17.4168 17.4148 16.5214 17.4148 15.4168V12.435C17.4148 11.3304 16.5194 10.435 15.4148 10.435H15.137Z" fill="currentColor"/>
                                 </svg>
                                 Insights
-                            </button>
-                            <button
-                                id="dataTab"
-                                onclick="switchExpandTab('data')"
-                                class="inline-flex items-center gap-2 border-b-2 px-2.5 py-3 text-sm font-medium transition-colors duration-200 ease-in-out bg-transparent text-gray-500 border-transparent hover:text-gray-700">
-                                <svg class="size-5" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M4.83203 2.5835C3.58939 2.5835 2.58203 3.59085 2.58203 4.83349V7.25015C2.58203 8.49279 3.58939 9.50015 4.83203 9.50015H7.2487C8.49134 9.50015 9.4987 8.49279 9.4987 7.25015V4.8335C9.4987 3.59086 8.49134 2.5835 7.2487 2.5835H4.83203ZM4.08203 4.83349C4.08203 4.41928 4.41782 4.0835 4.83203 4.0835H7.2487C7.66291 4.0835 7.9987 4.41928 7.9987 4.8335V7.25015C7.9987 7.66436 7.66291 8.00015 7.2487 8.00015H4.83203C4.41782 8.00015 4.08203 7.66436 4.08203 7.25015V4.83349ZM4.83203 10.5002C3.58939 10.5002 2.58203 11.5075 2.58203 12.7502V15.1668C2.58203 16.4095 3.58939 17.4168 4.83203 17.4168H7.2487C8.49134 17.4168 9.4987 16.4095 9.4987 15.1668V12.7502C9.4987 11.5075 8.49134 10.5002 7.2487 10.5002H4.83203ZM4.08203 12.7502C4.08203 12.336 4.41782 12.0002 4.83203 12.0002H7.2487C7.66291 12.0002 7.9987 12.336 7.9987 12.7502V15.1668C7.9987 15.5811 7.66291 15.9168 7.2487 15.9168H4.83203C4.41782 15.9168 4.08203 15.5811 4.08203 15.1668V12.7502ZM10.4987 4.83349C10.4987 3.59085 11.5061 2.5835 12.7487 2.5835H15.1654C16.408 2.5835 17.4154 3.59086 17.4154 4.8335V7.25015C17.4154 8.49279 16.408 9.50015 15.1654 9.50015H12.7487C11.5061 9.50015 10.4987 8.49279 10.4987 7.25015V4.83349ZM12.7487 4.0835C12.3345 4.0835 11.9987 4.41928 11.9987 4.83349V7.25015C11.9987 7.66436 12.3345 8.00015 12.7487 8.00015H15.1654C15.5796 8.00015 15.9154 7.66436 15.9154 7.25015V4.8335C15.9154 4.41928 15.5796 4.0835 15.1654 4.0835H12.7487ZM12.7487 10.5002C11.5061 10.5002 10.4987 11.5075 10.4987 12.7502V15.1668C10.4987 16.4095 11.5061 17.4168 12.7487 17.4168H15.1654C16.408 17.4168 17.4154 16.4095 17.4154 15.1668V12.7502C17.4154 11.5075 16.408 10.5002 15.1654 10.5002H12.7487ZM11.9987 12.7502C11.9987 12.336 12.3345 12.0002 12.7487 12.0002H15.1654C15.5796 12.0002 15.9154 12.336 15.9154 12.7502V15.1668C15.9154 15.5811 15.5796 15.9168 15.1654 15.9168H12.7487C12.3345 15.9168 11.9987 15.5811 11.9987 15.1668V12.7502Z" fill="currentColor"/>
-                                </svg>
-                                Data
                             </button>
                         </nav>
                     </div>
@@ -11660,33 +11651,7 @@
             modalSubtitle.textContent = details.subtitle;
             
             // Hide Data tab for global KPI charts (TFA, OSUC, Outstanding, Facilities, Relationships)
-            const globalKPITypes = ['tfa', 'osuc', 'outstanding', 'facilities', 'relationships'];
-            const expiringType = 'expiring';
-            const dataTabButton = document.getElementById('dataTab');
-            const tabsNav = document.querySelector('.border-b.border-gray-200.px-6.flex-shrink-0');
-            
-            // Hide entire tabs navigation for expiring modal
-            if (tabsNav) {
-                if (chartType === expiringType) {
-                    tabsNav.style.display = 'none';
-                    console.log('📊 Tabs navigation hidden for expiring modal');
-                } else {
-                    tabsNav.style.display = 'block';
-                    
-                    // Show/hide data tab for other modals
-                    if (dataTabButton) {
-                        if (globalKPITypes.includes(chartType)) {
-                            dataTabButton.style.display = 'none';
-                            console.log('📊 Data tab hidden for global KPI:', chartType);
-                        } else {
-                            dataTabButton.style.display = 'inline-flex';
-                            console.log('📊 Data tab visible for:', chartType);
-                        }
-                    }
-                }
-            }
-            
-            // Reset to insights tab
+            // Always show insights tab only
             switchExpandTab('insights');
 
             // Populate dynamic values based on chart type
@@ -12373,163 +12338,21 @@
         }
         
         
-        // Switch between tabs in expanded modal
+        // Switch to insights tab - simplified (no data tab anymore)
         function switchExpandTab(tabName) {
             console.log('🔄 switchExpandTab called with:', tabName);
             
-            // Prevent switching to Data tab for global KPI charts and expiring modal
-            const globalKPITypes = ['tfa', 'osuc', 'outstanding', 'facilities', 'relationships'];
-            const noDataTabTypes = [...globalKPITypes, 'expiring']; // expiring modal has no Data tab
-            
-            if (tabName === 'data' && noDataTabTypes.includes(currentExpandType)) {
-                console.log('⚠️ Data tab not available for:', currentExpandType);
-                return; // Don't allow switching to data tab
-            }
-            
+            // Only insights tab is available now
             const insightsTab = document.getElementById('insightsTab');
-            const dataTab = document.getElementById('dataTab');
             const insightsContent = document.getElementById('insightsContent');
-            const dataContent = document.getElementById('dataContent');
-            const modalTitleSection = document.getElementById('modalTitleSection');
-            const dataControls = document.getElementById('dataControls');
-            const dataTablePerPage = document.getElementById('dataTablePerPage');
             
-            // Define active and inactive classes
             const activeClass = 'inline-flex items-center gap-2 border-b-2 px-2.5 py-3 text-sm font-medium transition-colors duration-200 ease-in-out text-blue-600 border-blue-600';
-            const inactiveClass = 'inline-flex items-center gap-2 border-b-2 px-2.5 py-3 text-sm font-medium transition-colors duration-200 ease-in-out bg-transparent text-gray-500 border-transparent hover:text-gray-700';
             
-            if (tabName === 'insights') {
+            if (tabName === 'insights' && insightsTab && insightsContent) {
                 // Active insights tab
                 insightsTab.className = activeClass;
-                dataTab.className = inactiveClass;
                 insightsContent.classList.remove('hidden');
-                dataContent.classList.add('hidden');
-                // Show modal title, hide data controls
-                if (modalTitleSection) modalTitleSection.classList.remove('hidden');
-                if (dataControls) dataControls.classList.add('hidden');
-                // Hide per page selector
-                if (dataTablePerPage) dataTablePerPage.classList.add('hidden');
                 console.log('✅ Switched to Insights tab');
-            } else if (tabName === 'data') {
-                // Active data tab
-                insightsTab.className = inactiveClass;
-                dataTab.className = activeClass;
-                insightsContent.classList.add('hidden');
-                dataContent.classList.remove('hidden');
-                // Hide modal title, show data controls
-                if (modalTitleSection) modalTitleSection.classList.add('hidden');
-                if (dataControls) dataControls.classList.remove('hidden');
-                // Show per page selector
-                if (dataTablePerPage) dataTablePerPage.classList.remove('hidden');
-                // Update the data table title and subtitle
-                const chartName = document.getElementById('expandModalTitle')?.textContent;
-                const chartSubtitle = document.getElementById('expandModalSubtitle')?.textContent;
-                const dataTableTitle = document.getElementById('dataTableTitle');
-                const dataTableSubtitle = document.getElementById('dataTableSubtitle');
-                if (dataTableTitle && chartName) dataTableTitle.textContent = chartName;
-                if (dataTableSubtitle && chartSubtitle) dataTableSubtitle.textContent = chartSubtitle;
-                
-                // Show loading state temporarily
-                window.datatableState.isLoading = true;
-                window.datatableState.updateTrigger++;
-                
-                // Initialize the data table with current chart data
-                console.log('📊 Data tab activated, initializing datatable for:', currentExpandType);
-                
-                // Check for "Coming Soon" chart types - use datatableState to show message within Alpine component
-                if (currentExpandType === 'facilities') {
-                    console.log('⚠️ Facilities - showing coming soon message in Data tab');
-                    // Set state to show coming soon message within Alpine component
-                    window.datatableState.data = [];
-                    window.datatableState.isLoading = false;
-                    window.datatableState.comingSoon = true;
-                    window.datatableState.comingSoonMessage = 'Facilities data table is under development';
-                    window.datatableState.updateTrigger++;
-                    console.log('✅ Switched to Data tab (coming soon)');
-                    return;
-                }
-                
-                if (currentExpandType === 'relationships') {
-                    console.log('⚠️ Relationships - showing coming soon message in Data tab');
-                    // Set state to show coming soon message within Alpine component
-                    window.datatableState.data = [];
-                    window.datatableState.isLoading = false;
-                    window.datatableState.comingSoon = true;
-                    window.datatableState.comingSoonMessage = 'Relationships data table is under development';
-                    window.datatableState.updateTrigger++;
-                    console.log('✅ Switched to Data tab (coming soon)');
-                    return;
-                }
-                
-                // Check if there's no data for any chart type (based on hasData flag)
-                if (currentExpandType === 'topRelationships' && window.topRelationshipsExpandedData && !window.topRelationshipsExpandedData.hasData) {
-                    console.log('⚠️ No data for Top Relationships - showing no data message in Data tab');
-                    dataContent.innerHTML = generateNoDataMessage('Top Relationships');
-                    console.log('✅ Switched to Data tab (no data)');
-                    return;
-                }
-                
-                if (currentExpandType === 'rotce' && window.rotceExpandedData && !window.rotceExpandedData.hasData) {
-                    console.log('⚠️ No data for ROTCE - showing no data message in Data tab');
-                    dataContent.innerHTML = generateNoDataMessage('ROTCE Performance');
-                    console.log('✅ Switched to Data tab (no data)');
-                    return;
-                }
-                
-                if (currentExpandType === 'expiring' && window.expiringData && window.expiringData.hasData === false) {
-                    console.log('⚠️ No data for CAs & Facilities Expiring - showing no data message in Data tab');
-                    dataContent.innerHTML = generateNoDataMessage('CAs & Facilities Expiring');
-                    console.log('✅ Switched to Data tab (no data)');
-                    return;
-                }
-                
-                if (currentExpandType === 'newFacilities' && window.newFacilitiesExpandedData && window.newFacilitiesExpandedData.hasData === false) {
-                    console.log('⚠️ No data for New Facilities Approved - showing no data message in Data tab');
-                    dataContent.innerHTML = generateNoDataMessage('New Facilities Approved');
-                    console.log('✅ Switched to Data tab (no data)');
-                    return;
-                }
-                
-                if (currentExpandType === 'newDealsYTD' && window.newDealsYTDExpandedData && window.newDealsYTDExpandedData.hasData === false) {
-                    console.log('⚠️ No data for New Deals YTD - showing no data message in Data tab');
-                    dataContent.innerHTML = generateNoDataMessage('New Deals YTD');
-                    console.log('✅ Switched to Data tab (no data)');
-                    return;
-                }
-                
-                if (currentExpandType === 'newDealsMTD' && window.newDealsMTDExpandedData && window.newDealsMTDExpandedData.hasData === false) {
-                    console.log('⚠️ No data for New Deals MTD - showing no data message in Data tab');
-                    dataContent.innerHTML = generateNoDataMessage('New Deals MTD');
-                    console.log('✅ Switched to Data tab (no data)');
-                    return;
-                }
-                
-                if (currentExpandType === 'pipeline' && window.pipelineExpandedData && window.pipelineExpandedData.hasData === false) {
-                    console.log('⚠️ No data for Pipeline - showing no data message in Data tab');
-                    dataContent.innerHTML = generateNoDataMessage('Deals Pending Closure');
-                    console.log('✅ Switched to Data tab (no data)');
-                    return;
-                }
-                
-                // For Covenants and CCM, use their specific data sources (they have their own Region-only filtering)
-                // For other charts, use filteredData (respects all filters)
-                let dataSource;
-                if (currentExpandType === 'covenantMonitoring' || currentExpandType === 'covenantRegional') {
-                    dataSource = window.covenantsData || [];
-                    console.log('📊 Using covenant data source for table:', dataSource.length, 'records');
-                } else if (currentExpandType === 'ccmRegionalChart') {
-                    dataSource = window.ccmData || [];
-                    console.log('📊 Using CCM data source for table:', dataSource.length, 'records');
-                } else {
-                    // Use filteredData if it exists and has records, otherwise use portfolioData
-                    // This handles the case when page loads or filters are cleared
-                    dataSource = (filteredData && filteredData.length > 0) ? filteredData : portfolioData;
-                    console.log('📊 Using filtered portfolio data for table:', dataSource.length, 'records');
-                }
-                
-                initializeDataTable(currentExpandType, dataSource);
-                
-                console.log('✅ Switched to Data tab');
             }
         }
         
@@ -14786,7 +14609,7 @@
             const expiredProductData = {};
             const expiredDetailedData = []; // For backward compatibility
             const expiredFacilityDetails = []; // New: detailed facility data for table
-            const expiredAgingData = { '1-30': 0, '31-60': 0, '61-90': 0, '>90': 0 }; // Aging buckets
+            const expiredAgingData = { '0-30': 0, '31-60': 0, '61-90': 0, '>90': 0 }; // Aging buckets
             
             dataSource.forEach(row => {
                 const region = (row.Region || "Unknown").toUpperCase();
@@ -14889,8 +14712,8 @@
                     expiredProductData[product].tfa += amount;
                     
                     // Categorize by aging bucket
-                    if (daysPastDue >= 1 && daysPastDue <= 30) {
-                        expiredAgingData['1-30']++;
+                    if (daysPastDue >= 0 && daysPastDue <= 30) {
+                        expiredAgingData['0-30']++;
                     } else if (daysPastDue >= 31 && daysPastDue <= 60) {
                         expiredAgingData['31-60']++;
                     } else if (daysPastDue >= 61 && daysPastDue <= 90) {
@@ -17309,7 +17132,7 @@
             const expiredRegionalData = { NAM: 0, LATAM: 0, EMEA: 0, APAC: 0 };
             const expiredProductData = {};
             const expiredFacilityDetails = []; // New: detailed facility data for table
-            const expiredAgingData = { '1-30': 0, '31-60': 0, '61-90': 0, '>90': 0 }; // Aging buckets
+            const expiredAgingData = { '0-30': 0, '31-60': 0, '61-90': 0, '>90': 0 }; // Aging buckets
             
             filteredDataSource.forEach(row => {
                 const region = (row.Region || "Unknown").toUpperCase();
@@ -17418,8 +17241,8 @@
                     expiredProductData[product].tfa += amount;
                     
                     // Categorize by aging bucket
-                    if (daysPastDue >= 1 && daysPastDue <= 30) {
-                        expiredAgingData['1-30']++;
+                    if (daysPastDue >= 0 && daysPastDue <= 30) {
+                        expiredAgingData['0-30']++;
                     } else if (daysPastDue >= 31 && daysPastDue <= 60) {
                         expiredAgingData['31-60']++;
                     } else if (daysPastDue >= 61 && daysPastDue <= 90) {
@@ -17678,8 +17501,8 @@
             perPage: 10,
             allData: [],
             columnFilters: {},
-            sortColumn: '',
-            sortDirection: 'asc',
+            sortColumn: 'tfa', // Default sort by TFA
+            sortDirection: 'desc', // Descending for highest first
             openFilterColumn: null // Track which filter dropdown is open
         };
         
@@ -17858,18 +17681,19 @@
             
             const viewFilter = state.viewFilter;
             const categoryFilter = state.categoryFilter;
+            const agingLabel = categoryFilter === 'expiring' ? 'Coming Due' : 'Past Due';
             
             // Define CSV headers based on view and category
             let headers = [];
             if (viewFilter === 'cas') {
                 headers = ['Relationship', 'Region', 'Underwriter', 'Product Program', 
                           categoryFilter === 'expiring' ? 'CA Expiry Date' : 'Expired Date', 
-                          'Aging', 'TFA'];
+                          agingLabel, 'TFA'];
             } else {
                 headers = ['Relationship', 'Region', 'Underwriter', 'Product Program', 
                           'Facility Number', 
                           categoryFilter === 'expiring' ? 'Maturity Date' : 'Matured Date', 
-                          'Aging', 'TFA'];
+                          agingLabel, 'TFA'];
             }
             
             // Build CSV rows
@@ -17973,9 +17797,9 @@
             // 1. Expired Facilities by Aging - Bar Chart
             const agingChartEl = document.getElementById('expiredAgingChart');
             if (agingChartEl && expiredAgingData) {
-                const agingCategories = ['1-30 Days', '31-60 Days', '61-90 Days', '> 90 Days'];
+                const agingCategories = ['0-30 Days', '31-60 Days', '61-90 Days', '> 90 Days'];
                 const agingValues = [
-                    expiredAgingData['1-30'] || 0,
+                    expiredAgingData['0-30'] || 0,
                     expiredAgingData['31-60'] || 0,
                     expiredAgingData['61-90'] || 0,
                     expiredAgingData['>90'] || 0
@@ -21179,8 +21003,8 @@
                                 
                                 // Categorize by aging bucket
                                 let agingCategory = '';
-                                if (daysToExpiry >= 1 && daysToExpiry <= 30) {
-                                    agingCategory = '1-30 Days';
+                                if (daysToExpiry >= 0 && daysToExpiry <= 30) {
+                                    agingCategory = '0-30 Days';
                                 } else if (daysToExpiry >= 31 && daysToExpiry <= 60) {
                                     agingCategory = '31-60 Days';
                                 } else if (daysToExpiry >= 61 && daysToExpiry <= 90) {
@@ -21259,8 +21083,8 @@
                                 
                                 // Categorize by aging bucket
                                 let agingCategory = '';
-                                if (daysToExpiry >= 1 && daysToExpiry <= 30) {
-                                    agingCategory = '1-30 Days';
+                                if (daysToExpiry >= 0 && daysToExpiry <= 30) {
+                                    agingCategory = '0-30 Days';
                                 } else if (daysToExpiry >= 31 && daysToExpiry <= 60) {
                                     agingCategory = '31-60 Days';
                                 } else if (daysToExpiry >= 61 && daysToExpiry <= 90) {
@@ -21517,6 +21341,7 @@
             // Render table headers based on view and category
             let headers = '';
             const totalCols = viewFilter === 'cas' ? 7 : 8;
+            const agingLabel = categoryFilter === 'expiring' ? 'Coming Due' : 'Past Due';
             
             if (viewFilter === 'cas') {
                 if (categoryFilter === 'expiring') {
@@ -21525,7 +21350,7 @@
                               createHeaderCell('Underwriter', 'underwriter', 2, totalCols) +
                               createHeaderCell('Product Program', 'product', 3, totalCols) +
                               createHeaderCell('CA Expiry Date', 'expiryDate', 4, totalCols) +
-                              createHeaderCell('Aging', 'agingCategory', 5, totalCols) +
+                              createHeaderCell(agingLabel, 'agingCategory', 5, totalCols) +
                               createHeaderCell('TFA', 'tfa', 6, totalCols);
                 } else {
                     headers = createHeaderCell('Relationship', 'relationship', 0, totalCols) +
@@ -21533,7 +21358,7 @@
                               createHeaderCell('Underwriter', 'underwriter', 2, totalCols) +
                               createHeaderCell('Product Program', 'product', 3, totalCols) +
                               createHeaderCell('Expired Date', 'expiryDate', 4, totalCols) +
-                              createHeaderCell('Aging', 'agingCategory', 5, totalCols) +
+                              createHeaderCell(agingLabel, 'agingCategory', 5, totalCols) +
                               createHeaderCell('TFA', 'tfa', 6, totalCols);
                 }
             } else {
@@ -21544,7 +21369,7 @@
                               createHeaderCell('Product Program', 'product', 3, totalCols) +
                               createHeaderCell('Facility Number', 'facilityId', 4, totalCols) +
                               createHeaderCell('Maturity Date', 'maturityDate', 5, totalCols) +
-                              createHeaderCell('Aging', 'agingCategory', 6, totalCols) +
+                              createHeaderCell(agingLabel, 'agingCategory', 6, totalCols) +
                               createHeaderCell('TFA', 'tfa', 7, totalCols);
                 } else {
                     headers = createHeaderCell('Relationship', 'relationship', 0, totalCols) +
@@ -21553,7 +21378,7 @@
                               createHeaderCell('Product Program', 'product', 3, totalCols) +
                               createHeaderCell('Facility Number', 'facilityId', 4, totalCols) +
                               createHeaderCell('Matured Date', 'maturityDate', 5, totalCols) +
-                              createHeaderCell('Aging', 'agingCategory', 6, totalCols) +
+                              createHeaderCell(agingLabel, 'agingCategory', 6, totalCols) +
                               createHeaderCell('TFA', 'tfa', 7, totalCols);
                 }
             }
@@ -21581,7 +21406,7 @@
                 let agingBadgeClass = '';
                 const agingCat = item.agingCategory;
                 
-                if (agingCat === '1-30 Days') {
+                if (agingCat === '0-30 Days') {
                     agingBadgeClass = 'bg-blue-50 text-blue-700 border border-blue-200';
                 } else if (agingCat === '31-60 Days') {
                     agingBadgeClass = 'bg-orange-50 text-orange-700 border border-orange-200';

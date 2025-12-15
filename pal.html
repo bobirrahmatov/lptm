@@ -19695,67 +19695,112 @@
             const avgDealSize = totalFacilities > 0 ? totalTFA / totalFacilities : 0;
             document.getElementById('pipelineAvgDealSize').textContent = formatCurrency(avgDealSize);
             
-            // 1. Regional Distribution Table (matching CAs Expiring style)
-            const regionalTableEl = document.getElementById('pipelineRegionalTable');
-            if (regionalTableEl && regional) {
-                // Show all regions, even if they have 0 values
+            // 1. Regional Distribution - Donut Chart (matching Product Program Distribution style)
+            const regionalChartEl = document.getElementById('pipelineRegionalChart');
+            const regionalListEl = document.getElementById('pipelineRegionalList');
+            if (regionalChartEl && regional) {
+                // Filter regions with data and sort by count
                 const regionEntries = [
-                    { name: 'APAC', ...(regional.APAC || {count: 0, tfa: 0, facilities: 0}) },
-                    { name: 'EMEA', ...(regional.EMEA || {count: 0, tfa: 0, facilities: 0}) },
-                    { name: 'NAM', ...(regional.NAM || {count: 0, tfa: 0, facilities: 0}) },
-                    { name: 'LATAM', ...(regional.LATAM || {count: 0, tfa: 0, facilities: 0}) }
-                ].sort((a, b) => b.facilities - a.facilities);
+                    { name: 'NAM', count: regional.NAM ? regional.NAM.facilities : 0 },
+                    { name: 'LATAM', count: regional.LATAM ? regional.LATAM.facilities : 0 }
+                ].filter(r => r.count > 0).sort((a, b) => b.count - a.count);
                 
-                let tableHTML = `
-                <table class="min-w-full h-full">
-                    <thead>
-                        <tr class="bg-gray-50">
-                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Region</th>
-                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Pending Deals</th>
-                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Total TFA</th>
-                            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">Avg per Deal</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200">
-                `;
+                const totalCount = regionEntries.reduce((sum, r) => sum + r.count, 0);
+                const colors = [
+                    "#3641f5",  // Primary blue
+                    "#7592ff",  // Light blue
+                    "#dde9ff",  // Lighter blue
+                    "#ff6b6b",  // Red
+                    "#ffd93d",  // Yellow
+                    "#6bcf7f",  // Green
+                    "#c084fc",  // Purple
+                    "#14b8a6",  // Teal
+                    "#f97316",  // Orange
+                    "#06b6d4"   // Cyan
+                ];
                 
-                let totalCount = 0, totalTFASum = 0;
-                regionEntries.forEach(region => {
-                    totalCount += region.facilities;
-                    totalTFASum += region.tfa;
-                    const avg = region.facilities > 0 ? region.tfa / region.facilities : 0;
-                    
-                    const regionBadgeColors = {
-                        'APAC': 'bg-blue-50 text-blue-600',
-                        'EMEA': 'bg-green-50 text-green-600',
-                        'NAM': 'bg-orange-50 text-orange-600',
-                        'LATAM': 'bg-purple-50 text-purple-600'
-                    };
-                    
-                    tableHTML += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 text-center whitespace-nowrap">
-                                <span class="inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-medium ${regionBadgeColors[region.name]}">${region.name}</span>
-                            </td>
-                            <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-900">${region.facilities}</td>
-                            <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-900">${formatCurrency(region.tfa)}</td>
-                            <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-900">${formatCurrency(avg)}</td>
-                        </tr>
-                    `;
-                });
+                const regionalDonutOptions = {
+                    series: regionEntries.map(r => r.count),
+                    colors: colors.slice(0, regionEntries.length),
+                    labels: regionEntries.map(r => r.name),
+                    chart: {
+                        fontFamily: "Outfit, sans-serif",
+                        type: "donut",
+                        width: 300,
+                        height: 300,
+                    },
+                    stroke: {
+                        show: false,
+                    },
+                    plotOptions: {
+                        pie: {
+                            donut: {
+                                size: "65%",
+                                background: "transparent",
+                                labels: {
+                                    show: true,
+                                    name: {
+                                        show: true,
+                                        offsetY: -10,
+                                        color: "#1D2939",
+                                        fontSize: "14px",
+                                        fontWeight: "600",
+                                    },
+                                    value: {
+                                        show: true,
+                                        offsetY: 10,
+                                        color: "#667085",
+                                        fontSize: "16px",
+                                        fontWeight: "700",
+                                        formatter: (val) => val.toString(),
+                                    },
+                                    total: {
+                                        show: true,
+                                        label: "Total Deals",
+                                        color: "#111827",
+                                        fontSize: "16px",
+                                        fontWeight: "700",
+                                        formatter: () => totalCount.toString(),
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    dataLabels: {
+                        enabled: false,
+                    },
+                    legend: {
+                        show: false, // Hide built-in legend, using custom HTML legend
+                    },
+                    tooltip: {
+                        enabled: true,
+                        theme: "light",
+                        y: {
+                            formatter: function(val, opts) {
+                                const percentage = ((val / totalCount) * 100).toFixed(1);
+                                return val + ' deals (' + percentage + '%)';
+                            }
+                        }
+                    },
+                };
                 
-                const avgTotal = totalCount > 0 ? totalTFASum / totalCount : 0;
-                tableHTML += `
-                        <tr class="bg-gray-50 font-semibold border-t-2 border-gray-300">
-                            <td class="px-6 py-4 text-center text-sm text-gray-900 rounded-bl-xl">Total</td>
-                            <td class="px-6 py-4 text-center text-sm text-gray-900">${totalCount}</td>
-                            <td class="px-6 py-4 text-center text-sm text-gray-900">${formatCurrency(totalTFASum)}</td>
-                            <td class="px-6 py-4 text-center text-sm text-gray-900 rounded-br-xl">${formatCurrency(avgTotal)}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                `;
-                regionalTableEl.innerHTML = tableHTML;
+                regionalChartEl.innerHTML = '';
+                const regionalChart = new ApexCharts(regionalChartEl, regionalDonutOptions);
+                regionalChart.render();
+                
+                // Populate legend list
+                if (regionalListEl) {
+                    regionalListEl.innerHTML = regionEntries.map((region, index) => {
+                        const color = colors[index % colors.length];
+                        return `
+                            <div class="flex items-center gap-3 py-2">
+                                <div class="w-4 h-4 rounded-sm flex-shrink-0" style="background-color: ${color};"></div>
+                                <p class="text-sm font-medium text-gray-800 flex-1">${region.name}</p>
+                                <p class="text-sm font-semibold text-gray-900">${region.count}</p>
+                            </div>
+                        `;
+                    }).join('');
+                }
             }
             
             // 2. Product Program Distribution - Donut Chart (matching New Deals YTD Product Distribution style)
@@ -22118,14 +22163,26 @@
                 
                 <!-- Analysis Row -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <!-- Regional Distribution -->
-                    <div class="rounded-xl border border-gray-200 bg-white flex flex-col">
+                    <!-- Regional Distribution - Donut Chart with Legends -->
+                    <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
                             <h3 class="text-base font-semibold text-gray-900">Regional Distribution</h3>
-                            <p class="text-xs text-gray-500 mt-1">Breakdown by region for pending deals</p>
+                            <p class="text-xs text-gray-500 mt-1">Deals by region with count</p>
                         </div>
-                        <div class="flex-1 overflow-hidden">
-                            <div id="pipelineRegionalTable" class="h-full"></div>
+                        <div class="p-6 flex items-center justify-center" style="min-height: 400px;">
+                            <div class="flex flex-row items-center justify-center gap-8">
+                                <!-- Donut Chart -->
+                                <div class="flex-shrink-0">
+                                    <div id="pipelineRegionalChart"></div>
+                                </div>
+                                
+                                <!-- Legend / Details List - Right Side -->
+                                <div class="flex-1 max-w-md">
+                                    <div id="pipelineRegionalList" class="space-y-3">
+                                        <!-- Legend will be populated by JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     

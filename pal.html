@@ -14487,7 +14487,7 @@
         
         // Initialize Expiring Chart - processes data and renders
         function initializeExpiringChart(dataSource) {
-            const filterState = window.expiringFilterState || 'cas';
+            const filterState = window.expiringFilterState || 'facilities';
             
             // Get report date
             const reportDates = dataSource.map(row => parseDate(row.Report_Date)).filter(d => d);
@@ -17003,8 +17003,8 @@
             // The actual data processing and chart rendering is done by initializeExpiringChart()
             // which is called after this HTML is inserted into the DOM
             
-            // State for filter (default to 'cas', no 'both' option)
-            const filterState = window.expiringFilterState || 'cas';
+            // State for filter (default to 'facilities', no 'both' option)
+            const filterState = window.expiringFilterState || 'facilities';
             
             // Apply all active filters to dataSource (for KPI calculations only)
             const filteredDataSource = applyAllFilters(dataSource);
@@ -17331,8 +17331,8 @@
                             <h3 class="text-base font-semibold text-gray-900">Expired Facilities by Aging</h3>
                             <p class="text-xs text-gray-500 mt-1">Count of expired facilities by days past due</p>
                         </div>
-                        <div class="p-6">
-                            <div id="expiredAgingChart" style="min-height: 300px;"></div>
+                        <div class="p-6 flex items-center justify-center" style="min-height: 400px;">
+                            <div id="expiredAgingChart" class="w-full"></div>
                         </div>
                     </div>
                     
@@ -17388,11 +17388,11 @@
                                 <span class="text-xs font-medium text-gray-500 tracking-wider">View:</span>
                                 <div class="inline-flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
                                     <button id="btnExpiringCAs" onclick="updateExpiringFilter('cas', 'view')" 
-                                        class="min-w-[60px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white">
+                                        class="min-w-[60px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
                                         CAs
                                     </button>
                                     <button id="btnExpiringFacilities" onclick="updateExpiringFilter('facilities', 'view')" 
-                                        class="min-w-[90px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
+                                        class="min-w-[90px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white">
                                         Facilities
                                     </button>
                                 </div>
@@ -17403,11 +17403,11 @@
                                 <span class="text-xs font-medium text-gray-500 tracking-wider">Category:</span>
                                 <div class="inline-flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
                                     <button id="btnCategoryExpiring" onclick="updateExpiringFilter('expiring', 'category')" 
-                                        class="min-w-[70px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white">
+                                        class="min-w-[70px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
                                         Expiring
                                     </button>
                                     <button id="btnCategoryExpired" onclick="updateExpiringFilter('expired', 'category')" 
-                                        class="min-w-[70px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
+                                        class="min-w-[70px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white">
                                         Expired
                                     </button>
                                 </div>
@@ -17494,8 +17494,8 @@
         
         // Initialize expiring table state
         window.expiringTableState = {
-            viewFilter: 'cas', // 'cas' or 'facilities'
-            categoryFilter: 'expiring', // 'expiring' or 'expired'
+            viewFilter: 'facilities', // 'cas' or 'facilities' - default to facilities
+            categoryFilter: 'expired', // 'expiring' or 'expired' - default to expired
             searchQuery: '',
             currentPage: 1,
             perPage: 10,
@@ -17818,7 +17818,7 @@
                     }],
                     chart: {
                         type: 'bar',
-                        height: 300,
+                        height: 340,
                         fontFamily: 'Outfit, sans-serif',
                         toolbar: { show: false },
                         parentHeightOffset: 0
@@ -17879,7 +17879,7 @@
                         xaxis: { lines: { show: false } },
                         yaxis: { lines: { show: true } },
                         padding: {
-                            top: 4,
+                            top: 0,
                             right: 0,
                             bottom: 0,
                             left: 0
@@ -18739,8 +18739,7 @@
                         y: {
                             formatter: function(val, opts) {
                                 const percentage = ((val / totalTFA) * 100).toFixed(1);
-                                const count = topProducts[opts.seriesIndex].count;
-                                return formatCurrency(val) + ' (' + percentage + '%) - ' + count + ' deals';
+                                return formatCurrency(val) + ' (' + percentage + '%)';
                             }
                         }
                     },
@@ -18761,32 +18760,35 @@
                             <div class="flex items-center gap-3 py-2">
                                 <div class="w-4 h-4 rounded-sm flex-shrink-0" style="background-color: ${color};"></div>
                                 <p class="text-sm font-medium text-gray-800 flex-1">${product.name}</p>
-                                <p class="text-sm font-semibold text-gray-900">${formattedAmount} • ${product.count}</p>
+                                <p class="text-sm font-semibold text-gray-900">${formattedAmount}</p>
                             </div>
                         `;
                     }).join('');
                 }
             }
             
-            // 6. Credit Classification Distribution - Donut Chart (shows deal quality/risk profile)
-            const creditClassChartEl = document.getElementById('newDealsYTDCreditClassChart');
-            const creditClassListEl = document.getElementById('newDealsYTDDealCountList');
-            if (creditClassChartEl && creditClassification && creditClassification.length > 0) {
-                const totalDeals = creditClassification.reduce((sum, c) => sum + c.count, 0);
-                // Use risk-appropriate colors: green for PASS, yellow for SPECIAL MENTION, orange/red for worse
-                const creditClassColors = {
-                    'PASS': '#10b981',              // Green
-                    'SPECIAL MENTION': '#fbbf24',   // Yellow
-                    'SUBSTANDARD': '#f97316',       // Orange
-                    'DOUBTFUL': '#ef4444',          // Red
-                    'LOSS': '#dc2626'               // Dark Red
-                };
-                const colors = creditClassification.map(c => creditClassColors[c.name] || '#6b7280');
+            // 6. Product Distribution by Deals Count - Donut Chart
+            const productCountChartElYTD = document.getElementById('newDealsYTDProductCountChart');
+            const productCountListElYTD = document.getElementById('newDealsYTDProductCountList');
+            if (productCountChartElYTD && topProducts && topProducts.length > 0) {
+                const totalDealsForProductYTD = topProducts.reduce((sum, p) => sum + p.count, 0);
+                const colors = [
+                    "#3641f5",  // Primary blue
+                    "#7592ff",  // Light blue
+                    "#dde9ff",  // Lighter blue
+                    "#ff6b6b",  // Red
+                    "#ffd93d",  // Yellow
+                    "#6bcf7f",  // Green
+                    "#c084fc",  // Purple
+                    "#14b8a6",  // Teal
+                    "#f97316",  // Orange
+                    "#06b6d4"   // Cyan
+                ];
                 
-                const creditClassDonutOptions = {
-                    series: creditClassification.map(c => c.count),
+                const productCountDonutOptions = {
+                    series: topProducts.map(p => p.count),
                     colors: colors,
-                    labels: creditClassification.map(c => c.name),
+                    labels: topProducts.map(p => p.name),
                     chart: {
                         fontFamily: "Outfit, sans-serif",
                         type: "donut",
@@ -18824,7 +18826,7 @@
                                         color: "#111827",
                                         fontSize: "16px",
                                         fontWeight: "700",
-                                        formatter: () => totalDeals.toString(),
+                                        formatter: () => totalDealsForProductYTD.toString(),
                                     },
                                 },
                             },
@@ -18834,136 +18836,38 @@
                         enabled: false,
                     },
                     legend: {
-                        show: false, // Hide built-in legend, using custom HTML legend
+                        show: false,
                     },
                     tooltip: {
                         enabled: true,
                         theme: "light",
                         y: {
                             formatter: function(val, opts) {
-                                const percentage = ((val / totalDeals) * 100).toFixed(1);
-                                const tfa = creditClassification[opts.seriesIndex].tfa;
-                                return val + ' deals (' + percentage + '%) - ' + formatCurrency(tfa);
+                                const percentage = ((val / totalDealsForProductYTD) * 100).toFixed(1);
+                                return val + ' deals (' + percentage + '%)';
                             }
                         }
                     },
                 };
                 
-                creditClassChartEl.innerHTML = '';
-                const creditClassChart = new ApexCharts(creditClassChartEl, creditClassDonutOptions);
-                creditClassChart.render();
+                productCountChartElYTD.innerHTML = '';
+                const productCountChartYTD = new ApexCharts(productCountChartElYTD, productCountDonutOptions);
+                productCountChartYTD.render();
                 
                 // Populate legend list
-                if (creditClassListEl) {
-                    creditClassListEl.innerHTML = creditClassification.map((cls, index) => {
+                if (productCountListElYTD) {
+                    productCountListElYTD.innerHTML = topProducts.map((product, index) => {
                         const color = colors[index];
-                        const formattedTFA = cls.tfa >= 1000000000 
-                            ? `$${(cls.tfa / 1000000000).toFixed(2)}B`
-                            : `$${(cls.tfa / 1000000).toFixed(1)}M`;
+                        const percentage = ((product.count / totalDealsForProductYTD) * 100).toFixed(1);
                         return `
                             <div class="flex items-center gap-3 py-2">
                                 <div class="w-4 h-4 rounded-sm flex-shrink-0" style="background-color: ${color};"></div>
-                                <p class="text-sm font-medium text-gray-800 flex-1">${cls.name}</p>
-                                <p class="text-sm font-semibold text-gray-900">${formattedTFA} • ${cls.count}</p>
+                                <p class="text-sm font-medium text-gray-800 flex-1">${product.name}</p>
+                                <p class="text-sm font-semibold text-gray-900">${product.count} (${percentage}%)</p>
                             </div>
                         `;
                     }).join('');
                 }
-            }
-            const productCountChartEl = document.getElementById('newDealsYTDProductCountChart');
-            if (productCountChartEl && topProducts && topProducts.length > 0) {
-                const productCountChartHeight = Math.max(280, topProducts.length * 34);
-                const productCountOptions = {
-                    series: [{
-                        name: 'Deal Count',
-                        data: topProducts.map(p => p.count)
-                    }],
-                    chart: {
-                        type: 'bar',
-                        height: productCountChartHeight,
-                        fontFamily: 'Outfit, sans-serif',
-                        toolbar: { show: false },
-                        parentHeightOffset: 0
-                    },
-                    colors: ['#10b981'],
-                    plotOptions: {
-                        bar: {
-                            borderRadius: 6,
-                            horizontal: true,
-                            distributed: false,
-                            dataLabels: { position: 'right' },
-                            barHeight: '70%'
-                        }
-                    },
-                    dataLabels: {
-                        enabled: true,
-                        textAnchor: 'start',
-                        offsetX: 16,
-                        style: {
-                            fontSize: '11px',
-                            fontWeight: 500,
-                            colors: ['#374151']
-                        },
-                        background: {
-                            enabled: true,
-                            foreColor: '#374151',
-                            backgroundColor: '#F3F4F6',
-                            borderRadius: 12,
-                            padding: 8,
-                            opacity: 1,
-                            borderWidth: 0
-                        }
-                    },
-                    xaxis: {
-                        categories: topProducts.map(p => p.name),
-                        labels: {
-                            style: {
-                                colors: "#6B7280",
-                                fontSize: "12px",
-                                fontFamily: "Outfit, sans-serif",
-                            },
-                        },
-                        axisBorder: { show: false },
-                        axisTicks: { show: false },
-                    },
-                    yaxis: {
-                        labels: {
-                            align: 'left',
-                            offsetX: -10,
-                            style: {
-                                colors: "#6B7280",
-                                fontSize: "12px",
-                                fontFamily: "Outfit, sans-serif",
-                            },
-                            maxWidth: 180
-                        },
-                    },
-                    grid: {
-                        borderColor: '#E5E7EB',
-                        strokeDashArray: 4,
-                        xaxis: { lines: { show: true } },
-                        yaxis: { lines: { show: false } },
-                        padding: {
-                            top: 4,
-                            right: 0,
-                            bottom: 0,
-                            left: 0
-                        }
-                    },
-                    tooltip: {
-                        theme: 'light',
-                        y: {
-                            formatter: function(val, opts) {
-                                const tfa = topProducts[opts.dataPointIndex].tfa;
-                                return val + ` deals (${formatCurrency(tfa)})`;
-                            }
-                        }
-                    }
-                };
-                
-                productCountChartEl.innerHTML = '';
-                const productCountChart = new ApexCharts(productCountChartEl, productCountOptions);
-                productCountChart.render();
             }
             
             // 6. Underwriter Table
@@ -19366,8 +19270,7 @@
                         y: {
                             formatter: function(val, opts) {
                                 const percentage = ((val / totalTFA) * 100).toFixed(1);
-                                const count = topProducts[opts.seriesIndex].count;
-                                return formatCurrency(val) + ' (' + percentage + '%) - ' + count + ' deals';
+                                return formatCurrency(val) + ' (' + percentage + '%)';
                             }
                         }
                     },
@@ -19388,32 +19291,35 @@
                             <div class="flex items-center gap-3 py-2">
                                 <div class="w-4 h-4 rounded-sm flex-shrink-0" style="background-color: ${color};"></div>
                                 <p class="text-sm font-medium text-gray-800 flex-1">${product.name}</p>
-                                <p class="text-sm font-semibold text-gray-900">${formattedAmount} • ${product.count}</p>
+                                <p class="text-sm font-semibold text-gray-900">${formattedAmount}</p>
                             </div>
                         `;
                     }).join('');
                 }
             }
             
-            // 6. Credit Classification Distribution - Donut Chart (shows deal quality/risk profile)
-            const creditClassChartEl = document.getElementById('newDealsMTDCreditClassChart');
-            const creditClassListEl = document.getElementById('newDealsMTDDealCountList');
-            if (creditClassChartEl && creditClassification && creditClassification.length > 0) {
-                const totalDeals = creditClassification.reduce((sum, c) => sum + c.count, 0);
-                // Use risk-appropriate colors: green for PASS, yellow for SPECIAL MENTION, orange/red for worse
-                const creditClassColors = {
-                    'PASS': '#10b981',              // Green
-                    'SPECIAL MENTION': '#fbbf24',   // Yellow
-                    'SUBSTANDARD': '#f97316',       // Orange
-                    'DOUBTFUL': '#ef4444',          // Red
-                    'LOSS': '#dc2626'               // Dark Red
-                };
-                const colors = creditClassification.map(c => creditClassColors[c.name] || '#6b7280');
+            // 6. Product Distribution by Deals Count - Donut Chart
+            const productCountChartElMTD = document.getElementById('newDealsMTDProductCountChart');
+            const productCountListElMTD = document.getElementById('newDealsMTDProductCountList');
+            if (productCountChartElMTD && topProducts && topProducts.length > 0) {
+                const totalDealsForProductMTD = topProducts.reduce((sum, p) => sum + p.count, 0);
+                const colors = [
+                    "#3641f5",  // Primary blue
+                    "#7592ff",  // Light blue
+                    "#dde9ff",  // Lighter blue
+                    "#ff6b6b",  // Red
+                    "#ffd93d",  // Yellow
+                    "#6bcf7f",  // Green
+                    "#c084fc",  // Purple
+                    "#14b8a6",  // Teal
+                    "#f97316",  // Orange
+                    "#06b6d4"   // Cyan
+                ];
                 
-                const creditClassDonutOptions = {
-                    series: creditClassification.map(c => c.count),
+                const productCountDonutOptions = {
+                    series: topProducts.map(p => p.count),
                     colors: colors,
-                    labels: creditClassification.map(c => c.name),
+                    labels: topProducts.map(p => p.name),
                     chart: {
                         fontFamily: "Outfit, sans-serif",
                         type: "donut",
@@ -19451,7 +19357,7 @@
                                         color: "#111827",
                                         fontSize: "16px",
                                         fontWeight: "700",
-                                        formatter: () => totalDeals.toString(),
+                                        formatter: () => totalDealsForProductMTD.toString(),
                                     },
                                 },
                             },
@@ -19461,37 +19367,34 @@
                         enabled: false,
                     },
                     legend: {
-                        show: false, // Hide built-in legend, using custom HTML legend
+                        show: false,
                     },
                     tooltip: {
                         enabled: true,
                         theme: "light",
                         y: {
                             formatter: function(val, opts) {
-                                const percentage = ((val / totalDeals) * 100).toFixed(1);
-                                const tfa = creditClassification[opts.seriesIndex].tfa;
-                                return val + ' deals (' + percentage + '%) - ' + formatCurrency(tfa);
+                                const percentage = ((val / totalDealsForProductMTD) * 100).toFixed(1);
+                                return val + ' deals (' + percentage + '%)';
                             }
                         }
                     },
                 };
                 
-                creditClassChartEl.innerHTML = '';
-                const creditClassChart = new ApexCharts(creditClassChartEl, creditClassDonutOptions);
-                creditClassChart.render();
+                productCountChartElMTD.innerHTML = '';
+                const productCountChartMTD = new ApexCharts(productCountChartElMTD, productCountDonutOptions);
+                productCountChartMTD.render();
                 
                 // Populate legend list
-                if (creditClassListEl) {
-                    creditClassListEl.innerHTML = creditClassification.map((cls, index) => {
+                if (productCountListElMTD) {
+                    productCountListElMTD.innerHTML = topProducts.map((product, index) => {
                         const color = colors[index];
-                        const formattedTFA = cls.tfa >= 1000000000 
-                            ? `$${(cls.tfa / 1000000000).toFixed(2)}B`
-                            : `$${(cls.tfa / 1000000).toFixed(1)}M`;
+                        const percentage = ((product.count / totalDealsForProductMTD) * 100).toFixed(1);
                         return `
                             <div class="flex items-center gap-3 py-2">
                                 <div class="w-4 h-4 rounded-sm flex-shrink-0" style="background-color: ${color};"></div>
-                                <p class="text-sm font-medium text-gray-800 flex-1">${cls.name}</p>
-                                <p class="text-sm font-semibold text-gray-900">${formattedTFA} • ${cls.count}</p>
+                                <p class="text-sm font-medium text-gray-800 flex-1">${product.name}</p>
+                                <p class="text-sm font-semibold text-gray-900">${product.count} (${percentage}%)</p>
                             </div>
                         `;
                     }).join('');
@@ -19712,8 +19615,7 @@
                         y: {
                             formatter: function(val, opts) {
                                 const percentage = ((val / totalTFA) * 100).toFixed(1);
-                                const count = topProducts[opts.seriesIndex].count;
-                                return formatCurrency(val) + ' (' + percentage + '%) - ' + count + ' deals';
+                                return formatCurrency(val) + ' (' + percentage + '%)';
                             }
                         }
                     },
@@ -19723,7 +19625,7 @@
                 const productChart = new ApexCharts(productChartEl, productDonutOptions);
                 productChart.render();
                 
-                // Populate legend list (matching New Deals YTD style: TFA • count)
+                // Populate legend list (matching New Deals YTD style: TFA only)
                 if (productListEl) {
                     productListEl.innerHTML = topProducts.map((product, index) => {
                         const color = colors[index % colors.length];
@@ -19734,7 +19636,7 @@
                             <div class="flex items-center gap-3 py-2">
                                 <div class="w-4 h-4 rounded-sm flex-shrink-0" style="background-color: ${color};"></div>
                                 <p class="text-sm font-medium text-gray-800 flex-1">${product.name}</p>
-                                <p class="text-sm font-semibold text-gray-900">${formattedAmount} • ${product.count}</p>
+                                <p class="text-sm font-semibold text-gray-900">${formattedAmount}</p>
                             </div>
                         `;
                     }).join('');
@@ -21521,7 +21423,7 @@
                     <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
                             <h3 class="text-base font-semibold text-gray-900">Product Distribution by TFA</h3>
-                            <p class="text-xs text-gray-500 mt-1">Total facility amount by product</p>
+                            <p class="text-xs text-gray-500 mt-1">Distribution of facility amounts</p>
                         </div>
                         <div class="p-6">
                             <div class="flex flex-row items-center justify-center gap-8">
@@ -21543,19 +21445,19 @@
                     <!-- Credit Classification Distribution - Donut Chart with Legends -->
                     <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-base font-semibold text-gray-900">Credit Classification Distribution</h3>
-                            <p class="text-xs text-gray-500 mt-1">Risk profile of new deals (PASS, Special Mention, etc.)</p>
+                            <h3 class="text-base font-semibold text-gray-900">Product Distribution by Deals Count</h3>
+                            <p class="text-xs text-gray-500 mt-1">Number of deals by product program</p>
                         </div>
                         <div class="p-6">
                             <div class="flex flex-row items-center justify-center gap-8">
                                 <!-- Donut Chart -->
                                 <div class="flex-shrink-0">
-                                    <div id="newDealsYTDCreditClassChart"></div>
+                                    <div id="newDealsYTDProductCountChart"></div>
                                 </div>
                                 
                                 <!-- Legend / Details List - Right Side -->
                                 <div class="flex-1 max-w-md">
-                                    <div id="newDealsYTDDealCountList" class="space-y-3">
+                                    <div id="newDealsYTDProductCountList" class="space-y-3">
                                         <!-- Legend will be populated by JavaScript -->
                                     </div>
                                 </div>
@@ -21631,7 +21533,7 @@
                     <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
                             <h3 class="text-base font-semibold text-gray-900">Product Distribution by TFA</h3>
-                            <p class="text-xs text-gray-500 mt-1">Total facility amount by product</p>
+                            <p class="text-xs text-gray-500 mt-1">Distribution of facility amounts</p>
                         </div>
                         <div class="p-6">
                             <div class="flex flex-row items-center justify-center gap-8">
@@ -21653,19 +21555,19 @@
                     <!-- Credit Classification Distribution - Donut Chart with Legends -->
                     <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-base font-semibold text-gray-900">Credit Classification Distribution</h3>
-                            <p class="text-xs text-gray-500 mt-1">Risk profile of new deals (PASS, Special Mention, etc.)</p>
+                            <h3 class="text-base font-semibold text-gray-900">Product Distribution by Deals Count</h3>
+                            <p class="text-xs text-gray-500 mt-1">Number of deals by product program</p>
                         </div>
                         <div class="p-6">
                             <div class="flex flex-row items-center justify-center gap-8">
                                 <!-- Donut Chart -->
                                 <div class="flex-shrink-0">
-                                    <div id="newDealsMTDCreditClassChart"></div>
+                                    <div id="newDealsMTDProductCountChart"></div>
                                 </div>
                                 
                                 <!-- Legend / Details List - Right Side -->
                                 <div class="flex-1 max-w-md">
-                                    <div id="newDealsMTDDealCountList" class="space-y-3">
+                                    <div id="newDealsMTDProductCountList" class="space-y-3">
                                         <!-- Legend will be populated by JavaScript -->
                                     </div>
                                 </div>

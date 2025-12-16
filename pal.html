@@ -243,8 +243,7 @@
 <body class="bg-gray-50">
     <!-- Loading Overlay -->
     <div id="loadingOverlay"
-        class="fixed inset-0 bg-gray-900/90 backdrop-blur-sm z-[9999] flex items-center justify-center hidden"
-        style="backdrop-filter: blur(8px);">
+        class="fixed inset-0 bg-gray-400/50 backdrop-blur-[32px] z-[9999] flex items-center justify-center hidden">
         <div class="loader">
             <label id="loadingMessage" class="loading-label">Loading Portfolio Data</label>
             <div class="loading">
@@ -7157,9 +7156,12 @@
             // Apply status filter
             let filteredDeals = pendingDeals;
             if (pipelineStatusFilter !== 'all') {
-                filteredDeals = pendingDeals.filter(deal => 
-                    String(deal.managementStatus).trim().toUpperCase() === pipelineStatusFilter
-                );
+                filteredDeals = pendingDeals.filter(deal => {
+                    const status = String(deal.managementStatus || '').trim().toUpperCase();
+                    // Match CM or DM (case-insensitive, partial match)
+                    return status.includes(pipelineStatusFilter.toUpperCase());
+                });
+                console.log(`Pipeline filter applied: ${pipelineStatusFilter}, filtered from ${pendingDeals.length} to ${filteredDeals.length} deals`);
             }
             
             // Apply search filter
@@ -7182,7 +7184,7 @@
             const endIndex = Math.min(startIndex + pipelineTablePerPage, totalRecords);
             const paginatedDeals = filteredDeals.slice(startIndex, endIndex);
             
-            // Render header
+            // Render header (Aging before Days)
             const headerEl = document.getElementById('pipelineDetailsTableHeader');
             if (headerEl) {
                 headerEl.innerHTML = `
@@ -7192,7 +7194,7 @@
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 tracking-wider">Region</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 tracking-wider">Status</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 tracking-wider">Aging</th>
-                    <th class="px-6 py-3 text-right text-xs font-semibold text-gray-700 tracking-wider">Days</th>
+                    <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700 tracking-wider">Days</th>
                     <th class="px-6 py-3 text-right text-xs font-semibold text-gray-700 tracking-wider">TFA</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 tracking-wider">Approval Date</th>
                 `;
@@ -7212,7 +7214,7 @@
                             <td class="px-6 py-4 text-sm text-gray-700">${deal.region}</td>
                             <td class="px-6 py-4 text-sm text-gray-700">${deal.managementStatus}</td>
                             <td class="px-6 py-4 text-sm text-gray-700">${deal.aging}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900 text-right font-semibold">${deal.days}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900 text-center font-semibold">${deal.days}</td>
                             <td class="px-6 py-4 text-sm text-gray-900 text-right">${formatCurrency(deal.tfaAmount)}</td>
                             <td class="px-6 py-4 text-sm text-gray-700">${deal.firstApprovalDate.toLocaleDateString()}</td>
                         </tr>

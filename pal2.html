@@ -32,6 +32,10 @@
     </script>
     <!-- ApexCharts -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- jsvectormap for regional distribution maps -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/css/jsvectormap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/js/jsvectormap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/maps/world.js"></script>
     <!-- SheetJS for Excel/CSV parsing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <!-- html2canvas for PNG export -->
@@ -168,63 +172,22 @@
         }
 
         /* Loading Overlay Styles */
-        .loader {
-            width: 350px;
-            height: 180px;
-            border-radius: 10px;
-            background: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-evenly;
-            padding: 30px;
-            box-shadow: 2px 2px 10px -5px lightgrey;
-        }
-        
-        .loading {
-            width: 100%;
-            height: 10px;
-            background: lightgrey;
-            border-radius: 10px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .loading::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 50%;
-            height: 10px;
-            background: #002;
-            border-radius: 10px;
-            z-index: 1;
-            animation: loading 0.6s alternate infinite;
-        }
-        
-        .loader label {
-            color: #002;
-            font-size: 18px;
-            animation: bit 0.6s alternate infinite;
-        }
-        
         @keyframes bit {
-            from {
-                opacity: 0.3;
-            }
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0.3; }
+            to { opacity: 1; }
         }
         
         @keyframes loading {
-            0% {
-                left: -25%;
-            }
-            100% {
-                left: 70%;
-            }
+            0% { left: -25%; }
+            100% { left: 70%; }
+        }
+        
+        .animate-bit {
+            animation: bit 0.6s alternate infinite;
+        }
+        
+        .animate-loading {
+            animation: loading 0.6s alternate infinite;
         }
     </style>
 </head>
@@ -232,10 +195,12 @@
 <body class="bg-gray-50">
     <!-- Loading Overlay -->
     <div id="loadingOverlay"
-        class="fixed inset-0 bg-gray-50 backdrop-blur-md z-[10000] flex items-center justify-center hidden">
-        <div class="loader">
-            <label id="loadingMessage">Please wait...</label>
-            <div class="loading"></div>
+        class="fixed inset-0 bg-gray-100 z-[10000] flex items-center justify-center hidden">
+        <div class="w-[350px] h-[180px] rounded-[10px] bg-white flex flex-col items-center justify-evenly p-[30px] shadow-[2px_2px_10px_-5px_lightgrey]">
+            <label id="loadingMessage" class="text-[#002] text-lg animate-bit">Please wait...</label>
+            <div class="w-full h-[10px] bg-gray-300 rounded-[10px] relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1/2 h-[10px] bg-blue-500 rounded-[10px] z-[1] animate-loading"></div>
+            </div>
         </div>
     </div>
 
@@ -12638,14 +12603,19 @@
                 
                 <!-- Charts Row -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- TFA by Client (Top 10) -->
+                    <!-- Regional Distribution Map -->
                     <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-base font-semibold text-gray-900">TFA by Client (Top 10)</h3>
-                            <p class="text-sm font-medium text-gray-500 mt-1">Largest clients by facility amount</p>
+                            <h3 class="text-base font-semibold text-gray-900">Regional Distribution</h3>
+                            <p class="text-sm font-medium text-gray-500 mt-1">TFA distribution by region</p>
                         </div>
-                        <div class="p-6">
-                            <div id="tfaClientChart" style="min-height: 350px;"></div>
+                        <div class="p-5">
+                            <div class="border-gray-200 my-6 overflow-hidden rounded-2xl border bg-gray-50 px-4 py-6">
+                                <div id="tfaRegionalMap" class="map-btn h-[150px] w-full"></div>
+                            </div>
+                            <div id="tfaRegionalList" class="space-y-5">
+                                <!-- Regional items will be dynamically generated -->
+                            </div>
                         </div>
                     </div>
                     
@@ -12792,151 +12762,9 @@
         
         // Initialize TFA Charts
         function initializeTFAChart(dataSource) {
-            // 1. TFA by Client (Top 10) - Bar Chart (like Top Relationships)
-            const byClient = {};
-            dataSource.forEach(row => {
-                const client = row.Relationship_Name || row.Relationship_ID || 'Unknown';
-                if (!byClient[client]) byClient[client] = 0;
-                byClient[client] += parseNumber(row.Fac_Amount || row.Facility_Amount);
-            });
+            // 1. Regional Distribution Map
+            initializeRegionalMap('tfaRegionalMap', 'tfaRegionalList', dataSource, 'Fac_Amount');
             
-            const topClients = Object.entries(byClient)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10);
-            
-            const clientLabels = topClients.map(([name], idx) => `${idx + 1}. ${name}`);
-            const clientValues = topClients.map(([, amount]) => amount);
-            
-            // Calculate dynamic height based on number of clients (35px per bar, min 350px)
-            const calculatedHeight = Math.max(350, clientLabels.length * 35);
-            
-            // Client Bar Chart Options (matching Top Relationships style)
-            const clientChartOptions = {
-                series: [{
-                    name: 'TFA Amount',
-                    data: clientValues,
-                }],
-                colors: ["#465fff"], // Same blue as Top Relationships
-                chart: {
-                    fontFamily: "Outfit, sans-serif",
-                    type: "bar",
-                    height: calculatedHeight,
-                    toolbar: {
-                        show: false,
-                    },
-                    offsetY: 0,
-                },
-                plotOptions: {
-                    bar: {
-                        horizontal: true,
-                        borderRadius: 5,
-                        borderRadiusApplication: "end",
-                        dataLabels: {
-                            position: 'top',
-                        },
-                    },
-                },
-                dataLabels: {
-                    enabled: true,
-                    textAnchor: 'start',
-                    offsetX: 30,
-                    style: {
-                        fontSize: '11px',
-                        fontWeight: 500,
-                        colors: ['#374151']
-                    },
-                    background: {
-                        enabled: true,
-                        foreColor: '#374151',
-                        backgroundColor: '#F3F4F6',
-                        borderRadius: 12,
-                        padding: 8,
-                        opacity: 1,
-                        borderWidth: 0
-                    },
-                    formatter: function(val) {
-                        return formatCurrency(val);
-                    }
-                },
-                stroke: {
-                    show: true,
-                    width: 4,
-                    colors: ["transparent"],
-                },
-                xaxis: {
-                    categories: clientLabels,
-                    labels: {
-                        formatter: function (val) {
-                            return formatCurrency(val);
-                        },
-                        style: {
-                            colors: "#6B7280",
-                            fontSize: "12px",
-                            fontFamily: "Outfit, sans-serif",
-                        },
-                    },
-                    axisBorder: {
-                        show: false,
-                    },
-                    axisTicks: {
-                        show: false,
-                    },
-                },
-                yaxis: {
-                    title: false,
-                    labels: {
-                        align: 'left',
-                        offsetX: -10,
-                        style: {
-                            colors: "#6B7280",
-                            fontSize: "12px",
-                            fontFamily: "Outfit, sans-serif",
-                        },
-                    },
-                },
-                legend: {
-                    show: true,
-                    position: "top",
-                    horizontalAlign: "left",
-                    fontFamily: "Outfit, sans-serif",
-                    fontSize: "12px",
-                    markers: {
-                        radius: 12,
-                    },
-                    offsetY: 0,
-                },
-                grid: {
-                    borderColor: '#E5E7EB',
-                    strokeDashArray: 4,
-                    padding: {
-                        top: 0,
-                        right: 0,
-                        bottom: 0,
-                        left: 0
-                    },
-                    xaxis: {
-                        lines: {
-                            show: true,
-                        },
-                    },
-                    yaxis: {
-                        lines: {
-                            show: false,
-                        },
-                    },
-                },
-                fill: {
-                    opacity: 1,
-                },
-                tooltip: {
-                    theme: "light",
-                    y: {
-                        formatter: function(val) {
-                            return formatCurrency(val);
-                        }
-                    }
-                },
-            };
             
             // 2. TFA by Product Program - Donut Chart
             const byProgram = {};
@@ -13030,14 +12858,8 @@
                 },
             };
             
-            // Render both charts
-            const clientChartEl = document.getElementById('tfaClientChart');
+            // Render donut chart
             const programDonutChartEl = document.getElementById('tfaProgramDonutChart');
-            
-            if (clientChartEl && typeof ApexCharts !== 'undefined') {
-                const clientChart = new ApexCharts(clientChartEl, clientChartOptions);
-                clientChart.render();
-            }
             
             if (programDonutChartEl && typeof ApexCharts !== 'undefined') {
                 const programDonutChart = new ApexCharts(programDonutChartEl, programChartOptions);
@@ -13047,166 +12869,23 @@
         
         // Initialize OSUC Charts
         function initializeOSUCChart(dataSource) {
-            // 1. OSUC by Client (Top 10) - Bar Chart (like TFA structure)
-            const byClient = {};
-            dataSource.forEach(row => {
-                const client = row.Relationship_Name || row.Relationship_ID || 'Unknown';
-                if (!byClient[client]) byClient[client] = 0;
-                byClient[client] += parseNumber(row.OSUC);
-            });
+            // 1. Regional Distribution Map
+            initializeRegionalMap('osucRegionalMap', 'osucRegionalList', dataSource, 'OSUC');
             
-            const topClients = Object.entries(byClient)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10);
-            
-            const clientLabels = topClients.map(([name], idx) => `${idx + 1}. ${name}`);
-            const clientValues = topClients.map(([, amount]) => amount);
-            
-            // Calculate dynamic height based on number of clients (35px per bar, min 350px)
-            const calculatedHeight = Math.max(350, clientLabels.length * 35);
-            
-            // Client Bar Chart Options (matching TFA style)
-            const clientChartOptions = {
-                series: [{
-                    name: 'OSUC Amount',
-                    data: clientValues,
-                }],
-                colors: ["#465fff"],
-                chart: {
-                    fontFamily: "Outfit, sans-serif",
-                    type: "bar",
-                    height: calculatedHeight,
-                    toolbar: {
-                        show: false,
-                    },
-                    offsetY: 0,
-                },
-                plotOptions: {
-                    bar: {
-                        horizontal: true,
-                        borderRadius: 5,
-                        borderRadiusApplication: "end",
-                        dataLabels: {
-                            position: 'top',
-                        },
-                    },
-                },
-                dataLabels: {
-                    enabled: true,
-                    textAnchor: 'start',
-                    offsetX: 30,
-                    style: {
-                        fontSize: '11px',
-                        fontWeight: 500,
-                        colors: ['#374151']
-                    },
-                    background: {
-                        enabled: true,
-                        foreColor: '#374151',
-                        backgroundColor: '#F3F4F6',
-                        borderRadius: 12,
-                        padding: 8,
-                        opacity: 1,
-                        borderWidth: 0
-                    },
-                    formatter: function(val) {
-                        return formatCurrency(val);
-                    }
-                },
-                stroke: {
-                    show: true,
-                    width: 4,
-                    colors: ["transparent"],
-                },
-                xaxis: {
-                    categories: clientLabels,
-                    labels: {
-                        formatter: function (val) {
-                            return formatCurrency(val);
-                        },
-                        style: {
-                            colors: "#6B7280",
-                            fontSize: "12px",
-                            fontFamily: "Outfit, sans-serif",
-                        },
-                    },
-                    axisBorder: {
-                        show: false,
-                    },
-                    axisTicks: {
-                        show: false,
-                    },
-                },
-                yaxis: {
-                    title: false,
-                    labels: {
-                        align: 'left',
-                        offsetX: -10,
-                        style: {
-                            colors: "#6B7280",
-                            fontSize: "12px",
-                            fontFamily: "Outfit, sans-serif",
-                        },
-                    },
-                },
-                legend: {
-                    show: true,
-                    position: "top",
-                    horizontalAlign: "left",
-                    fontFamily: "Outfit, sans-serif",
-                    fontSize: "12px",
-                    markers: {
-                        radius: 12,
-                    },
-                    offsetY: 0,
-                },
-                grid: {
-                    borderColor: '#E5E7EB',
-                    strokeDashArray: 4,
-                    padding: {
-                        top: 0,
-                        right: 0,
-                        bottom: 0,
-                        left: 0
-                    },
-                    xaxis: {
-                        lines: {
-                            show: true,
-                        },
-                    },
-                    yaxis: {
-                        lines: {
-                            show: false,
-                        },
-                    },
-                },
-                fill: {
-                    opacity: 1,
-                },
-                tooltip: {
-                    theme: "light",
-                    y: {
-                        formatter: function(val) {
-                            return formatCurrency(val);
-                        }
-                    }
-                },
-            };
-            
-            // 2. OSUC by Product Program - Donut Chart (matching TFA style)
-            const byProgram = {};
+            // 2. OSUC by Product Program - Donut Chart
+            const osucByProgram = {};
             dataSource.forEach(row => {
                 const program = row.Product_Program || 'Unknown';
-                if (!byProgram[program]) byProgram[program] = 0;
-                byProgram[program] += parseNumber(row.OSUC);
+                if (!osucByProgram[program]) osucByProgram[program] = 0;
+                osucByProgram[program] += parseNumber(row.OSUC);
             });
             
-            const sortedPrograms = Object.entries(byProgram)
+            const osucSortedPrograms = Object.entries(osucByProgram)
                 .sort((a, b) => b[1] - a[1]);
             
-            const programLabels = sortedPrograms.map(([name]) => name);
-            const programValues = sortedPrograms.map(([, amount]) => amount);
-            const totalOSUC = programValues.reduce((a, b) => a + b, 0);
+            const osucProgramLabels = osucSortedPrograms.map(([name]) => name);
+            const osucProgramValues = osucSortedPrograms.map(([, amount]) => amount);
+            const osucTotal = osucProgramValues.reduce((a, b) => a + b, 0);
             
             // Donut chart colors (matching TFA style)
             const donutColors = [
@@ -13221,9 +12900,9 @@
             
             // Program Donut Chart Options (matching TFA style)
             const programChartOptions = {
-                series: programValues,
-                colors: donutColors.slice(0, programLabels.length),
-                labels: programLabels,
+                series: osucProgramValues,
+                colors: donutColors.slice(0, osucProgramLabels.length),
+                labels: osucProgramLabels,
                 chart: {
                     fontFamily: "Outfit, sans-serif",
                     type: "donut",
@@ -13261,7 +12940,7 @@
                                     color: "#1D2939",
                                     fontSize: "14px",
                                     fontWeight: "600",
-                                    formatter: () => formatCurrency(totalOSUC),
+                                    formatter: () => formatCurrency(osucTotal),
                                 },
                             },
                         },
@@ -13281,14 +12960,8 @@
                 },
             };
             
-            // Render both charts
-            const clientChartEl = document.getElementById('osucClientChart');
+            // Render donut chart
             const programChartEl = document.getElementById('osucProgramDonutChart');
-            
-            if (clientChartEl && typeof ApexCharts !== 'undefined') {
-                const clientChart = new ApexCharts(clientChartEl, clientChartOptions);
-                clientChart.render();
-            }
             
             if (programChartEl && typeof ApexCharts !== 'undefined') {
                 const programChart = new ApexCharts(programChartEl, programChartOptions);
@@ -13298,151 +12971,8 @@
         
         // Initialize Outstanding Charts
         function initializeOutstandingChart(dataSource) {
-            // 1. Outstanding by Client (Top 10) - Bar Chart (like TFA structure)
-            const byClient = {};
-            dataSource.forEach(row => {
-                const client = row.Relationship_Name || row.Relationship_ID || 'Unknown';
-                if (!byClient[client]) byClient[client] = 0;
-                byClient[client] += parseNumber(row.Total_OS);
-            });
-            
-            const topClients = Object.entries(byClient)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10);
-            
-            const clientLabels = topClients.map(([name], idx) => `${idx + 1}. ${name}`);
-            const clientValues = topClients.map(([, amount]) => amount);
-            
-            // Calculate dynamic height based on number of clients (35px per bar, min 350px)
-            const calculatedHeight = Math.max(350, clientLabels.length * 35);
-            
-            // Client Bar Chart Options (matching TFA style)
-            const clientChartOptions = {
-                series: [{
-                    name: 'Outstanding Amount',
-                    data: clientValues,
-                }],
-                colors: ["#465fff"],
-                chart: {
-                    fontFamily: "Outfit, sans-serif",
-                    type: "bar",
-                    height: calculatedHeight,
-                    toolbar: {
-                        show: false,
-                    },
-                    offsetY: 0,
-                },
-                plotOptions: {
-                    bar: {
-                        horizontal: true,
-                        borderRadius: 5,
-                        borderRadiusApplication: "end",
-                        dataLabels: {
-                            position: 'top',
-                        },
-                    },
-                },
-                dataLabels: {
-                    enabled: true,
-                    textAnchor: 'start',
-                    offsetX: 30,
-                    style: {
-                        fontSize: '11px',
-                        fontWeight: 500,
-                        colors: ['#374151']
-                    },
-                    background: {
-                        enabled: true,
-                        foreColor: '#374151',
-                        backgroundColor: '#F3F4F6',
-                        borderRadius: 12,
-                        padding: 8,
-                        opacity: 1,
-                        borderWidth: 0
-                    },
-                    formatter: function(val) {
-                        return formatCurrency(val);
-                    }
-                },
-                stroke: {
-                    show: true,
-                    width: 4,
-                    colors: ["transparent"],
-                },
-                xaxis: {
-                    categories: clientLabels,
-                    labels: {
-                        formatter: function (val) {
-                            return formatCurrency(val);
-                        },
-                        style: {
-                            colors: "#6B7280",
-                            fontSize: "12px",
-                            fontFamily: "Outfit, sans-serif",
-                        },
-                    },
-                    axisBorder: {
-                        show: false,
-                    },
-                    axisTicks: {
-                        show: false,
-                    },
-                },
-                yaxis: {
-                    title: false,
-                    labels: {
-                        align: 'left',
-                        offsetX: -10,
-                        style: {
-                            colors: "#6B7280",
-                            fontSize: "12px",
-                            fontFamily: "Outfit, sans-serif",
-                        },
-                    },
-                },
-                legend: {
-                    show: true,
-                    position: "top",
-                    horizontalAlign: "left",
-                    fontFamily: "Outfit, sans-serif",
-                    fontSize: "12px",
-                    markers: {
-                        radius: 12,
-                    },
-                    offsetY: 0,
-                },
-                grid: {
-                    borderColor: '#E5E7EB',
-                    strokeDashArray: 4,
-                    padding: {
-                        top: 0,
-                        right: 0,
-                        bottom: 0,
-                        left: 0
-                    },
-                    xaxis: {
-                        lines: {
-                            show: true,
-                        },
-                    },
-                    yaxis: {
-                        lines: {
-                            show: false,
-                        },
-                    },
-                },
-                fill: {
-                    opacity: 1,
-                },
-                tooltip: {
-                    theme: "light",
-                    y: {
-                        formatter: function(val) {
-                            return formatCurrency(val);
-                        }
-                    }
-                },
-            };
+            // 1. Regional Distribution Map
+            initializeRegionalMap('outstandingRegionalMap', 'outstandingRegionalList', dataSource, 'Total_OS');
             
             // 2. Outstanding by Product Program - Donut Chart (matching TFA style)
             const byProgram = {};
@@ -13532,14 +13062,8 @@
                 },
             };
             
-            // Render both charts
-            const clientChartEl = document.getElementById('outstandingClientChart');
+            // Render donut chart
             const programChartEl = document.getElementById('outstandingProgramDonutChart');
-            
-            if (clientChartEl && typeof ApexCharts !== 'undefined') {
-                const clientChart = new ApexCharts(clientChartEl, clientChartOptions);
-                clientChart.render();
-            }
             
             if (programChartEl && typeof ApexCharts !== 'undefined') {
                 const programChart = new ApexCharts(programChartEl, programChartOptions);
@@ -15603,14 +15127,19 @@
                 
                 <!-- Charts Row -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- OSUC by Client (Top 10) -->
+                    <!-- Regional Distribution Map -->
                     <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-base font-semibold text-gray-900">OSUC by Client (Top 10)</h3>
-                            <p class="text-sm font-medium text-gray-500 mt-1">Largest clients by OSUC amount</p>
+                            <h3 class="text-base font-semibold text-gray-900">Regional Distribution</h3>
+                            <p class="text-sm font-medium text-gray-500 mt-1">OSUC distribution by region</p>
                         </div>
-                        <div class="p-6">
-                            <div id="osucClientChart" style="min-height: 350px;"></div>
+                        <div class="p-5">
+                            <div class="border-gray-200 my-6 overflow-hidden rounded-2xl border bg-gray-50 px-4 py-6">
+                                <div id="osucRegionalMap" class="map-btn h-[150px] w-full"></div>
+                            </div>
+                            <div id="osucRegionalList" class="space-y-5">
+                                <!-- Regional items will be dynamically generated -->
+                            </div>
                         </div>
                     </div>
                     
@@ -15862,14 +15391,19 @@
                 
                 <!-- Charts Row -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Outstanding by Client (Top 10) -->
+                    <!-- Regional Distribution Map -->
                     <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-base font-semibold text-gray-900">Outstanding by Client (Top 10)</h3>
-                            <p class="text-sm font-medium text-gray-500 mt-1">Largest clients by outstanding amount</p>
+                            <h3 class="text-base font-semibold text-gray-900">Regional Distribution</h3>
+                            <p class="text-sm font-medium text-gray-500 mt-1">Outstanding distribution by region</p>
                         </div>
-                        <div class="p-6">
-                            <div id="outstandingClientChart" style="min-height: 350px;"></div>
+                        <div class="p-5">
+                            <div class="border-gray-200 my-6 overflow-hidden rounded-2xl border bg-gray-50 px-4 py-6">
+                                <div id="outstandingRegionalMap" class="map-btn h-[150px] w-full"></div>
+                            </div>
+                            <div id="outstandingRegionalList" class="space-y-5">
+                                <!-- Regional items will be dynamically generated -->
+                            </div>
                         </div>
                     </div>
                     
@@ -25299,6 +24833,156 @@
                     button.classList.add('hidden');
                     button.classList.remove('flex');
                 }
+            }
+        }
+        
+        // Initialize Regional Distribution Map
+        function initializeRegionalMap(mapId, listId, dataSource, amountField) {
+            console.log(`Initializing regional map: ${mapId}`);
+            
+            // Define region to ISO country codes mapping
+            const regionCountries = {
+                'NAM': ['US', 'CA', 'MX'], // North America
+                'LATAM': ['BR', 'AR', 'CL', 'CO', 'PE', 'VE', 'EC', 'BO', 'PY', 'UY', 'GY', 'SR', 'GF', 'CR', 'PA', 'NI', 'HN', 'GT', 'SV', 'BZ', 'CU', 'DO', 'HT', 'JM', 'TT', 'BS', 'BB', 'GD', 'LC', 'VC', 'AG', 'DM', 'KN'], // Latin America
+                'EMEA': ['GB', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'CH', 'AT', 'SE', 'NO', 'DK', 'FI', 'IE', 'PT', 'GR', 'PL', 'CZ', 'HU', 'RO', 'BG', 'HR', 'SI', 'SK', 'LT', 'LV', 'EE', 'LU', 'MT', 'CY', 'IS', 'AL', 'RS', 'BA', 'MK', 'ME', 'XK', 'MD', 'UA', 'BY', 'RU', 'TR', 'SA', 'AE', 'QA', 'KW', 'BH', 'OM', 'JO', 'LB', 'IQ', 'SY', 'YE', 'IL', 'PS', 'EG', 'DZ', 'MA', 'TN', 'LY', 'SD', 'SS', 'ET', 'KE', 'TZ', 'UG', 'RW', 'BI', 'SO', 'DJ', 'ER', 'ZA', 'NG', 'GH', 'CI', 'CM', 'AO', 'ZM', 'ZW', 'MW', 'MZ', 'BW', 'NA', 'LS', 'SZ', 'MG', 'MU', 'SC', 'KM', 'ML', 'BF', 'NE', 'TD', 'CF', 'CD', 'CG', 'GA', 'GQ', 'ST', 'SN', 'GM', 'GW', 'GN', 'SL', 'LR', 'TG', 'BJ'], // Europe, Middle East, and Africa
+                'APAC': ['CN', 'JP', 'IN', 'AU', 'KR', 'ID', 'TH', 'MY', 'SG', 'PH', 'VN', 'NZ', 'BD', 'PK', 'MM', 'KH', 'LA', 'BN', 'TL', 'MN', 'NP', 'LK', 'AF', 'BT', 'MV', 'PG', 'FJ', 'SB', 'VU', 'WS', 'TO', 'KI', 'FM', 'MH', 'PW', 'NR', 'TV', 'HK', 'MO', 'TW', 'KP', 'KZ', 'UZ', 'TM', 'TJ', 'KG'] // Asia-Pacific
+            };
+            
+            // Color scheme for regions
+            const regionColors = {
+                'NAM': '#3B82F6',    // Blue
+                'LATAM': '#10B981',  // Green
+                'EMEA': '#8B5CF6',   // Purple
+                'APAC': '#F59E0B'    // Orange
+            };
+            
+            // Calculate regional totals
+            const regionalData = {};
+            let grandTotal = 0;
+            
+            dataSource.forEach(row => {
+                const region = String(row.Region || '').trim().toUpperCase();
+                const amount = parseNumber(row[amountField]);
+                
+                if (region && amount > 0) {
+                    if (!regionalData[region]) {
+                        regionalData[region] = { total: 0, count: 0 };
+                    }
+                    regionalData[region].total += amount;
+                    regionalData[region].count++;
+                    grandTotal += amount;
+                }
+            });
+            
+            // Sort regions by total (descending)
+            const sortedRegions = Object.keys(regionalData).sort((a, b) => 
+                regionalData[b].total - regionalData[a].total
+            );
+            
+            // Create series data for map coloring
+            const regionSeries = {};
+            sortedRegions.forEach(region => {
+                if (regionCountries[region]) {
+                    regionCountries[region].forEach(countryCode => {
+                        regionSeries[countryCode] = regionColors[region] || '#D9D9D9';
+                    });
+                }
+            });
+            
+            // Initialize the map
+            try {
+                const mapElement = document.querySelector(`#${mapId}`);
+                if (mapElement && typeof jsVectorMap !== 'undefined') {
+                    const map = new jsVectorMap({
+                        selector: `#${mapId}`,
+                        map: 'world',
+                        zoomButtons: false,
+                        regionStyle: {
+                            initial: {
+                                fill: '#D9D9D9',
+                                fillOpacity: 1
+                            },
+                            hover: {
+                                fillOpacity: 0.8,
+                                cursor: 'pointer'
+                            }
+                        },
+                        series: {
+                            regions: [{
+                                values: regionSeries,
+                                attribute: 'fill'
+                            }]
+                        },
+                        onRegionTipShow: function(event, tooltip, code) {
+                            // Find which region this country belongs to
+                            let regionName = '';
+                            for (const [region, countries] of Object.entries(regionCountries)) {
+                                if (countries.includes(code)) {
+                                    regionName = region;
+                                    break;
+                                }
+                            }
+                            
+                            if (regionName && regionalData[regionName]) {
+                                const data = regionalData[regionName];
+                                const percentage = ((data.total / grandTotal) * 100).toFixed(1);
+                                tooltip.css({
+                                    backgroundColor: regionColors[regionName],
+                                    color: '#ffffff',
+                                    fontSize: '12px',
+                                    padding: '8px 12px',
+                                    borderRadius: '6px',
+                                    fontWeight: '500'
+                                });
+                                tooltip.text(
+                                    `${regionName}\n${formatCurrency(data.total)} (${percentage}%)`
+                                );
+                            } else {
+                                event.preventDefault();
+                            }
+                        }
+                    });
+                    
+                    console.log(`✅ Regional map ${mapId} initialized successfully`);
+                }
+            } catch (error) {
+                console.error(`❌ Error initializing regional map ${mapId}:`, error);
+            }
+            
+            // Generate regional list
+            const listElement = document.getElementById(listId);
+            if (listElement && sortedRegions.length > 0) {
+                const listHTML = sortedRegions.map(region => {
+                    const data = regionalData[region];
+                    const percentage = ((data.total / grandTotal) * 100).toFixed(1);
+                    const color = regionColors[region] || '#D9D9D9';
+                    
+                    return `
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="flex items-center justify-center w-[70px]">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold" 
+                                          style="background-color: ${color}20; color: ${color};">
+                                        ${region}
+                                    </span>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-800">${formatCurrency(data.total)}</p>
+                                    <span class="block text-xs text-gray-500">${data.count} facilities</span>
+                                </div>
+                            </div>
+                            <div class="flex w-full max-w-[140px] items-center gap-3">
+                                <div class="relative block h-2 w-full max-w-[100px] rounded-sm bg-gray-200">
+                                    <div class="absolute left-0 top-0 flex h-full items-center justify-center rounded-sm text-xs font-medium text-white"
+                                         style="width: ${percentage}%; background-color: ${color};"></div>
+                                </div>
+                                <p class="text-sm font-medium text-gray-800 min-w-[45px] text-right">${percentage}%</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                listElement.innerHTML = listHTML;
             }
         }
         

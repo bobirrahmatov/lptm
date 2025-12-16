@@ -243,7 +243,7 @@
 <body class="bg-gray-50">
     <!-- Loading Overlay -->
     <div id="loadingOverlay"
-        class="fixed inset-0 bg-gray-400/50 backdrop-blur-[32px] z-[9999] flex items-center justify-center hidden">
+        style="position: fixed; inset: 0; background-color: rgba(156, 163, 175, 0.5); backdrop-filter: blur(32px); -webkit-backdrop-filter: blur(32px); z-index: 9999; display: none; align-items: center; justify-content: center;">
         <div class="loader">
             <label id="loadingMessage" class="loading-label">Loading Portfolio Data</label>
             <div class="loading">
@@ -2814,7 +2814,7 @@
 
         // ===== DUMMY DATA FOR TESTING =====
         // Uncomment this section to test with dummy data without loading from Confluence
-        const ENABLE_DUMMY_DATA = true; // Set to false to use real data from Confluence
+        const ENABLE_DUMMY_DATA = false; // Set to false to use real data from Confluence
         
         if (ENABLE_DUMMY_DATA) {
             // Generate comprehensive dummy data for testing
@@ -4177,8 +4177,7 @@
             
             if (overlay) {
                 console.log('✅ Loading overlay found, displaying...');
-                overlay.classList.remove("hidden");
-                overlay.style.display = 'flex'; // Ensure display is set
+                overlay.style.display = 'flex'; // Use inline style for Confluence compatibility
                 if (titleEl) {
                     titleEl.textContent = title;
                     console.log('📝 Title updated:', title);
@@ -7036,7 +7035,7 @@
         let pipelineTableData = []; // Store filtered data
         
         function selectPipelineStatusFilter(status) {
-            console.log('Pipeline status filter selected:', status);
+            console.log('🎯 selectPipelineStatusFilter called with:', status);
             pipelineStatusFilter = status;
             
             // Update button styles
@@ -7045,6 +7044,12 @@
                 'CM': document.getElementById('btnPipelineStatusCM'),
                 'DM': document.getElementById('btnPipelineStatusDM')
             };
+            
+            console.log('📍 Button elements found:', {
+                all: !!buttons.all,
+                CM: !!buttons.CM,
+                DM: !!buttons.DM
+            });
             
             Object.keys(buttons).forEach(key => {
                 const btn = buttons[key];
@@ -7059,6 +7064,7 @@
             
             // Reset to page 1 and re-render
             pipelineTableCurrentPage = 1;
+            console.log('🔄 Calling renderPipelineDetailsTable...');
             renderPipelineDetailsTable();
         }
         
@@ -7138,6 +7144,9 @@
                     else if (daysSinceApproval >= 61 && daysSinceApproval <= 90) agingBucket = '61-90 Days';
                     else if (daysSinceApproval > 90) agingBucket = '>90 Days';
                     
+                    // Get management status from various possible field names
+                    const managementStatus = row.Management_Status || row['DM/CM'] || row.DM_CM || row['Management Status'] || '';
+                    
                     pendingDeals.push({
                         facilityId: facilityId,
                         relationshipName: row.Relationship_Name || 'Unknown',
@@ -7147,21 +7156,40 @@
                         tfaAmount: parseNumber(row.Fac_Amount || row.Facility_Amount),
                         region: region,
                         facilityType: facilityType,
-                        managementStatus: row.Management_Status || row['DM/CM'] || 'Unknown',
+                        managementStatus: managementStatus || 'N/A',
                         firstApprovalDate: firstApprovalDate
                     });
                 }
             });
             
+            console.log('📊 Pipeline Details Table - Total pending deals:', pendingDeals.length);
+            if (pendingDeals.length > 0) {
+                console.log('📊 Sample deal:', {
+                    managementStatus: pendingDeals[0].managementStatus,
+                    facilityId: pendingDeals[0].facilityId,
+                    aging: pendingDeals[0].aging,
+                    days: pendingDeals[0].days
+                });
+                // Check unique management statuses
+                const uniqueStatuses = [...new Set(pendingDeals.map(d => d.managementStatus))];
+                console.log('📊 Unique Management Statuses:', uniqueStatuses);
+            }
+            
             // Apply status filter
             let filteredDeals = pendingDeals;
             if (pipelineStatusFilter !== 'all') {
+                console.log(`🔍 Applying filter: "${pipelineStatusFilter}"`);
                 filteredDeals = pendingDeals.filter(deal => {
                     const status = String(deal.managementStatus || '').trim().toUpperCase();
-                    // Match CM or DM (case-insensitive, partial match)
-                    return status.includes(pipelineStatusFilter.toUpperCase());
+                    const filterValue = pipelineStatusFilter.toUpperCase();
+                    const matches = status.includes(filterValue);
+                    // Log first few matches for debugging
+                    if (filteredDeals.length < 3) {
+                        console.log(`  Deal status: "${status}", filter: "${filterValue}", matches: ${matches}`);
+                    }
+                    return matches;
                 });
-                console.log(`Pipeline filter applied: ${pipelineStatusFilter}, filtered from ${pendingDeals.length} to ${filteredDeals.length} deals`);
+                console.log(`✅ Pipeline filter applied: ${pipelineStatusFilter}, filtered from ${pendingDeals.length} to ${filteredDeals.length} deals`);
             }
             
             // Apply search filter
@@ -7243,11 +7271,13 @@
         }
         
         function exportPipelineTableToCSV() {
+            console.log('📥 Exporting pipeline table to CSV...');
             if (pipelineTableData.length === 0) {
                 alert('No data to export');
                 return;
             }
             
+            // Headers match table order: Aging before Days
             const headers = ['Facility ID', 'Relationship Name', 'Lead Underwriter', 'Region', 'Status', 'Aging', 'Days', 'TFA', 'Approval Date'];
             const rows = pipelineTableData.map(deal => [
                 deal.facilityId,
@@ -7275,6 +7305,7 @@
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
+            console.log('✅ CSV exported successfully');
         }
         
         // Create Covenant Monitoring Chart (Radial Gauge Style)

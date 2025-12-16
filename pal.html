@@ -178,7 +178,9 @@
             align-items: center;
             justify-content: space-evenly;
             padding: 30px;
-            box-shadow: 2px 2px 10px -5px lightgrey;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            position: relative;
+            z-index: 10000;
         }
         
         .loading {
@@ -241,7 +243,8 @@
 <body class="bg-gray-50">
     <!-- Loading Overlay -->
     <div id="loadingOverlay"
-        class="fixed inset-0 bg-gray-900/80 backdrop-blur-3xl z-[9999] flex items-center justify-center hidden">
+        class="fixed inset-0 bg-gray-900/90 backdrop-blur-sm z-[9999] flex items-center justify-center hidden"
+        style="backdrop-filter: blur(8px);">
         <div class="loader">
             <label id="loadingMessage" class="loading-label">Loading Portfolio Data</label>
             <div class="loading">
@@ -3516,7 +3519,16 @@
 
         // Load data from Confluence attachment (read-only)
         async function loadDataFromCSV() {
+            console.log('🚀 ========== loadDataFromCSV STARTED ==========');
             const loadStartTime = performance.now();
+            
+            console.log('📊 Confluence Configuration:', {
+                BASE_URL: CONFLUENCE_BASE_URL,
+                PAGE_ID: CONFLUENCE_PAGE_ID,
+                FILE_NAME: CONFLUENCE_FILE_NAME,
+                COVENANTS_FILE: CONFLUENCE_COVENANTS_FILE,
+                CCM_FILE: CONFLUENCE_CCM_FILE
+            });
             
             showLoadingOverlay(
                 "Loading Portfolio Data",
@@ -3524,6 +3536,7 @@
             );
             
             try {
+                console.log('✅ Inside try block, starting data load...');
                 // Start loading covenant and CCM data in parallel (they're smaller files)
                 showLoadingOverlay(
                     "Loading Portfolio Data",
@@ -3697,7 +3710,13 @@
                     );
                 }
             } catch (error) {
-                console.error("Error loading data from Confluence:", error);
+                console.error("❌ ========== ERROR LOADING DATA ==========");
+                console.error("❌ Error loading data from Confluence:", error);
+                console.error("❌ Error message:", error.message);
+                console.error("❌ Error stack:", error.stack);
+                console.error("❌ Error name:", error.name);
+                console.error("❌ ==========================================");
+                
                 hideLoadingOverlay();
                 showNotification(
                     "Error",
@@ -3710,27 +3729,31 @@
         // Fetch data from Confluence attachment (read-only, no updates)
         async function fetchDataFromConfluence() {
             try {
+                console.log('🌐 Starting fetchDataFromConfluence...');
                 // Construct Confluence API URL
                 const url = `${CONFLUENCE_BASE_URL}/download/attachments/${CONFLUENCE_PAGE_ID}/${CONFLUENCE_FILE_NAME}?api=v2`;
                 
-                console.log("Fetching portfolio data from Confluence:", url);
-                console.log("File name:", CONFLUENCE_FILE_NAME);
+                console.log("📡 Fetching portfolio data from Confluence:", url);
+                console.log("📄 File name:", CONFLUENCE_FILE_NAME);
+                console.log("🆔 Page ID:", CONFLUENCE_PAGE_ID);
                 
                 const response = await fetch(url, {
                     headers: {
                         "X-Atlassian-Token": "no-check",
                     },
                 });
+                
+                console.log('📥 Response received. Status:', response.status, response.statusText);
 
                 if (!response.ok) {
-                    throw new Error(
-                        `Failed to fetch ${CONFLUENCE_FILE_NAME}: ${response.status} ${response.statusText}`
-                    );
+                    const errorMsg = `Failed to fetch ${CONFLUENCE_FILE_NAME}: ${response.status} ${response.statusText}`;
+                    console.error('❌', errorMsg);
+                    throw new Error(errorMsg);
                 }
 
-                console.log("Successfully fetched file from Confluence");
+                console.log("✅ Successfully fetched file from Confluence");
                 const blob = await response.blob();
-                console.log("Blob size:", blob.size, "bytes");
+                console.log("📦 Blob size:", blob.size, "bytes");
                 
                 // Parse based on file type with progress updates (10-40% range)
                 let portfolioProgressStart = 10;
@@ -3760,7 +3783,8 @@
                     "Unsupported file format. Please use .csv, .xlsx, or .xls files."
                 );
             } catch (error) {
-                console.error("Error fetching data from Confluence:", error.message);
+                console.error("❌ Error fetching portfolio data from Confluence:", error.message);
+                console.error("❌ Full error:", error);
                 return null;
             }
         }
@@ -4147,14 +4171,25 @@
             progress = "Please wait while we fetch your data...",
             percent = null
         ) {
+            console.log('🔄 showLoadingOverlay called:', { title, progress });
             const overlay = document.getElementById("loadingOverlay");
             const titleEl = document.getElementById("loadingMessage");
             const progressEl = document.getElementById("loadingProgress");
             
             if (overlay) {
+                console.log('✅ Loading overlay found, displaying...');
                 overlay.classList.remove("hidden");
-                if (titleEl) titleEl.textContent = title;
-                if (progressEl) progressEl.textContent = progress;
+                overlay.style.display = 'flex'; // Ensure display is set
+                if (titleEl) {
+                    titleEl.textContent = title;
+                    console.log('📝 Title updated:', title);
+                }
+                if (progressEl) {
+                    progressEl.textContent = progress;
+                    console.log('📝 Progress updated:', progress);
+                }
+            } else {
+                console.error('❌ Loading overlay element not found!');
             }
         }
         
@@ -4165,9 +4200,14 @@
 
         // Hide loading overlay
         function hideLoadingOverlay() {
+            console.log('⏹️ hideLoadingOverlay called');
             const overlay = document.getElementById("loadingOverlay");
             if (overlay) {
+                console.log('✅ Hiding loading overlay');
                 overlay.classList.add("hidden");
+                overlay.style.display = 'none';
+            } else {
+                console.error('❌ Loading overlay element not found when trying to hide!');
             }
         }
 
@@ -6988,6 +7028,253 @@
                 buckets: buckets.map(b => ({ label: b.label, count: b.count, tfa: formatCurrency(b.tfa) }))
             });
         }
+        
+        // Pipeline Details Table - Status Filter (DM/CM)
+        let pipelineStatusFilter = 'all'; // Global variable to track selected status filter
+        let pipelineTableSearchTerm = ''; // Global variable for search term
+        let pipelineTableCurrentPage = 1;
+        let pipelineTablePerPage = 10;
+        let pipelineTableData = []; // Store filtered data
+        
+        function selectPipelineStatusFilter(status) {
+            console.log('Pipeline status filter selected:', status);
+            pipelineStatusFilter = status;
+            
+            // Update button styles
+            const buttons = {
+                'all': document.getElementById('btnPipelineStatusAll'),
+                'CM': document.getElementById('btnPipelineStatusCM'),
+                'DM': document.getElementById('btnPipelineStatusDM')
+            };
+            
+            Object.keys(buttons).forEach(key => {
+                const btn = buttons[key];
+                if (btn) {
+                    if (key === status) {
+                        btn.className = 'min-w-[45px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white';
+                    } else {
+                        btn.className = 'min-w-[45px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900';
+                    }
+                }
+            });
+            
+            // Reset to page 1 and re-render
+            pipelineTableCurrentPage = 1;
+            renderPipelineDetailsTable();
+        }
+        
+        function updatePipelineTableSearch(searchValue) {
+            pipelineTableSearchTerm = searchValue.toLowerCase();
+            pipelineTableCurrentPage = 1;
+            renderPipelineDetailsTable();
+        }
+        
+        function updatePipelineTablePerPage(perPage) {
+            pipelineTablePerPage = perPage;
+            pipelineTableCurrentPage = 1;
+            renderPipelineDetailsTable();
+        }
+        
+        function changePipelineTablePage(direction) {
+            if (direction === 'next') {
+                pipelineTableCurrentPage++;
+            } else if (direction === 'prev' && pipelineTableCurrentPage > 1) {
+                pipelineTableCurrentPage--;
+            }
+            renderPipelineDetailsTable();
+        }
+        
+        function clearAllPipelineFilters() {
+            pipelineStatusFilter = 'all';
+            pipelineTableSearchTerm = '';
+            pipelineTableCurrentPage = 1;
+            
+            // Reset button styles
+            selectPipelineStatusFilter('all');
+            
+            // Clear search input
+            const searchInput = document.getElementById('pipelineTableSearch');
+            if (searchInput) searchInput.value = '';
+            
+            renderPipelineDetailsTable();
+        }
+        
+        function renderPipelineDetailsTable() {
+            const dataSource = filteredData.length > 0 ? filteredData : portfolioData;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const currentYear = today.getFullYear();
+            const excludedFacilityTypes = EXCLUDED_FACILITY_TYPES;
+            
+            // Collect all pending deals
+            const pendingDeals = [];
+            
+            dataSource.forEach(row => {
+                // Apply pipeline filters
+                const pseColumn = row["PSE_non-PSE"] || row.PSE_non_PSE || "";
+                const pseValue = String(pseColumn).trim().toUpperCase();
+                if (pseValue === "PSE") return;
+                
+                const region = String(row.Region || "").trim().toUpperCase();
+                if (region !== "NAM" && region !== "LATAM") return;
+                
+                const facilityType = String(row.Facility_Type || "").trim();
+                if (excludedFacilityTypes.includes(facilityType)) return;
+                
+                const originationDate = row.Origination_Date;
+                const firstApprovalDate = parseDate(row.Facility_First_Approval_Date);
+                const facilityId = row.Facility_ID;
+                
+                if ((!originationDate || originationDate.trim() === '') &&
+                    firstApprovalDate &&
+                    facilityId &&
+                    firstApprovalDate.getFullYear() === currentYear) {
+                    
+                    const daysSinceApproval = Math.floor((today - firstApprovalDate) / (1000 * 60 * 60 * 24));
+                    
+                    // Determine aging bucket
+                    let agingBucket = '';
+                    if (daysSinceApproval >= 1 && daysSinceApproval <= 30) agingBucket = '1-30 Days';
+                    else if (daysSinceApproval >= 31 && daysSinceApproval <= 60) agingBucket = '31-60 Days';
+                    else if (daysSinceApproval >= 61 && daysSinceApproval <= 90) agingBucket = '61-90 Days';
+                    else if (daysSinceApproval > 90) agingBucket = '>90 Days';
+                    
+                    pendingDeals.push({
+                        facilityId: facilityId,
+                        relationshipName: row.Relationship_Name || 'Unknown',
+                        leadUnderwriter: row.Lead_Underwriter || 'Unknown',
+                        aging: agingBucket,
+                        days: daysSinceApproval,
+                        tfaAmount: parseNumber(row.Fac_Amount || row.Facility_Amount),
+                        region: region,
+                        facilityType: facilityType,
+                        managementStatus: row.Management_Status || row['DM/CM'] || 'Unknown',
+                        firstApprovalDate: firstApprovalDate
+                    });
+                }
+            });
+            
+            // Apply status filter
+            let filteredDeals = pendingDeals;
+            if (pipelineStatusFilter !== 'all') {
+                filteredDeals = pendingDeals.filter(deal => 
+                    String(deal.managementStatus).trim().toUpperCase() === pipelineStatusFilter
+                );
+            }
+            
+            // Apply search filter
+            if (pipelineTableSearchTerm) {
+                filteredDeals = filteredDeals.filter(deal =>
+                    String(deal.facilityId).toLowerCase().includes(pipelineTableSearchTerm) ||
+                    String(deal.relationshipName).toLowerCase().includes(pipelineTableSearchTerm) ||
+                    String(deal.leadUnderwriter).toLowerCase().includes(pipelineTableSearchTerm) ||
+                    String(deal.region).toLowerCase().includes(pipelineTableSearchTerm) ||
+                    String(deal.facilityType).toLowerCase().includes(pipelineTableSearchTerm)
+                );
+            }
+            
+            pipelineTableData = filteredDeals;
+            
+            // Pagination
+            const totalRecords = filteredDeals.length;
+            const totalPages = Math.ceil(totalRecords / pipelineTablePerPage);
+            const startIndex = (pipelineTableCurrentPage - 1) * pipelineTablePerPage;
+            const endIndex = Math.min(startIndex + pipelineTablePerPage, totalRecords);
+            const paginatedDeals = filteredDeals.slice(startIndex, endIndex);
+            
+            // Render header
+            const headerEl = document.getElementById('pipelineDetailsTableHeader');
+            if (headerEl) {
+                headerEl.innerHTML = `
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 tracking-wider">Facility ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 tracking-wider">Relationship Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 tracking-wider">Lead Underwriter</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 tracking-wider">Region</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 tracking-wider">Aging</th>
+                    <th class="px-6 py-3 text-right text-xs font-semibold text-gray-700 tracking-wider">Days</th>
+                    <th class="px-6 py-3 text-right text-xs font-semibold text-gray-700 tracking-wider">TFA</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 tracking-wider">Approval Date</th>
+                `;
+            }
+            
+            // Render body
+            const bodyEl = document.getElementById('pipelineDetailsTableBody');
+            if (bodyEl) {
+                if (paginatedDeals.length === 0) {
+                    bodyEl.innerHTML = '<tr><td colspan="9" class="px-6 py-8 text-center text-sm text-gray-500">No deals found</td></tr>';
+                } else {
+                    bodyEl.innerHTML = paginatedDeals.map(deal => `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 text-sm text-gray-900">${deal.facilityId}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900">${deal.relationshipName}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700">${deal.leadUnderwriter}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700">${deal.region}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700">${deal.managementStatus}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700">${deal.aging}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900 text-right font-semibold">${deal.days}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900 text-right">${formatCurrency(deal.tfaAmount)}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700">${deal.firstApprovalDate.toLocaleDateString()}</td>
+                        </tr>
+                    `).join('');
+                }
+            }
+            
+            // Update pagination info
+            document.getElementById('pipelineTableStart').textContent = totalRecords > 0 ? startIndex + 1 : 0;
+            document.getElementById('pipelineTableEnd').textContent = endIndex;
+            document.getElementById('pipelineTableTotal').textContent = totalRecords;
+            document.getElementById('pipelineTableCurrentPage').textContent = pipelineTableCurrentPage;
+            document.getElementById('pipelineTableTotalPages').textContent = Math.max(1, totalPages);
+            
+            // Update pagination buttons
+            const prevBtn = document.getElementById('pipelineTablePrevBtn');
+            const nextBtn = document.getElementById('pipelineTableNextBtn');
+            if (prevBtn) prevBtn.disabled = pipelineTableCurrentPage === 1;
+            if (nextBtn) nextBtn.disabled = pipelineTableCurrentPage >= totalPages;
+            
+            // Show/hide clear filters button
+            const clearBtn = document.getElementById('btnClearAllPipelineFilters');
+            if (clearBtn) {
+                clearBtn.style.display = (pipelineStatusFilter !== 'all' || pipelineTableSearchTerm) ? 'flex' : 'none';
+            }
+        }
+        
+        function exportPipelineTableToCSV() {
+            if (pipelineTableData.length === 0) {
+                alert('No data to export');
+                return;
+            }
+            
+            const headers = ['Facility ID', 'Relationship Name', 'Lead Underwriter', 'Region', 'Status', 'Aging', 'Days', 'TFA', 'Approval Date'];
+            const rows = pipelineTableData.map(deal => [
+                deal.facilityId,
+                deal.relationshipName,
+                deal.leadUnderwriter,
+                deal.region,
+                deal.managementStatus,
+                deal.aging,
+                deal.days,
+                deal.tfaAmount,
+                deal.firstApprovalDate.toLocaleDateString()
+            ]);
+            
+            let csvContent = headers.join(',') + '\n';
+            rows.forEach(row => {
+                csvContent += row.map(cell => `"${cell}"`).join(',') + '\n';
+            });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `pipeline_deals_${new Date().toISOString().slice(0,10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+        
         // Create Covenant Monitoring Chart (Radial Gauge Style)
         let covenantMonitoringChartInstance = null;
         let currentCovenantData = {
@@ -11537,6 +11824,14 @@
                 
                 // Initialize any charts if needed
                 initializeExpandCharts(chartType, dataSource);
+                
+                // Initialize pipeline details table if this is the pipeline modal
+                if (chartType === 'pipeline' && typeof renderPipelineDetailsTable === 'function') {
+                    console.log('Initializing Pipeline Details Table');
+                    setTimeout(() => {
+                        renderPipelineDetailsTable();
+                    }, 100);
+                }
                 } catch (error) {
                     console.error('❌ Error generating expanded view for', chartType, error);
                     insightsContent.innerHTML = `
@@ -21536,6 +21831,22 @@
                             <p class="text-sm font-medium text-gray-500 mt-1">All pending deals awaiting closure</p>
                     </div>
                         <div class="flex items-center gap-3">
+                            <!-- Status Filter (DM/CM) -->
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-medium text-gray-500 tracking-wider">Status:</span>
+                                <div class="inline-flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5">
+                                    <button id="btnPipelineStatusAll" onclick="selectPipelineStatusFilter('all')" class="min-w-[45px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs shadow-sm text-gray-900 bg-white">
+                                        All
+                                    </button>
+                                    <button id="btnPipelineStatusCM" onclick="selectPipelineStatusFilter('CM')" class="min-w-[45px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
+                                        CM
+                                    </button>
+                                    <button id="btnPipelineStatusDM" onclick="selectPipelineStatusFilter('DM')" class="min-w-[45px] px-3 py-1.5 font-medium transition-colors rounded-md text-xs text-gray-600 hover:text-gray-900">
+                                        DM
+                                    </button>
+                                </div>
+                            </div>
+                            
                             <!-- Search Input -->
                             <div class="relative">
                                 <input 

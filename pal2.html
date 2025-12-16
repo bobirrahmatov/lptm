@@ -178,16 +178,38 @@
         }
         
         @keyframes loading {
-            0% { left: -25%; }
-            100% { left: 70%; }
+            0% { 
+                left: -25%;
+                transform: translateX(0);
+            }
+            100% { 
+                left: 70%;
+                transform: translateX(0);
+            }
         }
         
         .animate-bit {
             animation: bit 0.6s alternate infinite;
+            will-change: opacity;
         }
         
         .animate-loading {
-            animation: loading 0.6s alternate infinite;
+            animation: loading 0.6s ease-in-out alternate infinite;
+            will-change: transform, left;
+            /* Use GPU acceleration for smoother animation */
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            perspective: 1000px;
+        }
+        
+        /* Ensure animation continues smoothly even during DOM updates */
+        #loadingOverlay * {
+            animation-play-state: running !important;
+        }
+        
+        /* Prevent layout thrashing */
+        #loadingMessage {
+            contain: layout style;
         }
     </style>
 </head>
@@ -197,9 +219,9 @@
     <div id="loadingOverlay"
         class="fixed inset-0 bg-gray-100 z-[10000] flex items-center justify-center hidden">
         <div class="w-[350px] h-[180px] rounded-[10px] bg-white flex flex-col items-center justify-evenly p-[30px] shadow-[2px_2px_10px_-5px_lightgrey]">
-            <label id="loadingMessage" class="text-[#002] text-lg animate-bit">Please wait...</label>
+            <label id="loadingMessage" class="text-[#002] text-lg animate-bit pointer-events-none">Please wait...</label>
             <div class="w-full h-[10px] bg-gray-300 rounded-[10px] relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-1/2 h-[10px] bg-blue-500 rounded-[10px] z-[1] animate-loading"></div>
+                <div id="loadingBar" class="absolute top-0 left-0 w-1/2 h-[10px] bg-blue-500 rounded-[10px] z-[1] animate-loading"></div>
             </div>
         </div>
     </div>
@@ -4113,8 +4135,11 @@
                 overlay.classList.remove("hidden");
                 
                 if (messageEl) {
-                    messageEl.textContent = title;
-                    console.log('📝 Message updated:', title);
+                    // Use requestAnimationFrame to update text without interrupting animation
+                    requestAnimationFrame(() => {
+                        messageEl.textContent = title;
+                        console.log('📝 Message updated:', title);
+                    });
                 }
             } else {
                 console.error('❌ Loading overlay element not found!');

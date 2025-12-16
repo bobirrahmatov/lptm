@@ -166,23 +166,8 @@
         .z-9999 {
             z-index: 9999;
         }
-    </style>
-</head>
 
-<body class="bg-gray-50">
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay"
-        class="fixed inset-0 bg-gray-900/80 backdrop-blur-3xl z-[9999] flex items-center justify-center hidden">
-        <div class="loader">
-            <label id="loadingMessage" class="loading-label">Loading Portfolio Data</label>
-            <div class="loading">
-                <div class="loading-bar"></div>
-            </div>
-            <p id="loadingProgress" class="loading-subtext">Please wait while we fetch your data...</p>
-        </div>
-    </div>
-    
-    <style>
+        /* Loading Overlay Styles */
         .loader {
             width: 350px;
             height: 180px;
@@ -251,6 +236,20 @@
             }
         }
     </style>
+</head>
+
+<body class="bg-gray-50">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay"
+        class="fixed inset-0 bg-gray-900/80 backdrop-blur-3xl z-[9999] flex items-center justify-center hidden">
+        <div class="loader">
+            <label id="loadingMessage" class="loading-label">Loading Portfolio Data</label>
+            <div class="loading">
+                <div class="loading-bar"></div>
+            </div>
+            <p id="loadingProgress" class="loading-subtext">Please wait while we fetch your data...</p>
+        </div>
+    </div>
 
     <div class="p-4 md:p-6">
         <!-- Portfolio Overview Content -->
@@ -1284,7 +1283,7 @@
         <!-- Covenants and Reviews Section -->
         <div class="grid grid-cols-12 gap-4 md:gap-6 mb-6">
             <!-- Covenant Monitoring Dashboard (Past Due Covenants) -->
-            <div class="col-span-12 xl:col-span-4">
+            <div class="col-span-12 xl:col-span-6">
                 <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white h-full flex flex-col relative" x-data="{ covenantView: 'pastDue' }">
                     <!-- Action Buttons - Absolute Top Right -->
                     <div class="absolute top-2 right-2 flex items-center gap-0.5 z-10">
@@ -1330,44 +1329,8 @@
                 </div>
             </div>
 
-            <!-- Regional Distribution Table -->
-            <div class="col-span-12 xl:col-span-4">
-                <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white h-full flex flex-col relative">
-                    <div class="flex items-center justify-between px-5 pt-5 sm:px-6 sm:pt-6 pb-4">
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-800" id="covenantRegionalTableTitle">
-                                Past Due Covenants by Region
-                            </h3>
-                            <p class="mt-1 text-sm text-gray-500" id="covenantRegionalTableSubtitle">
-                                Regional breakdown of past due covenants
-                            </p>
-                    </div>
-                </div>
-                    <div class="max-w-full overflow-x-auto flex-1">
-                        <table class="w-full table-auto h-full">
-                    <thead>
-                                <tr class="bg-gray-50 text-left" id="covenantRegionalTableHeader">
-                                    <th class="px-3 py-3 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">Region</th>
-                                    <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">1-45</span><br><span class="whitespace-nowrap">Days</span></th>
-                                    <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">46-90</span><br><span class="whitespace-nowrap">Days</span></th>
-                                    <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">&gt;90</span><br><span class="whitespace-nowrap">Days</span></th>
-                                    <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">Total</span><br><span class="whitespace-nowrap">Past Dues</span></th>
-                                    <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">Total</span><br><span class="whitespace-nowrap">Covenants</span></th>
-                                    <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">% of</span><br><span class="whitespace-nowrap">Total</span></th>
-                                </tr>
-                            </thead>
-                            <tbody id="covenantRegionalTableBody" class="divide-y divide-gray-200">
-                                <tr>
-                                    <td colspan="7" class="px-5 py-4 text-center text-sm text-gray-500">Loading...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-            </div>
-                </div>
-            </div>
-
             <!-- CCM Regional Distribution Chart (Stacked Bar) -->
-            <div class="col-span-12 xl:col-span-4">
+            <div class="col-span-12 xl:col-span-6">
                 <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6 h-full flex flex-col pb-0 relative">
                     <!-- Action Buttons - Absolute Top Right -->
                     <div class="absolute top-2 right-2 flex items-center gap-0.5 z-10">
@@ -3443,6 +3406,12 @@
                 console.log("File:", CONFLUENCE_FILE_NAME);
                 console.log("=====================================");
                 
+                // Show loading overlay immediately
+                showLoadingOverlay(
+                    "Loading Portfolio Data",
+                    "Connecting to data source..."
+                );
+                
                 // Load actual data from Confluence
                 loadDataFromCSV();
             }
@@ -4781,10 +4750,7 @@
             chartFilter.value = filterValue;
             chartFilter.label = displayLabel || filterValue;
 
-            // Display chart filter badge
-            displayChartFilterBadge();
-
-            // Apply the filter
+            // Apply the filter (which will also update badges via displayFilterBadges)
             applyFiltersWithChartFilter();
         }
 
@@ -4797,51 +4763,15 @@
             chartFilter.value = null;
             chartFilter.label = null;
 
-            // Remove badge and reapply normal filters
-            const badge = document.getElementById("chartFilterBadge");
-            if (badge) badge.remove();
-
+            // Reapply normal filters (which will update badges)
             applyFilters();
         }
 
         // Display chart filter badge
         function displayChartFilterBadge() {
-            // Remove existing badges if any
-            const existing = document.getElementById("chartFilterBadge");
-            if (existing) existing.remove();
-            const pbExisting = document.getElementById("pb-chartFilterBadge");
-            if (pbExisting) pbExisting.remove();
-
-            if (!chartFilter.active) return;
-
-            // Update Portfolio Overview badges
-            const badgesContainer = document.getElementById("activeFiltersBadges");
-            if (badgesContainer) {
-                badgesContainer.style.display = "flex";
-
-                const badge = document.createElement("span");
-                badge.id = "chartFilterBadge";
-                badge.className =
-                    "inline-flex items-center bg-blue-50 text-sm text-blue-700 border-2 border-blue-500 rounded-lg gap-x-2 py-1.5 pl-3 pr-1 font-medium";
-                badge.innerHTML = `
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
-                    </svg>
-                    <span class="text-blue-700">Chart Filter</span>
-                    <span class="h-4 w-px bg-blue-400"></span>
-                    <span class="font-semibold text-blue-900">${chartFilter.label}</span>
-                    <button type="button" onclick="clearChartFilter()" 
-                        class="flex h-5 w-5 items-center justify-center rounded text-blue-600 hover:bg-blue-100 hover:text-blue-800"
-                        aria-label="Remove">
-                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                        </svg>
-                    </button>
-                `;
-
-                // Add as first badge
-                badgesContainer.insertBefore(badge, badgesContainer.firstChild);
-            }
+            // Note: This function is now integrated into displayFilterBadges()
+            // Kept for backwards compatibility but does nothing
+            return;
         }
 
         // Apply filters with chart filter included
@@ -5120,8 +5050,8 @@
             
             if (badgesContainer) badgesContainer.innerHTML = "";
             
-            // Check if there are any filters (including search)
-            const hasFilters = Object.keys(activeFilters).length > 0 || selectedSearchTerm !== "";
+            // Check if there are any filters (including search and chart filter)
+            const hasFilters = Object.keys(activeFilters).length > 0 || selectedSearchTerm !== "" || chartFilter.active;
             
             if (!hasFilters) {
                 if (badgesContainer) badgesContainer.style.display = "none";
@@ -5129,6 +5059,38 @@
             }
             
             if (badgesContainer) badgesContainer.style.display = "flex";
+            
+            // Add chart filter badge first (if active)
+            if (chartFilter.active) {
+                const chartBadge = document.createElement("span");
+                chartBadge.id = "chartFilterBadge";
+                chartBadge.className =
+                    "inline-flex items-center bg-white text-sm text-gray-600 border border-gray-300 rounded-lg gap-x-2 py-1.5 pl-3 pr-1";
+                
+                // Get proper label for the filter type
+                let filterTypeLabel = chartFilter.type.charAt(0).toUpperCase() + chartFilter.type.slice(1);
+                if (chartFilter.type === 'relationship') filterTypeLabel = 'Relationship';
+                if (chartFilter.type === 'product') filterTypeLabel = 'Product';
+                if (chartFilter.type === 'facilityType') filterTypeLabel = 'Facility Type';
+                if (chartFilter.type === 'region') filterTypeLabel = 'Region';
+                if (chartFilter.type === 'expiryMonth') filterTypeLabel = 'Expiry Month';
+                if (chartFilter.type === 'pipelineType') filterTypeLabel = 'Pipeline Type';
+                if (chartFilter.type === 'pipelineWeek') filterTypeLabel = 'Pipeline Week';
+                
+                chartBadge.innerHTML = `
+                    <span class="text-gray-600">${filterTypeLabel}</span>
+                    <span class="h-4 w-px bg-gray-300"></span>
+                    <span class="font-medium text-gray-800">${chartFilter.label}</span>
+                    <button type="button" onclick="clearChartFilter()" 
+                        class="flex h-5 w-5 items-center justify-center rounded text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                        aria-label="Remove">
+                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                `;
+                badgesContainer.appendChild(chartBadge);
+            }
             
             // Add search badge if search is active
             if (selectedSearchTerm !== "") {
@@ -5896,16 +5858,7 @@
                         show: false,
                     },
                     events: {
-                        dataPointSelection: function (event, chartContext, config) {
-                            const selectedIndex = config.dataPointIndex;
-                            const selectedRelationship = relationships[selectedIndex];
-                            console.log("Relationship clicked:", selectedRelationship);
-                            applyChartFilter(
-                                "relationship",
-                                selectedRelationship,
-                                selectedRelationship
-                            );
-                        },
+                        // Chart click filtering disabled
                     },
                 },
                 plotOptions: {
@@ -8510,22 +8463,15 @@
                     offsetY: 0,
                     offsetX: 0,
                     events: {
+                        // Chart click filtering disabled
+                    },
+                    events_disabled: {
+                        // Expiry chart click functionality removed
                         dataPointSelection: function (event, chartContext, config) {
                             const selectedMonth = next3Months[config.dataPointIndex];
                             const monthName = categories[config.dataPointIndex];
                             const seriesName = config.w.config.series[config.seriesIndex].name;
                             console.log("Month clicked:", monthName, "Series:", seriesName, "Month Key:", selectedMonth);
-                            
-                            // Store the selected month for filtering
-                            window.selectedExpiryMonth = selectedMonth;
-                            window.selectedExpiryMonthLabel = monthName;
-                            window.selectedExpirySeries = seriesName;
-                            
-                            applyChartFilter(
-                                "expiryMonth",
-                                selectedMonth,
-                                `${seriesName} - ${monthName}`
-                            );
                         },
                     },
                 },
@@ -8912,22 +8858,15 @@
                         enabled: false,
                     },
                     events: {
+                        // Chart click filtering disabled
+                    },
+                    events_disabled: {
+                        // Expiry chart click functionality removed
                         dataPointSelection: function (event, chartContext, config) {
                             const selectedMonth = next3Months[config.dataPointIndex];
                             const monthName = categories[config.dataPointIndex];
                             const seriesName = config.w.config.series[config.seriesIndex].name;
                             console.log("Month clicked:", monthName, "Series:", seriesName, "Month Key:", selectedMonth);
-                            
-                            // Store the selected month for filtering
-                            window.selectedExpiryMonth = selectedMonth;
-                            window.selectedExpiryMonthLabel = monthName;
-                            window.selectedExpirySeries = seriesName;
-                            
-                            applyChartFilter(
-                                "expiryMonth",
-                                selectedMonth,
-                                `${seriesName} - ${monthName}`
-                            );
                         },
                     },
                 },
@@ -9514,16 +9453,7 @@
                         show: false,
                     },
                     events: {
-                        dataPointSelection: function (event, chartContext, config) {
-                            const selectedIndex = config.dataPointIndex;
-                            const selectedRelationship = relationships[selectedIndex];
-                            console.log("Relationship clicked:", selectedRelationship);
-                            applyChartFilter(
-                                "relationship",
-                                selectedRelationship,
-                                selectedRelationship
-                            );
-                        },
+                        // Chart click filtering disabled
                     },
                 },
                 plotOptions: {
@@ -9996,12 +9926,7 @@
                     width: 280,
                     height: 280,
                     events: {
-                        dataPointSelection: function (event, chartContext, config) {
-                            const selectedIndex = config.dataPointIndex;
-                            const selectedProduct = labels[selectedIndex];
-                            console.log("Product clicked:", selectedProduct);
-                            applyChartFilter("product", selectedProduct, selectedProduct);
-                        },
+                        // Chart click filtering disabled
                     },
                 },
                 stroke: {
@@ -10418,12 +10343,7 @@
                     width: 280,
                     height: 280,
                     events: {
-                        dataPointSelection: function (event, chartContext, config) {
-                            const selectedIndex = config.dataPointIndex;
-                            const selectedProduct = labels[selectedIndex];
-                            console.log("Product clicked:", selectedProduct);
-                            applyChartFilter("product", selectedProduct, selectedProduct);
-                        },
+                        // Chart click filtering disabled
                     },
                 },
                 stroke: {
@@ -17119,20 +17039,12 @@
                         Classification
                         <span class="ml-1 text-xs text-gray-400">⇅</span>
                     </th>
-                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500 cursor-pointer hover:bg-gray-100" onclick="sortCCMTable('Frequency')">
-                        Frequency
-                        <span class="ml-1 text-xs text-gray-400">⇅</span>
-                    </th>
                     <th class="px-6 py-4 text-left text-sm font-medium whitespace-nowrap text-gray-500 cursor-pointer hover:bg-gray-100" onclick="sortCCMTable('Underwriter')">
                         Underwriter
                         <span class="ml-1 text-xs text-gray-400">⇅</span>
                     </th>
-                    <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500 cursor-pointer hover:bg-gray-100" onclick="sortCCMTable('Next_CCM_Month_End')">
-                        Next CCM Month End
-                        <span class="ml-1 text-xs text-gray-400">⇅</span>
-                    </th>
                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500 cursor-pointer hover:bg-gray-100" onclick="sortCCMTable('Next_CCM_Approval_Date')">
-                        Next CCM Approval Date
+                        CCM Approval Due Date
                         <span class="ml-1 text-xs text-gray-400">⇅</span>
                     </th>
                     <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500 cursor-pointer hover:bg-gray-100" onclick="sortCCMTable('CCM_Status')">
@@ -17146,7 +17058,7 @@
             const bodyEl = document.getElementById('ccmDetailsTableBody');
             if (bodyEl) {
                 if (pageData.length === 0) {
-                    bodyEl.innerHTML = '<tr><td colspan="9" class="px-6 py-8 text-center text-sm text-gray-500">No data available</td></tr>';
+                    bodyEl.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-sm text-gray-500">No data available</td></tr>';
                 } else {
                     bodyEl.innerHTML = pageData.map(row => {
                         const classificationColors = {
@@ -17180,9 +17092,7 @@
                                         ${classification}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-center text-gray-700">${row.Frequency || '-'}</td>
                                 <td class="px-6 py-4 text-gray-700">${row.Underwriter || row.Lead_Underwriter || '-'}</td>
-                                <td class="px-6 py-4 text-center text-gray-700">${row.Next_CCM_Month_End || '-'}</td>
                                 <td class="px-6 py-4 text-center text-gray-700">${row.Next_CCM_Approval_Date || '-'}</td>
                                 <td class="px-6 py-4 text-center">
                                     <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${statusColor}">
@@ -17196,7 +17106,7 @@
                     // Add totals row
                     bodyEl.innerHTML += `
                         <tr class="bg-gray-50 font-semibold border-t-2 border-gray-300">
-                            <td colspan="8" class="px-6 py-4 text-gray-900">Total Records</td>
+                            <td colspan="6" class="px-6 py-4 text-gray-900">Total Records</td>
                             <td class="px-6 py-4 text-center text-gray-900">${data.length}</td>
                         </tr>
                     `;
@@ -17325,8 +17235,8 @@
             }
             
             // Define CSV headers
-            const headers = ['Region', 'Relationship ID', 'Client Name', 'Classification', 'Frequency', 
-                           'Underwriter', 'Next CCM Month End', 'Next CCM Approval Date', 'CCM Status'];
+            const headers = ['Region', 'Relationship ID', 'Client Name', 'Classification', 
+                           'Underwriter', 'CCM Approval Due Date', 'CCM Status'];
             
             // Build CSV rows
             const csvRows = [headers.join(',')];
@@ -17337,9 +17247,7 @@
                 row.push(`"${item.Relationship_ID || ''}"`);
                 row.push(`"${item.Client_Name || ''}"`);
                 row.push(`"${item.Classification || ''}"`);
-                row.push(`"${item.Frequency || ''}"`);
                 row.push(`"${item.Underwriter || item.Lead_Underwriter || ''}"`);
-                row.push(`"${item.Next_CCM_Month_End || ''}"`);
                 row.push(`"${item.Next_CCM_Approval_Date || ''}"`);
                 row.push(`"${item.CCM_Status || ''}"`);
                 
@@ -22634,7 +22542,58 @@
             const variance = totalCovenants - lastWeekTotal;
             const variancePercent = lastWeekTotal > 0 ? ((variance / lastWeekTotal) * 100).toFixed(1) : 0;
             
-            // Variance by region
+            // Regional data for table - match dashboard structure exactly
+            const regions = ['APAC', 'EMEA', 'NAM', 'LATAM'];
+            const regionalAgingData = {};
+            const regionPopulation = {}; // Total covenants per region (no status filter)
+            
+            regions.forEach(region => {
+                regionalAgingData[region] = {
+                    '1-30': 0,
+                    '31-45': 0,
+                    '46-60': 0,
+                    '61-90': 0,
+                    '>90': 0,
+                    'comingDue': 0
+                };
+                regionPopulation[region] = 0;
+            });
+            
+            // FIRST PASS: Count total covenants per region (Population - no status filter)
+            covenantDataSource.forEach(row => {
+                const region = String(row.Region || "").trim().toUpperCase();
+                if (!regions.includes(region)) return;
+                regionPopulation[region]++;
+            });
+            
+            // SECOND PASS: Count by aging buckets for filtered covenants
+            filteredCovenants.forEach(row => {
+                const status = String(row.Coming_Due_Past_Due || "").trim().toLowerCase();
+                const region = String(row.Region || "").trim().toUpperCase();
+                const pastDueCategory = String(row.Past_Due_Category || "").trim();
+                
+                if (!regions.includes(region)) return;
+                
+                if (status === 'past due') {
+                    if (pastDueCategory === '>90 Days') {
+                        regionalAgingData[region]['>90']++;
+                    } else if (pastDueCategory === '61-90 Days') {
+                        regionalAgingData[region]['61-90']++;
+                    } else if (pastDueCategory === '46-60 Days') {
+                        regionalAgingData[region]['46-60']++;
+                    } else if (pastDueCategory === '31-45 Days') {
+                        regionalAgingData[region]['31-45']++;
+                    } else if (pastDueCategory === '0-30 Days') {
+                        regionalAgingData[region]['1-30']++;
+                    }
+                }
+                
+                if (status === 'coming due' && isWithinNext30Days(row.Covenant_Due_Date)) {
+                    regionalAgingData[region]['comingDue']++;
+                }
+            });
+            
+            // Variance by region (for potential future use)
             const varianceByRegion = {};
             ['APAC', 'EMEA', 'NAM', 'LATAM'].forEach(region => {
                 const thisWeek = filteredCovenants.filter(r => r.Region === region).length;
@@ -22703,20 +22662,17 @@
                 
                 const status = String(row.Coming_Due_Past_Due || "").trim().toLowerCase();
                 if (status === 'past due') {
-                    const category = row.Past_Due_Category || '';
-                    if (category.includes('1-45')) {
+                    const category = String(row.Past_Due_Category || '').trim();
+                    // Use exact category matching (not includes)
+                    if (category === '0-30 Days' || category === '31-45 Days') {
                         detailedTableData[key].days_1_45++;
                         debugAgingCounts['1-45']++;
                     }
-                    else if (category.includes('46-60')) {
+                    else if (category === '46-60 Days' || category === '61-90 Days') {
                         detailedTableData[key].days_46_60++;
                         debugAgingCounts['46-60']++;
                     }
-                    else if (category.includes('61-90')) {
-                        detailedTableData[key].days_61_90++;
-                        debugAgingCounts['61-90']++;
-                    }
-                    else if (category.includes('>90')) {
+                    else if (category === '>90 Days') {
                         detailedTableData[key].days_90_plus++;
                         debugAgingCounts['>90']++;
                         console.log('📊 Found >90 Days covenant:', { relationshipName, underwriter, category });
@@ -22825,9 +22781,83 @@
                     </div>
                 </div>
                 
-                <!-- 2x2 Chart Grid -->
+                <!-- Analysis Row -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <!-- Chart 1: Product Program Distribution - Matching TFA Style -->
+                    <!-- Regional Distribution Table - Matching Dashboard Structure -->
+                    <div class="rounded-xl border border-gray-200 bg-white flex flex-col">
+                        <div class="border-b border-gray-200 px-6 py-4">
+                            <h3 class="text-base font-semibold text-gray-900">${isPastDue ? 'Past Due Covenants by Region' : 'Coming Due Covenants by Region (Next 30 Days)'}</h3>
+                            <p class="text-sm font-medium text-gray-500 mt-1">${isPastDue ? 'Regional breakdown of past due covenants' : 'Regional breakdown of covenants due in the next 30 days'}</p>
+                        </div>
+                        <div class="flex-1 overflow-hidden">
+                            <div class="h-full max-w-full overflow-x-auto">
+                                <table class="w-full h-full table-auto">
+                                    <thead>
+                                        <tr class="bg-gray-50 text-left">
+                                            ${isPastDue ? `
+                                                <th class="px-3 py-3 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">Region</th>
+                                                <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">1-45</span><br><span class="whitespace-nowrap">Days</span></th>
+                                                <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">46-90</span><br><span class="whitespace-nowrap">Days</span></th>
+                                                <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">&gt;90</span><br><span class="whitespace-nowrap">Days</span></th>
+                                                <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">Total</span><br><span class="whitespace-nowrap">Past Dues</span></th>
+                                                <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">Total</span><br><span class="whitespace-nowrap">Covenants</span></th>
+                                                <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">% of</span><br><span class="whitespace-nowrap">Total</span></th>
+                                            ` : `
+                                                <th class="px-3 py-3 text-xs font-semibold text-gray-700 tracking-wider whitespace-nowrap">Region</th>
+                                                <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">Coming</span><br><span class="whitespace-nowrap">Due</span></th>
+                                                <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">Total</span><br><span class="whitespace-nowrap">Covenants</span></th>
+                                                <th class="px-2 py-3 text-xs font-semibold text-gray-700 tracking-wider text-center"><span class="whitespace-nowrap">% of</span><br><span class="whitespace-nowrap">Total</span></th>
+                                            `}
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        ${regions.map(region => {
+                                            // Calculate combined columns (matching dashboard logic)
+                                            const count145 = regionalAgingData[region]['1-30'] + regionalAgingData[region]['31-45'];
+                                            const count4690 = regionalAgingData[region]['46-60'] + regionalAgingData[region]['61-90'];
+                                            const countOver90 = regionalAgingData[region]['>90'];
+                                            const countComingDue = regionalAgingData[region]['comingDue'];
+                                            
+                                            const regionPastDueTotal = count145 + count4690 + countOver90;
+                                            const regPopulation = regionPopulation[region];
+                                            
+                                            if (isPastDue) {
+                                                // % of Total = Past Due Total / Region's Total Covenants
+                                                const percentOfTotal = regPopulation > 0 ? ((regionPastDueTotal / regPopulation) * 100).toFixed(1) : '0.0';
+                                                
+                                                return `
+                                                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                                        <td class="px-3 py-3 text-xs font-medium text-gray-700">${region}</td>
+                                                        <td class="px-2 py-3 text-xs text-gray-700 text-center font-semibold">${count145}</td>
+                                                        <td class="px-2 py-3 text-xs text-gray-700 text-center font-semibold">${count4690}</td>
+                                                        <td class="px-2 py-3 text-xs text-gray-700 text-center font-semibold">${countOver90}</td>
+                                                        <td class="px-2 py-3 text-xs text-gray-900 text-center font-bold">${regionPastDueTotal}</td>
+                                                        <td class="px-2 py-3 text-xs text-gray-900 text-center font-bold">${regPopulation}</td>
+                                                        <td class="px-2 py-3 text-xs text-gray-900 text-center font-semibold">${percentOfTotal}%</td>
+                                                    </tr>
+                                                `;
+                                            } else {
+                                                // For Coming Due: % of Total = Coming Due for region / Total Coming Due across all regions
+                                                const totalComingDueAcrossRegions = regions.reduce((sum, r) => sum + regionalAgingData[r]['comingDue'], 0);
+                                                const percentOfTotal = totalComingDueAcrossRegions > 0 ? ((countComingDue / totalComingDueAcrossRegions) * 100).toFixed(1) : '0.0';
+                                                
+                                                return `
+                                                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                                        <td class="px-3 py-3 text-xs font-medium text-gray-700">${region}</td>
+                                                        <td class="px-2 py-3 text-xs text-gray-900 text-center font-bold">${countComingDue}</td>
+                                                        <td class="px-2 py-3 text-xs text-gray-900 text-center font-bold">${regPopulation}</td>
+                                                        <td class="px-2 py-3 text-xs text-gray-900 text-center font-semibold">${percentOfTotal}%</td>
+                                                    </tr>
+                                                `;
+                                            }
+                                        }).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Product Program Distribution - Donut Chart -->
                     <div class="rounded-xl border border-gray-200 bg-white">
                         <div class="border-b border-gray-200 px-6 py-4">
                             <h3 class="text-base font-semibold text-gray-900">Covenants by Product Program</h3>
@@ -22858,17 +22888,6 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Week-over-Week Variance by Region -->
-                    <div class="rounded-xl border border-gray-200 bg-white">
-                        <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-base font-semibold text-gray-900">Week-over-Week Change by Region</h3>
-                            <p class="text-sm font-medium text-gray-500 mt-1">Variance vs last week (${lastWeekTotal} → ${totalCovenants})</p>
-                        </div>
-                        <div class="p-6 flex items-center justify-center" style="min-height: 400px;">
-                            <div id="covenantVarianceRegionChart" class="w-full"></div>
                         </div>
                     </div>
                 </div>
@@ -23040,112 +23059,7 @@
                             new ApexCharts(donutEl, donutOptions).render();
                         }
                         
-                        // Variance by Region (Grouped Bar Chart)
-                        const varianceRegionEl = document.getElementById('covenantVarianceRegionChart');
-                        if (varianceRegionEl && Object.keys(varianceByRegion).length > 0) {
-                            const regions = Object.keys(varianceByRegion);
-                            const thisWeekValues = regions.map(r => varianceByRegion[r].thisWeek);
-                            const lastWeekValues = regions.map(r => varianceByRegion[r].lastWeek);
-                            
-                            const varianceRegionOptions = {
-                                series: [
-                                    {
-                                        name: 'This Week',
-                                        data: thisWeekValues
-                                    },
-                                    {
-                                        name: 'Last Week',
-                                        data: lastWeekValues
-                                    }
-                                ],
-                                chart: {
-                                    type: 'bar',
-                                    height: 340,
-                                    fontFamily: 'Outfit, sans-serif',
-                                    toolbar: { show: false },
-                                    parentHeightOffset: 0
-                                },
-                                colors: ['#93a8ff', '#465fff'],
-                                plotOptions: {
-                                    bar: {
-                                        horizontal: false,
-                                        columnWidth: '55%',
-                                        borderRadius: 6
-                                    }
-                                },
-                                dataLabels: {
-                                    enabled: false
-                                },
-                                stroke: {
-                                    show: true,
-                                    width: 2,
-                                    colors: ['transparent']
-                                },
-                                xaxis: {
-                                    categories: regions,
-                                    labels: {
-                                        style: {
-                                            fontSize: '12px',
-                                            fontWeight: 500
-                                        }
-                                    },
-                                    axisBorder: {
-                                        show: false
-                                    },
-                                    axisTicks: {
-                                        show: false
-                                    }
-                                },
-                                yaxis: {
-                                    title: {
-                                        text: 'Count',
-                                        style: {
-                                            fontSize: '12px',
-                                            fontWeight: 500
-                                        }
-                                    },
-                                    labels: {
-                                        style: {
-                                            fontSize: '11px'
-                                        }
-                                    }
-                                },
-                                legend: {
-                                    position: 'top',
-                                    horizontalAlign: 'center',
-                                    fontSize: '12px',
-                                    offsetY: 0,
-                                    markers: {
-                                        width: 12,
-                                        height: 12,
-                                        radius: 3
-                                    },
-                                    itemMargin: {
-                                        horizontal: 10
-                                    }
-                                },
-                                grid: {
-                                    borderColor: '#E5E7EB',
-                                    strokeDashArray: 4,
-                                    padding: {
-                                        top: 0,
-                                        right: 0,
-                                        bottom: 0,
-                                        left: 0
-                                    }
-                                },
-                                tooltip: {
-                                    theme: 'light',
-                                    y: {
-                                        formatter: function(val) {
-                                            return val + ' covenants';
-                                        }
-                                    }
-                                }
-                            };
-                            varianceRegionEl.innerHTML = '';
-                            new ApexCharts(varianceRegionEl, varianceRegionOptions).render();
-                        }
+                        // Week-over-Week Variance chart removed - replaced with Regional Distribution table
                     }, 100);
                 <\/script>
             `;
@@ -23312,9 +23226,11 @@
             
             // Variance calculations
             const variance = totalCCMs - totalCCMsPrev;
-            const variancePercent = totalCCMsPrev > 0 ? ((variance / totalCCMsPrev) * 100).toFixed(1) : '0.0';
-            const varianceColor = variance > 0 ? 'red' : variance < 0 ? 'green' : 'gray';
-            const varianceIcon = variance > 0 ? '↑' : variance < 0 ? '↓' : '→';
+            // If no previous data, show neutral (gray) regardless of current value
+            const hasPreviousData = totalCCMsPrev > 0;
+            const variancePercent = hasPreviousData ? ((variance / totalCCMsPrev) * 100).toFixed(1) : '0.0';
+            const varianceColor = !hasPreviousData ? 'gray' : (variance > 0 ? 'red' : variance < 0 ? 'green' : 'gray');
+            const varianceIcon = !hasPreviousData ? '→' : (variance > 0 ? '↑' : variance < 0 ? '↓' : '→');
             
             // Variance by region
             const varianceByRegion = {};
@@ -23418,7 +23334,7 @@
                     </div>
                 </div>
                 
-                <!-- Charts Grid (2x2) -->
+                <!-- Charts Grid (1x2) -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <!-- Chart 1: Regional Distribution (Table) -->
                     <div class="rounded-xl border border-gray-200 bg-white">
@@ -23439,40 +23355,6 @@
                         </div>
                         <div class="p-6 flex items-center justify-center" style="min-height: 400px;">
                             <div id="ccmStatusVarianceChart" class="w-full"></div>
-                        </div>
-                    </div>
-                    
-                    <!-- Chart 3: Month-over-Month Variance (Grouped Bar) -->
-                    <div class="rounded-xl border border-gray-200 bg-white">
-                        <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-base font-semibold text-gray-900">Month-over-Month Change by Region</h3>
-                            <p class="text-sm font-medium text-gray-500 mt-1">Variance vs last month (${totalCCMsPrev} → ${totalCCMs})</p>
-                        </div>
-                        <div class="p-6 flex items-center justify-center" style="min-height: 400px;">
-                            <div id="ccmVarianceRegionChart" class="w-full"></div>
-                        </div>
-                    </div>
-                    
-                    <!-- Chart 4: CCMs by Underwriter (Donut Chart) -->
-                    <div class="rounded-xl border border-gray-200 bg-white">
-                        <div class="border-b border-gray-200 px-6 py-4">
-                            <h3 class="text-base font-semibold text-gray-900">CCMs by Underwriter (Top 5)</h3>
-                            <p class="text-sm font-medium text-gray-500 mt-1">Underwriters with most CCMs by status</p>
-                        </div>
-                        <div class="p-6">
-                            <div class="flex flex-row items-center justify-center gap-8">
-                                <!-- Donut Chart -->
-                                <div class="flex-shrink-0">
-                                    <div id="ccmUnderwriterDonutChart"></div>
-                                </div>
-                                
-                                <!-- Legend / Details List - Right Side -->
-                                <div class="flex-1 max-w-md">
-                                    <div id="ccmUnderwriterList" class="space-y-3">
-                                        <!-- Legend will be populated by JavaScript -->
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -23775,218 +23657,6 @@
                             };
                             statusVarianceEl.innerHTML = '';
                             new ApexCharts(statusVarianceEl, statusVarianceOptions).render();
-                        }
-                        
-                        // Chart 3: Month-over-Month Variance (Grouped Bar)
-                        const varianceEl = document.getElementById('ccmVarianceRegionChart');
-                        if (varianceEl) {
-                            const regions = ['APAC', 'EMEA', 'NAM', 'LATAM'];
-                            const varianceData = ${JSON.stringify(varianceByRegion)};
-                            
-                            const varianceOptions = {
-                                series: [
-                                    {
-                                        name: 'Last Month',
-                                        data: regions.map(r => varianceData[r].previous)
-                                    },
-                                    {
-                                        name: 'Current Month',
-                                        data: regions.map(r => varianceData[r].current)
-                                    }
-                                ],
-                                colors: ['#93a8ff', '#465fff'],
-                                chart: {
-                                    fontFamily: 'Outfit, sans-serif',
-                                    type: 'bar',
-                                    height: 340,
-                                    toolbar: { show: false },
-                                    parentHeightOffset: 0
-                                },
-                                plotOptions: {
-                                    bar: {
-                                        horizontal: false,
-                                        columnWidth: '55%',
-                                        borderRadius: 6
-                                    }
-                                },
-                                dataLabels: {
-                                    enabled: false
-                                },
-                                stroke: {
-                                    show: true,
-                                    width: 2,
-                                    colors: ['transparent']
-                                },
-                                xaxis: {
-                                    categories: regions,
-                                    labels: {
-                                        style: {
-                                            fontSize: '12px',
-                                            fontWeight: 500
-                                        }
-                                    },
-                                    axisBorder: {
-                                        show: false
-                                    },
-                                    axisTicks: {
-                                        show: false
-                                    }
-                                },
-                                yaxis: {
-                                    title: {
-                                        text: 'Count',
-                                        style: {
-                                            fontSize: '12px',
-                                            fontWeight: 500
-                                        }
-                                    },
-                                    labels: {
-                                        style: {
-                                            fontSize: '11px'
-                                        }
-                                    }
-                                },
-                                legend: {
-                                    position: 'top',
-                                    horizontalAlign: 'center',
-                                    fontSize: '12px',
-                                    offsetY: 0,
-                                    markers: {
-                                        width: 12,
-                                        height: 12,
-                                        radius: 3
-                                    },
-                                    itemMargin: {
-                                        horizontal: 10
-                                    }
-                                },
-                                grid: {
-                                    borderColor: '#E5E7EB',
-                                    strokeDashArray: 4,
-                                    padding: {
-                                        top: 0,
-                                        right: 0,
-                                        bottom: 0,
-                                        left: 0
-                                    }
-                                },
-                                tooltip: {
-                                    theme: 'light',
-                                    y: {
-                                        formatter: function(val) {
-                                            return val + ' CCMs';
-                                        }
-                                    }
-                                }
-                            };
-                            varianceEl.innerHTML = '';
-                            new ApexCharts(varianceEl, varianceOptions).render();
-                        }
-                        
-                        // Chart 4: CCMs by Underwriter (Donut Chart - matching Product Distribution style)
-                        const donutChartEl = document.getElementById('ccmUnderwriterDonutChart');
-                        const donutListEl = document.getElementById('ccmUnderwriterList');
-                        if (donutChartEl) {
-                            const underwritersData = ${JSON.stringify(sortedUnderwriters)};
-                            const totalCCMsForUnderwriters = underwritersData.reduce((sum, uw) => sum + uw.total, 0);
-                            
-                            // Use same color palette as Product Distribution chart
-                            const colors = [
-                                "#3641f5",  // Primary blue
-                                "#7592ff",  // Light blue
-                                "#dde9ff",  // Lighter blue
-                                "#ff6b6b",  // Red
-                                "#ffd93d",  // Yellow
-                                "#6bcf7f",  // Green
-                                "#c084fc",  // Purple
-                                "#14b8a6",  // Teal
-                                "#f97316",  // Orange
-                                "#06b6d4"   // Cyan
-                            ];
-                            
-                            const donutOptions = {
-                                series: underwritersData.map(uw => uw.total),
-                                colors: colors,
-                                labels: underwritersData.map(uw => uw.name),
-                                chart: {
-                                    fontFamily: "Outfit, sans-serif",
-                                    type: "donut",
-                                    width: 300,
-                                    height: 300,
-                                },
-                                stroke: {
-                                    show: false,
-                                },
-                                plotOptions: {
-                                    pie: {
-                                        donut: {
-                                            size: "65%",
-                                            background: "transparent",
-                                            labels: {
-                                                show: true,
-                                                name: {
-                                                    show: true,
-                                                    offsetY: -10,
-                                                    color: "#1D2939",
-                                                    fontSize: "14px",
-                                                    fontWeight: "600",
-                                                },
-                                                value: {
-                                                    show: true,
-                                                    offsetY: 10,
-                                                    color: "#667085",
-                                                    fontSize: "16px",
-                                                    fontWeight: "700",
-                                                    formatter: (val) => val.toString(),
-                                                },
-                                                total: {
-                                                    show: true,
-                                                    label: "Total CCMs",
-                                                    color: "#111827",
-                                                    fontSize: "16px",
-                                                    fontWeight: "700",
-                                                    formatter: () => totalCCMsForUnderwriters.toString(),
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                                dataLabels: {
-                                    enabled: false,
-                                },
-                                legend: {
-                                    show: false,
-                                },
-                                tooltip: {
-                                    enabled: true,
-                                    theme: "light",
-                                    y: {
-                                        formatter: function(val, opts) {
-                                            const percentage = ((val / totalCCMsForUnderwriters) * 100).toFixed(1);
-                                            return val + ' CCMs (' + percentage + '%)';
-                                        }
-                                    },
-                                },
-                            };
-                            
-                            donutChartEl.innerHTML = '';
-                            const donutChart = new ApexCharts(donutChartEl, donutOptions);
-                            donutChart.render();
-                            
-                            // Populate legend list
-                            if (donutListEl) {
-                                donutListEl.innerHTML = underwritersData.map((underwriter, index) => {
-                                    const color = colors[index];
-                                    const percentage = ((underwriter.total / totalCCMsForUnderwriters) * 100).toFixed(1);
-                                    return \`
-                                        <div class="flex items-center gap-3 py-2">
-                                            <div class="w-4 h-4 rounded-sm flex-shrink-0" style="background-color: \${color};"></div>
-                                            <p class="text-sm font-medium text-gray-800 flex-1">\${underwriter.name}</p>
-                                            <p class="text-sm font-semibold text-gray-900">\${underwriter.total} (\${percentage}%)</p>
-                                        </div>
-                                    \`;
-                                }).join('');
-                            }
                         }
                         
                         // Initialize CCM Details Table

@@ -614,6 +614,7 @@
                             open: false, 
                             selected: 'All Programs', 
                             options: [],
+                            search: '',
                             init() {
                                 this.refreshOptions();
                                 window.addEventListener('filters-populated', () => {
@@ -625,13 +626,17 @@
                                 if (select) {
                                     this.options = Array.from(select.options).map(o => ({value: o.value, text: o.text}));
                                 }
+                            },
+                            get filteredOptions() {
+                                if (!this.search) return this.options;
+                                return this.options.filter(o => o.text.toLowerCase().includes(this.search.toLowerCase()));
                             }
                         }">
                             <label class="mb-1.5 block text-sm font-medium text-gray-700">
                                 Product Program
                             </label>
                             <div class="relative">
-                                <button @click="open = !open" type="button"
+                                <button @click="open = !open; if(open) { $nextTick(() => $refs.searchInput.focus()); search = ''; }" type="button"
                                     class="inline-flex items-center justify-between w-full gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
                                     <span x-text="selected"></span>
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -639,15 +644,25 @@
                                     </svg>
                                 </button>
                                 <div x-show="open" @click.outside="open = false" x-cloak
-                                    class="absolute left-0 right-0 top-full z-[9999] max-h-60 overflow-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
-                                    <template x-for="option in options" :key="option.value">
-                                        <button type="button"
-                                            @click="selected = option.text; open = false; document.getElementById('filterProductProgram').value = option.value; applyFilters();"
-                                            :class="selected === option.text ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                            class="flex w-full rounded-lg px-3 py-1.5 text-left text-sm font-medium transition-colors"
-                                            x-text="option.text">
-                                        </button>
-                                    </template>
+                                    class="absolute left-0 right-0 top-full z-[9999] rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                    <div class="sticky top-0 bg-white pb-2">
+                                        <input x-ref="searchInput" x-model="search" type="text" placeholder="Search..." 
+                                            class="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            @keydown.escape="open = false">
+                                    </div>
+                                    <div class="max-h-48 overflow-auto space-y-1">
+                                        <template x-for="option in filteredOptions" :key="option.value">
+                                            <button type="button"
+                                                @click="selected = option.text; open = false; document.getElementById('filterProductProgram').value = option.value; applyFilters();"
+                                                :class="selected === option.text ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                                class="flex w-full rounded-lg px-3 py-1.5 text-left text-sm font-medium transition-colors"
+                                                x-text="option.text">
+                                            </button>
+                                        </template>
+                                        <div x-show="filteredOptions.length === 0" class="px-3 py-2 text-sm text-gray-500 text-center">
+                                            No results found
+                                        </div>
+                                    </div>
                                 </div>
                                 <select id="filterProductProgram" class="hidden">
                                     <option value="">All Programs</option>
@@ -660,6 +675,7 @@
                             open: false, 
                             selected: 'All Units', 
                             options: [],
+                            search: '',
                             init() {
                                 this.refreshOptions();
                                 window.addEventListener('filters-populated', () => {
@@ -671,13 +687,17 @@
                                 if (select) {
                                     this.options = Array.from(select.options).map(o => ({value: o.value, text: o.text}));
                                 }
+                            },
+                            get filteredOptions() {
+                                if (!this.search) return this.options;
+                                return this.options.filter(o => o.text.toLowerCase().includes(this.search.toLowerCase()));
                             }
                         }">
                             <label class="mb-1.5 block text-sm font-medium text-gray-700">
                                 Extending Unit
                             </label>
                             <div class="relative">
-                                <button @click="open = !open" type="button"
+                                <button @click="open = !open; if(open) { $nextTick(() => $refs.searchInput.focus()); search = ''; }" type="button"
                                     class="inline-flex items-center justify-between w-full gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
                                     <span x-text="selected"></span>
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -685,15 +705,25 @@
                                     </svg>
                                 </button>
                                 <div x-show="open" @click.outside="open = false" x-cloak
-                                    class="absolute left-0 right-0 top-full z-[9999] max-h-60 overflow-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
-                                    <template x-for="option in options" :key="option.value">
-                                        <button type="button"
-                                            @click="selected = option.text; open = false; document.getElementById('filterExtendingUnit').value = option.value; applyFilters();"
-                                            :class="selected === option.text ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                            class="flex w-full rounded-lg px-3 py-1.5 text-left text-sm font-medium transition-colors"
-                                            x-text="option.text">
-                                        </button>
-                                    </template>
+                                    class="absolute left-0 right-0 top-full z-[9999] rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                    <div class="sticky top-0 bg-white pb-2">
+                                        <input x-ref="searchInput" x-model="search" type="text" placeholder="Search..." 
+                                            class="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            @keydown.escape="open = false">
+                                    </div>
+                                    <div class="max-h-48 overflow-auto space-y-1">
+                                        <template x-for="option in filteredOptions" :key="option.value">
+                                            <button type="button"
+                                                @click="selected = option.text; open = false; document.getElementById('filterExtendingUnit').value = option.value; applyFilters();"
+                                                :class="selected === option.text ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                                class="flex w-full rounded-lg px-3 py-1.5 text-left text-sm font-medium transition-colors"
+                                                x-text="option.text">
+                                            </button>
+                                        </template>
+                                        <div x-show="filteredOptions.length === 0" class="px-3 py-2 text-sm text-gray-500 text-center">
+                                            No results found
+                                        </div>
+                                    </div>
                                 </div>
                                 <select id="filterExtendingUnit" class="hidden">
                                     <option value="">All Units</option>
@@ -706,6 +736,7 @@
                             open: false, 
                             selected: 'All Types', 
                             options: [],
+                            search: '',
                             init() {
                                 this.refreshOptions();
                                 window.addEventListener('filters-populated', () => {
@@ -717,13 +748,17 @@
                                 if (select) {
                                     this.options = Array.from(select.options).map(o => ({value: o.value, text: o.text}));
                                 }
+                            },
+                            get filteredOptions() {
+                                if (!this.search) return this.options;
+                                return this.options.filter(o => o.text.toLowerCase().includes(this.search.toLowerCase()));
                             }
                         }">
                             <label class="mb-1.5 block text-sm font-medium text-gray-700">
                                 Facility Type
                             </label>
                             <div class="relative">
-                                <button @click="open = !open" type="button"
+                                <button @click="open = !open; if(open) { $nextTick(() => $refs.searchInput.focus()); search = ''; }" type="button"
                                     class="inline-flex items-center justify-between w-full gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
                                     <span x-text="selected"></span>
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -731,15 +766,25 @@
                                     </svg>
                                 </button>
                                 <div x-show="open" @click.outside="open = false" x-cloak
-                                    class="absolute left-0 right-0 top-full z-[9999] max-h-60 overflow-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
-                                    <template x-for="option in options" :key="option.value">
-                                        <button type="button"
-                                            @click="selected = option.text; open = false; document.getElementById('filterFacilityType').value = option.value; applyFilters();"
-                                            :class="selected === option.text ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                            class="flex w-full rounded-lg px-3 py-1.5 text-left text-sm font-medium transition-colors"
-                                            x-text="option.text">
-                                        </button>
-                                    </template>
+                                    class="absolute left-0 right-0 top-full z-[9999] rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                    <div class="sticky top-0 bg-white pb-2">
+                                        <input x-ref="searchInput" x-model="search" type="text" placeholder="Search..." 
+                                            class="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            @keydown.escape="open = false">
+                                    </div>
+                                    <div class="max-h-48 overflow-auto space-y-1">
+                                        <template x-for="option in filteredOptions" :key="option.value">
+                                            <button type="button"
+                                                @click="selected = option.text; open = false; document.getElementById('filterFacilityType').value = option.value; applyFilters();"
+                                                :class="selected === option.text ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                                class="flex w-full rounded-lg px-3 py-1.5 text-left text-sm font-medium transition-colors"
+                                                x-text="option.text">
+                                            </button>
+                                        </template>
+                                        <div x-show="filteredOptions.length === 0" class="px-3 py-2 text-sm text-gray-500 text-center">
+                                            No results found
+                                        </div>
+                                    </div>
                                 </div>
                                 <select id="filterFacilityType" class="hidden">
                                     <option value="">All Types</option>
@@ -752,6 +797,7 @@
                             open: false, 
                             selected: 'All', 
                             options: [],
+                            search: '',
                             init() {
                                 this.refreshOptions();
                                 window.addEventListener('filters-populated', () => {
@@ -763,13 +809,17 @@
                                 if (select) {
                                     this.options = Array.from(select.options).map(o => ({value: o.value, text: o.text}));
                                 }
+                            },
+                            get filteredOptions() {
+                                if (!this.search) return this.options;
+                                return this.options.filter(o => o.text.toLowerCase().includes(this.search.toLowerCase()));
                             }
                         }">
                             <label class="mb-1.5 block text-sm font-medium text-gray-700">
                                 Commitment Status
                             </label>
                             <div class="relative">
-                                <button @click="open = !open" type="button"
+                                <button @click="open = !open; if(open) { $nextTick(() => $refs.searchInput.focus()); search = ''; }" type="button"
                                     class="inline-flex items-center justify-between w-full gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
                                     <span x-text="selected"></span>
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -777,15 +827,25 @@
                                     </svg>
                                 </button>
                                 <div x-show="open" @click.outside="open = false" x-cloak
-                                    class="absolute left-0 right-0 top-full z-[9999] max-h-60 overflow-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
-                                    <template x-for="option in options" :key="option.value">
-                                        <button type="button"
-                                            @click="selected = option.text; open = false; document.getElementById('filterCommitment').value = option.value; applyFilters();"
-                                            :class="selected === option.text ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                            class="flex w-full rounded-lg px-3 py-1.5 text-left text-sm font-medium transition-colors"
-                                            x-text="option.text">
-                                        </button>
-                                    </template>
+                                    class="absolute left-0 right-0 top-full z-[9999] rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                    <div class="sticky top-0 bg-white pb-2">
+                                        <input x-ref="searchInput" x-model="search" type="text" placeholder="Search..." 
+                                            class="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            @keydown.escape="open = false">
+                                    </div>
+                                    <div class="max-h-48 overflow-auto space-y-1">
+                                        <template x-for="option in filteredOptions" :key="option.value">
+                                            <button type="button"
+                                                @click="selected = option.text; open = false; document.getElementById('filterCommitment').value = option.value; applyFilters();"
+                                                :class="selected === option.text ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                                class="flex w-full rounded-lg px-3 py-1.5 text-left text-sm font-medium transition-colors"
+                                                x-text="option.text">
+                                            </button>
+                                        </template>
+                                        <div x-show="filteredOptions.length === 0" class="px-3 py-2 text-sm text-gray-500 text-center">
+                                            No results found
+                                        </div>
+                                    </div>
                                 </div>
                                 <select id="filterCommitment" class="hidden">
                                     <option value="">All</option>
@@ -798,6 +858,7 @@
                             open: false, 
                             selected: 'All Team Leads', 
                             options: [],
+                            search: '',
                             init() {
                                 this.refreshOptions();
                                 window.addEventListener('filters-populated', () => {
@@ -809,13 +870,17 @@
                                 if (select) {
                                     this.options = Array.from(select.options).map(o => ({value: o.value, text: o.text}));
                                 }
+                            },
+                            get filteredOptions() {
+                                if (!this.search) return this.options;
+                                return this.options.filter(o => o.text.toLowerCase().includes(this.search.toLowerCase()));
                             }
                         }">
                             <label class="mb-1.5 block text-sm font-medium text-gray-700">
                                 Team Lead
                             </label>
                             <div class="relative">
-                                <button @click="open = !open" type="button"
+                                <button @click="open = !open; if(open) { $nextTick(() => $refs.searchInput.focus()); search = ''; }" type="button"
                                     class="inline-flex items-center justify-between w-full gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
                                     <span x-text="selected"></span>
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -823,15 +888,25 @@
                                     </svg>
                                 </button>
                                 <div x-show="open" @click.outside="open = false" x-cloak
-                                    class="absolute left-0 right-0 top-full z-[9999] max-h-60 overflow-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
-                                    <template x-for="option in options" :key="option.value">
-                                        <button type="button"
-                                            @click="selected = option.text; open = false; document.getElementById('filterTeamLead').value = option.value; applyFilters();"
-                                            :class="selected === option.text ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                            class="flex w-full rounded-lg px-3 py-1.5 text-left text-sm font-medium transition-colors"
-                                            x-text="option.text">
-                                        </button>
-                                    </template>
+                                    class="absolute left-0 right-0 top-full z-[9999] rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                    <div class="sticky top-0 bg-white pb-2">
+                                        <input x-ref="searchInput" x-model="search" type="text" placeholder="Search..." 
+                                            class="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            @keydown.escape="open = false">
+                                    </div>
+                                    <div class="max-h-48 overflow-auto space-y-1">
+                                        <template x-for="option in filteredOptions" :key="option.value">
+                                            <button type="button"
+                                                @click="selected = option.text; open = false; document.getElementById('filterTeamLead').value = option.value; applyFilters();"
+                                                :class="selected === option.text ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                                class="flex w-full rounded-lg px-3 py-1.5 text-left text-sm font-medium transition-colors"
+                                                x-text="option.text">
+                                            </button>
+                                        </template>
+                                        <div x-show="filteredOptions.length === 0" class="px-3 py-2 text-sm text-gray-500 text-center">
+                                            No results found
+                                        </div>
+                                    </div>
                                 </div>
                                 <select id="filterTeamLead" class="hidden">
                                     <option value="">All Team Leads</option>
@@ -844,6 +919,7 @@
                             open: false, 
                             selected: 'All Underwriters', 
                             options: [],
+                            search: '',
                             init() {
                                 this.refreshOptions();
                                 window.addEventListener('filters-populated', () => {
@@ -855,13 +931,17 @@
                                 if (select) {
                                     this.options = Array.from(select.options).map(o => ({value: o.value, text: o.text}));
                                 }
+                            },
+                            get filteredOptions() {
+                                if (!this.search) return this.options;
+                                return this.options.filter(o => o.text.toLowerCase().includes(this.search.toLowerCase()));
                             }
                         }">
                             <label class="mb-1.5 block text-sm font-medium text-gray-700">
                                 Underwriter
                             </label>
                             <div class="relative">
-                                <button @click="open = !open" type="button"
+                                <button @click="open = !open; if(open) { $nextTick(() => $refs.searchInput.focus()); search = ''; }" type="button"
                                     class="inline-flex items-center justify-between w-full gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
                                     <span x-text="selected"></span>
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -869,15 +949,25 @@
                                     </svg>
                                 </button>
                                 <div x-show="open" @click.outside="open = false" x-cloak
-                                    class="absolute left-0 right-0 top-full z-[9999] max-h-60 overflow-auto space-y-1 rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
-                                    <template x-for="option in options" :key="option.value">
-                                        <button type="button"
-                                            @click="selected = option.text; open = false; document.getElementById('filterUnderwriter').value = option.value; applyFilters();"
-                                            :class="selected === option.text ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
-                                            class="flex w-full rounded-lg px-3 py-1.5 text-left text-sm font-medium transition-colors"
-                                            x-text="option.text">
-                                        </button>
-                                    </template>
+                                    class="absolute left-0 right-0 top-full z-[9999] rounded-2xl border border-gray-200 bg-white p-2 shadow-theme-lg mt-2">
+                                    <div class="sticky top-0 bg-white pb-2">
+                                        <input x-ref="searchInput" x-model="search" type="text" placeholder="Search..." 
+                                            class="w-full px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            @keydown.escape="open = false">
+                                    </div>
+                                    <div class="max-h-48 overflow-auto space-y-1">
+                                        <template x-for="option in filteredOptions" :key="option.value">
+                                            <button type="button"
+                                                @click="selected = option.text; open = false; document.getElementById('filterUnderwriter').value = option.value; applyFilters();"
+                                                :class="selected === option.text ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'"
+                                                class="flex w-full rounded-lg px-3 py-1.5 text-left text-sm font-medium transition-colors"
+                                                x-text="option.text">
+                                            </button>
+                                        </template>
+                                        <div x-show="filteredOptions.length === 0" class="px-3 py-2 text-sm text-gray-500 text-center">
+                                            No results found
+                                        </div>
+                                    </div>
                                 </div>
                                 <select id="filterUnderwriter" class="hidden">
                                     <option value="">All Underwriters</option>
@@ -3946,6 +4036,30 @@
         }
 
         // Fetch data from Confluence attachment (read-only, no updates)
+        // Helper function for fetch with timeout
+        async function fetchWithTimeout(url, options = {}, timeoutMs = 60000) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => {
+                controller.abort();
+                console.error(`❌ Fetch timed out after ${timeoutMs/1000}s for: ${url}`);
+            }, timeoutMs);
+            
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                return response;
+            } catch (error) {
+                clearTimeout(timeoutId);
+                if (error.name === 'AbortError') {
+                    throw new Error(`Network request timed out after ${timeoutMs/1000}s`);
+                }
+                throw error;
+            }
+        }
+
         async function fetchDataFromConfluence() {
             try {
                 console.log('🌐 Starting fetchDataFromConfluence...');
@@ -3956,11 +4070,11 @@
                 console.log("📄 File name:", CONFLUENCE_FILE_NAME);
                 console.log("🆔 Page ID:", CONFLUENCE_PAGE_ID);
                 
-                const response = await fetch(url, {
+                const response = await fetchWithTimeout(url, {
                     headers: {
                         "X-Atlassian-Token": "no-check",
                     },
-                });
+                }, 90000); // 90 second timeout for large portfolio files
                 
                 console.log('📥 Response received. Status:', response.status, response.statusText);
 
@@ -4017,11 +4131,11 @@
                 console.log("Fetching covenant data from Confluence:", url);
                 console.log("Covenants file name:", CONFLUENCE_COVENANTS_FILE);
                 
-                const response = await fetch(url, {
+                const response = await fetchWithTimeout(url, {
                     headers: {
                         "X-Atlassian-Token": "no-check",
                     },
-                });
+                }, 60000); // 60 second timeout
 
                 if (!response.ok) {
                     console.warn(
@@ -4049,9 +4163,21 @@
 
         // Parse Covenant Excel blob (separate parser for covenant files)
         async function parseCovenantExcelBlob(blob) {
+            const FILE_READ_TIMEOUT = 60000; // 60 second timeout for file reading
+            
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
+                let timeoutId = null;
+                
+                // Set up timeout to prevent hanging
+                timeoutId = setTimeout(() => {
+                    reader.abort();
+                    console.error("❌ Covenant file reading timed out after 60s");
+                    reject(new Error("File reading timed out"));
+                }, FILE_READ_TIMEOUT);
+                
                 reader.onload = function (e) {
+                    clearTimeout(timeoutId);
                     try {
                         const data = new Uint8Array(e.target.result);
                         
@@ -4096,8 +4222,14 @@
                     }
                 };
                 reader.onerror = function (error) {
+                    clearTimeout(timeoutId);
                     console.error("FileReader error:", error);
                     reject(error);
+                };
+                reader.onabort = function() {
+                    clearTimeout(timeoutId);
+                    console.warn("FileReader aborted");
+                    reject(new Error("File reading was aborted"));
                 };
                 reader.readAsArrayBuffer(blob);
             });
@@ -4112,11 +4244,11 @@
                 console.log("Fetching CCM data from Confluence:", url);
                 console.log("CCM file name:", CONFLUENCE_CCM_FILE);
                 
-                const response = await fetch(url, {
+                const response = await fetchWithTimeout(url, {
                     headers: {
                         "X-Atlassian-Token": "no-check",
                     },
-                });
+                }, 60000); // 60 second timeout
 
                 if (!response.ok) {
                     console.warn(
@@ -4149,11 +4281,11 @@
                 
                 console.log("Fetching last week covenants data from Confluence:", url);
                 
-                const response = await fetch(url, {
+                const response = await fetchWithTimeout(url, {
                     headers: {
                         "X-Atlassian-Token": "no-check",
                     },
-                });
+                }, 60000); // 60 second timeout
 
                 if (!response.ok) {
                     console.warn(
@@ -4184,11 +4316,11 @@
                 
                 console.log("Fetching previous month CCM data from Confluence:", url);
                 
-                const response = await fetch(url, {
+                const response = await fetchWithTimeout(url, {
                     headers: {
                         "X-Atlassian-Token": "no-check",
                     },
-                });
+                }, 60000); // 60 second timeout
 
                 if (!response.ok) {
                     console.warn(
@@ -4269,9 +4401,21 @@
 
         // Parse CSV blob (read-only)
         async function parseCSVBlob(blob) {
+            const FILE_READ_TIMEOUT = 60000; // 60 second timeout for file reading
+            
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
+                let timeoutId = null;
+                
+                // Set up timeout to prevent hanging
+                timeoutId = setTimeout(() => {
+                    reader.abort();
+                    console.error("❌ CSV file reading timed out after 60s");
+                    reject(new Error("File reading timed out"));
+                }, FILE_READ_TIMEOUT);
+                
                 reader.onload = function (e) {
+                    clearTimeout(timeoutId);
                     try {
                         const text = e.target.result;
                         const lines = text.split("\n");
@@ -4302,8 +4446,14 @@
                     }
                 };
                 reader.onerror = () => {
+                    clearTimeout(timeoutId);
                     console.error("FileReader error while reading CSV");
                     reject(new Error("Failed to read CSV file"));
+                };
+                reader.onabort = function() {
+                    clearTimeout(timeoutId);
+                    console.warn("CSV FileReader aborted");
+                    reject(new Error("File reading was aborted"));
                 };
                 reader.readAsText(blob);
             });
@@ -4311,10 +4461,30 @@
 
         // Parse Excel blob (read-only) - OPTIMIZED for large files
         async function parseExcelBlob(blob, progressCallback = null) {
+            const FILE_READ_TIMEOUT = 90000; // 90 second timeout for large Excel files
+            
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
+                let timeoutId = null;
+                
+                // Set up timeout to prevent hanging on large files
+                timeoutId = setTimeout(() => {
+                    reader.abort();
+                    console.error("❌ Excel file reading timed out after 90s");
+                    reject(new Error("File reading timed out - file may be too large"));
+                }, FILE_READ_TIMEOUT);
                 
                 reader.onprogress = function(e) {
+                    // Reset timeout on progress (file is actively being read)
+                    if (timeoutId) {
+                        clearTimeout(timeoutId);
+                        timeoutId = setTimeout(() => {
+                            reader.abort();
+                            console.error("❌ Excel file reading timed out");
+                            reject(new Error("File reading timed out"));
+                        }, FILE_READ_TIMEOUT);
+                    }
+                    
                     if (e.lengthComputable && progressCallback) {
                         const percent = Math.round((e.loaded / e.total) * 30);
                         progressCallback(`Reading file...`, percent);
@@ -4322,6 +4492,7 @@
                 };
                 
                 reader.onload = function (e) {
+                    clearTimeout(timeoutId);
                     try {
                         if (progressCallback) progressCallback("Processing data structure...", 35);
                         
@@ -4377,12 +4548,24 @@
                     }
                 };
                 reader.onerror = () => {
+                    clearTimeout(timeoutId);
                     console.error("FileReader error while reading Excel file");
                     reject(new Error("Failed to read Excel file"));
+                };
+                reader.onabort = function() {
+                    clearTimeout(timeoutId);
+                    console.warn("Excel FileReader aborted");
+                    reject(new Error("File reading was aborted"));
                 };
                 reader.readAsArrayBuffer(blob);
             });
         }
+
+        // Global loading timeout tracker
+        let loadingTimeoutId = null;
+        const MAX_LOADING_TIME = 120000; // 2 minutes max loading time before auto-hide
+        const LOADING_WATCHDOG_INTERVAL = 30000; // Check every 30 seconds
+        let loadingStartTime = null;
 
         // Show loading overlay with title - completely non-blocking
         function showLoadingOverlay(
@@ -4404,7 +4587,14 @@
                 if (overlay.classList.contains("hidden")) {
                 overlay.classList.remove("hidden");
                     console.log('✅ Loading overlay displayed');
+                    loadingStartTime = Date.now();
+                    
+                    // Start safety timeout to prevent spinner from getting stuck
+                    startLoadingTimeout();
                 }
+                
+                // Reset timeout on each message update (shows progress is being made)
+                resetLoadingTimeout();
                 
                 // Update text only if changed - use separate animation frame to isolate from overlay show
                 if (messageEl && messageEl.textContent !== title) {
@@ -4417,6 +4607,52 @@
             });
         }
         
+        // Start loading timeout watchdog
+        function startLoadingTimeout() {
+            clearLoadingTimeout();
+            loadingTimeoutId = setTimeout(() => {
+                const overlay = document.getElementById("loadingOverlay");
+                if (overlay && !overlay.classList.contains("hidden")) {
+                    const elapsed = Date.now() - loadingStartTime;
+                    console.warn(`⚠️ Loading timeout reached after ${(elapsed/1000).toFixed(1)}s - auto-hiding spinner`);
+                    hideLoadingOverlay();
+                    showNotification(
+                        "Warning",
+                        "Loading took too long. Please try refreshing the page if data didn't load.",
+                        "warning"
+                    );
+                }
+            }, MAX_LOADING_TIME);
+        }
+        
+        // Reset loading timeout (called when progress is made)
+        function resetLoadingTimeout() {
+            if (loadingTimeoutId) {
+                clearTimeout(loadingTimeoutId);
+                loadingTimeoutId = setTimeout(() => {
+                    const overlay = document.getElementById("loadingOverlay");
+                    if (overlay && !overlay.classList.contains("hidden")) {
+                        const elapsed = Date.now() - loadingStartTime;
+                        console.warn(`⚠️ Loading timeout reached after ${(elapsed/1000).toFixed(1)}s - auto-hiding spinner`);
+                        hideLoadingOverlay();
+                        showNotification(
+                            "Warning",
+                            "Loading took too long. Please try refreshing the page if data didn't load.",
+                            "warning"
+                        );
+                    }
+                }, MAX_LOADING_TIME);
+            }
+        }
+        
+        // Clear loading timeout
+        function clearLoadingTimeout() {
+            if (loadingTimeoutId) {
+                clearTimeout(loadingTimeoutId);
+                loadingTimeoutId = null;
+            }
+        }
+        
         // Update just the loading percentage (legacy support - no longer needed with new loader)
         function updateLoadingPercent(percent) {
             // No-op for new loader design
@@ -4424,6 +4660,10 @@
 
         // Hide loading overlay - non-blocking
         function hideLoadingOverlay() {
+            // Clear the safety timeout
+            clearLoadingTimeout();
+            loadingStartTime = null;
+            
             // Schedule hiding on next animation frame
             requestAnimationFrame(() => {
             const overlay = document.getElementById("loadingOverlay");
@@ -4437,6 +4677,20 @@
                 overlay.classList.add("hidden");
             });
         }
+        
+        // Force hide loading overlay - use this as emergency escape hatch
+        function forceHideLoadingOverlay() {
+            clearLoadingTimeout();
+            loadingStartTime = null;
+            const overlay = document.getElementById("loadingOverlay");
+            if (overlay) {
+                overlay.classList.add("hidden");
+                console.log('⚠️ Force-hidden loading overlay');
+            }
+        }
+        
+        // Expose forceHideLoadingOverlay globally for console access during debugging
+        window.forceHideLoadingOverlay = forceHideLoadingOverlay;
         
         // Animation Protection System - ensures animations never pause regardless of file operations
         (function() {
@@ -4751,14 +5005,18 @@
             populateSelect("filterFacilityType", facilityTypes);
             console.log("Facility Types:", facilityTypes.length, "options");
             
-            // Committed/Uncommitted
-            const commitments = [
+            // Committed/Uncommitted - ensure Committed and Uncommitted are always available
+            let commitments = [
                 ...new Set(
                     portfolioData
                         .map((row) => row["Committed/Uncommitted"])
                         .filter(Boolean)
                 ),
-            ].sort();
+            ];
+            // Always ensure Committed and Uncommitted options exist
+            if (!commitments.includes("Committed")) commitments.push("Committed");
+            if (!commitments.includes("Uncommitted")) commitments.push("Uncommitted");
+            commitments = commitments.sort();
             populateSelect("filterCommitment", commitments);
             console.log("Commitment Status:", commitments.length, "options");
             
@@ -9782,7 +10040,13 @@
                     intersect: true,
                     followCursor: false,
                     fixed: {
-                        enabled: false,
+                        enabled: true,
+                        position: 'topRight',
+                        offsetX: 10,
+                        offsetY: -50
+                    },
+                    marker: {
+                        show: false
                     },
                     custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                         const monthKey = next3Months[dataPointIndex];
@@ -10252,66 +10516,6 @@
                     });
                 }, 100);
                 
-                // Add tooltip positioning fix - always show on right, move to left only when overflow
-                setTimeout(() => {
-                    const tooltipObserver = new MutationObserver(() => {
-                        const tooltip = chartElement.querySelector('.apexcharts-tooltip.apexcharts-active');
-                        if (tooltip && !tooltip.hasAttribute('data-positioned')) {
-                            const tooltipRect = tooltip.getBoundingClientRect();
-                            const windowWidth = window.innerWidth;
-                            const windowHeight = window.innerHeight;
-                            const margin = 10;
-                            
-                            let needsReposition = false;
-                            
-                            // Only reposition if tooltip overflows right edge (move it to the left)
-                            if (tooltipRect.right > windowWidth - margin) {
-                                // Move tooltip to the left of the cursor/bar
-                                const currentLeft = parseFloat(tooltip.style.left) || tooltipRect.left;
-                                const newLeft = currentLeft - tooltipRect.width - 60; // 60px offset to left
-                                
-                                // Make sure it doesn't go off the left edge
-                                if (newLeft >= margin) {
-                                    tooltip.style.left = newLeft + 'px';
-                                    tooltip.style.transform = 'none';
-                                    needsReposition = true;
-                                } else {
-                                    // If it would go off left edge, keep it within bounds
-                                    tooltip.style.left = margin + 'px';
-                                    tooltip.style.transform = 'none';
-                                    needsReposition = true;
-                                }
-                            }
-                            // Otherwise, let ApexCharts default positioning (right side) work
-                            
-                            // Check and adjust vertical position
-                            if (tooltipRect.top < margin) {
-                                tooltip.style.top = margin + 'px';
-                                needsReposition = true;
-                            } else if (tooltipRect.bottom > windowHeight - margin) {
-                                tooltip.style.top = (windowHeight - tooltipRect.height - margin) + 'px';
-                                needsReposition = true;
-                            }
-                            
-                            if (needsReposition) {
-                                tooltip.setAttribute('data-positioned', 'true');
-                            }
-                        }
-                        
-                        // Remove marker when tooltip is hidden
-                        const hiddenTooltip = chartElement.querySelector('.apexcharts-tooltip:not(.apexcharts-active)[data-positioned]');
-                        if (hiddenTooltip) {
-                            hiddenTooltip.removeAttribute('data-positioned');
-                        }
-                    });
-                    
-                    tooltipObserver.observe(chartElement, {
-                        attributes: true,
-                        attributeFilter: ['class'],
-                        subtree: true
-                    });
-                }, 200);
-                
                 console.log("✅ Facility trend chart rendered successfully");
             } catch (error) {
                 console.error("❌ Error rendering facility trend chart:", error);
@@ -10621,7 +10825,13 @@
                     intersect: true,
                     followCursor: false,
                     fixed: {
-                        enabled: false,
+                        enabled: true,
+                        position: 'topRight',
+                        offsetX: 10,
+                        offsetY: -50
+                    },
+                    marker: {
+                        show: false
                     },
                     custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                         const monthKey = next3Months[dataPointIndex];
@@ -11083,66 +11293,6 @@
                         bar.style.cursor = 'pointer';
                     });
                 }, 100);
-                
-                // Add tooltip positioning fix - always show on right, move to left only when overflow
-                setTimeout(() => {
-                    const tooltipObserver = new MutationObserver(() => {
-                        const tooltip = chartElement.querySelector('.apexcharts-tooltip.apexcharts-active');
-                        if (tooltip && !tooltip.hasAttribute('data-positioned')) {
-                            const tooltipRect = tooltip.getBoundingClientRect();
-                            const windowWidth = window.innerWidth;
-                            const windowHeight = window.innerHeight;
-                            const margin = 10;
-                            
-                            let needsReposition = false;
-                            
-                            // Only reposition if tooltip overflows right edge (move it to the left)
-                            if (tooltipRect.right > windowWidth - margin) {
-                                // Move tooltip to the left of the cursor/bar
-                                const currentLeft = parseFloat(tooltip.style.left) || tooltipRect.left;
-                                const newLeft = currentLeft - tooltipRect.width - 60; // 60px offset to left
-                                
-                                // Make sure it doesn't go off the left edge
-                                if (newLeft >= margin) {
-                                    tooltip.style.left = newLeft + 'px';
-                                    tooltip.style.transform = 'none';
-                                    needsReposition = true;
-                                } else {
-                                    // If it would go off left edge, keep it within bounds
-                                    tooltip.style.left = margin + 'px';
-                                    tooltip.style.transform = 'none';
-                                    needsReposition = true;
-                                }
-                            }
-                            // Otherwise, let ApexCharts default positioning (right side) work
-                            
-                            // Check and adjust vertical position
-                            if (tooltipRect.top < margin) {
-                                tooltip.style.top = margin + 'px';
-                                needsReposition = true;
-                            } else if (tooltipRect.bottom > windowHeight - margin) {
-                                tooltip.style.top = (windowHeight - tooltipRect.height - margin) + 'px';
-                                needsReposition = true;
-                            }
-                            
-                            if (needsReposition) {
-                                tooltip.setAttribute('data-positioned', 'true');
-                            }
-                        }
-                        
-                        // Remove marker when tooltip is hidden
-                        const hiddenTooltip = chartElement.querySelector('.apexcharts-tooltip:not(.apexcharts-active)[data-positioned]');
-                        if (hiddenTooltip) {
-                            hiddenTooltip.removeAttribute('data-positioned');
-                        }
-                    });
-                    
-                    tooltipObserver.observe(chartElement, {
-                        attributes: true,
-                        attributeFilter: ['class'],
-                        subtree: true
-                    });
-                }, 200);
                 
                 console.log("✅ Filtered facility trend chart rendered successfully");
             } catch (error) {

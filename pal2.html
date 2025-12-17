@@ -610,7 +610,23 @@
                     <!-- Filter Grid -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                         <!-- Product Program Filter -->
-                        <div x-data="{ open: false, selected: 'All Programs', options: [] }" x-init="options = Array.from(document.getElementById('filterProductProgram')?.options || []).map(o => ({value: o.value, text: o.text}))">
+                        <div x-data="{ 
+                            open: false, 
+                            selected: 'All Programs', 
+                            options: [],
+                            init() {
+                                this.refreshOptions();
+                                window.addEventListener('filters-populated', () => {
+                                    this.refreshOptions();
+                                });
+                            },
+                            refreshOptions() {
+                                const select = document.getElementById('filterProductProgram');
+                                if (select) {
+                                    this.options = Array.from(select.options).map(o => ({value: o.value, text: o.text}));
+                                }
+                            }
+                        }">
                             <label class="mb-1.5 block text-sm font-medium text-gray-700">
                                 Product Program
                             </label>
@@ -640,7 +656,23 @@
                         </div>
 
                         <!-- Extending Unit Filter -->
-                        <div x-data="{ open: false, selected: 'All Units', options: [] }" x-init="options = Array.from(document.getElementById('filterExtendingUnit')?.options || []).map(o => ({value: o.value, text: o.text}))">
+                        <div x-data="{ 
+                            open: false, 
+                            selected: 'All Units', 
+                            options: [],
+                            init() {
+                                this.refreshOptions();
+                                window.addEventListener('filters-populated', () => {
+                                    this.refreshOptions();
+                                });
+                            },
+                            refreshOptions() {
+                                const select = document.getElementById('filterExtendingUnit');
+                                if (select) {
+                                    this.options = Array.from(select.options).map(o => ({value: o.value, text: o.text}));
+                                }
+                            }
+                        }">
                             <label class="mb-1.5 block text-sm font-medium text-gray-700">
                                 Extending Unit
                             </label>
@@ -670,7 +702,23 @@
                         </div>
 
                         <!-- Facility Type Filter -->
-                        <div x-data="{ open: false, selected: 'All Types', options: [] }" x-init="options = Array.from(document.getElementById('filterFacilityType')?.options || []).map(o => ({value: o.value, text: o.text}))">
+                        <div x-data="{ 
+                            open: false, 
+                            selected: 'All Types', 
+                            options: [],
+                            init() {
+                                this.refreshOptions();
+                                window.addEventListener('filters-populated', () => {
+                                    this.refreshOptions();
+                                });
+                            },
+                            refreshOptions() {
+                                const select = document.getElementById('filterFacilityType');
+                                if (select) {
+                                    this.options = Array.from(select.options).map(o => ({value: o.value, text: o.text}));
+                                }
+                            }
+                        }">
                             <label class="mb-1.5 block text-sm font-medium text-gray-700">
                                 Facility Type
                             </label>
@@ -700,7 +748,23 @@
                         </div>
 
                         <!-- Commitment Status Filter -->
-                        <div x-data="{ open: false, selected: 'All', options: [] }" x-init="options = Array.from(document.getElementById('filterCommitment')?.options || []).map(o => ({value: o.value, text: o.text}))">
+                        <div x-data="{ 
+                            open: false, 
+                            selected: 'All', 
+                            options: [],
+                            init() {
+                                this.refreshOptions();
+                                window.addEventListener('filters-populated', () => {
+                                    this.refreshOptions();
+                                });
+                            },
+                            refreshOptions() {
+                                const select = document.getElementById('filterCommitment');
+                                if (select) {
+                                    this.options = Array.from(select.options).map(o => ({value: o.value, text: o.text}));
+                                }
+                            }
+                        }">
                             <label class="mb-1.5 block text-sm font-medium text-gray-700">
                                 Commitment Status
                             </label>
@@ -730,7 +794,23 @@
                         </div>
 
                         <!-- Team Lead Filter -->
-                        <div x-data="{ open: false, selected: 'All Team Leads', options: [] }" x-init="options = Array.from(document.getElementById('filterTeamLead')?.options || []).map(o => ({value: o.value, text: o.text}))">
+                        <div x-data="{ 
+                            open: false, 
+                            selected: 'All Team Leads', 
+                            options: [],
+                            init() {
+                                this.refreshOptions();
+                                window.addEventListener('filters-populated', () => {
+                                    this.refreshOptions();
+                                });
+                            },
+                            refreshOptions() {
+                                const select = document.getElementById('filterTeamLead');
+                                if (select) {
+                                    this.options = Array.from(select.options).map(o => ({value: o.value, text: o.text}));
+                                }
+                            }
+                        }">
                             <label class="mb-1.5 block text-sm font-medium text-gray-700">
                                 Team Lead
                             </label>
@@ -760,7 +840,23 @@
                         </div>
 
                         <!-- Underwriter Filter -->
-                        <div x-data="{ open: false, selected: 'All Underwriters', options: [] }" x-init="options = Array.from(document.getElementById('filterUnderwriter')?.options || []).map(o => ({value: o.value, text: o.text}))">
+                        <div x-data="{ 
+                            open: false, 
+                            selected: 'All Underwriters', 
+                            options: [],
+                            init() {
+                                this.refreshOptions();
+                                window.addEventListener('filters-populated', () => {
+                                    this.refreshOptions();
+                                });
+                            },
+                            refreshOptions() {
+                                const select = document.getElementById('filterUnderwriter');
+                                if (select) {
+                                    this.options = Array.from(select.options).map(o => ({value: o.value, text: o.text}));
+                                }
+                            }
+                        }">
                             <label class="mb-1.5 block text-sm font-medium text-gray-700">
                                 Underwriter
                             </label>
@@ -3771,45 +3867,56 @@
                         setTimeout(() => {
                             showLoadingOverlay("Almost ready...");
                             
-                            // Initialize dashboard with data
-                            buildIndexes();
-                            populateFilterOptions();
-                            
-                            // Initialize filteredData with all data (no filters applied initially)
-                            filterData();
-                            
-                            calculateMetrics();
-                            updateReportDate(); // Update "Last Updated" display
-                            
-                            // Create all main charts
-                            createFacilityTrendChart();
-                            createRelationshipChart();
-                            createNewFacilitiesApprovedChart();
-                            createROTCEChart();
-                            
-                            // Initialize covenant and CCM charts
-                            populateCovenantMonitoringData();
-                            createCovenantMonitoringChart('pastDue');
-                            updateCovenantRegionalTable('pastDue');
-                            calculateCCMStats();
-                            createCCMRegionalChart();
-                            updateCCMStats('pastDue');
-                            
-                            const loadTime = ((performance.now() - loadStartTime) / 1000).toFixed(1);
-                            
-                            showLoadingOverlay("Dashboard Ready!");
-                            
-                            setTimeout(() => {
-                        hideLoadingOverlay();
+                            try {
+                                // Initialize dashboard with data
+                                buildIndexes();
+                                populateFilterOptions();
                                 
-                        showNotification(
-                            "Success",
-                                    `Loaded ${data.length.toLocaleString()} records in ${loadTime}s`,
-                            "success"
-                        );
+                                // Initialize filteredData with all data (no filters applied initially)
+                                filterData();
                                 
-                                console.log(`🎉 Dashboard loaded in ${loadTime}s`);
-                            }, 300);
+                                calculateMetrics();
+                                updateReportDate(); // Update "Last Updated" display
+                                
+                                // Create all main charts
+                                createFacilityTrendChart();
+                                createRelationshipChart();
+                                createNewFacilitiesApprovedChart();
+                                createROTCEChart();
+                                
+                                // Initialize covenant and CCM charts
+                                populateCovenantMonitoringData();
+                                createCovenantMonitoringChart('pastDue');
+                                updateCovenantRegionalTable('pastDue');
+                                calculateCCMStats();
+                                createCCMRegionalChart();
+                                updateCCMStats('pastDue');
+                                
+                                const loadTime = ((performance.now() - loadStartTime) / 1000).toFixed(1);
+                                
+                                showLoadingOverlay("Dashboard Ready!");
+                                
+                                setTimeout(() => {
+                                    hideLoadingOverlay();
+                                    
+                                    showNotification(
+                                        "Success",
+                                        `Loaded ${data.length.toLocaleString()} records in ${loadTime}s`,
+                                        "success"
+                                    );
+                                    
+                                    console.log(`🎉 Dashboard loaded in ${loadTime}s`);
+                                }, 300);
+                            } catch (chartError) {
+                                console.error('❌ Error during dashboard initialization:', chartError);
+                                // Always hide loading overlay even on error
+                                hideLoadingOverlay();
+                                showNotification(
+                                    "Warning",
+                                    "Dashboard loaded with some errors. Please check console.",
+                                    "warning"
+                                );
+                            }
                         }, 50);
                     }, 100);
                 } else {
@@ -4285,9 +4392,9 @@
         ) {
             // Schedule all DOM operations on next animation frame to prevent blocking
             requestAnimationFrame(() => {
-                const overlay = document.getElementById("loadingOverlay");
-                const messageEl = document.getElementById("loadingMessage");
-                
+            const overlay = document.getElementById("loadingOverlay");
+            const messageEl = document.getElementById("loadingMessage");
+            
                 if (!overlay) {
                     console.error('❌ Loading overlay element not found!');
                     return;
@@ -4295,7 +4402,7 @@
                 
                 // Show overlay if hidden
                 if (overlay.classList.contains("hidden")) {
-                    overlay.classList.remove("hidden");
+                overlay.classList.remove("hidden");
                     console.log('✅ Loading overlay displayed');
                 }
                 
@@ -4303,8 +4410,8 @@
                 if (messageEl && messageEl.textContent !== title) {
                     requestAnimationFrame(() => {
                         // Double-buffer text update to completely isolate from animations
-                        messageEl.textContent = title;
-                        console.log('📝 Message updated:', title);
+                    messageEl.textContent = title;
+                    console.log('📝 Message updated:', title);
                     });
                 }
             });
@@ -4319,8 +4426,8 @@
         function hideLoadingOverlay() {
             // Schedule hiding on next animation frame
             requestAnimationFrame(() => {
-                const overlay = document.getElementById("loadingOverlay");
-                
+            const overlay = document.getElementById("loadingOverlay");
+            
                 if (!overlay) {
                     console.error('❌ Loading overlay element not found when trying to hide!');
                     return;
@@ -4674,6 +4781,11 @@
             ].sort();
             populateSelect("filterUnderwriter", underwriters);
             console.log("Underwriters:", underwriters.length, "options");
+            
+            // Refresh Alpine.js dropdowns after populating all filters
+            setTimeout(() => {
+                refreshAlpineDropdowns();
+            }, 100);
         }
 
         // Helper to populate a select element
@@ -4701,6 +4813,14 @@
             if (currentValue && options.includes(currentValue)) {
                 select.value = currentValue;
             }
+        }
+        
+        // Refresh Alpine.js dropdowns after populating filters
+        function refreshAlpineDropdowns() {
+            // Dispatch custom event to notify Alpine.js components to refresh
+            window.dispatchEvent(new CustomEvent('filters-populated'));
+            
+            console.log("✅ Alpine.js dropdowns refreshed");
         }
 
         // Apply all filters (OPTIMIZED for 40K+ rows)
@@ -10132,7 +10252,7 @@
                     });
                 }, 100);
                 
-                // Add tooltip positioning fix with mutation observer to prevent flickering
+                // Add tooltip positioning fix - always show on right, move to left only when overflow
                 setTimeout(() => {
                     const tooltipObserver = new MutationObserver(() => {
                         const tooltip = chartElement.querySelector('.apexcharts-tooltip.apexcharts-active');
@@ -10144,16 +10264,25 @@
                             
                             let needsReposition = false;
                             
-                            // Check and adjust horizontal position
-                            if (tooltipRect.left < margin) {
-                                tooltip.style.left = margin + 'px';
-                                tooltip.style.transform = 'none';
-                                needsReposition = true;
-                            } else if (tooltipRect.right > windowWidth - margin) {
-                                tooltip.style.left = (windowWidth - tooltipRect.width - margin) + 'px';
-                                tooltip.style.transform = 'none';
-                                needsReposition = true;
+                            // Only reposition if tooltip overflows right edge (move it to the left)
+                            if (tooltipRect.right > windowWidth - margin) {
+                                // Move tooltip to the left of the cursor/bar
+                                const currentLeft = parseFloat(tooltip.style.left) || tooltipRect.left;
+                                const newLeft = currentLeft - tooltipRect.width - 60; // 60px offset to left
+                                
+                                // Make sure it doesn't go off the left edge
+                                if (newLeft >= margin) {
+                                    tooltip.style.left = newLeft + 'px';
+                                    tooltip.style.transform = 'none';
+                                    needsReposition = true;
+                                } else {
+                                    // If it would go off left edge, keep it within bounds
+                                    tooltip.style.left = margin + 'px';
+                                    tooltip.style.transform = 'none';
+                                    needsReposition = true;
+                                }
                             }
+                            // Otherwise, let ApexCharts default positioning (right side) work
                             
                             // Check and adjust vertical position
                             if (tooltipRect.top < margin) {
@@ -10954,6 +11083,66 @@
                         bar.style.cursor = 'pointer';
                     });
                 }, 100);
+                
+                // Add tooltip positioning fix - always show on right, move to left only when overflow
+                setTimeout(() => {
+                    const tooltipObserver = new MutationObserver(() => {
+                        const tooltip = chartElement.querySelector('.apexcharts-tooltip.apexcharts-active');
+                        if (tooltip && !tooltip.hasAttribute('data-positioned')) {
+                            const tooltipRect = tooltip.getBoundingClientRect();
+                            const windowWidth = window.innerWidth;
+                            const windowHeight = window.innerHeight;
+                            const margin = 10;
+                            
+                            let needsReposition = false;
+                            
+                            // Only reposition if tooltip overflows right edge (move it to the left)
+                            if (tooltipRect.right > windowWidth - margin) {
+                                // Move tooltip to the left of the cursor/bar
+                                const currentLeft = parseFloat(tooltip.style.left) || tooltipRect.left;
+                                const newLeft = currentLeft - tooltipRect.width - 60; // 60px offset to left
+                                
+                                // Make sure it doesn't go off the left edge
+                                if (newLeft >= margin) {
+                                    tooltip.style.left = newLeft + 'px';
+                                    tooltip.style.transform = 'none';
+                                    needsReposition = true;
+                                } else {
+                                    // If it would go off left edge, keep it within bounds
+                                    tooltip.style.left = margin + 'px';
+                                    tooltip.style.transform = 'none';
+                                    needsReposition = true;
+                                }
+                            }
+                            // Otherwise, let ApexCharts default positioning (right side) work
+                            
+                            // Check and adjust vertical position
+                            if (tooltipRect.top < margin) {
+                                tooltip.style.top = margin + 'px';
+                                needsReposition = true;
+                            } else if (tooltipRect.bottom > windowHeight - margin) {
+                                tooltip.style.top = (windowHeight - tooltipRect.height - margin) + 'px';
+                                needsReposition = true;
+                            }
+                            
+                            if (needsReposition) {
+                                tooltip.setAttribute('data-positioned', 'true');
+                            }
+                        }
+                        
+                        // Remove marker when tooltip is hidden
+                        const hiddenTooltip = chartElement.querySelector('.apexcharts-tooltip:not(.apexcharts-active)[data-positioned]');
+                        if (hiddenTooltip) {
+                            hiddenTooltip.removeAttribute('data-positioned');
+                        }
+                    });
+                    
+                    tooltipObserver.observe(chartElement, {
+                        attributes: true,
+                        attributeFilter: ['class'],
+                        subtree: true
+                    });
+                }, 200);
                 
                 console.log("✅ Filtered facility trend chart rendered successfully");
             } catch (error) {
@@ -14793,11 +14982,11 @@
                             <p class="text-sm font-medium text-gray-500 mt-1">TFA distribution by region</p>
                         </div>
                         <div class="p-5">
-                            <div class="border-gray-200 my-6 overflow-hidden rounded-2xl border bg-gray-50 px-4 py-6">
+                        <div class="border-gray-200 my-6 overflow-hidden rounded-2xl border bg-gray-50 px-4 py-6">
                                 <div id="tfaRegionalMap" class="map-btn h-[150px] w-full"></div>
-                            </div>
-                            <div id="tfaRegionalList" class="space-y-5">
-                                <!-- Regional items will be dynamically generated -->
+                        </div>
+                        <div id="tfaRegionalList" class="space-y-5">
+                            <!-- Regional items will be dynamically generated -->
                             </div>
                         </div>
                     </div>
@@ -16362,10 +16551,20 @@
                             regionalData[region].count++;
                             regionalData[region].tfa += amount;
                             
-                            // Product data
-                            if (!productData[product]) productData[product] = { count: 0, tfa: 0 };
+                            // Product data with regional breakdown
+                            if (!productData[product]) {
+                                productData[product] = { 
+                                    count: 0, 
+                                    tfa: 0,
+                                    regionalBreakdown: { NAM: { count: 0, tfa: 0 }, LATAM: { count: 0, tfa: 0 }, EMEA: { count: 0, tfa: 0 }, APAC: { count: 0, tfa: 0 } }
+                                };
+                            }
                             productData[product].count++;
                             productData[product].tfa += amount;
+                            if (productData[product].regionalBreakdown[region]) {
+                                productData[product].regionalBreakdown[region].count++;
+                                productData[product].regionalBreakdown[region].tfa += amount;
+                            }
                             
                             // Underwriter deals count with regional distribution
                             if (!underwriterDeals[underwriter]) {
@@ -18080,11 +18279,11 @@
                             <p class="text-sm font-medium text-gray-500 mt-1">OSUC distribution by region</p>
                         </div>
                         <div class="p-5">
-                            <div class="border-gray-200 my-6 overflow-hidden rounded-2xl border bg-gray-50 px-4 py-6">
+                        <div class="border-gray-200 my-6 overflow-hidden rounded-2xl border bg-gray-50 px-4 py-6">
                                 <div id="osucRegionalMap" class="map-btn h-[150px] w-full"></div>
-                            </div>
-                            <div id="osucRegionalList" class="space-y-5">
-                                <!-- Regional items will be dynamically generated -->
+                        </div>
+                        <div id="osucRegionalList" class="space-y-5">
+                            <!-- Regional items will be dynamically generated -->
                             </div>
                         </div>
                     </div>
@@ -18344,11 +18543,11 @@
                             <p class="text-sm font-medium text-gray-500 mt-1">Outstanding distribution by region</p>
                         </div>
                         <div class="p-5">
-                            <div class="border-gray-200 my-6 overflow-hidden rounded-2xl border bg-gray-50 px-4 py-6">
+                        <div class="border-gray-200 my-6 overflow-hidden rounded-2xl border bg-gray-50 px-4 py-6">
                                 <div id="outstandingRegionalMap" class="map-btn h-[150px] w-full"></div>
-                            </div>
-                            <div id="outstandingRegionalList" class="space-y-5">
-                                <!-- Regional items will be dynamically generated -->
+                        </div>
+                        <div id="outstandingRegionalList" class="space-y-5">
+                            <!-- Regional items will be dynamically generated -->
                             </div>
                         </div>
                     </div>
@@ -20651,53 +20850,64 @@
                     const agingChart = new ApexCharts(agingChartEl, agingOptions);
                     agingChart.render();
                     
-                    // Add tooltip positioning fix
-                    setTimeout(() => {
-                        const tooltipObserver = new MutationObserver(() => {
-                            const tooltip = agingChartEl.querySelector('.apexcharts-tooltip.apexcharts-active');
-                            if (tooltip && !tooltip.hasAttribute('data-positioned')) {
-                                const tooltipRect = tooltip.getBoundingClientRect();
-                                const windowWidth = window.innerWidth;
-                                const windowHeight = window.innerHeight;
-                                const margin = 10;
-                                
-                                let needsReposition = false;
-                                
-                                if (tooltipRect.left < margin) {
-                                    tooltip.style.left = margin + 'px';
-                                    tooltip.style.transform = 'none';
-                                    needsReposition = true;
-                                } else if (tooltipRect.right > windowWidth - margin) {
-                                    tooltip.style.left = (windowWidth - tooltipRect.width - margin) + 'px';
-                                    tooltip.style.transform = 'none';
-                                    needsReposition = true;
-                                }
-                                
-                                if (tooltipRect.top < margin) {
-                                    tooltip.style.top = margin + 'px';
-                                    needsReposition = true;
-                                } else if (tooltipRect.bottom > windowHeight - margin) {
-                                    tooltip.style.top = (windowHeight - tooltipRect.height - margin) + 'px';
-                                    needsReposition = true;
-                                }
-                                
-                                if (needsReposition) {
-                                    tooltip.setAttribute('data-positioned', 'true');
-                                }
+                // Add tooltip positioning fix - FORCE to always show from right side
+                setTimeout(() => {
+                    const tooltipObserver = new MutationObserver(() => {
+                        const tooltip = agingChartEl.querySelector('.apexcharts-tooltip.apexcharts-active');
+                        if (tooltip && !tooltip.hasAttribute('data-positioned')) {
+                            const tooltipRect = tooltip.getBoundingClientRect();
+                            const windowWidth = window.innerWidth;
+                            const windowHeight = window.innerHeight;
+                            const margin = 10;
+                            const chartRect = agingChartEl.getBoundingClientRect();
+                            
+                            let needsReposition = false;
+                            
+                            // ALWAYS ensure tooltip is at least 'margin' pixels from left edge
+                            // This forces tooltips to show from the right when near the left edge
+                            const currentLeft = tooltipRect.left;
+                            
+                            if (currentLeft < margin) {
+                                // Force tooltip to right side
+                                tooltip.style.left = margin + 'px';
+                                tooltip.style.transform = 'none';
+                                needsReposition = true;
                             }
                             
-                            const hiddenTooltip = agingChartEl.querySelector('.apexcharts-tooltip:not(.apexcharts-active)[data-positioned]');
-                            if (hiddenTooltip) {
-                                hiddenTooltip.removeAttribute('data-positioned');
+                            // Also check right edge
+                            const updatedRect = tooltip.getBoundingClientRect();
+                            if (updatedRect.right > windowWidth - margin) {
+                                tooltip.style.left = (windowWidth - tooltipRect.width - margin) + 'px';
+                                tooltip.style.transform = 'none';
+                                needsReposition = true;
                             }
-                        });
+                            
+                            // Vertical positioning
+                            if (updatedRect.top < margin) {
+                                tooltip.style.top = margin + 'px';
+                                needsReposition = true;
+                            } else if (updatedRect.bottom > windowHeight - margin) {
+                                tooltip.style.top = (windowHeight - tooltipRect.height - margin) + 'px';
+                                needsReposition = true;
+                            }
+                            
+                            if (needsReposition) {
+                                tooltip.setAttribute('data-positioned', 'true');
+                            }
+                        }
                         
-                        tooltipObserver.observe(agingChartEl, {
-                            attributes: true,
-                            attributeFilter: ['class'],
-                            subtree: true
-                        });
-                    }, 200);
+                        const hiddenTooltip = agingChartEl.querySelector('.apexcharts-tooltip:not(.apexcharts-active)[data-positioned]');
+                        if (hiddenTooltip) {
+                            hiddenTooltip.removeAttribute('data-positioned');
+                        }
+                    });
+                    
+                    tooltipObserver.observe(agingChartEl, {
+                        attributes: true,
+                        attributeFilter: ['class'],
+                        subtree: true
+                    });
+                }, 200);
                 } else {
                     // Show "no data" message for aging chart
                     agingChartEl.innerHTML = '<div class="flex items-center justify-center h-full py-12 text-sm text-gray-500">No expired facilities</div>';
@@ -20968,7 +21178,7 @@
                     const productChart = new ApexCharts(productChartEl, productChartOptions);
                     productChart.render();
                     
-                    // Add tooltip positioning fix
+                    // Add tooltip positioning fix - donut charts need protection from edges
                     setTimeout(() => {
                         const tooltipObserver = new MutationObserver(() => {
                             const tooltip = productChartEl.querySelector('.apexcharts-tooltip.apexcharts-active');
@@ -20980,11 +21190,13 @@
                                 
                                 let needsReposition = false;
                                 
+                                // For donut charts, ensure tooltip stays within viewport
                                 if (tooltipRect.left < margin) {
                                     tooltip.style.left = margin + 'px';
                                     tooltip.style.transform = 'none';
                                     needsReposition = true;
-                                } else if (tooltipRect.right > windowWidth - margin) {
+                                }
+                                if (tooltipRect.right > windowWidth - margin) {
                                     tooltip.style.left = (windowWidth - tooltipRect.width - margin) + 'px';
                                     tooltip.style.transform = 'none';
                                     needsReposition = true;
@@ -21606,11 +21818,161 @@
                     },
                     tooltip: {
                         theme: 'light',
-                        y: {
-                            formatter: function(val, opts) {
-                                const count = products[opts.dataPointIndex].count;
-                                return formatCurrency(val) + ` (${count} facilities)`;
-                            }
+                        followCursor: false,
+                        custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                            const product = products[dataPointIndex];
+                            const productName = product.name;
+                            const tfaAmount = product.tfa;
+                            const facilityCount = product.count;
+                            const regionalBreakdown = product.regionalBreakdown || { NAM: { count: 0, tfa: 0 }, LATAM: { count: 0, tfa: 0 }, EMEA: { count: 0, tfa: 0 }, APAC: { count: 0, tfa: 0 } };
+                            
+                            // Build regional table rows
+                            let regionalRows = '';
+                            ['NAM', 'LATAM', 'EMEA', 'APAC'].forEach(region => {
+                                const regionData = regionalBreakdown[region];
+                                if (regionData && (regionData.count > 0 || regionData.tfa > 0)) {
+                                    regionalRows += `
+                                        <tr>
+                                            <td style="padding: 6px 8px; text-align: left; font-size: 11px; color: #6B7280; font-weight: 500;">${region}</td>
+                                            <td style="padding: 6px 8px; text-align: center; font-size: 11px; color: #111827; font-weight: 600;">${regionData.count}</td>
+                                            <td style="padding: 6px 8px; text-align: right; font-size: 11px; color: #111827; font-weight: 600;">${formatCurrency(regionData.tfa)}</td>
+                                        </tr>
+                                    `;
+                                }
+                            });
+                            
+                            return `
+                                <div style="
+                                    background: #ffffff; 
+                                    border-radius: 12px; 
+                                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
+                                    min-width: 320px;
+                                    max-width: 360px;
+                                    overflow: hidden;
+                                    font-family: Outfit, sans-serif;
+                                ">
+                                    <!-- Header with border -->
+                                    <div style="
+                                        border-bottom: 1px solid #E5E7EB;
+                                        padding: 16px 16px 12px 16px;
+                                        margin-bottom: 14px;
+                                    ">
+                                        <div style="
+                                            font-weight: 600; 
+                                            font-size: 15px; 
+                                            color: #111827;
+                                            margin-bottom: 4px;
+                                        ">${productName}</div>
+                                        <div style="
+                                            font-size: 12px; 
+                                            font-weight: 500;
+                                            color: #6B7280;
+                                        ">Product Program</div>
+                                    </div>
+                                    
+                                    <!-- Content wrapper -->
+                                    <div style="padding: 0 16px 16px 16px;">
+                                        <!-- Widget Grid (2 columns) -->
+                                        <div style="
+                                            display: grid;
+                                            grid-template-columns: 1fr 1fr;
+                                            gap: 10px;
+                                            margin-bottom: 16px;
+                                        ">
+                                            <!-- Widget 1: Facility Count -->
+                                            <div style="
+                                                background: #F9FAFB;
+                                                border-radius: 8px;
+                                                padding: 12px;
+                                                border: 1px solid #E5E7EB;
+                                            ">
+                                                <div style="
+                                                    display: flex;
+                                                    align-items: center;
+                                                    gap: 6px;
+                                                    font-size: 11px;
+                                                    color: #6B7280;
+                                                    font-weight: 500;
+                                                    margin-bottom: 6px;
+                                                ">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                                    </svg>
+                                                    Facilities
+                                                </div>
+                                                <div style="
+                                                    font-size: 20px;
+                                                    font-weight: 700;
+                                                    color: #111827;
+                                                ">${facilityCount}</div>
+                                            </div>
+                                            
+                                            <!-- Widget 2: TFA -->
+                                            <div style="
+                                                background: #F9FAFB;
+                                                border-radius: 8px;
+                                                padding: 12px;
+                                                border: 1px solid #E5E7EB;
+                                            ">
+                                                <div style="
+                                                    display: flex;
+                                                    align-items: center;
+                                                    gap: 6px;
+                                                    font-size: 11px;
+                                                    color: #6B7280;
+                                                    font-weight: 500;
+                                                    margin-bottom: 6px;
+                                                ">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                                    </svg>
+                                                    TFA
+                                                </div>
+                                                <div style="
+                                                    font-size: 14px;
+                                                    font-weight: 700;
+                                                    color: #111827;
+                                                ">${formatCurrency(tfaAmount)}</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Regional Distribution Table -->
+                                        <div style="margin-top: 12px;">
+                                            <div style="
+                                                display: flex;
+                                                align-items: center;
+                                                gap: 6px;
+                                                margin-bottom: 8px;
+                                            ">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2">
+                                                    <circle cx="12" cy="12" r="10"></circle>
+                                                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                                                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                                                </svg>
+                                                <span style="
+                                                    font-size: 12px;
+                                                    font-weight: 600;
+                                                    color: #374151;
+                                                ">Regional Distribution</span>
+                                            </div>
+                                            <table style="width: 100%; border-collapse: collapse;">
+                                                <thead>
+                                                    <tr style="border-bottom: 1px solid #E5E7EB;">
+                                                        <th style="padding: 6px 8px; text-align: left; font-size: 10px; color: #6B7280; font-weight: 600; text-transform: uppercase;">Region</th>
+                                                        <th style="padding: 6px 8px; text-align: center; font-size: 10px; color: #6B7280; font-weight: 600; text-transform: uppercase;">Count</th>
+                                                        <th style="padding: 6px 8px; text-align: right; font-size: 10px; color: #6B7280; font-weight: 600; text-transform: uppercase;">TFA</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    ${regionalRows || '<tr><td colspan="3" style="padding: 8px; text-align: center; font-size: 11px; color: #9CA3AF;">No data</td></tr>'}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
                         }
                     }
                 };
@@ -21618,6 +21980,55 @@
                 productChartEl.innerHTML = '';
                 const productChart = new ApexCharts(productChartEl, productOptions);
                 productChart.render();
+                
+                // Add tooltip positioning fix
+                setTimeout(() => {
+                    const tooltipObserver = new MutationObserver(() => {
+                        const tooltip = productChartEl.querySelector('.apexcharts-tooltip.apexcharts-active');
+                        if (tooltip && !tooltip.hasAttribute('data-positioned')) {
+                            const tooltipRect = tooltip.getBoundingClientRect();
+                            const windowWidth = window.innerWidth;
+                            const windowHeight = window.innerHeight;
+                            const margin = 10;
+                            
+                            let needsReposition = false;
+                            
+                            if (tooltipRect.left < margin) {
+                                tooltip.style.left = margin + 'px';
+                                tooltip.style.transform = 'none';
+                                needsReposition = true;
+                            }
+                            if (tooltipRect.right > windowWidth - margin) {
+                                tooltip.style.left = (windowWidth - tooltipRect.width - margin) + 'px';
+                                tooltip.style.transform = 'none';
+                                needsReposition = true;
+                            }
+                            
+                            if (tooltipRect.top < margin) {
+                                tooltip.style.top = margin + 'px';
+                                needsReposition = true;
+                            } else if (tooltipRect.bottom > windowHeight - margin) {
+                                tooltip.style.top = (windowHeight - tooltipRect.height - margin) + 'px';
+                                needsReposition = true;
+                            }
+                            
+                            if (needsReposition) {
+                                tooltip.setAttribute('data-positioned', 'true');
+                            }
+                        }
+                        
+                        const hiddenTooltip = productChartEl.querySelector('.apexcharts-tooltip:not(.apexcharts-active)[data-positioned]');
+                        if (hiddenTooltip) {
+                            hiddenTooltip.removeAttribute('data-positioned');
+                        }
+                    });
+                    
+                    tooltipObserver.observe(productChartEl, {
+                        attributes: true,
+                        attributeFilter: ['class'],
+                        subtree: true
+                    });
+                }, 200);
             }
         }
         
@@ -22464,11 +22875,161 @@
                     tooltip: {
                         enabled: true,
                         theme: "light",
-                        y: {
-                            formatter: function(val, opts) {
-                                const percentage = ((val / totalDealsForProductYTD) * 100).toFixed(1);
-                                return val + ' deals (' + percentage + '%)';
-                            }
+                        followCursor: false,
+                        custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                            const product = topProducts[seriesIndex];
+                            const productName = product.name;
+                            const dealCount = product.count;
+                            const tfaAmount = product.tfa;
+                            const regionalBreakdown = product.regionalBreakdown || { NAM: { count: 0, tfa: 0 }, LATAM: { count: 0, tfa: 0 }, EMEA: { count: 0, tfa: 0 }, APAC: { count: 0, tfa: 0 } };
+                            
+                            // Build regional table rows
+                            let regionalRows = '';
+                            ['NAM', 'LATAM', 'EMEA', 'APAC'].forEach(region => {
+                                const regionData = regionalBreakdown[region];
+                                if (regionData && (regionData.count > 0 || regionData.tfa > 0)) {
+                                    regionalRows += `
+                                        <tr>
+                                            <td style="padding: 6px 8px; text-align: left; font-size: 11px; color: #6B7280; font-weight: 500;">${region}</td>
+                                            <td style="padding: 6px 8px; text-align: center; font-size: 11px; color: #111827; font-weight: 600;">${regionData.count}</td>
+                                            <td style="padding: 6px 8px; text-align: right; font-size: 11px; color: #111827; font-weight: 600;">${formatCurrency(regionData.tfa)}</td>
+                                        </tr>
+                                    `;
+                                }
+                            });
+                            
+                            return `
+                                <div style="
+                                    background: #ffffff; 
+                                    border-radius: 12px; 
+                                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
+                                    min-width: 320px;
+                                    max-width: 360px;
+                                    overflow: hidden;
+                                    font-family: Outfit, sans-serif;
+                                ">
+                                    <!-- Header with border -->
+                                    <div style="
+                                        border-bottom: 1px solid #E5E7EB;
+                                        padding: 16px 16px 12px 16px;
+                                        margin-bottom: 14px;
+                                    ">
+                                        <div style="
+                                            font-weight: 600; 
+                                            font-size: 15px; 
+                                            color: #111827;
+                                            margin-bottom: 4px;
+                                        ">${productName}</div>
+                                        <div style="
+                                            font-size: 12px; 
+                                            font-weight: 500;
+                                            color: #6B7280;
+                                        ">Product Program</div>
+                                    </div>
+                                    
+                                    <!-- Content wrapper -->
+                                    <div style="padding: 0 16px 16px 16px;">
+                                        <!-- Widget Grid (2 columns) -->
+                                        <div style="
+                                            display: grid;
+                                            grid-template-columns: 1fr 1fr;
+                                            gap: 10px;
+                                            margin-bottom: 16px;
+                                        ">
+                                            <!-- Widget 1: Deal Count -->
+                                            <div style="
+                                                background: #F9FAFB;
+                                                border-radius: 8px;
+                                                padding: 12px;
+                                                border: 1px solid #E5E7EB;
+                                            ">
+                                                <div style="
+                                                    display: flex;
+                                                    align-items: center;
+                                                    gap: 6px;
+                                                    font-size: 11px;
+                                                    color: #6B7280;
+                                                    font-weight: 500;
+                                                    margin-bottom: 6px;
+                                                ">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                                    </svg>
+                                                    Deals
+                                                </div>
+                                                <div style="
+                                                    font-size: 20px;
+                                                    font-weight: 700;
+                                                    color: #111827;
+                                                ">${dealCount}</div>
+                                            </div>
+                                            
+                                            <!-- Widget 2: TFA -->
+                                            <div style="
+                                                background: #F9FAFB;
+                                                border-radius: 8px;
+                                                padding: 12px;
+                                                border: 1px solid #E5E7EB;
+                                            ">
+                                                <div style="
+                                                    display: flex;
+                                                    align-items: center;
+                                                    gap: 6px;
+                                                    font-size: 11px;
+                                                    color: #6B7280;
+                                                    font-weight: 500;
+                                                    margin-bottom: 6px;
+                                                ">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                                    </svg>
+                                                    TFA
+                                                </div>
+                                                <div style="
+                                                    font-size: 14px;
+                                                    font-weight: 700;
+                                                    color: #111827;
+                                                ">${formatCurrency(tfaAmount)}</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Regional Distribution Table -->
+                                        <div style="margin-top: 12px;">
+                                            <div style="
+                                                display: flex;
+                                                align-items: center;
+                                                gap: 6px;
+                                                margin-bottom: 8px;
+                                            ">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2">
+                                                    <circle cx="12" cy="12" r="10"></circle>
+                                                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                                                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                                                </svg>
+                                                <span style="
+                                                    font-size: 12px;
+                                                    font-weight: 600;
+                                                    color: #374151;
+                                                ">Regional Distribution</span>
+                                            </div>
+                                            <table style="width: 100%; border-collapse: collapse;">
+                                                <thead>
+                                                    <tr style="border-bottom: 1px solid #E5E7EB;">
+                                                        <th style="padding: 6px 8px; text-align: left; font-size: 10px; color: #6B7280; font-weight: 600; text-transform: uppercase;">Region</th>
+                                                        <th style="padding: 6px 8px; text-align: center; font-size: 10px; color: #6B7280; font-weight: 600; text-transform: uppercase;">Deals</th>
+                                                        <th style="padding: 6px 8px; text-align: right; font-size: 10px; color: #6B7280; font-weight: 600; text-transform: uppercase;">TFA</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    ${regionalRows || '<tr><td colspan="3" style="padding: 8px; text-align: center; font-size: 11px; color: #9CA3AF;">No data</td></tr>'}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
                         }
                     },
                 };
@@ -22476,6 +23037,54 @@
                 productCountChartElYTD.innerHTML = '';
                 const productCountChartYTD = new ApexCharts(productCountChartElYTD, productCountDonutOptions);
                 productCountChartYTD.render();
+                
+                // Add tooltip positioning fix
+                setTimeout(() => {
+                    const tooltipObserver = new MutationObserver(() => {
+                        const tooltip = productCountChartElYTD.querySelector('.apexcharts-tooltip.apexcharts-active');
+                        if (tooltip && !tooltip.hasAttribute('data-positioned')) {
+                            const tooltipRect = tooltip.getBoundingClientRect();
+                            const windowWidth = window.innerWidth;
+                            const windowHeight = window.innerHeight;
+                            const margin = 10;
+                            
+                            let needsReposition = false;
+                            
+                            if (tooltipRect.left < margin) {
+                                tooltip.style.left = margin + 'px';
+                                tooltip.style.transform = 'none';
+                                needsReposition = true;
+                            } else if (tooltipRect.right > windowWidth - margin) {
+                                tooltip.style.left = (windowWidth - tooltipRect.width - margin) + 'px';
+                                tooltip.style.transform = 'none';
+                                needsReposition = true;
+                            }
+                            
+                            if (tooltipRect.top < margin) {
+                                tooltip.style.top = margin + 'px';
+                                needsReposition = true;
+                            } else if (tooltipRect.bottom > windowHeight - margin) {
+                                tooltip.style.top = (windowHeight - tooltipRect.height - margin) + 'px';
+                                needsReposition = true;
+                            }
+                            
+                            if (needsReposition) {
+                                tooltip.setAttribute('data-positioned', 'true');
+                            }
+                        }
+                        
+                        const hiddenTooltip = productCountChartElYTD.querySelector('.apexcharts-tooltip:not(.apexcharts-active)[data-positioned]');
+                        if (hiddenTooltip) {
+                            hiddenTooltip.removeAttribute('data-positioned');
+                        }
+                    });
+                    
+                    tooltipObserver.observe(productCountChartElYTD, {
+                        attributes: true,
+                        attributeFilter: ['class'],
+                        subtree: true
+                    });
+                }, 200);
                 
                 // Populate legend list
                 if (productCountListElYTD) {
@@ -22807,13 +23416,217 @@
                         }
                     },
                     tooltip: {
-                        theme: 'light'
+                        theme: 'light',
+                        followCursor: false,
+                        custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                            const weekData = weeklyTrend[dataPointIndex];
+                            const weekName = weekData.name;
+                            const dealCount = weekData.count;
+                            const totalTFA = weekData.tfa;
+                            const regionalBreakdown = weekData.regionalBreakdown || { NAM: { count: 0, tfa: 0 }, LATAM: { count: 0, tfa: 0 }, EMEA: { count: 0, tfa: 0 }, APAC: { count: 0, tfa: 0 } };
+                            
+                            // Build regional table rows
+                            let regionalRows = '';
+                            ['NAM', 'LATAM', 'EMEA', 'APAC'].forEach(region => {
+                                const regionData = regionalBreakdown[region];
+                                if (regionData && (regionData.count > 0 || regionData.tfa > 0)) {
+                                    regionalRows += `
+                                        <tr>
+                                            <td style="padding: 6px 8px; text-align: left; font-size: 11px; color: #6B7280; font-weight: 500;">${region}</td>
+                                            <td style="padding: 6px 8px; text-align: center; font-size: 11px; color: #111827; font-weight: 600;">${regionData.count}</td>
+                                            <td style="padding: 6px 8px; text-align: right; font-size: 11px; color: #111827; font-weight: 600;">${formatCurrency(regionData.tfa)}</td>
+                                        </tr>
+                                    `;
+                                }
+                            });
+                            
+                            return `
+                                <div style="
+                                    background: #ffffff; 
+                                    border-radius: 12px; 
+                                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
+                                    min-width: 320px;
+                                    max-width: 360px;
+                                    overflow: hidden;
+                                    font-family: Outfit, sans-serif;
+                                ">
+                                    <!-- Header with border -->
+                                    <div style="
+                                        border-bottom: 1px solid #E5E7EB;
+                                        padding: 16px 16px 12px 16px;
+                                        margin-bottom: 14px;
+                                    ">
+                                        <div style="
+                                            font-weight: 600; 
+                                            font-size: 15px; 
+                                            color: #111827;
+                                            margin-bottom: 4px;
+                                        ">${weekName}</div>
+                                        <div style="
+                                            font-size: 12px; 
+                                            font-weight: 500;
+                                            color: #6B7280;
+                                        ">Weekly Trend</div>
+                                    </div>
+                                    
+                                    <!-- Content wrapper -->
+                                    <div style="padding: 0 16px 16px 16px;">
+                                        <!-- Widget Grid (2 columns) -->
+                                        <div style="
+                                            display: grid;
+                                            grid-template-columns: 1fr 1fr;
+                                            gap: 10px;
+                                            margin-bottom: 16px;
+                                        ">
+                                            <!-- Widget 1: Deal Count -->
+                                            <div style="
+                                                background: #F9FAFB;
+                                                border-radius: 8px;
+                                                padding: 12px;
+                                                border: 1px solid #E5E7EB;
+                                            ">
+                                                <div style="
+                                                    display: flex;
+                                                    align-items: center;
+                                                    gap: 6px;
+                                                    font-size: 11px;
+                                                    color: #6B7280;
+                                                    font-weight: 500;
+                                                    margin-bottom: 6px;
+                                                ">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                                    </svg>
+                                                    Deals
+                                                </div>
+                                                <div style="
+                                                    font-size: 20px;
+                                                    font-weight: 700;
+                                                    color: #111827;
+                                                ">${dealCount}</div>
+                                            </div>
+                                            
+                                            <!-- Widget 2: TFA -->
+                                            <div style="
+                                                background: #F9FAFB;
+                                                border-radius: 8px;
+                                                padding: 12px;
+                                                border: 1px solid #E5E7EB;
+                                            ">
+                                                <div style="
+                                                    display: flex;
+                                                    align-items: center;
+                                                    gap: 6px;
+                                                    font-size: 11px;
+                                                    color: #6B7280;
+                                                    font-weight: 500;
+                                                    margin-bottom: 6px;
+                                                ">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                                    </svg>
+                                                    TFA
+                                                </div>
+                                                <div style="
+                                                    font-size: 14px;
+                                                    font-weight: 700;
+                                                    color: #111827;
+                                                ">${formatCurrency(totalTFA)}</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Regional Distribution Table -->
+                                        <div style="margin-top: 12px;">
+                                            <div style="
+                                                display: flex;
+                                                align-items: center;
+                                                gap: 6px;
+                                                margin-bottom: 8px;
+                                            ">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2">
+                                                    <circle cx="12" cy="12" r="10"></circle>
+                                                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                                                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                                                </svg>
+                                                <span style="
+                                                    font-size: 12px;
+                                                    font-weight: 600;
+                                                    color: #374151;
+                                                ">Regional Distribution</span>
+                                            </div>
+                                            <table style="width: 100%; border-collapse: collapse;">
+                                                <thead>
+                                                    <tr style="border-bottom: 1px solid #E5E7EB;">
+                                                        <th style="padding: 6px 8px; text-align: left; font-size: 10px; color: #6B7280; font-weight: 600; text-transform: uppercase;">Region</th>
+                                                        <th style="padding: 6px 8px; text-align: center; font-size: 10px; color: #6B7280; font-weight: 600; text-transform: uppercase;">Deals</th>
+                                                        <th style="padding: 6px 8px; text-align: right; font-size: 10px; color: #6B7280; font-weight: 600; text-transform: uppercase;">TFA</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    ${regionalRows || '<tr><td colspan="3" style="padding: 8px; text-align: center; font-size: 11px; color: #9CA3AF;">No data</td></tr>'}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }
                     }
                 };
                 
                 weeklyChartEl.innerHTML = '';
                 const weeklyChart = new ApexCharts(weeklyChartEl, weeklyOptions);
                 weeklyChart.render();
+                
+                // Add tooltip positioning fix
+                setTimeout(() => {
+                    const tooltipObserver = new MutationObserver(() => {
+                        const tooltip = weeklyChartEl.querySelector('.apexcharts-tooltip.apexcharts-active');
+                        if (tooltip && !tooltip.hasAttribute('data-positioned')) {
+                            const tooltipRect = tooltip.getBoundingClientRect();
+                            const windowWidth = window.innerWidth;
+                            const windowHeight = window.innerHeight;
+                            const margin = 10;
+                            
+                            let needsReposition = false;
+                            
+                            if (tooltipRect.left < margin) {
+                                tooltip.style.left = margin + 'px';
+                                tooltip.style.transform = 'none';
+                                needsReposition = true;
+                            } else if (tooltipRect.right > windowWidth - margin) {
+                                tooltip.style.left = (windowWidth - tooltipRect.width - margin) + 'px';
+                                tooltip.style.transform = 'none';
+                                needsReposition = true;
+                            }
+                            
+                            if (tooltipRect.top < margin) {
+                                tooltip.style.top = margin + 'px';
+                                needsReposition = true;
+                            } else if (tooltipRect.bottom > windowHeight - margin) {
+                                tooltip.style.top = (windowHeight - tooltipRect.height - margin) + 'px';
+                                needsReposition = true;
+                            }
+                            
+                            if (needsReposition) {
+                                tooltip.setAttribute('data-positioned', 'true');
+                            }
+                        }
+                        
+                        const hiddenTooltip = weeklyChartEl.querySelector('.apexcharts-tooltip:not(.apexcharts-active)[data-positioned]');
+                        if (hiddenTooltip) {
+                            hiddenTooltip.removeAttribute('data-positioned');
+                        }
+                    });
+                    
+                    tooltipObserver.observe(weeklyChartEl, {
+                        attributes: true,
+                        attributeFilter: ['class'],
+                        subtree: true
+                    });
+                }, 200);
             }
             
             // 5. Product Distribution by TFA - Donut Chart (matching Deal Count style)
@@ -22890,11 +23703,161 @@
                     tooltip: {
                         enabled: true,
                         theme: "light",
-                        y: {
-                            formatter: function(val, opts) {
-                                const percentage = ((val / totalTFA) * 100).toFixed(1);
-                                return formatCurrency(val) + ' (' + percentage + '%)';
-                            }
+                        followCursor: false,
+                        custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                            const product = topProducts[seriesIndex];
+                            const productName = product.name;
+                            const tfaAmount = product.tfa;
+                            const dealCount = product.count;
+                            const regionalBreakdown = product.regionalBreakdown || { NAM: { count: 0, tfa: 0 }, LATAM: { count: 0, tfa: 0 }, EMEA: { count: 0, tfa: 0 }, APAC: { count: 0, tfa: 0 } };
+                            
+                            // Build regional table rows
+                            let regionalRows = '';
+                            ['NAM', 'LATAM', 'EMEA', 'APAC'].forEach(region => {
+                                const regionData = regionalBreakdown[region];
+                                if (regionData && (regionData.count > 0 || regionData.tfa > 0)) {
+                                    regionalRows += `
+                                        <tr>
+                                            <td style="padding: 6px 8px; text-align: left; font-size: 11px; color: #6B7280; font-weight: 500;">${region}</td>
+                                            <td style="padding: 6px 8px; text-align: center; font-size: 11px; color: #111827; font-weight: 600;">${regionData.count}</td>
+                                            <td style="padding: 6px 8px; text-align: right; font-size: 11px; color: #111827; font-weight: 600;">${formatCurrency(regionData.tfa)}</td>
+                                        </tr>
+                                    `;
+                                }
+                            });
+                            
+                            return `
+                                <div style="
+                                    background: #ffffff; 
+                                    border-radius: 12px; 
+                                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
+                                    min-width: 320px;
+                                    max-width: 360px;
+                                    overflow: hidden;
+                                    font-family: Outfit, sans-serif;
+                                ">
+                                    <!-- Header with border -->
+                                    <div style="
+                                        border-bottom: 1px solid #E5E7EB;
+                                        padding: 16px 16px 12px 16px;
+                                        margin-bottom: 14px;
+                                    ">
+                                        <div style="
+                                            font-weight: 600; 
+                                            font-size: 15px; 
+                                            color: #111827;
+                                            margin-bottom: 4px;
+                                        ">${productName}</div>
+                                        <div style="
+                                            font-size: 12px; 
+                                            font-weight: 500;
+                                            color: #6B7280;
+                                        ">Product Program</div>
+                                    </div>
+                                    
+                                    <!-- Content wrapper -->
+                                    <div style="padding: 0 16px 16px 16px;">
+                                        <!-- Widget Grid (2 columns) -->
+                                        <div style="
+                                            display: grid;
+                                            grid-template-columns: 1fr 1fr;
+                                            gap: 10px;
+                                            margin-bottom: 16px;
+                                        ">
+                                            <!-- Widget 1: Deal Count -->
+                                            <div style="
+                                                background: #F9FAFB;
+                                                border-radius: 8px;
+                                                padding: 12px;
+                                                border: 1px solid #E5E7EB;
+                                            ">
+                                                <div style="
+                                                    display: flex;
+                                                    align-items: center;
+                                                    gap: 6px;
+                                                    font-size: 11px;
+                                                    color: #6B7280;
+                                                    font-weight: 500;
+                                                    margin-bottom: 6px;
+                                                ">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                                    </svg>
+                                                    Deals
+                                                </div>
+                                                <div style="
+                                                    font-size: 20px;
+                                                    font-weight: 700;
+                                                    color: #111827;
+                                                ">${dealCount}</div>
+                                            </div>
+                                            
+                                            <!-- Widget 2: TFA -->
+                                            <div style="
+                                                background: #F9FAFB;
+                                                border-radius: 8px;
+                                                padding: 12px;
+                                                border: 1px solid #E5E7EB;
+                                            ">
+                                                <div style="
+                                                    display: flex;
+                                                    align-items: center;
+                                                    gap: 6px;
+                                                    font-size: 11px;
+                                                    color: #6B7280;
+                                                    font-weight: 500;
+                                                    margin-bottom: 6px;
+                                                ">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                                    </svg>
+                                                    TFA
+                                                </div>
+                                                <div style="
+                                                    font-size: 14px;
+                                                    font-weight: 700;
+                                                    color: #111827;
+                                                ">${formatCurrency(tfaAmount)}</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Regional Distribution Table -->
+                                        <div style="margin-top: 12px;">
+                                            <div style="
+                                                display: flex;
+                                                align-items: center;
+                                                gap: 6px;
+                                                margin-bottom: 8px;
+                                            ">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2">
+                                                    <circle cx="12" cy="12" r="10"></circle>
+                                                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                                                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                                                </svg>
+                                                <span style="
+                                                    font-size: 12px;
+                                                    font-weight: 600;
+                                                    color: #374151;
+                                                ">Regional Distribution</span>
+                                            </div>
+                                            <table style="width: 100%; border-collapse: collapse;">
+                                                <thead>
+                                                    <tr style="border-bottom: 1px solid #E5E7EB;">
+                                                        <th style="padding: 6px 8px; text-align: left; font-size: 10px; color: #6B7280; font-weight: 600; text-transform: uppercase;">Region</th>
+                                                        <th style="padding: 6px 8px; text-align: center; font-size: 10px; color: #6B7280; font-weight: 600; text-transform: uppercase;">Deals</th>
+                                                        <th style="padding: 6px 8px; text-align: right; font-size: 10px; color: #6B7280; font-weight: 600; text-transform: uppercase;">TFA</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    ${regionalRows || '<tr><td colspan="3" style="padding: 8px; text-align: center; font-size: 11px; color: #9CA3AF;">No data</td></tr>'}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
                         }
                     },
                 };
@@ -22902,6 +23865,54 @@
                 productChartEl.innerHTML = '';
                 const productDonutChart = new ApexCharts(productChartEl, productDonutOptions);
                 productDonutChart.render();
+                
+                // Add tooltip positioning fix
+                setTimeout(() => {
+                    const tooltipObserver = new MutationObserver(() => {
+                        const tooltip = productChartEl.querySelector('.apexcharts-tooltip.apexcharts-active');
+                        if (tooltip && !tooltip.hasAttribute('data-positioned')) {
+                            const tooltipRect = tooltip.getBoundingClientRect();
+                            const windowWidth = window.innerWidth;
+                            const windowHeight = window.innerHeight;
+                            const margin = 10;
+                            
+                            let needsReposition = false;
+                            
+                            if (tooltipRect.left < margin) {
+                                tooltip.style.left = margin + 'px';
+                                tooltip.style.transform = 'none';
+                                needsReposition = true;
+                            } else if (tooltipRect.right > windowWidth - margin) {
+                                tooltip.style.left = (windowWidth - tooltipRect.width - margin) + 'px';
+                                tooltip.style.transform = 'none';
+                                needsReposition = true;
+                            }
+                            
+                            if (tooltipRect.top < margin) {
+                                tooltip.style.top = margin + 'px';
+                                needsReposition = true;
+                            } else if (tooltipRect.bottom > windowHeight - margin) {
+                                tooltip.style.top = (windowHeight - tooltipRect.height - margin) + 'px';
+                                needsReposition = true;
+                            }
+                            
+                            if (needsReposition) {
+                                tooltip.setAttribute('data-positioned', 'true');
+                            }
+                        }
+                        
+                        const hiddenTooltip = productChartEl.querySelector('.apexcharts-tooltip:not(.apexcharts-active)[data-positioned]');
+                        if (hiddenTooltip) {
+                            hiddenTooltip.removeAttribute('data-positioned');
+                        }
+                    });
+                    
+                    tooltipObserver.observe(productChartEl, {
+                        attributes: true,
+                        attributeFilter: ['class'],
+                        subtree: true
+                    });
+                }, 200);
                 
                 // Populate legend list
                 if (productListEl) {
@@ -22995,11 +24006,161 @@
                     tooltip: {
                         enabled: true,
                         theme: "light",
-                        y: {
-                            formatter: function(val, opts) {
-                                const percentage = ((val / totalDealsForProductMTD) * 100).toFixed(1);
-                                return val + ' deals (' + percentage + '%)';
-                            }
+                        followCursor: false,
+                        custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+                            const product = topProducts[seriesIndex];
+                            const productName = product.name;
+                            const dealCount = product.count;
+                            const tfaAmount = product.tfa;
+                            const regionalBreakdown = product.regionalBreakdown || { NAM: { count: 0, tfa: 0 }, LATAM: { count: 0, tfa: 0 }, EMEA: { count: 0, tfa: 0 }, APAC: { count: 0, tfa: 0 } };
+                            
+                            // Build regional table rows
+                            let regionalRows = '';
+                            ['NAM', 'LATAM', 'EMEA', 'APAC'].forEach(region => {
+                                const regionData = regionalBreakdown[region];
+                                if (regionData && (regionData.count > 0 || regionData.tfa > 0)) {
+                                    regionalRows += `
+                                        <tr>
+                                            <td style="padding: 6px 8px; text-align: left; font-size: 11px; color: #6B7280; font-weight: 500;">${region}</td>
+                                            <td style="padding: 6px 8px; text-align: center; font-size: 11px; color: #111827; font-weight: 600;">${regionData.count}</td>
+                                            <td style="padding: 6px 8px; text-align: right; font-size: 11px; color: #111827; font-weight: 600;">${formatCurrency(regionData.tfa)}</td>
+                                        </tr>
+                                    `;
+                                }
+                            });
+                            
+                            return `
+                                <div style="
+                                    background: #ffffff; 
+                                    border-radius: 12px; 
+                                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); 
+                                    min-width: 320px;
+                                    max-width: 360px;
+                                    overflow: hidden;
+                                    font-family: Outfit, sans-serif;
+                                ">
+                                    <!-- Header with border -->
+                                    <div style="
+                                        border-bottom: 1px solid #E5E7EB;
+                                        padding: 16px 16px 12px 16px;
+                                        margin-bottom: 14px;
+                                    ">
+                                        <div style="
+                                            font-weight: 600; 
+                                            font-size: 15px; 
+                                            color: #111827;
+                                            margin-bottom: 4px;
+                                        ">${productName}</div>
+                                        <div style="
+                                            font-size: 12px; 
+                                            font-weight: 500;
+                                            color: #6B7280;
+                                        ">Product Program</div>
+                                    </div>
+                                    
+                                    <!-- Content wrapper -->
+                                    <div style="padding: 0 16px 16px 16px;">
+                                        <!-- Widget Grid (2 columns) -->
+                                        <div style="
+                                            display: grid;
+                                            grid-template-columns: 1fr 1fr;
+                                            gap: 10px;
+                                            margin-bottom: 16px;
+                                        ">
+                                            <!-- Widget 1: Deal Count -->
+                                            <div style="
+                                                background: #F9FAFB;
+                                                border-radius: 8px;
+                                                padding: 12px;
+                                                border: 1px solid #E5E7EB;
+                                            ">
+                                                <div style="
+                                                    display: flex;
+                                                    align-items: center;
+                                                    gap: 6px;
+                                                    font-size: 11px;
+                                                    color: #6B7280;
+                                                    font-weight: 500;
+                                                    margin-bottom: 6px;
+                                                ">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                                    </svg>
+                                                    Deals
+                                                </div>
+                                                <div style="
+                                                    font-size: 20px;
+                                                    font-weight: 700;
+                                                    color: #111827;
+                                                ">${dealCount}</div>
+                                            </div>
+                                            
+                                            <!-- Widget 2: TFA -->
+                                            <div style="
+                                                background: #F9FAFB;
+                                                border-radius: 8px;
+                                                padding: 12px;
+                                                border: 1px solid #E5E7EB;
+                                            ">
+                                                <div style="
+                                                    display: flex;
+                                                    align-items: center;
+                                                    gap: 6px;
+                                                    font-size: 11px;
+                                                    color: #6B7280;
+                                                    font-weight: 500;
+                                                    margin-bottom: 6px;
+                                                ">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                                                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                                    </svg>
+                                                    TFA
+                                                </div>
+                                                <div style="
+                                                    font-size: 14px;
+                                                    font-weight: 700;
+                                                    color: #111827;
+                                                ">${formatCurrency(tfaAmount)}</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Regional Distribution Table -->
+                                        <div style="margin-top: 12px;">
+                                            <div style="
+                                                display: flex;
+                                                align-items: center;
+                                                gap: 6px;
+                                                margin-bottom: 8px;
+                                            ">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2">
+                                                    <circle cx="12" cy="12" r="10"></circle>
+                                                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                                                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                                                </svg>
+                                                <span style="
+                                                    font-size: 12px;
+                                                    font-weight: 600;
+                                                    color: #374151;
+                                                ">Regional Distribution</span>
+                                            </div>
+                                            <table style="width: 100%; border-collapse: collapse;">
+                                                <thead>
+                                                    <tr style="border-bottom: 1px solid #E5E7EB;">
+                                                        <th style="padding: 6px 8px; text-align: left; font-size: 10px; color: #6B7280; font-weight: 600; text-transform: uppercase;">Region</th>
+                                                        <th style="padding: 6px 8px; text-align: center; font-size: 10px; color: #6B7280; font-weight: 600; text-transform: uppercase;">Deals</th>
+                                                        <th style="padding: 6px 8px; text-align: right; font-size: 10px; color: #6B7280; font-weight: 600; text-transform: uppercase;">TFA</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    ${regionalRows || '<tr><td colspan="3" style="padding: 8px; text-align: center; font-size: 11px; color: #9CA3AF;">No data</td></tr>'}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
                         }
                     },
                 };
@@ -23007,6 +24168,54 @@
                 productCountChartElMTD.innerHTML = '';
                 const productCountChartMTD = new ApexCharts(productCountChartElMTD, productCountDonutOptions);
                 productCountChartMTD.render();
+                
+                // Add tooltip positioning fix
+                setTimeout(() => {
+                    const tooltipObserver = new MutationObserver(() => {
+                        const tooltip = productCountChartElMTD.querySelector('.apexcharts-tooltip.apexcharts-active');
+                        if (tooltip && !tooltip.hasAttribute('data-positioned')) {
+                            const tooltipRect = tooltip.getBoundingClientRect();
+                            const windowWidth = window.innerWidth;
+                            const windowHeight = window.innerHeight;
+                            const margin = 10;
+                            
+                            let needsReposition = false;
+                            
+                            if (tooltipRect.left < margin) {
+                                tooltip.style.left = margin + 'px';
+                                tooltip.style.transform = 'none';
+                                needsReposition = true;
+                            } else if (tooltipRect.right > windowWidth - margin) {
+                                tooltip.style.left = (windowWidth - tooltipRect.width - margin) + 'px';
+                                tooltip.style.transform = 'none';
+                                needsReposition = true;
+                            }
+                            
+                            if (tooltipRect.top < margin) {
+                                tooltip.style.top = margin + 'px';
+                                needsReposition = true;
+                            } else if (tooltipRect.bottom > windowHeight - margin) {
+                                tooltip.style.top = (windowHeight - tooltipRect.height - margin) + 'px';
+                                needsReposition = true;
+                            }
+                            
+                            if (needsReposition) {
+                                tooltip.setAttribute('data-positioned', 'true');
+                            }
+                        }
+                        
+                        const hiddenTooltip = productCountChartElMTD.querySelector('.apexcharts-tooltip:not(.apexcharts-active)[data-positioned]');
+                        if (hiddenTooltip) {
+                            hiddenTooltip.removeAttribute('data-positioned');
+                        }
+                    });
+                    
+                    tooltipObserver.observe(productCountChartElMTD, {
+                        attributes: true,
+                        attributeFilter: ['class'],
+                        subtree: true
+                    });
+                }, 200);
                 
                 // Populate legend list
                 if (productCountListElMTD) {
@@ -30338,20 +31547,20 @@
                         console.log('Tooltip show for code:', code);
                         console.log('Tooltip object:', tooltip);
                         
-                        // Find which region this country belongs to
-                        let regionName = '';
-                        for (const [region, countries] of Object.entries(regionCountries)) {
-                            if (countries.includes(code)) {
-                                regionName = region;
-                                break;
+                            // Find which region this country belongs to
+                            let regionName = '';
+                            for (const [region, countries] of Object.entries(regionCountries)) {
+                                if (countries.includes(code)) {
+                                    regionName = region;
+                                    break;
+                                }
                             }
-                        }
                         
                         console.log('Region found:', regionName);
-                        
-                        if (regionName && regionalData[regionName]) {
-                            const data = regionalData[regionName];
-                            const percentage = ((data.total / grandTotal) * 100).toFixed(1);
+                            
+                            if (regionName && regionalData[regionName]) {
+                                const data = regionalData[regionName];
+                                const percentage = ((data.total / grandTotal) * 100).toFixed(1);
                             const facilityCount = data.facilities.size;
                             const color = regionColors[regionName];
                             
@@ -30366,7 +31575,7 @@
                                     tooltip.text(tooltipText.replace(/<br>/g, '\n'));
                                 }
                                 if (tooltip.css && typeof tooltip.css === 'function') {
-                                    tooltip.css({
+                                tooltip.css({
                                         'background-color': color,
                                         'color': '#ffffff',
                                         'font-size': '12px',
@@ -30398,7 +31607,7 @@
                                 });
                                 console.log(`Colored ${regionCountries[regionName].length} countries in ${regionName}`);
                             }
-                        } else {
+                            } else {
                             console.log('No regional data found for:', regionName);
                         }
                     };

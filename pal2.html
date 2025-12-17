@@ -171,45 +171,161 @@
             z-index: 9999;
         }
 
-        /* Loading Overlay Styles */
+        /* Loading Overlay Styles - Optimized for independent, uninterrupted animations */
         @keyframes bit {
             from { opacity: 0.3; }
             to { opacity: 1; }
         }
         
-        @keyframes loading {
-            0% { 
-                left: -25%;
-                transform: translateX(0);
-            }
-            100% { 
-                left: 70%;
-                transform: translateX(0);
-            }
+        @keyframes spinner {
+            0% { opacity: 1; }
+            100% { opacity: 0.3; }
         }
         
+        /* Text animation - completely isolated from state changes */
         .animate-bit {
             animation: bit 0.6s alternate infinite;
             will-change: opacity;
-        }
-        
-        .animate-loading {
-            animation: loading 0.6s ease-in-out alternate infinite;
-            will-change: transform, left;
-            /* Use GPU acceleration for smoother animation */
+            /* GPU acceleration for smooth animation */
             transform: translateZ(0);
             backface-visibility: hidden;
-            perspective: 1000px;
+            /* Isolate from layout changes */
+            contain: layout style paint;
+            /* Prevent text updates from interrupting animation */
+            pointer-events: none;
         }
         
-        /* Ensure animation continues smoothly even during DOM updates */
-        #loadingOverlay * {
+        /* Spinner container - isolated animation layer */
+        .loader-container {
+            /* Create separate compositing layer for optimal performance */
+            transform: translateZ(0);
+            will-change: transform;
+            contain: layout style paint;
+            /* Ensure animations run on GPU */
+            -webkit-transform: translate3d(0, 0, 0);
+            transform: translate3d(0, 0, 0);
+        }
+        
+        /* Spinner items - independent rotation animations */
+        .loader-item {
+            transform-origin: 40px 40px;
+            animation: spinner 1.2s linear infinite;
+            position: absolute;
+            /* Force GPU acceleration */
+            will-change: opacity;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            /* Prevent layout recalculation */
+            contain: strict;
+        }
+        
+        .loader-item:after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 3px;
+            left: 37px;
+            width: 6px;
+            height: 18px;
+            border-radius: 20%;
+            background: var(--color);
+            /* GPU acceleration for pseudo-elements */
+            transform: translateZ(0);
+        }
+        
+        /* Color gradient for spinner bars */
+        .loader-item:nth-child(1):after { background: #1e40af; }
+        .loader-item:nth-child(2):after { background: #2563eb; }
+        .loader-item:nth-child(3):after { background: #3b82f6; }
+        .loader-item:nth-child(4):after { background: #60a5fa; }
+        .loader-item:nth-child(5):after { background: #93c5fd; }
+        .loader-item:nth-child(6):after { background: #bfdbfe; }
+        .loader-item:nth-child(7):after { background: #93c5fd; }
+        .loader-item:nth-child(8):after { background: #60a5fa; }
+        .loader-item:nth-child(9):after { background: #3b82f6; }
+        .loader-item:nth-child(10):after { background: #2563eb; }
+        .loader-item:nth-child(11):after { background: #1e40af; }
+        .loader-item:nth-child(12):after { background: #1e3a8a; }
+        
+        /* Rotation and animation delays for each bar */
+        .loader-item:nth-child(1) {
+            transform: rotate(0deg);
+            animation-delay: -1.1s;
+        }
+        
+        .loader-item:nth-child(2) {
+            transform: rotate(30deg);
+            animation-delay: -1s;
+        }
+        
+        .loader-item:nth-child(3) {
+            transform: rotate(60deg);
+            animation-delay: -0.9s;
+        }
+        
+        .loader-item:nth-child(4) {
+            transform: rotate(90deg);
+            animation-delay: -0.8s;
+        }
+        
+        .loader-item:nth-child(5) {
+            transform: rotate(120deg);
+            animation-delay: -0.7s;
+        }
+        
+        .loader-item:nth-child(6) {
+            transform: rotate(150deg);
+            animation-delay: -0.6s;
+        }
+        
+        .loader-item:nth-child(7) {
+            transform: rotate(180deg);
+            animation-delay: -0.5s;
+        }
+        
+        .loader-item:nth-child(8) {
+            transform: rotate(210deg);
+            animation-delay: -0.4s;
+        }
+        
+        .loader-item:nth-child(9) {
+            transform: rotate(240deg);
+            animation-delay: -0.3s;
+        }
+        
+        .loader-item:nth-child(10) {
+            transform: rotate(270deg);
+            animation-delay: -0.2s;
+        }
+        
+        .loader-item:nth-child(11) {
+            transform: rotate(300deg);
+            animation-delay: -0.1s;
+        }
+        
+        .loader-item:nth-child(12) {
+            transform: rotate(330deg);
+            animation-delay: 0s;
+        }
+        
+        /* Critical: Ensure animations NEVER pause regardless of state */
+        #loadingOverlay,
+        #loadingOverlay *,
+        .loader-item,
+        .loader-item:after,
+        .animate-bit {
             animation-play-state: running !important;
+            -webkit-animation-play-state: running !important;
         }
         
-        /* Prevent layout thrashing */
-        #loadingMessage {
-            contain: layout style;
+        /* Isolate loading overlay on separate layer */
+        #loadingOverlay {
+            /* Create independent stacking context */
+            transform: translateZ(0);
+            will-change: contents;
+            /* Prevent parent operations from affecting animations */
+            isolation: isolate;
+            contain: layout style paint;
         }
     </style>
 </head>
@@ -218,10 +334,24 @@
     <!-- Loading Overlay -->
     <div id="loadingOverlay"
         class="fixed inset-0 bg-gray-100 z-[10000] flex items-center justify-center hidden">
-        <div class="w-[350px] h-[180px] rounded-[10px] bg-white flex flex-col items-center justify-evenly p-[30px] shadow-[2px_2px_10px_-5px_lightgrey]">
-            <label id="loadingMessage" class="text-[#002] text-lg animate-bit pointer-events-none">Please wait...</label>
-            <div class="w-full h-[10px] bg-gray-300 rounded-[10px] relative overflow-hidden">
-                <div id="loadingBar" class="absolute top-0 left-0 w-1/2 h-[10px] bg-blue-500 rounded-[10px] z-[1] animate-loading"></div>
+        <div class="w-[450px] rounded-[10px] bg-white flex flex-col items-center justify-evenly p-[30px] shadow-[2px_2px_10px_-5px_lightgrey] aspect-square">
+            <!-- Text animation layer - isolated from state changes -->
+            <label id="loadingMessage" class="text-gray-900 text-lg font-semibold animate-bit">Please wait...</label>
+            
+            <!-- Spinner animation layer - runs independently on GPU -->
+            <div class="loader-container inline-block relative w-20 h-20">
+                <div class="loader-item"></div>
+                <div class="loader-item"></div>
+                <div class="loader-item"></div>
+                <div class="loader-item"></div>
+                <div class="loader-item"></div>
+                <div class="loader-item"></div>
+                <div class="loader-item"></div>
+                <div class="loader-item"></div>
+                <div class="loader-item"></div>
+                <div class="loader-item"></div>
+                <div class="loader-item"></div>
+                <div class="loader-item"></div>
             </div>
         </div>
     </div>
@@ -4120,30 +4250,37 @@
             });
         }
 
-        // Show loading overlay with title, progress and percentage
+        // Show loading overlay with title - completely non-blocking
         function showLoadingOverlay(
             title = "Please wait...",
             progress = null,
             percent = null
         ) {
-            console.log('🔄 showLoadingOverlay called:', { title });
-            const overlay = document.getElementById("loadingOverlay");
-            const messageEl = document.getElementById("loadingMessage");
-            
-            if (overlay) {
-                console.log('✅ Loading overlay found, displaying...');
-                overlay.classList.remove("hidden");
+            // Schedule all DOM operations on next animation frame to prevent blocking
+            requestAnimationFrame(() => {
+                const overlay = document.getElementById("loadingOverlay");
+                const messageEl = document.getElementById("loadingMessage");
                 
-                if (messageEl) {
-                    // Use requestAnimationFrame to update text without interrupting animation
+                if (!overlay) {
+                    console.error('❌ Loading overlay element not found!');
+                    return;
+                }
+                
+                // Show overlay if hidden
+                if (overlay.classList.contains("hidden")) {
+                    overlay.classList.remove("hidden");
+                    console.log('✅ Loading overlay displayed');
+                }
+                
+                // Update text only if changed - use separate animation frame to isolate from overlay show
+                if (messageEl && messageEl.textContent !== title) {
                     requestAnimationFrame(() => {
+                        // Double-buffer text update to completely isolate from animations
                         messageEl.textContent = title;
                         console.log('📝 Message updated:', title);
                     });
                 }
-            } else {
-                console.error('❌ Loading overlay element not found!');
-            }
+            });
         }
         
         // Update just the loading percentage (legacy support - no longer needed with new loader)
@@ -4151,18 +4288,57 @@
             // No-op for new loader design
         }
 
-        // Hide loading overlay
+        // Hide loading overlay - non-blocking
         function hideLoadingOverlay() {
-            console.log('⏹️ hideLoadingOverlay called');
-            const overlay = document.getElementById("loadingOverlay");
-            
-            if (overlay) {
+            // Schedule hiding on next animation frame
+            requestAnimationFrame(() => {
+                const overlay = document.getElementById("loadingOverlay");
+                
+                if (!overlay) {
+                    console.error('❌ Loading overlay element not found when trying to hide!');
+                    return;
+                }
+                
                 console.log('✅ Hiding loading overlay');
                 overlay.classList.add("hidden");
-            } else {
-                console.error('❌ Loading overlay element not found when trying to hide!');
-            }
+            });
         }
+        
+        // Animation Protection System - ensures animations never pause regardless of file operations
+        (function() {
+            if (typeof window === 'undefined') return;
+            
+            // Monitor and protect animations every 100ms
+            const protectAnimations = () => {
+                const overlay = document.getElementById("loadingOverlay");
+                if (!overlay || overlay.classList.contains("hidden")) return;
+                
+                // Ensure all animation elements maintain running state
+                const animatedElements = overlay.querySelectorAll('.animate-bit, .loader-item');
+                animatedElements.forEach(el => {
+                    const style = window.getComputedStyle(el);
+                    // Force animation to run if somehow paused
+                    if (style.animationPlayState === 'paused') {
+                        el.style.animationPlayState = 'running';
+                    }
+                });
+            };
+            
+            // Run protection check on animation frame loop for optimal timing
+            const animationLoop = () => {
+                protectAnimations();
+                requestAnimationFrame(animationLoop);
+            };
+            
+            // Start protection system when page loads
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    requestAnimationFrame(animationLoop);
+                });
+            } else {
+                requestAnimationFrame(animationLoop);
+            }
+        })();
 
         // Show notification (TailAdmin style - matching alerts.html)
         function showNotification(title, message, type = "success") {
@@ -24865,12 +25041,30 @@
         function initializeRegionalMap(mapId, listId, dataSource, amountField) {
             console.log(`Initializing regional map: ${mapId}`);
             
-            // Define region to ISO country codes mapping
+            // Define region to ISO country codes mapping (matching your regional structure)
             const regionCountries = {
-                'NAM': ['US', 'CA', 'MX'], // North America
-                'LATAM': ['BR', 'AR', 'CL', 'CO', 'PE', 'VE', 'EC', 'BO', 'PY', 'UY', 'GY', 'SR', 'GF', 'CR', 'PA', 'NI', 'HN', 'GT', 'SV', 'BZ', 'CU', 'DO', 'HT', 'JM', 'TT', 'BS', 'BB', 'GD', 'LC', 'VC', 'AG', 'DM', 'KN'], // Latin America
-                'EMEA': ['GB', 'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'CH', 'AT', 'SE', 'NO', 'DK', 'FI', 'IE', 'PT', 'GR', 'PL', 'CZ', 'HU', 'RO', 'BG', 'HR', 'SI', 'SK', 'LT', 'LV', 'EE', 'LU', 'MT', 'CY', 'IS', 'AL', 'RS', 'BA', 'MK', 'ME', 'XK', 'MD', 'UA', 'BY', 'RU', 'TR', 'SA', 'AE', 'QA', 'KW', 'BH', 'OM', 'JO', 'LB', 'IQ', 'SY', 'YE', 'IL', 'PS', 'EG', 'DZ', 'MA', 'TN', 'LY', 'SD', 'SS', 'ET', 'KE', 'TZ', 'UG', 'RW', 'BI', 'SO', 'DJ', 'ER', 'ZA', 'NG', 'GH', 'CI', 'CM', 'AO', 'ZM', 'ZW', 'MW', 'MZ', 'BW', 'NA', 'LS', 'SZ', 'MG', 'MU', 'SC', 'KM', 'ML', 'BF', 'NE', 'TD', 'CF', 'CD', 'CG', 'GA', 'GQ', 'ST', 'SN', 'GM', 'GW', 'GN', 'SL', 'LR', 'TG', 'BJ'], // Europe, Middle East, and Africa
-                'APAC': ['CN', 'JP', 'IN', 'AU', 'KR', 'ID', 'TH', 'MY', 'SG', 'PH', 'VN', 'NZ', 'BD', 'PK', 'MM', 'KH', 'LA', 'BN', 'TL', 'MN', 'NP', 'LK', 'AF', 'BT', 'MV', 'PG', 'FJ', 'SB', 'VU', 'WS', 'TO', 'KI', 'FM', 'MH', 'PW', 'NR', 'TV', 'HK', 'MO', 'TW', 'KP', 'KZ', 'UZ', 'TM', 'TJ', 'KG'] // Asia-Pacific
+                'NAM': ['US', 'CA'], // North America - United States, Canada
+                'LATAM': ['MX', 'BZ', 'CR', 'SV', 'GT', 'HN', 'NI', 'PA', 'AG', 'BS', 'BB', 'CU', 'DM', 'DO', 'GD', 'HT', 'JM', 'KN', 'LC', 'VC', 'TT', 'AR', 'BO', 'BR', 'CL', 'CO', 'EC', 'GY', 'PY', 'PE', 'SR', 'UY', 'VE'], // Latin America - Mexico + Central America + Caribbean + South America
+                'EMEA': [
+                    // Europe
+                    'AL', 'AD', 'AT', 'BY', 'BE', 'BA', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IS', 'IE', 'IT', 'LV', 'LI', 'LT', 'LU', 'MT', 'MD', 'MC', 'ME', 'NL', 'MK', 'NO', 'PL', 'PT', 'RO', 'SM', 'RS', 'SK', 'SI', 'ES', 'SE', 'CH', 'UA', 'GB', 'VA',
+                    // Middle East
+                    'BH', 'IL', 'JO', 'KW', 'LB', 'OM', 'QA', 'SA', 'AE', 'YE', 'IQ', 'IR', 'SY', 'TR',
+                    // Africa
+                    'DZ', 'AO', 'BJ', 'BW', 'BF', 'BI', 'CV', 'CM', 'CF', 'TD', 'KM', 'CG', 'CD', 'DJ', 'EG', 'GQ', 'ER', 'SZ', 'ET', 'GA', 'GM', 'GH', 'GN', 'GW', 'CI', 'KE', 'LS', 'LR', 'LY', 'MG', 'MW', 'ML', 'MR', 'MU', 'MA', 'MZ', 'NA', 'NE', 'NG', 'RW', 'ST', 'SN', 'SC', 'SL', 'SO', 'ZA', 'SS', 'SD', 'TZ', 'TG', 'TN', 'UG', 'ZM', 'ZW'
+                ], // Europe, Middle East, and Africa
+                'APAC': [
+                    // East Asia
+                    'CN', 'HK', 'MO', 'JP', 'MN', 'KP', 'KR', 'TW',
+                    // Southeast Asia
+                    'BN', 'KH', 'ID', 'LA', 'MY', 'MM', 'PH', 'SG', 'TH', 'TL', 'VN',
+                    // South Asia
+                    'AF', 'BD', 'BT', 'IN', 'MV', 'NP', 'PK', 'LK',
+                    // Central Asia
+                    'KZ', 'KG', 'TJ', 'TM', 'UZ',
+                    // Oceania
+                    'AU', 'NZ', 'FJ', 'PG', 'SB', 'VU', 'WS', 'TO', 'KI', 'FM', 'MH', 'NR', 'PW', 'TV'
+                ] // Asia-Pacific
             };
             
             // Color scheme for regions
@@ -24881,20 +25075,26 @@
                 'APAC': '#F59E0B'    // Orange
             };
             
-            // Calculate regional totals
+            // Calculate regional totals with unique facility tracking
             const regionalData = {};
             let grandTotal = 0;
             
             dataSource.forEach(row => {
                 const region = String(row.Region || '').trim().toUpperCase();
                 const amount = parseNumber(row[amountField]);
+                const facilityId = row.Facility_ID || row.FacilityID || row.Fac_ID;
                 
                 if (region && amount > 0) {
                     if (!regionalData[region]) {
-                        regionalData[region] = { total: 0, count: 0 };
+                        regionalData[region] = { 
+                            total: 0, 
+                            facilities: new Set() 
+                        };
                     }
                     regionalData[region].total += amount;
-                    regionalData[region].count++;
+                    if (facilityId) {
+                        regionalData[region].facilities.add(facilityId);
+                    }
                     grandTotal += amount;
                 }
             });
@@ -24904,71 +25104,168 @@
                 regionalData[b].total - regionalData[a].total
             );
             
-            // Create series data for map coloring
-            const regionSeries = {};
-            sortedRegions.forEach(region => {
-                if (regionCountries[region]) {
-                    regionCountries[region].forEach(countryCode => {
-                        regionSeries[countryCode] = regionColors[region] || '#D9D9D9';
-                    });
-                }
-            });
+            console.log(`Map ${mapId} - Sorted regions:`, sortedRegions);
+            console.log(`Map ${mapId} - Regional data:`, regionalData);
             
             // Initialize the map
             try {
                 const mapElement = document.querySelector(`#${mapId}`);
                 if (mapElement && typeof jsVectorMap !== 'undefined') {
-                    const map = new jsVectorMap({
+                    console.log(`Initializing map: ${mapId}`);
+                    
+                    const mapConfig = {
                         selector: `#${mapId}`,
                         map: 'world',
                         zoomButtons: false,
+                        
                         regionStyle: {
                             initial: {
                                 fill: '#D9D9D9',
                                 fillOpacity: 1
                             },
                             hover: {
-                                fillOpacity: 0.8,
+                                fillOpacity: 1,
                                 cursor: 'pointer'
                             }
-                        },
-                        series: {
-                            regions: [{
-                                values: regionSeries,
-                                attribute: 'fill'
-                            }]
-                        },
-                        onRegionTipShow: function(event, tooltip, code) {
-                            // Find which region this country belongs to
-                            let regionName = '';
-                            for (const [region, countries] of Object.entries(regionCountries)) {
-                                if (countries.includes(code)) {
-                                    regionName = region;
-                                    break;
+                        }
+                    };
+                    
+                    // Add callbacks
+                    mapConfig.onRegionTooltipShow = function(event, tooltip, code) {
+                        console.log('Tooltip show for code:', code);
+                        console.log('Tooltip object:', tooltip);
+                        
+                        // Find which region this country belongs to
+                        let regionName = '';
+                        for (const [region, countries] of Object.entries(regionCountries)) {
+                            if (countries.includes(code)) {
+                                regionName = region;
+                                break;
+                            }
+                        }
+                        
+                        console.log('Region found:', regionName);
+                        
+                        if (regionName && regionalData[regionName]) {
+                            const data = regionalData[regionName];
+                            const percentage = ((data.total / grandTotal) * 100).toFixed(1);
+                            const facilityCount = data.facilities.size;
+                            const color = regionColors[regionName];
+                            
+                            // Build tooltip text
+                            const tooltipText = regionName + '<br>' +
+                                formatCurrency(data.total) + ' (' + percentage + '%)<br>' +
+                                facilityCount + ' ' + (facilityCount === 1 ? 'facility' : 'facilities');
+                            
+                            // Update tooltip - try different methods
+                            if (tooltip) {
+                                if (tooltip.text && typeof tooltip.text === 'function') {
+                                    tooltip.text(tooltipText.replace(/<br>/g, '\n'));
+                                }
+                                if (tooltip.css && typeof tooltip.css === 'function') {
+                                    tooltip.css({
+                                        'background-color': color,
+                                        'color': '#ffffff',
+                                        'font-size': '12px',
+                                        'padding': '8px 12px',
+                                        'border-radius': '6px',
+                                        'font-weight': '500',
+                                        'line-height': '1.4'
+                                    });
+                                }
+                                // Also try direct DOM manipulation
+                                if (tooltip.selector) {
+                                    tooltip.selector.innerHTML = tooltipText;
+                                    tooltip.selector.style.backgroundColor = color;
+                                    tooltip.selector.style.color = '#ffffff';
                                 }
                             }
                             
-                            if (regionName && regionalData[regionName]) {
-                                const data = regionalData[regionName];
-                                const percentage = ((data.total / grandTotal) * 100).toFixed(1);
-                                tooltip.css({
-                                    backgroundColor: regionColors[regionName],
-                                    color: '#ffffff',
-                                    fontSize: '12px',
-                                    padding: '8px 12px',
-                                    borderRadius: '6px',
-                                    fontWeight: '500'
+                            console.log('Tooltip updated with color:', color);
+                            
+                            // Color all countries in the region on hover
+                            const svg = mapElement.querySelector('svg');
+                            if (regionCountries[regionName] && svg) {
+                                regionCountries[regionName].forEach(countryCode => {
+                                    const pathElement = svg.querySelector(`path[data-code="${countryCode}"]`);
+                                    if (pathElement) {
+                                        pathElement.setAttribute('fill', color);
+                                        pathElement.style.fillOpacity = '1';
+                                    }
                                 });
-                                tooltip.text(
-                                    `${regionName}\n${formatCurrency(data.total)} (${percentage}%)`
-                                );
-                            } else {
-                                event.preventDefault();
+                                console.log(`Colored ${regionCountries[regionName].length} countries in ${regionName}`);
                             }
+                        } else {
+                            console.log('No regional data found for:', regionName);
                         }
-                    });
+                    };
+                    
+                    mapConfig.onRegionOut = function(event, code) {
+                        console.log('Region out for code:', code);
+                        
+                        // Reset ALL countries back to grey (not just the hovered region)
+                        // This ensures no countries are left colored
+                        const svg = mapElement.querySelector('svg');
+                        if (svg) {
+                            // Reset all countries in all regions
+                            Object.keys(regionCountries).forEach(region => {
+                                if (regionCountries[region] && Array.isArray(regionCountries[region])) {
+                                    regionCountries[region].forEach(countryCode => {
+                                        const pathElement = svg.querySelector(`path[data-code="${countryCode}"]`);
+                                        if (pathElement) {
+                                            pathElement.setAttribute('fill', '#D9D9D9');
+                                            pathElement.style.fillOpacity = '1';
+                                        }
+                                    });
+                                }
+                            });
+                            console.log('Reset all countries to grey');
+                        }
+                    };
+                    
+                    // Create the map instance
+                    const mapInstance = new jsVectorMap(mapConfig);
                     
                     console.log(`✅ Regional map ${mapId} initialized successfully`);
+                    
+                    // Add mouseleave listener to SVG to reset all countries when mouse leaves the map
+                    setTimeout(() => {
+                        const svg = mapElement.querySelector('svg');
+                        if (svg) {
+                            // Add listener to SVG element itself
+                            svg.addEventListener('mouseleave', function() {
+                                console.log('Mouse left SVG - resetting all countries');
+                                // Reset all countries to grey
+                                Object.keys(regionCountries).forEach(region => {
+                                    if (regionCountries[region] && Array.isArray(regionCountries[region])) {
+                                        regionCountries[region].forEach(countryCode => {
+                                            const pathElement = svg.querySelector(`path[data-code="${countryCode}"]`);
+                                            if (pathElement) {
+                                                pathElement.setAttribute('fill', '#D9D9D9');
+                                                pathElement.style.fillOpacity = '1';
+                                            }
+                                        });
+                                    }
+                                });
+                            });
+                            
+                            // Also add to map container as backup
+                            mapElement.addEventListener('mouseleave', function() {
+                                console.log('Mouse left map container - resetting all countries');
+                                Object.keys(regionCountries).forEach(region => {
+                                    if (regionCountries[region] && Array.isArray(regionCountries[region])) {
+                                        regionCountries[region].forEach(countryCode => {
+                                            const pathElement = svg.querySelector(`path[data-code="${countryCode}"]`);
+                                            if (pathElement) {
+                                                pathElement.setAttribute('fill', '#D9D9D9');
+                                                pathElement.style.fillOpacity = '1';
+                                            }
+                                        });
+                                    }
+                                });
+                            });
+                        }
+                    }, 100);
                 }
             } catch (error) {
                 console.error(`❌ Error initializing regional map ${mapId}:`, error);
@@ -24981,6 +25278,7 @@
                     const data = regionalData[region];
                     const percentage = ((data.total / grandTotal) * 100).toFixed(1);
                     const color = regionColors[region] || '#D9D9D9';
+                    const facilityCount = data.facilities.size;
                     
                     return `
                         <div class="flex items-center justify-between">
@@ -24993,7 +25291,7 @@
                                 </div>
                                 <div>
                                     <p class="text-sm font-semibold text-gray-800">${formatCurrency(data.total)}</p>
-                                    <span class="block text-xs text-gray-500">${data.count} facilities</span>
+                                    <span class="block text-xs text-gray-500">${facilityCount} ${facilityCount === 1 ? 'facility' : 'facilities'}</span>
                                 </div>
                             </div>
                             <div class="flex w-full max-w-[140px] items-center gap-3">

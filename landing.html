@@ -9,456 +9,547 @@
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
-        /* Only essential styles that Tailwind can't handle */
-        html, body {
-            overflow: hidden;
-            height: 100%;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
-        /* Smooth rotating text animation */
-        .flip-container {
-            display: inline-block;
-            min-width: 140px;
+        /* Fade-in animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        /* Underline decoration for name */
+        .name-underline {
             position: relative;
-        }
-
-        .flip-word {
             display: inline-block;
-            transition: all 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+            padding-bottom: 0.5rem;
         }
 
-        .flip-word.slide-out {
-            animation: slideOut 0.5s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+        .name-underline svg {
+            position: absolute;
+            width: 140%;
+            height: 20px;
+            bottom: -0.25rem;
+            left: -20%;
         }
 
-        .flip-word.slide-in {
-            animation: slideIn 0.5s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+        /* Search box focus styles */
+        .search-box-container {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        @keyframes slideOut {
-            0% {
-                transform: translateY(0);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-30px);
-                opacity: 0;
-            }
+        .search-box-container:focus-within {
+            transform: scale(1.01);
         }
 
-        @keyframes slideIn {
-            0% {
-                transform: translateY(30px);
-                opacity: 0;
-            }
-            100% {
-                transform: translateY(0);
-                opacity: 1;
-            }
+        /* Suggestion button hover */
+        .suggestion-btn {
+            transition: all 0.15s ease;
+        }
+
+        .suggestion-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .suggestion-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Custom scrollbar for results */
+        #lptm-search-results::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #lptm-search-results::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        #lptm-search-results::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 4px;
+        }
+
+        #lptm-search-results::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900" style="padding: 1rem;">
-<div style="height: calc(100vh - 2rem);" class="rounded-2xl border border-gray-200 px-5 py-7 relative bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem] overflow-hidden">
-    <!-- Subtle Gradient Overlay -->
-    <div class="absolute inset-0 bg-[radial-gradient(circle_500px_at_50%_200px,rgba(96,165,250,0.15),transparent)] pointer-events-none" style="border-radius: 1rem;"></div>
-    
-    <main class="relative z-10 h-full">
-        <section class="h-full flex items-center justify-center">
-            <div class="w-full max-w-4xl flex flex-col items-center space-y-6 sm:space-y-8 px-4">
-                <!-- LPTM Hub Title -->
-                <div class="text-center">
-                    <h1 class="!text-5xl md:!text-6xl font-bold text-gray-900 mb-6">
-                        <span>LPTM </span>
-                        <span class="flip-container bg-blue-600 text-white px-4 py-1 rounded-lg">
-                            <span class="flip-word" id="flip-text">Hub</span>
-                        </span>
-                    </h1>
-                    <p class="!text-lg text-gray-600">Your central resource for Loan Product & Transaction Management</p>
-                </div>
-                
-                <!-- Search Section -->
-                <div id="lptm-search-container" class="w-full max-w-xl sm:max-w-2xl relative">
-                    <div id="lptm-search-box" class="bg-white border border-gray-300 rounded-2xl flex items-center h-11 sm:h-12 md:h-14 px-3 sm:px-4 shadow-sm hover:shadow-md transition-shadow duration-300 focus-within:border-blue-500 focus-within:border-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 512 512" class="text-gray-400 mr-2 flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5">
-                            <path d="M497.913 497.913c-18.782 18.782-49.225 18.782-68.008 0l-84.862-84.863c-34.889 22.382-76.13 35.717-120.659 35.717C100.469 448.767 0 348.312 0 224.383S100.469 0 224.384 0c123.931 0 224.384 100.452 224.384 224.383 0 44.514-13.352 85.771-35.718 120.676l84.863 84.863c18.782 18.782 18.782 49.209 0 67.991zM224.384 64.109c-88.511 0-160.274 71.747-160.274 160.273s71.764 160.274 160.274 160.274c88.525 0 160.273-71.748 160.273-160.274S312.909 64.109 224.384 64.109z" fill="currentColor"></path>
-                        </svg>
-                        <input type="text" placeholder="Search Confluence..." class="w-full outline-none text-sm sm:text-base md:text-lg" id="lptm-search-input" autocomplete="off">
-                        <div id="lptm-search-loading" class="hidden ml-2 flex-shrink-0">
-                            <div class="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-2 border-gray-300 border-t-blue-500"></div>
-                        </div>
-                    </div>
-                </div>
+<body class="min-h-screen w-full bg-[#fcfcf9] dark:bg-[#202123] flex flex-col items-center justify-center p-4 transition-colors duration-200">
 
-                <!-- Suggestion Buttons -->
-                <div class="w-full text-center">
-                    <p class="text-sm text-gray-600 mb-5">Quick suggestions to get started:</p>
-                    <div class="flex flex-col items-center gap-3">
-                        <!-- Top Row -->
-                        <div class="flex items-center justify-center gap-3">
-                            <a href="learning.html" class="suggestion-link inline-flex items-center gap-2 h-11 px-5 py-2.5 bg-white hover:!bg-blue-50 text-gray-700  rounded-lg text-sm font-medium transition-all cursor-pointer border-2 border-gray-200 hover:border-blue-500 shadow-sm hover:shadow-md no-underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600 flex-shrink-0">
-                                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-                                    <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-                                </svg>
-                                Learning & Development
-                            </a>
-                            <a href="cmps.html" class="suggestion-link inline-flex items-center gap-2 h-11 px-5 py-2.5 bg-white hover:!bg-blue-50 text-gray-700 rounded-lg text-sm font-medium transition-all cursor-pointer border-2 border-gray-200 hover:border-blue-500 shadow-sm hover:shadow-md no-underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600 flex-shrink-0">
-                                    <line x1="18" x2="18" y1="20" y2="10"/>
-                                    <line x1="12" x2="12" y1="20" y2="4"/>
-                                    <line x1="6" x2="6" y1="20" y2="14"/>
-                                </svg>
-                                Data Analytics
-                            </a>
-                            <a href="projects-tracker.html" class="suggestion-link inline-flex items-center gap-2 h-11 px-5 py-2.5 bg-white hover:!bg-blue-50 text-gray-700 rounded-lg text-sm font-medium transition-all cursor-pointer border-2 border-gray-200 hover:border-blue-500 shadow-sm hover:shadow-md no-underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600 flex-shrink-0">
-                                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-                                    <polyline points="14 2 14 8 20 8"/>
-                                    <path d="M16 13H8"/>
-                                    <path d="M16 17H8"/>
-                                    <path d="M10 9H8"/>
-                                </svg>
-                                Process Documentation
-                            </a>
-                        </div>
-                        <!-- Bottom Row -->
-                        <div class="flex items-center justify-center gap-3">
-                            <a href="blog.html" class="suggestion-link inline-flex items-center gap-2 h-11 px-5 py-2.5 bg-white hover:!bg-blue-50 text-gray-700 rounded-lg text-sm font-medium transition-all cursor-pointer border-2 border-gray-200 hover:border-blue-500 shadow-sm hover:shadow-md no-underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600 flex-shrink-0">
-                                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-                                </svg>
-                                Resources
-                            </a>
-                            <a href="links.html" class="suggestion-link inline-flex items-center gap-2 h-11 px-5 py-2.5 bg-white hover:!bg-blue-50 text-gray-700  rounded-lg text-sm font-medium transition-all cursor-pointer border-2 border-gray-200 hover:border-blue-500 shadow-sm hover:shadow-md no-underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600 flex-shrink-0">
-                                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-                                </svg>
-                                Useful Links
-                            </a>
-                            <a href="trainings.html" class="suggestion-link inline-flex items-center gap-2 h-11 px-5 py-2.5 bg-white hover:!bg-blue-50 text-gray-700  rounded-lg text-sm font-medium transition-all cursor-pointer border-2 border-gray-200 hover:border-blue-500 shadow-sm hover:shadow-md no-underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600 flex-shrink-0">
-                                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-                                </svg>
-                                Tools
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            </div>
-        </section>
-    </main>
-</div>
-
-<!-- Search Results Container - Outside main container to prevent clipping -->
-<div id="lptm-search-results" class="fixed bg-white rounded-lg border border-gray-200 shadow-lg hidden max-h-80 overflow-y-auto overflow-x-hidden" style="z-index: 10000;">
-    <div id="lptm-results-list" class="p-2"></div>
-    <div id="lptm-no-results" class="hidden p-4 text-center text-gray-500">
-        No results found
+    <!-- Greeting Section -->
+    <div class="w-full max-w-3xl mb-8 sm:mb-12 text-center animate-fade-in">
+        <div class="mx-auto mb-6 flex items-center justify-center" style="width: 160px; height: 92px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="204" height="118" viewBox="0 0 204 118" fill="none" class="w-full h-full">
+                <path d="M0.947754 79.9668C0.947754 58.9732 18.1096 42.6292 40.4763 42.6292C53.418 42.6292 65.2344 48.4059 71.9866 57.1415L62.2803 66.8634C59.7057 63.5618 56.4208 60.8843 52.6701 59.0303C48.9193 57.1763 44.7994 56.1936 40.6169 56.1553C27.2532 56.1553 16.5622 66.1589 16.5622 79.9668C16.5622 93.9155 27.2532 103.919 40.6169 103.919C44.949 103.914 49.2214 102.907 53.101 100.976C56.9806 99.0452 60.3627 96.2432 62.9836 92.7884L72.5492 102.228C66.0784 111.387 53.6993 117.445 40.4763 117.445C18.1096 117.445 0.947754 101.101 0.947754 79.9668Z" fill="#255BE3"/>
+                <path d="M85.2095 45.1653H100.543V114.909H85.2095V45.1653Z" fill="#255BE3"/>
+                <path d="M129.099 96.1698V58.1278H112.359V45.1653H129.803V30.2302L144.151 23.1854V45.1653H166.94V58.1278H144.151V93.6337C144.151 100.679 148.09 103.778 155.545 103.778C159.425 103.798 163.263 102.981 166.799 101.383V114.627C162.369 116.574 157.569 117.536 152.732 117.445C139.087 117.445 129.099 109.978 129.099 96.1698Z" fill="#255BE3"/>
+                <path d="M179.037 45.1653H194.37V114.909H179.037V45.1653Z" fill="#255BE3"/>
+                <path d="M139.648 0.782832C152.241 0.75273 164.657 3.75831 175.846 9.54575C187.035 15.3332 196.669 23.7325 203.935 34.0344H186.07C180.214 27.5154 173.055 22.3026 165.058 18.7343C157.061 15.166 148.403 13.3221 139.648 13.3221C130.893 13.3221 122.236 15.166 114.239 18.7343C106.242 22.3026 99.0827 27.5154 93.227 34.0344H75.3618C82.6277 23.7325 92.2621 15.3332 103.451 9.54575C114.64 3.75831 127.055 0.75273 139.648 0.782832V0.782832Z" fill="#FF3C28"/>
+            </svg>
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-serif font-light text-gray-900 dark:text-gray-100 mb-3 tracking-tight">
+            <span id="greeting">Good morning</span>, 
+            <span class="name-underline">
+                <span id="userName">Team</span>
+                <svg viewBox="0 0 140 24" fill="none" preserveAspectRatio="none" aria-hidden="true">
+                    <path d="M6 16 Q 70 24, 134 14" stroke="#D97757" stroke-width="3" stroke-linecap="round" fill="none"/>
+                </svg>
+            </span>
+        </h1>
+        <p class="text-base sm:text-lg text-gray-600 dark:text-gray-400">Your central resource for Loan Product & Transaction Management</p>
     </div>
-</div>
 
-<script>
-    // LPTM Search Functionality
-    const lptmSearchInput = document.getElementById('lptm-search-input');
-    const lptmSearchBox = document.getElementById('lptm-search-box');
-    const lptmSearchContainer = document.getElementById('lptm-search-container');
-    const lptmSearchResults = document.getElementById('lptm-search-results');
-    const lptmResultsList = document.getElementById('lptm-results-list');
-    const lptmNoResults = document.getElementById('lptm-no-results');
-    const lptmSearchLoading = document.getElementById('lptm-search-loading');
-    
-    let lptmSearchTimeout;
-    let lptmCurrentAbortController;
+    <!-- Search Section -->
+    <div class="w-full max-w-2xl mb-6 animate-fade-in" style="animation-delay: 0.1s;">
+        <div id="lptm-search-container" class="relative">
+            <div id="lptm-search-box" class="search-box-container bg-white dark:bg-[#2d2e30] border border-gray-300 dark:border-gray-600 rounded-2xl flex items-center h-12 sm:h-14 px-4 shadow-sm hover:shadow-md transition-shadow duration-300 focus-within:border-blue-500 focus-within:shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512" class="text-gray-400 dark:text-gray-500 mr-3 flex-shrink-0">
+                    <path d="M497.913 497.913c-18.782 18.782-49.225 18.782-68.008 0l-84.862-84.863c-34.889 22.382-76.13 35.717-120.659 35.717C100.469 448.767 0 348.312 0 224.383S100.469 0 224.384 0c123.931 0 224.384 100.452 224.384 224.383 0 44.514-13.352 85.771-35.718 120.676l84.863 84.863c18.782 18.782 18.782 49.209 0 67.991zM224.384 64.109c-88.511 0-160.274 71.747-160.274 160.273s71.764 160.274 160.274 160.274c88.525 0 160.273-71.748 160.273-160.274S312.909 64.109 224.384 64.109z" fill="currentColor"></path>
+                </svg>
+                <input 
+                    type="text" 
+                    placeholder="Search Confluence..." 
+                    class="w-full outline-none text-sm sm:text-base bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-500" 
+                    id="lptm-search-input" 
+                    autocomplete="off"
+                >
+                <div id="lptm-search-loading" class="hidden ml-2 flex-shrink-0">
+                    <div class="animate-spin rounded-full h-5 w-5 border-2 border-gray-300 border-t-blue-500"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    // Function to position search results dropdown
-    function positionSearchResults() {
-        if (!lptmSearchBox || !lptmSearchResults) return;
-        
-        const rect = lptmSearchBox.getBoundingClientRect();
-        lptmSearchResults.style.top = `${rect.bottom + 12}px`;
-        lptmSearchResults.style.left = `${rect.left}px`;
-        lptmSearchResults.style.width = `${rect.width}px`;
-    }
+    <!-- Suggestion Buttons -->
+    <div class="flex flex-wrap justify-center gap-2 max-w-2xl mx-auto px-4 animate-fade-in" style="animation-delay: 0.2s;">
+        <a href="learning.html" class="suggestion-btn inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 bg-transparent border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-150 no-underline">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+            </svg>
+            Learning & Development
+        </a>
+        <a href="cmps.html" class="suggestion-btn inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 bg-transparent border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-150 no-underline">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" x2="18" y1="20" y2="10"/>
+                <line x1="12" x2="12" y1="20" y2="4"/>
+                <line x1="6" x2="6" y1="20" y2="14"/>
+            </svg>
+            Data Analytics
+        </a>
+        <a href="projects-tracker.html" class="suggestion-btn inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 bg-transparent border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-150 no-underline">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <path d="M16 13H8"/>
+                <path d="M16 17H8"/>
+                <path d="M10 9H8"/>
+            </svg>
+            Process Documentation
+        </a>
+        <a href="blog.html" class="suggestion-btn inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 bg-transparent border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-150 no-underline">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+            Resources
+        </a>
+        <a href="links.html" class="suggestion-btn inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 bg-transparent border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-150 no-underline">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+            </svg>
+            Useful Links
+        </a>
+        <a href="trainings.html" class="suggestion-btn inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 bg-transparent border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-150 no-underline">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+            </svg>
+            Tools
+        </a>
+    </div>
 
-    // Reposition on scroll and resize
-    window.addEventListener('scroll', positionSearchResults);
-    window.addEventListener('resize', positionSearchResults);
+    <!-- Search Results Container -->
+    <div id="lptm-search-results" class="fixed bg-white dark:bg-[#2d2e30] rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl hidden max-h-80 overflow-y-auto overflow-x-hidden" style="z-index: 10000;">
+        <div id="lptm-results-list" class="p-2"></div>
+        <div id="lptm-no-results" class="hidden p-4 text-center text-gray-500 dark:text-gray-400">
+            No results found
+        </div>
+    </div>
 
-    // Configure 6 different Confluence spaces
-    const CONFLUENCE_SPACES = [
-        { name: 'Credit Management Reporting', space: 'creditmanagementreporting', color: 'blue' },
-        { name: 'Credit Information Management', space: 'creditinformationmanagement', color: 'green' },
-        { name: 'Credit Service Management', space: 'creditservicemanagement', color: 'purple' },
-        { name: 'Deal Closing', space: 'dealclosing', color: 'orange' },
-        { name: 'Loan Management', space: 'loanmanagement', color: 'indigo' },
-        { name: 'Credit Approval Control', space: 'creditapprovalcontrol', color: 'red' }
-    ];
+    <!-- Footer -->
+    <div class="absolute bottom-4 text-xs text-gray-500 dark:text-gray-500 opacity-60 hover:opacity-100 transition-opacity">
+        LPTM Hub v2.0
+    </div>
 
-    const CONFLUENCE_BASE_URL = 'https://cedt-confluence.nam.nsroot.net/confluence';
+    <script>
+        // Set greeting based on time of day
+        const currentHour = new Date().getHours();
+        let greeting = 'Good morning';
+        if (currentHour >= 12 && currentHour < 18) {
+            greeting = 'Good afternoon';
+        } else if (currentHour >= 18) {
+            greeting = 'Good evening';
+        }
+        document.getElementById('greeting').textContent = greeting;
 
-    lptmSearchInput.addEventListener('input', function () {
-        const query = this.value.trim();
-        
-        if (lptmSearchTimeout) {
-            clearTimeout(lptmSearchTimeout);
+        // Current user object
+        let currentUser = null;
+
+        // Function to get current user from Confluence API
+        async function getCurrentUser() {
+            try {
+                console.log('Fetching current user from Confluence...');
+                const response = await fetch('https://cedt-confluence.nam.nsroot.net/confluence/rest/api/user/current', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to get current user: ${response.status} ${response.statusText}`);
+                }
+
+                const userData = await response.json();
+                console.log('Current user data:', userData);
+
+                return {
+                    username: userData.username || userData.accountId || 'unknown',
+                    displayName: userData.displayName || userData.username || 'Unknown User',
+                    type: userData.type || 'unknown'
+                };
+
+            } catch (error) {
+                console.warn('Error fetching current user:', error);
+                return null;
+            }
         }
 
-        if (lptmCurrentAbortController) {
-            lptmCurrentAbortController.abort();
+        // Function to check if user is logged in
+        async function isUserLoggedIn() {
+            try {
+                const user = await getCurrentUser();
+                if (
+                    user &&
+                    user.type !== 'anonymous' &&
+                    user.displayName !== 'Anonymous' &&
+                    user.username !== 'unknown' &&
+                    user.username !== 'anonymous'
+                ) {
+                    currentUser = user;
+                    console.log('User is logged in:', user);
+                    return true;
+                } else {
+                    console.log('User is not logged in or is anonymous');
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error checking user login status:', error);
+                return false;
+            }
         }
 
-        if (query.length < 2) {
-            hideLptmResults();
-            return;
-        }
-
-        lptmSearchLoading.classList.remove('hidden');
-        
-        lptmSearchTimeout = setTimeout(() => {
-            performMultiSpaceSearch(query);
-        }, 300);
-    });
-
-    async function performMultiSpaceSearch(query) {
-        try {
-            lptmCurrentAbortController = new AbortController();
+        // Initialize user authentication and update UI
+        async function initializeUser() {
+            const isLoggedIn = await isUserLoggedIn();
+            const userNameElement = document.getElementById('userName');
             
-            // Search all spaces in parallel
-            const searchPromises = CONFLUENCE_SPACES.map(space => 
-                searchConfluenceSpace(query, space)
-            );
-
-            const results = await Promise.allSettled(searchPromises);
-            
-            // Combine all successful results
-            const allResults = results
-                .filter(result => result.status === 'fulfilled' && result.value.length > 0)
-                .flatMap(result => result.value);
-
-            displayLptmResults(allResults, query);
-            
-        } catch (error) {
-            console.error('Multi-space search error:', error);
-            showMockLptmResults(query);
-        } finally {
-            lptmSearchLoading.classList.add('hidden');
+            if (isLoggedIn && currentUser) {
+                // Extract first name from display name (e.g., "John Doe" -> "John")
+                const firstName = currentUser.displayName.split(' ')[0];
+                userNameElement.textContent = firstName;
+                console.log(`Welcome, ${firstName}!`);
+            } else {
+                // Default to "Team" if not logged in
+                userNameElement.textContent = 'Team';
+                console.log('Using default greeting for non-logged-in user');
+            }
         }
-    }
 
-    async function searchConfluenceSpace(query, spaceConfig) {
-        try {
-            // Exclude attachments from search results
-            const cqlQuery = `(text ~ "*${query}*" AND space = ${spaceConfig.space} AND type = page)`;
-            const encodedCql = encodeURIComponent(cqlQuery);
-            const apiUrl = `${CONFLUENCE_BASE_URL}/rest/api/content/search?cql=${encodedCql}&limit=5&expand=space,body.view`;
+        // Call user initialization on page load
+        initializeUser();
 
-            const response = await fetch(apiUrl, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                signal: lptmCurrentAbortController.signal,
-                credentials: 'include'
-            });
+        // LPTM Search Functionality
+        const lptmSearchInput = document.getElementById('lptm-search-input');
+        const lptmSearchBox = document.getElementById('lptm-search-box');
+        const lptmSearchContainer = document.getElementById('lptm-search-container');
+        const lptmSearchResults = document.getElementById('lptm-search-results');
+        const lptmResultsList = document.getElementById('lptm-results-list');
+        const lptmNoResults = document.getElementById('lptm-no-results');
+        const lptmSearchLoading = document.getElementById('lptm-search-loading');
+        
+        let lptmSearchTimeout;
+        let lptmCurrentAbortController;
 
-            if (!response.ok) {
+        // Function to position search results dropdown
+        function positionSearchResults() {
+            if (!lptmSearchBox || !lptmSearchResults) return;
+            
+            const rect = lptmSearchBox.getBoundingClientRect();
+            lptmSearchResults.style.top = `${rect.bottom + 12}px`;
+            lptmSearchResults.style.left = `${rect.left}px`;
+            lptmSearchResults.style.width = `${rect.width}px`;
+        }
+
+        // Reposition on scroll and resize
+        window.addEventListener('scroll', positionSearchResults);
+        window.addEventListener('resize', positionSearchResults);
+
+        // Configure 6 different Confluence spaces
+        const CONFLUENCE_SPACES = [
+            { name: 'Credit Management Reporting', space: 'creditmanagementreporting', color: 'blue' },
+            { name: 'Credit Information Management', space: 'creditinformationmanagement', color: 'green' },
+            { name: 'Credit Service Management', space: 'creditservicemanagement', color: 'purple' },
+            { name: 'Deal Closing', space: 'dealclosing', color: 'orange' },
+            { name: 'Loan Management', space: 'loanmanagement', color: 'indigo' },
+            { name: 'Credit Approval Control', space: 'creditapprovalcontrol', color: 'red' }
+        ];
+
+        const CONFLUENCE_BASE_URL = 'https://cedt-confluence.nam.nsroot.net/confluence';
+
+        lptmSearchInput.addEventListener('input', function () {
+            const query = this.value.trim();
+            
+            if (lptmSearchTimeout) {
+                clearTimeout(lptmSearchTimeout);
+            }
+
+            if (lptmCurrentAbortController) {
+                lptmCurrentAbortController.abort();
+            }
+
+            if (query.length < 2) {
+                hideLptmResults();
+                return;
+            }
+
+            lptmSearchLoading.classList.remove('hidden');
+            
+            lptmSearchTimeout = setTimeout(() => {
+                performMultiSpaceSearch(query);
+            }, 300);
+        });
+
+        async function performMultiSpaceSearch(query) {
+            try {
+                lptmCurrentAbortController = new AbortController();
+                
+                // Search all spaces in parallel
+                const searchPromises = CONFLUENCE_SPACES.map(space => 
+                    searchConfluenceSpace(query, space)
+                );
+
+                const results = await Promise.allSettled(searchPromises);
+                
+                // Combine all successful results
+                const allResults = results
+                    .filter(result => result.status === 'fulfilled' && result.value.length > 0)
+                    .flatMap(result => result.value);
+
+                displayLptmResults(allResults, query);
+                
+            } catch (error) {
+                console.error('Multi-space search error:', error);
+                showMockLptmResults(query);
+            } finally {
+                lptmSearchLoading.classList.add('hidden');
+            }
+        }
+
+        async function searchConfluenceSpace(query, spaceConfig) {
+            try {
+                // Exclude attachments from search results
+                const cqlQuery = `(text ~ "*${query}*" AND space = ${spaceConfig.space} AND type = page)`;
+                const encodedCql = encodeURIComponent(cqlQuery);
+                const apiUrl = `${CONFLUENCE_BASE_URL}/rest/api/content/search?cql=${encodedCql}&limit=5&expand=space,body.view`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    signal: lptmCurrentAbortController.signal,
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    return [];
+                }
+
+                const data = await response.json();
+                
+                // Add space config to each result and filter out attachments
+                return (data.results || [])
+                    .filter(result => result.type === 'page')
+                    .map(result => ({
+                        ...result,
+                        spaceConfig: spaceConfig
+                    }));
+                
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    console.error(`Error searching ${spaceConfig.name}:`, error);
+                }
                 return [];
             }
+        }
 
-            const data = await response.json();
+        function stripHtmlTags(html) {
+            if (!html) return '';
             
-            // Add space config to each result and filter out attachments
-            return (data.results || [])
-                .filter(result => result.type === 'page')
-                .map(result => ({
-                    ...result,
-                    spaceConfig: spaceConfig
-                }));
+            // Create a temporary div to parse HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
             
-        } catch (error) {
-            if (error.name !== 'AbortError') {
-                console.error(`Error searching ${spaceConfig.name}:`, error);
+            // Remove script and style tags
+            const scripts = tempDiv.querySelectorAll('script, style');
+            scripts.forEach(script => script.remove());
+            
+            // Get text content and clean it up
+            let text = tempDiv.textContent || tempDiv.innerText || '';
+            
+            // Replace multiple spaces with single space
+            text = text.replace(/\s+/g, ' ').trim();
+            
+            return text;
+        }
+
+        function displayLptmResults(results, query) {
+            lptmResultsList.innerHTML = '';
+            
+            if (!results || results.length === 0) {
+                showLptmNoResults();
+                return;
             }
-            return [];
-        }
-    }
 
-    function stripHtmlTags(html) {
-        if (!html) return '';
-        
-        // Create a temporary div to parse HTML
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = html;
-        
-        // Remove script and style tags
-        const scripts = tempDiv.querySelectorAll('script, style');
-        scripts.forEach(script => script.remove());
-        
-        // Get text content and clean it up
-        let text = tempDiv.textContent || tempDiv.innerText || '';
-        
-        // Replace multiple spaces with single space
-        text = text.replace(/\s+/g, ' ').trim();
-        
-        return text;
-    }
+            // Display all results in a simple list
+            results.forEach(result => {
+                const resultElement = createLptmResultElement(result, query);
+                lptmResultsList.appendChild(resultElement);
+            });
 
-    function displayLptmResults(results, query) {
-        lptmResultsList.innerHTML = '';
-        
-        if (!results || results.length === 0) {
-            showLptmNoResults();
-            return;
+            showLptmResults();
         }
 
-        // Display all results in a simple list
-        results.forEach(result => {
-            const resultElement = createLptmResultElement(result, query);
-            lptmResultsList.appendChild(resultElement);
-        });
+        function createLptmResultElement(result, query) {
+            const div = document.createElement('div');
+            div.className = 'p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-b-0 rounded transition-colors';
+            
+            const pageUrl = result._links && result._links.webui ? `${CONFLUENCE_BASE_URL}${result._links.webui}` : '';
+            
+            // Extract and clean content
+            let excerpt = '';
+            if (result.body && result.body.view && result.body.view.value) {
+                const cleanText = stripHtmlTags(result.body.view.value);
+                excerpt = cleanText.length > 120 ? cleanText.substring(0, 120) + '...' : cleanText;
+            } else {
+                excerpt = `${result.title} - Content available, click to view`;
+            }
 
-        showLptmResults();
-    }
+            const highlightedTitle = highlightLptmSearchTerms(result.title, query);
+            const highlightedExcerpt = highlightLptmSearchTerms(excerpt, query);
 
-    function createLptmResultElement(result, query) {
-        const div = document.createElement('div');
-        div.className = 'p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0';
-        
-        const pageUrl = result._links && result._links.webui ? `${CONFLUENCE_BASE_URL}${result._links.webui}` : '';
-        
-        // Extract and clean content
-        let excerpt = '';
-        if (result.body && result.body.view && result.body.view.value) {
-            const cleanText = stripHtmlTags(result.body.view.value);
-            excerpt = cleanText.length > 120 ? cleanText.substring(0, 120) + '...' : cleanText;
-        } else {
-            excerpt = `${result.title} - Content available, click to view`;
-        }
-
-        const highlightedTitle = highlightLptmSearchTerms(result.title, query);
-        const highlightedExcerpt = highlightLptmSearchTerms(excerpt, query);
-
-        div.innerHTML = `
-            <div class="flex items-start">
-                <div class="flex-shrink-0 mr-3 mt-1">
-                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                </div>
-                <div class="flex-grow min-w-0">
-                    <h3 class="text-blue-600 hover:underline font-medium text-sm mb-1 leading-tight">${highlightedTitle}</h3>
-                    <p class="text-gray-600 text-xs mb-1 leading-relaxed">${highlightedExcerpt}</p>
-                    <div class="flex items-center text-xs text-gray-500">
-                        <span class="text-blue-600">${pageUrl}</span>
+            div.innerHTML = `
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 mr-3 mt-1">
+                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="flex-grow min-w-0">
+                        <h3 class="text-blue-600 dark:text-blue-400 hover:underline font-medium text-sm mb-1 leading-tight">${highlightedTitle}</h3>
+                        <p class="text-gray-600 dark:text-gray-400 text-xs mb-1 leading-relaxed">${highlightedExcerpt}</p>
+                        <div class="flex items-center text-xs text-gray-500 dark:text-gray-500">
+                            <span class="text-blue-600 dark:text-blue-400 truncate">${pageUrl}</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-        `;
+            `;
 
-        if (pageUrl) {
-            div.addEventListener('click', () => {
-                window.open(pageUrl, '_blank');
+            if (pageUrl) {
+                div.addEventListener('click', () => {
+                    window.open(pageUrl, '_blank');
+                });
+            }
+
+            return div;
+        }
+
+        function highlightLptmSearchTerms(text, query) {
+            if (!query || !text) return text;
+            const regex = new RegExp(`(${query.split(' ').join('|')})`, 'gi');
+            return text.replace(regex, '<mark class="bg-yellow-200 dark:bg-yellow-600 px-1 rounded">$1</mark>');
+        }
+
+        function showMockLptmResults(query) {
+            const mockResults = CONFLUENCE_SPACES.flatMap((space, index) => [
+                {
+                    title: `${query} Documentation - ${space.name}`,
+                    _links: { webui: `/display/${space.space}/mock-page-${index}` },
+                    spaceConfig: space,
+                    body: { view: { value: `<p>This is documentation about ${query} in the ${space.name} space. This content shows how processes and procedures are documented for your reference.</p>` } }
+                }
+            ]);
+            displayLptmResults(mockResults, query);
+        }
+
+        function showLptmResults() {
+            positionSearchResults();
+            lptmNoResults.classList.add('hidden');
+            lptmSearchResults.classList.remove('hidden');
+        }
+
+        function showLptmNoResults() {
+            positionSearchResults();
+            lptmNoResults.classList.remove('hidden');
+            lptmSearchResults.classList.remove('hidden');
+        }
+
+        function hideLptmResults() {
+            lptmSearchResults.classList.add('hidden');
+            lptmNoResults.classList.add('hidden');
+        }
+
+        // Hide results when clicking outside
+        document.addEventListener('click', function (event) {
+            if (lptmSearchBox && !lptmSearchBox.contains(event.target) && 
+                lptmSearchResults && !lptmSearchResults.contains(event.target)) {
+                hideLptmResults();
+            }
+        });
+
+        // Handle escape key
+        if (lptmSearchInput) {
+            lptmSearchInput.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    hideLptmResults();
+                    this.blur();
+                }
             });
         }
 
-        return div;
-    }
-
-    function highlightLptmSearchTerms(text, query) {
-        if (!query || !text) return text;
-        const regex = new RegExp(`(${query.split(' ').join('|')})`, 'gi');
-        return text.replace(regex, '<mark class="bg-yellow-200 px-1">$1</mark>');
-    }
-
-    function showMockLptmResults(query) {
-        const mockResults = CONFLUENCE_SPACES.flatMap((space, index) => [
-            {
-                title: `${query} Documentation - ${space.name}`,
-                _links: { webui: `/display/${space.space}/mock-page-${index}` },
-                spaceConfig: space,
-                body: { view: { value: `<p>This is documentation about ${query} in the ${space.name} space. This content shows how processes and procedures are documented for your reference.</p>` } }
-            }
-        ]);
-        displayLptmResults(mockResults, query);
-    }
-
-    function showLptmResults() {
-        positionSearchResults();
-        lptmNoResults.classList.add('hidden');
-        lptmSearchResults.classList.remove('hidden');
-    }
-
-    function showLptmNoResults() {
-        positionSearchResults();
-        lptmNoResults.classList.remove('hidden');
-        lptmSearchResults.classList.remove('hidden');
-    }
-
-    function hideLptmResults() {
-        lptmSearchResults.classList.add('hidden');
-        lptmNoResults.classList.add('hidden');
-    }
-
-    // Hide results when clicking outside
-    document.addEventListener('click', function (event) {
-        if (lptmSearchBox && !lptmSearchBox.contains(event.target) && 
-            lptmSearchResults && !lptmSearchResults.contains(event.target)) {
-            hideLptmResults();
+        // Focus search input on page load
+        if (lptmSearchInput) {
+            lptmSearchInput.focus();
         }
-    });
-
-    // Handle escape key
-    if (lptmSearchInput) {
-        lptmSearchInput.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape') {
-                hideLptmResults();
-                this.blur();
-            }
-        });
-    }
-
-    // Focus search input on page load
-    if (lptmSearchInput) {
-        lptmSearchInput.focus();
-    }
-
-    // Smooth rotating text animation for LPTM title
-    const flipWords = ['Hub', 'Portal', 'Center', 'Resource', 'Platform'];
-    let currentFlipIndex = 0;
-    const flipTextElement = document.getElementById('flip-text');
-
-    function flipText() {
-        if (!flipTextElement) return;
-        
-        // Slide out current word
-        flipTextElement.classList.add('slide-out');
-        
-        // After slide out completes, change text and slide in
-        setTimeout(() => {
-            currentFlipIndex = (currentFlipIndex + 1) % flipWords.length;
-            flipTextElement.textContent = flipWords[currentFlipIndex];
-            
-            // Remove slide-out and add slide-in
-            flipTextElement.classList.remove('slide-out');
-            flipTextElement.classList.add('slide-in');
-            
-            // Clean up slide-in class after animation
-            setTimeout(() => {
-                flipTextElement.classList.remove('slide-in');
-            }, 500);
-        }, 500);
-    }
-
-    // Start rotating every 3 seconds
-    setInterval(flipText, 3000);
-</script>
+    </script>
 
 </body>
 </html>

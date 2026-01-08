@@ -95,7 +95,7 @@
         }
     </style>
 </head>
-<body class="w-full flex flex-col items-center justify-center p-4">
+<body class="w-full flex flex-col items-center pt-8 sm:pt-12 md:pt-16 p-4">
 
     <!-- Greeting Section -->
     <div class="w-full max-w-3xl mb-8 sm:mb-12 text-center animate-fade-in">
@@ -273,8 +273,24 @@
             const userNameElement = document.getElementById('userName');
             
             if (isLoggedIn && currentUser) {
-                // Extract first name from display name (e.g., "John Doe" -> "John")
-                const firstName = currentUser.displayName.split(' ')[0];
+                // Extract first name from display name
+                // Format: "Surname, Name [Organization]" -> "Name"
+                let firstName = 'Team';
+                
+                if (currentUser.displayName.includes(',')) {
+                    // Split by comma and get the part after comma
+                    const parts = currentUser.displayName.split(',');
+                    if (parts.length > 1) {
+                        // Get name part, remove [Organization] if present
+                        const namePart = parts[1].split('[')[0].trim();
+                        // Get first word (first name)
+                        firstName = namePart.split(' ')[0];
+                    }
+                } else {
+                    // Fallback: if no comma, just take first word
+                    firstName = currentUser.displayName.split(' ')[0];
+                }
+                
                 userNameElement.textContent = firstName;
                 console.log(`Welcome, ${firstName}!`);
             } else {

@@ -5251,26 +5251,67 @@
                 // Creates weekly aggregated metrics by Report_Date, Region, Product_Program, Product_Sub_Program
                 aggregatePortfolioData(portfolioData) {
                     const aggregationMap = new Map();
+                    let excludedCount = 0;
+                    let includedCount = 0;
+                    
+                    // Track totals before aggregation for validation
+                    const totalsBefore = {
+                        TFA: 0,
+                        OSUC: 0,
+                        Total_OS: 0,
+                        Direct_OS: 0,
+                        Contingent_OS: 0,
+                        PSE_OS: 0,
+                        Total_Unused_Exposure: 0,
+                        Total_Undrawn: 0
+                    };
                     
                     portfolioData.forEach(row => {
-                        // Create aggregation key
+                        // CRITICAL FIX: Validate that essential fields are present
+                        // Skip rows with missing Report_Date or Region (these are required for meaningful aggregation)
+                        const reportDate = String(row.Report_Date || '').trim();
+                        const region = String(row.Region || '').trim();
+                        
+                        if (!reportDate || !region) {
+                            excludedCount++;
+                            console.warn('Excluding row from aggregation - missing Report_Date or Region:', {
+                                Report_Date: reportDate || '(empty)',
+                                Region: region || '(empty)',
+                                Facility_ID: row.Facility_ID || '(empty)'
+                            });
+                            return; // Skip this row
+                        }
+                        
+                        // Add to totals before aggregation (for validation)
+                        totalsBefore.TFA += this.parseNumeric(row.Fac_Amount);
+                        totalsBefore.OSUC += this.parseNumeric(row.OSUC);
+                        totalsBefore.Total_OS += this.parseNumeric(row.Total_OS);
+                        totalsBefore.Direct_OS += this.parseNumeric(row.Direct_OS);
+                        totalsBefore.Contingent_OS += this.parseNumeric(row.Contingent_OS);
+                        totalsBefore.PSE_OS += this.parseNumeric(row.PSE_OS);
+                        totalsBefore.Total_Unused_Exposure += this.parseNumeric(row.Total_Unused_Exposure);
+                        totalsBefore.Total_Undrawn += this.parseNumeric(row.Total_Undrawn);
+                        
+                        includedCount++;
+                        
+                        // Create aggregation key - use trimmed values and handle empty strings consistently
                         const key = [
-                            row.Report_Date || '',
-                            row.Region || '',
-                            row.Product_Program || '',
-                            row.Product_Sub_Program || '',
-                            row.Committed_Uncommitted || '',
-                            row.PSE_non_PSE || ''
+                            reportDate,
+                            region,
+                            String(row.Product_Program || '').trim(),
+                            String(row.Product_Sub_Program || '').trim(),
+                            String(row.Committed_Uncommitted || '').trim(),
+                            String(row.PSE_non_PSE || '').trim()
                         ].join('|');
                         
                         if (!aggregationMap.has(key)) {
                             aggregationMap.set(key, {
-                                Report_Date: row.Report_Date,
-                                Region: row.Region,
-                                Product_Program: row.Product_Program,
-                                Product_Sub_Program: row.Product_Sub_Program,
-                                Committed_Uncommitted: row.Committed_Uncommitted,
-                                PSE_non_PSE: row.PSE_non_PSE,
+                                Report_Date: reportDate,
+                                Region: region,
+                                Product_Program: String(row.Product_Program || '').trim(),
+                                Product_Sub_Program: String(row.Product_Sub_Program || '').trim(),
+                                Committed_Uncommitted: String(row.Committed_Uncommitted || '').trim(),
+                                PSE_non_PSE: String(row.PSE_non_PSE || '').trim(),
                                 TFA: 0,
                                 OSUC: 0,
                                 Total_OS: 0,
@@ -5287,7 +5328,7 @@
                         
                         const agg = aggregationMap.get(key);
                         
-                        // Sum financial metrics
+                        // Sum financial metrics - ensure parseNumeric is called for all values
                         agg.TFA += this.parseNumeric(row.Fac_Amount);
                         agg.OSUC += this.parseNumeric(row.OSUC);
                         agg.Total_OS += this.parseNumeric(row.Total_OS);
@@ -5302,6 +5343,14 @@
                         if (row.Relationship_ID) agg.Count_of_Relationships.add(row.Relationship_ID);
                         if (row.CAID) agg.Count_of_CAs.add(row.CAID);
                     });
+                    
+                    // Log aggregation statistics
+                    console.log(`Aggregation Summary:
+                        - Total input rows: ${portfolioData.length}
+                        - Included in aggregation: ${includedCount}
+                        - Excluded (missing Report_Date/Region): ${excludedCount}
+                        - Unique aggregation groups: ${aggregationMap.size}
+                    `);
                     
                     // Convert Sets to counts and format output
                     const aggregatedData = Array.from(aggregationMap.values()).map(agg => ({
@@ -5323,6 +5372,40 @@
                         Count_of_Relationships: agg.Count_of_Relationships.size,
                         Count_of_CAs: agg.Count_of_CAs.size
                     }));
+                    
+                    // Validate totals after aggregation
+                    const totalsAfter = {
+                        TFA: 0,
+                        OSUC: 0,
+                        Total_OS: 0,
+                        Direct_OS: 0,
+                        Contingent_OS: 0,
+                        PSE_OS: 0,
+                        Total_Unused_Exposure: 0,
+                        Total_Undrawn: 0
+                    };
+                    
+                    aggregatedData.forEach(row => {
+                        totalsAfter.TFA += row.TFA;
+                        totalsAfter.OSUC += row.OSUC;
+                        totalsAfter.Total_OS += row.Total_OS;
+                        totalsAfter.Direct_OS += row.Direct_OS;
+                        totalsAfter.Contingent_OS += row.Contingent_OS;
+                        totalsAfter.PSE_OS += row.PSE_OS;
+                        totalsAfter.Total_Unused_Exposure += row.Total_Unused_Exposure;
+                        totalsAfter.Total_Undrawn += row.Total_Undrawn;
+                    });
+                    
+                    // Log validation results (differences should be minimal due to rounding)
+                    console.log('Aggregation Validation:');
+                    console.log('  Before Aggregation -> After Aggregation:');
+                    Object.keys(totalsBefore).forEach(key => {
+                        const before = Math.round(totalsBefore[key] * 100) / 100;
+                        const after = Math.round(totalsAfter[key] * 100) / 100;
+                        const diff = Math.round((after - before) * 100) / 100;
+                        const status = Math.abs(diff) < 0.01 ? '✓' : '⚠';
+                        console.log(`  ${status} ${key}: ${before.toLocaleString()} -> ${after.toLocaleString()} (diff: ${diff})`);
+                    });
                     
                     // Sort by Report_Date, Region, Product_Program
                     aggregatedData.sort((a, b) => {

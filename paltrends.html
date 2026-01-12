@@ -763,12 +763,12 @@
                 Region: region,
                 Product_Program: product,
                 Product: product,
-                PSE: isPSE ? "Yes" : "No",
+                PSE_non_PSE: isPSE ? "PSE" : "non-PSE",
                 TFA: tfa,
                 OSUC: osuc,
                 Total_OS: outstanding,
-                Unused: unused,
-                Undrawn: undrawn,
+                Total_Unused_Exposure: unused,
+                Total_Undrawn: undrawn,
                 Count_of_Facilities: Math.floor(Math.random() * 50) + 10,
                 Count_of_Relationships: Math.floor(Math.random() * 30) + 5,
               });
@@ -1058,8 +1058,8 @@
           periodData.TFA += parseFloat(row.TFA || 0);
           periodData.OSUC += parseFloat(row.OSUC || 0);
           periodData.Outstanding += parseFloat(row.Total_OS || 0);
-          periodData.Unused += parseFloat(row.Unused || 0);
-          periodData.Undrawn += parseFloat(row.Undrawn || 0);
+          periodData.Unused += parseFloat(row.Total_Unused_Exposure || 0);
+          periodData.Undrawn += parseFloat(row.Total_Undrawn || 0);
         });
 
         // Generate table rows and calculate totals
@@ -1216,8 +1216,8 @@
         // Apply PSE filter
         if (selectedTrendPSE !== 'all') {
           filtered = filtered.filter(row => {
-            const isPSE = String(row.PSE || '').toLowerCase() === 'yes' || 
-                         String(row.PSE || '').toLowerCase() === 'true';
+            const pseValue = String(row.PSE_non_PSE || row.PSE || '').toLowerCase();
+            const isPSE = pseValue === 'yes' || pseValue === 'true' || pseValue === 'pse';
             return selectedTrendPSE === 'pse' ? isPSE : !isPSE;
           });
         }

@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portfolio Analytics Lending - Trends</title>
+    <!-- Alpine.js for reactive components -->
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS for Excel/CSV parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+      /* Custom scrollbar styles */
+      .custom-scrollbar::-webkit-scrollbar {
+        height: 6px;
+        width: 6px;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 3px;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #555;
+      }
+
+      [x-cloak] {
+        display: none !important;
+      }
+
+      /* Loading Overlay Styles - Optimized for independent, uninterrupted animations */
+      @keyframes bit {
+        from {
+          opacity: 0.3;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes spinner {
+        0% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0.3;
+        }
+      }
+
+      /* Text animation - completely isolated from state changes */
+      .animate-bit {
+        animation: bit 0.6s alternate infinite;
+        will-change: opacity;
+        /* GPU acceleration for smooth animation */
+        transform: translateZ(0);
+        backface-visibility: hidden;
+        /* Prevent text updates from interrupting animation */
+        pointer-events: none;
+      }
+
+      /* Spinner container - isolated animation layer */
+      .loader-container {
+        /* Create separate compositing layer for optimal performance */
+        transform: translateZ(0);
+        will-change: transform;
+        /* Ensure animations run on GPU */
+        -webkit-transform: translate3d(0, 0, 0);
+      }
+
+      /* Spinner items - independent rotation animations */
+      .loader-item {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        transform-origin: 40px 40px;
+        animation: spinner 1.2s linear infinite;
+        /* Force GPU acceleration */
+        will-change: opacity;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+      }
+
+      .loader-item:after {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 3px;
+        left: 37px;
+        width: 6px;
+        height: 18px;
+        border-radius: 20%;
+        /* GPU acceleration for pseudo-elements */
+        transform: translateZ(0);
+      }
+
+      /* Color gradient for spinner bars */
+      .loader-item:nth-child(1):after {
+        background: #1e40af;
+      }
+      .loader-item:nth-child(2):after {
+        background: #2563eb;
+      }
+      .loader-item:nth-child(3):after {
+        background: #3b82f6;
+      }
+      .loader-item:nth-child(4):after {
+        background: #60a5fa;
+      }
+      .loader-item:nth-child(5):after {
+        background: #93c5fd;
+      }
+      .loader-item:nth-child(6):after {
+        background: #bfdbfe;
+      }
+      .loader-item:nth-child(7):after {
+        background: #93c5fd;
+      }
+      .loader-item:nth-child(8):after {
+        background: #60a5fa;
+      }
+      .loader-item:nth-child(9):after {
+        background: #3b82f6;
+      }
+      .loader-item:nth-child(10):after {
+        background: #2563eb;
+      }
+      .loader-item:nth-child(11):after {
+        background: #1e40af;
+      }
+      .loader-item:nth-child(12):after {
+        background: #1e3a8a;
+      }
+
+      /* Rotation and animation delays for each bar */
+      .loader-item:nth-child(1) {
+        transform: rotate(0deg);
+        animation-delay: -1.1s;
+      }
+
+      .loader-item:nth-child(2) {
+        transform: rotate(30deg);
+        animation-delay: -1s;
+      }
+
+      .loader-item:nth-child(3) {
+        transform: rotate(60deg);
+        animation-delay: -0.9s;
+      }
+
+      .loader-item:nth-child(4) {
+        transform: rotate(90deg);
+        animation-delay: -0.8s;
+      }
+
+      .loader-item:nth-child(5) {
+        transform: rotate(120deg);
+        animation-delay: -0.7s;
+      }
+
+      .loader-item:nth-child(6) {
+        transform: rotate(150deg);
+        animation-delay: -0.6s;
+      }
+
+      .loader-item:nth-child(7) {
+        transform: rotate(180deg);
+        animation-delay: -0.5s;
+      }
+
+      .loader-item:nth-child(8) {
+        transform: rotate(210deg);
+        animation-delay: -0.4s;
+      }
+
+      .loader-item:nth-child(9) {
+        transform: rotate(240deg);
+        animation-delay: -0.3s;
+      }
+
+      .loader-item:nth-child(10) {
+        transform: rotate(270deg);
+        animation-delay: -0.2s;
+      }
+
+      .loader-item:nth-child(11) {
+        transform: rotate(300deg);
+        animation-delay: -0.1s;
+      }
+
+      .loader-item:nth-child(12) {
+        transform: rotate(330deg);
+        animation-delay: 0s;
+      }
+
+      /* Critical: Ensure animations NEVER pause regardless of state */
+      #loadingOverlay,
+      #loadingOverlay *,
+      .loader-item,
+      .loader-item:after,
+      .animate-bit {
+        animation-play-state: running !important;
+        -webkit-animation-play-state: running !important;
+      }
+
+      /* Isolate loading overlay on separate layer */
+      #loadingOverlay {
+        /* Create independent stacking context */
+        transform: translateZ(0);
+        will-change: contents;
+        /* Prevent parent operations from affecting animations */
+        isolation: isolate;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <!-- Loading Overlay -->
+    <div
+      id="loadingOverlay"
+      class="fixed inset-0 bg-gray-100 z-[10000] flex items-center justify-center hidden"
+    >
+      <div
+        class="w-[450px] h-[250px] rounded-[10px] bg-white flex flex-col items-center justify-evenly p-[30px] shadow-[2px_2px_10px_-5px_lightgrey] aspect-square"
+      >
+        <!-- Text animation layer - isolated from state changes -->
+        <label
+          id="loadingMessage"
+          class="text-gray-900 text-lg font-semibold animate-bit"
+          >Please wait...</label
+        >
+
+        <!-- Spinner animation layer - runs independently on GPU -->
+        <div class="loader-container inline-block relative w-20 h-20">
+          <div class="loader-item"></div>
+          <div class="loader-item"></div>
+          <div class="loader-item"></div>
+          <div class="loader-item"></div>
+          <div class="loader-item"></div>
+          <div class="loader-item"></div>
+          <div class="loader-item"></div>
+          <div class="loader-item"></div>
+          <div class="loader-item"></div>
+          <div class="loader-item"></div>
+          <div class="loader-item"></div>
+          <div class="loader-item"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-4 md:p-6">
+      <!-- Portfolio Trends Content -->
+      <div id="trendsContent">
+        <!-- Page Header -->
+      <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-5">
+        <!-- First Row: Search Bar and Action Buttons -->
+        <div class="flex items-center gap-3 mb-5">
+          <!-- Left: Search Input -->
+          <div class="relative flex-1 max-w-md">
+            <span
+              class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2"
+            >
+              <svg
+                class="fill-gray-500"
+                width="18"
+                height="18"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M3.04199 9.37381C3.04199 5.87712 5.87735 3.04218 9.37533 3.04218C12.8733 3.04218 15.7087 5.87712 15.7087 9.37381C15.7087 12.8705 12.8733 15.7055 9.37533 15.7055C5.87735 15.7055 3.04199 12.8705 3.04199 9.37381ZM9.37533 1.54218C5.04926 1.54218 1.54199 5.04835 1.54199 9.37381C1.54199 13.6993 5.04926 17.2055 9.37533 17.2055C11.2676 17.2055 13.0032 16.5346 14.3572 15.4178L17.1773 18.2381C17.4702 18.531 17.945 18.5311 18.2379 18.2382C18.5308 17.9453 18.5309 17.4704 18.238 17.1775L15.4182 14.3575C16.5367 13.0035 17.2087 11.2671 17.2087 9.37381C17.2087 5.04835 13.7014 1.54218 9.37533 1.54218Z"
+                  fill=""
+                ></path>
+              </svg>
+            </span>
+            <input
+              type="text"
+              id="trendsSearchInput"
+              placeholder="Search trends by region or product..."
+              onkeyup="filterTrendsTable()"
+              class="h-10 w-full rounded-lg border border-gray-300 bg-white py-2.5 pr-4 pl-11 text-sm text-gray-800 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none shadow-sm"
+            />
+          </div>
+
+          <!-- Center: Action Buttons -->
+          <div class="flex items-center gap-2">
+            <!-- Refresh Button -->
+            <button
+              onclick="loadHistoricalTrendsData()"
+              class="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              title="Refresh trends data"
+            >
+              <svg
+                class="w-3.5 h-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                ></path>
+              </svg>
+              <span>Refresh</span>
+            </button>
+
+            <!-- Reset Filters Button -->
+            <button
+              onclick="resetTrendsFilters()"
+              class="flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <svg
+                class="w-3.5 h-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                ></path>
+              </svg>
+              <span>Reset Filters</span>
+            </button>
+
+            <!-- Export Button -->
+            <button
+              onclick="exportTrendsToExcel()"
+              class="flex items-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 px-3 py-2 text-xs font-medium text-white transition-colors"
+            >
+              <svg
+                class="w-3.5 h-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                ></path>
+              </svg>
+              <span>Export to Excel</span>
+            </button>
+          </div>
+
+          <!-- Right: Data Info -->
+          <div class="text-right shrink-0 ml-auto">
+            <p class="text-xs text-gray-400 font-medium">Historical Data</p>
+            <p
+              class="text-sm font-semibold text-gray-600"
+              id="trendDateRange"
+            >
+              Loading...
+            </p>
+          </div>
+        </div>
+
+          <!-- Second Row: Filters (Exposure Type, Region, Product, PSE) -->
+          <div class="flex flex-wrap items-end gap-4">
+            <!-- Exposure Type Filter -->
+            <div class="flex flex-col gap-1.5">
+              <span class="text-sm font-medium text-gray-700 tracking-wide text-center"
+                >Exposure Type</span
+              >
+              <div
+                x-data="{selectedExposure: 'TFA'}"
+                class="inline-flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5"
+              >
+                <button
+                  @click="selectedExposure = 'TFA'; filterTrendsByExposure('TFA')"
+                  :class="selectedExposure === 'TFA' ? 'shadow-sm text-gray-900 bg-white' : 'text-gray-500'"
+                  class="px-3.5 py-2.5 font-medium transition-colors rounded-md text-sm hover:text-gray-900"
+                >
+                  TFA
+                </button>
+                <button
+                  @click="selectedExposure = 'OSUC'; filterTrendsByExposure('OSUC')"
+                  :class="selectedExposure === 'OSUC' ? 'shadow-sm text-gray-900 bg-white' : 'text-gray-500'"
+                  class="px-3.5 py-2.5 font-medium transition-colors rounded-md text-sm hover:text-gray-900"
+                >
+                  OSUC
+                </button>
+                <button
+                  @click="selectedExposure = 'Outstanding'; filterTrendsByExposure('Outstanding')"
+                  :class="selectedExposure === 'Outstanding' ? 'shadow-sm text-gray-900 bg-white' : 'text-gray-500'"
+                  class="px-3.5 py-2.5 font-medium transition-colors rounded-md text-sm hover:text-gray-900"
+                >
+                  Outstanding
+                </button>
+                <button
+                  @click="selectedExposure = 'Unused'; filterTrendsByExposure('Unused')"
+                  :class="selectedExposure === 'Unused' ? 'shadow-sm text-gray-900 bg-white' : 'text-gray-500'"
+                  class="px-3.5 py-2.5 font-medium transition-colors rounded-md text-sm hover:text-gray-900"
+                >
+                  Unused
+                </button>
+                <button
+                  @click="selectedExposure = 'Undrawn'; filterTrendsByExposure('Undrawn')"
+                  :class="selectedExposure === 'Undrawn' ? 'shadow-sm text-gray-900 bg-white' : 'text-gray-500'"
+                  class="px-3.5 py-2.5 font-medium transition-colors rounded-md text-sm hover:text-gray-900"
+                >
+                  Undrawn
+                </button>
+              </div>
+            </div>
+
+            <!-- Divider -->
+            <div class="h-10 w-px bg-gray-300 mb-1"></div>
+
+            <!-- Region Filter (Button Group) -->
+            <div class="flex flex-col gap-1.5">
+              <span class="text-sm font-medium text-gray-700 tracking-wide text-center"
+                >Region</span
+              >
+              <div
+                x-data="{selectedRegion: 'global'}"
+                class="inline-flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5"
+              >
+                <button
+                  @click="selectedRegion = 'global'; filterTrendsByRegion('global')"
+                  :class="selectedRegion === 'global' ? 'shadow-sm text-gray-900 bg-white' : 'text-gray-500'"
+                  class="px-3.5 py-2.5 font-medium transition-colors rounded-md text-sm hover:text-gray-900"
+                >
+                  Global
+                </button>
+                <button
+                  @click="selectedRegion = 'APAC'; filterTrendsByRegion('APAC')"
+                  :class="selectedRegion === 'APAC' ? 'shadow-sm text-gray-900 bg-white' : 'text-gray-500'"
+                  class="px-3.5 py-2.5 font-medium transition-colors rounded-md text-sm hover:text-gray-900"
+                >
+                  APAC
+                </button>
+                <button
+                  @click="selectedRegion = 'EMEA'; filterTrendsByRegion('EMEA')"
+                  :class="selectedRegion === 'EMEA' ? 'shadow-sm text-gray-900 bg-white' : 'text-gray-500'"
+                  class="px-3.5 py-2.5 font-medium transition-colors rounded-md text-sm hover:text-gray-900"
+                >
+                  EMEA
+                </button>
+                <button
+                  @click="selectedRegion = 'NAM'; filterTrendsByRegion('NAM')"
+                  :class="selectedRegion === 'NAM' ? 'shadow-sm text-gray-900 bg-white' : 'text-gray-500'"
+                  class="px-3.5 py-2.5 font-medium transition-colors rounded-md text-sm hover:text-gray-900"
+                >
+                  NAM
+                </button>
+                <button
+                  @click="selectedRegion = 'LATAM'; filterTrendsByRegion('LATAM')"
+                  :class="selectedRegion === 'LATAM' ? 'shadow-sm text-gray-900 bg-white' : 'text-gray-500'"
+                  class="px-3.5 py-2.5 font-medium transition-colors rounded-md text-sm hover:text-gray-900"
+                >
+                  LATAM
+                </button>
+              </div>
+            </div>
+
+            <!-- Divider -->
+            <div class="h-10 w-px bg-gray-300 mb-1"></div>
+
+            <!-- PSE Filter (Button Group) -->
+            <div class="flex flex-col gap-1.5">
+              <span class="text-sm font-medium text-gray-700 tracking-wide text-center"
+                >PSE</span
+              >
+              <div
+                x-data="{selectedPSE: 'all'}"
+                class="inline-flex items-center gap-0.5 rounded-lg bg-gray-100 p-0.5"
+              >
+                <button
+                  @click="selectedPSE = 'all'; filterTrendsByPSE('all')"
+                  :class="selectedPSE === 'all' ? 'shadow-sm text-gray-900 bg-white' : 'text-gray-500'"
+                  class="px-3.5 py-2.5 font-medium transition-colors rounded-md text-sm hover:text-gray-900"
+                >
+                  All
+                </button>
+                <button
+                  @click="selectedPSE = 'pse'; filterTrendsByPSE('pse')"
+                  :class="selectedPSE === 'pse' ? 'shadow-sm text-gray-900 bg-white' : 'text-gray-500'"
+                  class="px-3.5 py-2.5 font-medium transition-colors rounded-md text-sm hover:text-gray-900"
+                >
+                  PSE
+                </button>
+                <button
+                  @click="selectedPSE = 'non-pse'; filterTrendsByPSE('non-pse')"
+                  :class="selectedPSE === 'non-pse' ? 'shadow-sm text-gray-900 bg-white' : 'text-gray-500'"
+                  class="px-3.5 py-2.5 font-medium transition-colors rounded-md text-sm hover:text-gray-900"
+                >
+                  Non-PSE
+                </button>
+              </div>
+            </div>
+
+            <!-- Divider -->
+            <div class="h-10 w-px bg-gray-300 mb-1"></div>
+
+            <!-- Product Multi-Select Dropdown -->
+            <div class="flex flex-col gap-1.5">
+              <span class="text-sm font-medium text-gray-700 text-center"
+                >Product</span
+              >
+              <div class="relative" id="trendsProductFilterContainer">
+                <button
+                  onclick="toggleTrendsFilter('product')"
+                  id="btnTrendsProductDropdown"
+                  class="inline-flex items-center justify-between min-w-[140px] gap-2 rounded-lg border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-600 shadow-sm outline-none hover:border-gray-300 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 transition-all"
+                >
+                  <span id="trendsProductFilterLabel" class="text-sm"
+                    >All Products</span
+                  >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-5 h-5 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8 9l4-4 4 4m0 6l-4 4-4-4"
+                    />
+                  </svg>
+                </button>
+                <div
+                  id="trendsProductFilterDropdown"
+                  class="hidden absolute left-0 top-full z-[9999] w-72 mt-3 bg-white border border-gray-200 rounded-lg shadow-lg text-sm overflow-hidden"
+                >
+                  <div
+                    class="flex items-center border-b border-gray-100 shadow-sm"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-5 w-5 mx-3 text-gray-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                    <input
+                      type="text"
+                      id="trendsProductFilterSearch"
+                      oninput="filterTrendsDropdownValues('product')"
+                      placeholder="Search products..."
+                      class="flex-1 p-2.5 text-sm text-gray-600 outline-none bg-transparent"
+                    />
+                  </div>
+                  <div
+                    id="trendsProductFilterValues"
+                    class="max-h-64 overflow-y-auto"
+                  >
+                    <!-- Will be populated dynamically -->
+                  </div>
+                  <!-- Apply Button -->
+                  <div class="p-3 border-t border-gray-100 bg-gray-50">
+                    <button
+                      onclick="applyTrendsFilter('product')"
+                      class="w-full py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-sm"
+                    >
+                      Apply Filter
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Filters Badges -->
+          <div
+            id="activeFiltersBadges"
+            class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-200"
+            style="display: none"
+          >
+            <!-- Badges will be dynamically added here -->
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Trend Analysis by Region & Product Table -->
+      <div class="mb-6">
+        <div class="rounded-2xl border border-gray-200 bg-white overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-100">
+            <h3 class="text-xl font-bold text-gray-900">
+              Trend Analysis by Region & Product
+            </h3>
+            <p class="text-sm font-medium text-gray-500 mt-1">
+              Period-over-period growth and current portfolio values
+            </p>
+          </div>
+
+          <div class="custom-scrollbar overflow-x-auto">
+            <table class="min-w-full" id="trendAnalysisTable">
+              <thead id="trendAnalysisTableHead">
+                <tr class="bg-gray-50">
+                  <th
+                    class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500 sticky left-0 bg-gray-50 z-10"
+                  >
+                    Product Category
+                  </th>
+                  <!-- Dynamic date columns will be inserted here -->
+                </tr>
+              </thead>
+
+              <tbody
+                class="divide-y divide-gray-200"
+                id="trendAnalysisTableBody"
+              >
+                <tr>
+                  <td
+                    colspan="10"
+                    class="px-6 py-8 text-center text-gray-400"
+                  >
+                    <div class="flex flex-col items-center gap-2">
+                      <svg
+                        class="h-8 w-8 text-gray-300 animate-spin"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          class="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          stroke-width="4"
+                          fill="none"
+                        ></circle>
+                        <path
+                          class="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      <p class="text-sm">Loading trend analysis...</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Data Source Info -->
+      <div
+        class="overflow-hidden rounded-xl border border-blue-100 bg-blue-50"
+      >
+        <div class="flex items-start gap-3 px-5 py-4">
+          <div
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100"
+          >
+            <svg
+              class="h-5 w-5 text-blue-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h4 class="text-sm font-semibold text-blue-800 mb-1">
+              Historical Data Period
+            </h4>
+            <p class="text-xs text-blue-700">
+              This dashboard displays portfolio trends by reporting date from
+              <span id="trendsInfoDateRange" class="font-semibold"
+                >loading...</span
+              >. Data is aggregated by Report Date, Region, and Product, showing Total
+              Facility Amount (TFA), OSUC, Total Outstanding, and facility
+              counts over time.
+            </p>
+          </div>
+        </div>
+      </div>
+      <!-- End Portfolio Trends Content -->
+    </div>
+    </div>
+
+    <script>
+      // ===== CONFIGURATION =====
+      const CONFLUENCE_PAGE_ID = "3229979875";
+      const CONFLUENCE_FILE_NAME = "Portfolio_Aggregated_History.xlsx";
+      const CONFLUENCE_BASE_URL =
+        "https://cedt-confluence.nam.nsroot.net/confluence";
+      
+      // Enable dummy data for testing
+      const ENABLE_DUMMY_DATA = true;
+
+      // ===== GLOBAL STATE =====
+      let historicalTrendsData = [];
+      let trendsFilteredData = [];
+      let selectedExposureType = 'TFA';
+      let selectedTrendRegion = 'global';
+      let selectedTrendPSE = 'all';
+      let selectedTrendProducts = [];
+      let activeFilters = {};
+      let availableDates = []; // Store all available dates in the data
+
+      // ===== DUMMY DATA GENERATION =====
+      if (ENABLE_DUMMY_DATA) {
+        const regions = ["NAM", "EMEA", "APAC", "LATAM"];
+        const products = [
+          "Corporate Lending",
+          "Trade Finance",
+          "Working Capital",
+          "Project Finance",
+          "Real Estate",
+          "Asset Based Lending",
+        ];
+
+        // Generate 24 months of historical data
+        const now = new Date();
+        for (let monthsAgo = 23; monthsAgo >= 0; monthsAgo--) {
+          const date = new Date(now.getFullYear(), now.getMonth() - monthsAgo, 1);
+          const dateStr = formatDateToDDMMYYYY(date);
+
+          regions.forEach((region) => {
+            products.forEach((product) => {
+              const baseTFA = Math.random() * 500000000 + 100000000;
+              const growthFactor = 1 + ((23 - monthsAgo) * 0.02); // 2% monthly growth trend
+              const isPSE = Math.random() > 0.5; // 50% PSE, 50% non-PSE
+              
+              const tfa = baseTFA * growthFactor;
+              const osuc = tfa * 0.7;
+              const outstanding = tfa * 0.5;
+              const unused = tfa - outstanding;
+              const undrawn = tfa - osuc;
+              
+              historicalTrendsData.push({
+                Report_Date: dateStr,
+                Region: region,
+                Product_Program: product,
+                Product: product,
+                PSE: isPSE ? "Yes" : "No",
+                TFA: tfa,
+                OSUC: osuc,
+                Total_OS: outstanding,
+                Unused: unused,
+                Undrawn: undrawn,
+                Count_of_Facilities: Math.floor(Math.random() * 50) + 10,
+                Count_of_Relationships: Math.floor(Math.random() * 30) + 5,
+              });
+            });
+          });
+        }
+
+        console.log(`✅ Generated ${historicalTrendsData.length} dummy trend records`);
+      }
+
+      // ===== UTILITY FUNCTIONS =====
+      function formatCurrency(value) {
+        const num = parseFloat(value);
+        if (isNaN(num)) return "$0.00";
+        if (num >= 1000000000) {
+          return "$" + (num / 1000000000).toFixed(2) + "B";
+        } else if (num >= 1000000) {
+          return "$" + (num / 1000000).toFixed(2) + "M";
+        } else if (num >= 1000) {
+          return "$" + (num / 1000).toFixed(2) + "K";
+        }
+        return "$" + num.toFixed(2);
+      }
+
+      function formatGrowthBadge(growth) {
+        const num = parseFloat(growth);
+        if (isNaN(num) || num === 0) return '<span class="text-gray-400">--</span>';
+        
+        const isPositive = num >= 0;
+        
+        if (isPositive) {
+          return `<span class="inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-medium bg-green-50 text-green-600">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+            </svg>
+            ${Math.abs(num).toFixed(1)}%
+          </span>`;
+        } else {
+          return `<span class="inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-medium bg-red-50 text-red-600">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+            ${Math.abs(num).toFixed(1)}%
+          </span>`;
+        }
+      }
+
+      function parseDate(dateStr) {
+        if (!dateStr) return null;
+        
+        // Try DD/MM/YYYY format
+        if (dateStr.includes('/')) {
+          const parts = dateStr.split('/');
+          if (parts.length === 3) {
+            const day = parseInt(parts[0]);
+            const month = parseInt(parts[1]) - 1;
+            const year = parseInt(parts[2]);
+            return new Date(year, month, day);
+          }
+        }
+        
+        // Fallback to standard parsing
+        const date = new Date(dateStr);
+        return isNaN(date.getTime()) ? null : date;
+      }
+
+      function formatDateToDDMMYYYY(date) {
+        if (!date || isNaN(date.getTime())) return '';
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+      }
+
+      function formatDateShort(date) {
+        if (!date || isNaN(date.getTime())) return '';
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = months[date.getMonth()];
+        const year = String(date.getFullYear()).slice(-2);
+        return `${day}-${month}-${year}`;
+      }
+
+      // ===== LOADING OVERLAY FUNCTIONS =====
+      function showLoadingOverlay(message = "Loading data...") {
+        const overlay = document.getElementById("loadingOverlay");
+        const messageEl = document.getElementById("loadingMessage");
+        if (overlay && messageEl) {
+          messageEl.textContent = message;
+          overlay.classList.remove("hidden");
+        }
+      }
+
+      function hideLoadingOverlay() {
+        const overlay = document.getElementById("loadingOverlay");
+        if (overlay) {
+          overlay.classList.add("hidden");
+        }
+      }
+
+      // ===== DATA LOADING =====
+      async function loadHistoricalTrendsData() {
+        console.log("📈 Loading historical trends data...");
+        showLoadingOverlay("Loading Portfolio Trends...");
+
+        // If dummy data mode, use the generated data
+        if (ENABLE_DUMMY_DATA) {
+          console.log("📊 Using dummy historical trends data");
+          setTimeout(() => {
+            populateTrendsFilterDropdowns();
+            populateTrendAnalysisTable();
+            updateDateRangeDisplay();
+            hideLoadingOverlay();
+          }, 1000); // Simulate loading time
+          return;
+        }
+
+        try {
+          const fileName = CONFLUENCE_FILE_NAME;
+          const url = `${CONFLUENCE_BASE_URL}/download/attachments/${CONFLUENCE_PAGE_ID}/${fileName}?api=v2`;
+
+          console.log("Fetching trends from:", url);
+
+          const response = await fetch(url, {
+            headers: {
+              "X-Atlassian-Token": "no-check",
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error(`Failed to fetch: ${response.status}`);
+          }
+
+          const blob = await response.blob();
+          const data = await parseHistoricalTrendsExcelBlob(blob);
+
+          if (!data || data.length === 0) {
+            throw new Error("No data found in file");
+          }
+
+          historicalTrendsData = data;
+          console.log(`✅ Loaded ${historicalTrendsData.length} trend records`);
+
+          populateTrendsFilterDropdowns();
+          populateTrendAnalysisTable();
+          updateDateRangeDisplay();
+          hideLoadingOverlay();
+        } catch (error) {
+          console.error("❌ Error loading trends:", error);
+          showNoDataUI();
+          hideLoadingOverlay();
+        }
+      }
+
+      async function parseHistoricalTrendsExcelBlob(blob) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            try {
+              const data = new Uint8Array(e.target.result);
+              const workbook = XLSX.read(data, { type: "array" });
+              const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+              const jsonData = XLSX.utils.sheet_to_json(firstSheet, {
+                raw: false,
+                defval: "",
+              });
+              resolve(jsonData);
+            } catch (error) {
+              reject(error);
+            }
+          };
+          reader.onerror = reject;
+          reader.readAsArrayBuffer(blob);
+        });
+      }
+
+      function showNoDataUI() {
+        const tbody = document.getElementById("trendAnalysisTableBody");
+        if (tbody) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="10" class="px-6 py-8 text-center text-gray-400">
+                <p class="text-sm">No trend data available</p>
+              </td>
+            </tr>
+          `;
+        }
+        updateDateRangeDisplay("No data");
+      }
+
+      // ===== TABLE POPULATION =====
+      function populateTrendAnalysisTable() {
+        const thead = document.getElementById("trendAnalysisTableHead");
+        const tbody = document.getElementById("trendAnalysisTableBody");
+
+        if (!tbody || !thead) return;
+
+        // Get data to use (filtered or all)
+        let dataToUse = trendsFilteredData.length > 0 ? trendsFilteredData : historicalTrendsData;
+
+        if (!dataToUse || dataToUse.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="10" class="px-6 py-8 text-center text-gray-400">
+                <p class="text-sm">No data matches the selected filters</p>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        // Get all unique dates and sort them
+        const dateMap = new Map();
+        dataToUse.forEach((row) => {
+          const dateObj = parseDate(row.Report_Date);
+          if (dateObj) {
+            const timestamp = dateObj.getTime();
+            dateMap.set(timestamp, formatDateToDDMMYYYY(dateObj));
+          }
+        });
+        
+        availableDates = Array.from(dateMap.keys()).sort((a, b) => b - a); // Most recent first
+        
+        // Build table header with dynamic date columns
+        let headerHTML = `
+          <tr class="bg-gray-50">
+            <th class="px-6 py-4 text-left text-sm font-medium whitespace-nowrap text-gray-500 sticky left-0 bg-gray-50 z-10">
+              Product Category
+            </th>`;
+        
+        // Add date columns (show up to 4 most recent periods)
+        const maxDateColumns = Math.min(4, availableDates.length);
+        for (let i = 0; i < maxDateColumns; i++) {
+          const timestamp = availableDates[i];
+          const dateObj = new Date(timestamp);
+          const dateLabel = formatDateShort(dateObj);
+          headerHTML += `
+            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">
+              ${dateLabel}
+            </th>`;
+        }
+        
+        // Add variance columns
+        headerHTML += `
+            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">
+              MoM Variance
+            </th>
+            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">
+              QoQ Variance
+            </th>
+            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">
+              YoY Variance
+            </th>
+          </tr>`;
+        
+        thead.innerHTML = headerHTML;
+
+        // Aggregate by Product (across selected region)
+        const productAggregations = {};
+
+        dataToUse.forEach((row) => {
+          const product = row.Product_Program || row.Product || "Unknown";
+          
+          if (!productAggregations[product]) {
+            productAggregations[product] = {
+              product,
+              periodData: new Map(), // Map<timestamp, {TFA, OSUC, Outstanding, Unused, Undrawn}>
+            };
+          }
+
+          const dateObj = parseDate(row.Report_Date);
+          if (!dateObj) return;
+          
+          const timestamp = dateObj.getTime();
+          
+          if (!productAggregations[product].periodData.has(timestamp)) {
+            productAggregations[product].periodData.set(timestamp, {
+              TFA: 0,
+              OSUC: 0,
+              Outstanding: 0,
+              Unused: 0,
+              Undrawn: 0,
+            });
+          }
+
+          const periodData = productAggregations[product].periodData.get(timestamp);
+          periodData.TFA += parseFloat(row.TFA || 0);
+          periodData.OSUC += parseFloat(row.OSUC || 0);
+          periodData.Outstanding += parseFloat(row.Total_OS || 0);
+          periodData.Unused += parseFloat(row.Unused || 0);
+          periodData.Undrawn += parseFloat(row.Undrawn || 0);
+        });
+
+        // Generate table rows and calculate totals
+        let html = "";
+        const totals = {
+          periods: new Array(maxDateColumns).fill(0),
+          momVariance: 0,
+          qoqVariance: 0,
+          yoyVariance: 0
+        };
+        
+        Object.values(productAggregations).forEach((agg) => {
+          html += '<tr>';
+          
+          // Product Category column (sticky)
+          html += `
+            <td class="px-6 py-4 text-left text-sm font-medium text-gray-900 sticky left-0 bg-white z-10">
+              ${agg.product}
+            </td>`;
+          
+          // Period columns (show up to 4 most recent)
+          const periodValues = [];
+          for (let i = 0; i < maxDateColumns; i++) {
+            const timestamp = availableDates[i];
+            const data = agg.periodData.get(timestamp);
+            const value = data ? data[selectedExposureType] : 0;
+            periodValues.push(value);
+            totals.periods[i] += value;
+            
+            html += `
+              <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-700">
+                ${formatCurrency(value)}
+              </td>`;
+          }
+          
+          // MoM Variance (Month over Month - compare most recent 2 periods)
+          const momVariance = periodValues.length >= 2 && periodValues[1] > 0
+            ? (((periodValues[0] - periodValues[1]) / periodValues[1]) * 100).toFixed(1)
+            : 0;
+          html += `
+            <td class="px-6 py-4 text-center text-sm">
+              ${formatGrowthBadge(momVariance)}
+            </td>`;
+          
+          // QoQ Variance (Quarter over Quarter - compare period 0 vs period 3 if available)
+          const qoqVariance = periodValues.length >= 4 && periodValues[3] > 0
+            ? (((periodValues[0] - periodValues[3]) / periodValues[3]) * 100).toFixed(1)
+            : 0;
+          html += `
+            <td class="px-6 py-4 text-center text-sm">
+              ${periodValues.length >= 4 ? formatGrowthBadge(qoqVariance) : '<span class="text-gray-400">--</span>'}
+            </td>`;
+          
+          // YoY Variance (Year over Year - would need 12+ periods)
+          html += `
+            <td class="px-6 py-4 text-center text-sm">
+              <span class="text-gray-400">--</span>
+            </td>`;
+          
+          html += '</tr>';
+        });
+
+        // Add totals row (with rounded bottom corners)
+        html += '<tr class="bg-gray-50 font-semibold border-t-2 border-gray-300">';
+        html += `
+          <td class="px-6 py-4 text-left text-sm font-bold text-gray-900 sticky left-0 bg-gray-50 z-10 rounded-bl-2xl">
+            Total
+          </td>`;
+        
+        // Total for each period
+        for (let i = 0; i < maxDateColumns; i++) {
+          html += `
+            <td class="px-6 py-4 text-center text-sm whitespace-nowrap font-bold text-gray-900">
+              ${formatCurrency(totals.periods[i])}
+            </td>`;
+        }
+        
+        // Calculate total variances
+        const totalMomVariance = totals.periods.length >= 2 && totals.periods[1] > 0
+          ? (((totals.periods[0] - totals.periods[1]) / totals.periods[1]) * 100).toFixed(1)
+          : 0;
+        const totalQoqVariance = totals.periods.length >= 4 && totals.periods[3] > 0
+          ? (((totals.periods[0] - totals.periods[3]) / totals.periods[3]) * 100).toFixed(1)
+          : 0;
+        
+        html += `
+          <td class="px-6 py-4 text-center text-sm">
+            ${formatGrowthBadge(totalMomVariance)}
+          </td>
+          <td class="px-6 py-4 text-center text-sm">
+            ${totals.periods.length >= 4 ? formatGrowthBadge(totalQoqVariance) : '<span class="text-gray-400">--</span>'}
+          </td>
+          <td class="px-6 py-4 text-center text-sm rounded-br-2xl">
+            <span class="text-gray-400">--</span>
+          </td>`;
+        
+        html += '</tr>';
+
+        tbody.innerHTML = html;
+      }
+
+      // ===== FILTER FUNCTIONS =====
+
+      function filterTrendsByExposure(exposure) {
+        selectedExposureType = exposure;
+        
+        // Update active filters
+        if (exposure !== 'TFA') {
+          activeFilters['Exposure Type'] = exposure;
+        } else {
+          delete activeFilters['Exposure Type'];
+        }
+        
+        applyAllTrendFilters();
+        displayFilterBadges();
+      }
+
+      function filterTrendsByRegion(region) {
+        selectedTrendRegion = region;
+        
+        // Update active filters
+        if (region !== 'global') {
+          activeFilters['Region'] = region;
+        } else {
+          delete activeFilters['Region'];
+        }
+        
+        applyAllTrendFilters();
+        displayFilterBadges();
+      }
+
+      function filterTrendsByPSE(pse) {
+        selectedTrendPSE = pse;
+        
+        // Update active filters
+        if (pse !== 'all') {
+          activeFilters['PSE'] = pse === 'pse' ? 'PSE' : 'Non-PSE';
+        } else {
+          delete activeFilters['PSE'];
+        }
+        
+        applyAllTrendFilters();
+        displayFilterBadges();
+      }
+
+      function applyAllTrendFilters() {
+        let filtered = historicalTrendsData;
+
+        // Apply region filter
+        if (selectedTrendRegion !== 'global') {
+          filtered = filtered.filter(row => row.Region === selectedTrendRegion);
+        }
+
+        // Apply PSE filter
+        if (selectedTrendPSE !== 'all') {
+          filtered = filtered.filter(row => {
+            const isPSE = String(row.PSE || '').toLowerCase() === 'yes' || 
+                         String(row.PSE || '').toLowerCase() === 'true';
+            return selectedTrendPSE === 'pse' ? isPSE : !isPSE;
+          });
+        }
+
+        // Apply product filter
+        if (selectedTrendProducts.length > 0) {
+          filtered = filtered.filter(row => 
+            selectedTrendProducts.includes(row.Product_Program || row.Product)
+          );
+        }
+
+        trendsFilteredData = filtered;
+        populateTrendAnalysisTable();
+      }
+
+      // Display filter badges (matching PAL-dashboard.html)
+      function displayFilterBadges() {
+        const badgesContainer = document.getElementById("activeFiltersBadges");
+        
+        if (badgesContainer) badgesContainer.innerHTML = "";
+        
+        const hasFilters = Object.keys(activeFilters).length > 0;
+        
+        if (!hasFilters) {
+          if (badgesContainer) badgesContainer.style.display = "none";
+          return;
+        }
+        
+        if (badgesContainer) badgesContainer.style.display = "flex";
+        
+        // Add filter badges
+        Object.entries(activeFilters).forEach(([label, value]) => {
+          const badge = document.createElement("span");
+          badge.className = "inline-flex items-center bg-white text-sm text-gray-600 border border-gray-300 rounded-lg gap-x-2 py-1.5 pl-3 pr-1";
+          badge.innerHTML = `
+            <span class="text-gray-600">${label}</span>
+            <span class="h-4 w-px bg-gray-300"></span>
+            <span class="font-medium text-gray-800">${value}</span>
+            <button type="button" onclick="removeFilter('${label}')" 
+                class="flex h-5 w-5 items-center justify-center rounded text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                aria-label="Remove">
+                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+          `;
+          badgesContainer.appendChild(badge);
+        });
+      }
+
+      // Remove individual filter
+      function removeFilter(label) {
+        delete activeFilters[label];
+        
+        // Reset the corresponding filter
+        if (label === 'Exposure Type') {
+          selectedExposureType = 'TFA';
+        } else if (label === 'Region') {
+          selectedTrendRegion = 'global';
+        } else if (label === 'PSE') {
+          selectedTrendPSE = 'all';
+        } else if (label.startsWith('Product')) {
+          selectedTrendProducts = [];
+          updateProductFilterLabel();
+        }
+        
+        applyAllTrendFilters();
+        displayFilterBadges();
+      }
+
+      function toggleTrendsFilter(filterType) {
+        const dropdown = document.getElementById(`trends${capitalizeFirst(filterType)}FilterDropdown`);
+        if (dropdown) {
+          dropdown.classList.toggle("hidden");
+        }
+      }
+
+      function applyTrendsFilter(filterType) {
+        const container = document.getElementById(`trends${capitalizeFirst(filterType)}FilterValues`);
+        const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+        
+        const selected = [];
+        checkboxes.forEach(cb => {
+          if (cb.checked) {
+            selected.push(cb.value);
+          }
+        });
+
+        if (filterType === 'product') {
+          selectedTrendProducts = selected;
+          
+          // Update active filters
+          if (selected.length > 0) {
+            if (selected.length === 1) {
+              activeFilters['Product'] = selected[0];
+            } else {
+              activeFilters['Product'] = `${selected.length} Products`;
+            }
+          } else {
+            delete activeFilters['Product'];
+          }
+        }
+
+        applyAllTrendFilters();
+        displayFilterBadges();
+        updateProductFilterLabel();
+        toggleTrendsFilter(filterType);
+      }
+
+      function updateProductFilterLabel() {
+        const label = document.getElementById("trendsProductFilterLabel");
+        if (label) {
+          if (selectedTrendProducts.length === 0) {
+            label.textContent = "All Products";
+          } else if (selectedTrendProducts.length === 1) {
+            label.textContent = selectedTrendProducts[0];
+          } else {
+            label.textContent = `${selectedTrendProducts.length} Products`;
+          }
+        }
+      }
+
+      function populateTrendsFilterDropdowns() {
+        // Populate Product filter only (Region and PSE are now button groups)
+        const products = [...new Set(historicalTrendsData.map(d => d.Product_Program || d.Product))].filter(Boolean).sort();
+        const productContainer = document.getElementById("trendsProductFilterValues");
+        if (productContainer) {
+          productContainer.innerHTML = products.map(product => `
+            <label class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors">
+              <input
+                type="checkbox"
+                value="${product}"
+                class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              />
+              <span class="text-sm text-gray-700">${product}</span>
+            </label>
+          `).join('');
+        }
+      }
+
+      function filterTrendsDropdownValues(filterType) {
+        const searchInput = document.getElementById(`trends${capitalizeFirst(filterType)}FilterSearch`);
+        const container = document.getElementById(`trends${capitalizeFirst(filterType)}FilterValues`);
+        
+        if (!searchInput || !container) return;
+
+        const searchTerm = searchInput.value.toLowerCase();
+        const labels = container.querySelectorAll('label');
+
+        labels.forEach(label => {
+          const text = label.textContent.toLowerCase();
+          if (text.includes(searchTerm)) {
+            label.style.display = '';
+          } else {
+            label.style.display = 'none';
+          }
+        });
+      }
+
+      function resetTrendsFilters() {
+        // Clear filters state first to prevent badges from showing
+        activeFilters = {};
+        selectedTrendProducts = [];
+        trendsFilteredData = [];
+        
+        // Reset product search input
+        const productSearch = document.getElementById("trendsProductFilterSearch");
+        if (productSearch) productSearch.value = '';
+        
+        // Uncheck all product checkboxes
+        document.querySelectorAll('#trendsProductFilterValues input[type="checkbox"]').forEach(cb => cb.checked = false);
+        
+        // Reset table search input
+        const searchInput = document.getElementById("trendsSearchInput");
+        if (searchInput) searchInput.value = '';
+        
+        // Update product filter label
+        updateProductFilterLabel();
+        
+        // Programmatically click the default filter buttons to reset both state and UI
+        // Use setTimeout to ensure DOM is ready and Alpine is initialized
+        setTimeout(() => {
+          const allButtons = Array.from(document.querySelectorAll('button'));
+          
+          // Find and click TFA button for Exposure Type
+          const tfaBtn = allButtons.find(btn => 
+            btn.textContent.trim() === 'TFA' && 
+            btn.closest('[x-data*="selectedExposure"]')
+          );
+          if (tfaBtn) tfaBtn.click();
+          
+          // Find and click Global button for Region
+          const globalBtn = allButtons.find(btn => 
+            btn.textContent.trim() === 'Global' && 
+            btn.closest('[x-data*="selectedRegion"]')
+          );
+          if (globalBtn) globalBtn.click();
+          
+          // Find and click All button for PSE
+          const allBtn = allButtons.find(btn => 
+            btn.textContent.trim() === 'All' && 
+            btn.closest('[x-data*="selectedPSE"]')
+          );
+          if (allBtn) allBtn.click();
+        }, 0);
+      }
+
+      function filterTrendsTable() {
+        const searchInput = document.getElementById("trendsSearchInput");
+        if (!searchInput) return;
+
+        const searchTerm = searchInput.value.toLowerCase();
+        const tbody = document.getElementById("trendAnalysisTableBody");
+        if (!tbody) return;
+
+        const rows = tbody.querySelectorAll("tr");
+        rows.forEach(row => {
+          const text = row.textContent.toLowerCase();
+          row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+      }
+
+      // ===== EXPORT FUNCTION =====
+      function exportTrendsToExcel() {
+        if (!historicalTrendsData || historicalTrendsData.length === 0) {
+          alert("No data to export");
+          return;
+        }
+
+        const dataToExport = trendsFilteredData.length > 0 ? trendsFilteredData : historicalTrendsData;
+        
+        const ws = XLSX.utils.json_to_sheet(dataToExport);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Trends");
+        
+        const fileName = `Portfolio_Trends_${new Date().toISOString().split('T')[0]}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+      }
+
+      // ===== UTILITY =====
+      function capitalizeFirst(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+      }
+
+      function updateDateRangeDisplay(text) {
+        const dateRangeEl = document.getElementById("trendDateRange");
+        const infoDateRangeEl = document.getElementById("trendsInfoDateRange");
+        
+        if (!text && historicalTrendsData.length > 0) {
+          const dates = historicalTrendsData
+            .map(d => parseDate(d.Report_Date))
+            .filter(Boolean)
+            .sort((a, b) => a - b);
+          
+          if (dates.length > 0) {
+            const earliest = formatDateToDDMMYYYY(dates[0]);
+            const latest = formatDateToDDMMYYYY(dates[dates.length - 1]);
+            text = `${earliest} to ${latest}`;
+          } else {
+            text = "No valid dates";
+          }
+        }
+
+        if (dateRangeEl) dateRangeEl.textContent = text || "Loading...";
+        if (infoDateRangeEl) infoDateRangeEl.textContent = text || "loading...";
+      }
+
+      // ===== INITIALIZATION =====
+      document.addEventListener("DOMContentLoaded", () => {
+        console.log("🚀 Initializing Trends Dashboard...");
+        loadHistoricalTrendsData();
+
+        // Close product dropdown when clicking outside
+        document.addEventListener("click", (e) => {
+          if (!e.target.closest("#trendsProductFilterContainer")) {
+            const productDropdown = document.getElementById("trendsProductFilterDropdown");
+            if (productDropdown) productDropdown.classList.add("hidden");
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

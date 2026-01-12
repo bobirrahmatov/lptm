@@ -8434,12 +8434,19 @@
 
         console.log("📊 Populating trends metrics...");
 
-        // Get aggregated totals by date
+        // Get aggregated totals by date - use Date objects as keys
         const dateAggregates = new Map();
         dataToUse.forEach((row) => {
-          const date = row.Report_Date;
-          if (!dateAggregates.has(date)) {
-            dateAggregates.set(date, {
+          const dateObj = parseDate(row.Report_Date);
+          if (!dateObj) {
+            console.warn("Invalid date in trends data:", row.Report_Date);
+            return;
+          }
+          const dateKey = dateObj.getTime(); // Use timestamp as key for proper sorting
+          if (!dateAggregates.has(dateKey)) {
+            dateAggregates.set(dateKey, {
+              dateObj: dateObj,
+              dateStr: formatDateToDDMMYYYY(dateObj),
               TFA: 0,
               OSUC: 0,
               Outstanding: 0,
@@ -8447,7 +8454,7 @@
               Undrawn: 0,
             });
           }
-          const agg = dateAggregates.get(date);
+          const agg = dateAggregates.get(dateKey);
           agg.TFA += parseFloat(row.TFA || 0);
           agg.OSUC += parseFloat(row.OSUC || 0);
           agg.Outstanding += parseFloat(row.Total_OS || 0);
@@ -8455,14 +8462,17 @@
           agg.Undrawn += parseFloat(row.Total_Undrawn || 0);
         });
 
-        // Get sorted dates
-        const sortedDates = Array.from(dateAggregates.keys()).sort();
-        const latestDate = sortedDates[sortedDates.length - 1];
-        const previousDate =
-          sortedDates.length > 1 ? sortedDates[sortedDates.length - 2] : null;
+        // Get sorted dates (sort by timestamp)
+        const sortedTimestamps = Array.from(dateAggregates.keys()).sort((a, b) => a - b);
+        const latestTimestamp = sortedTimestamps[sortedTimestamps.length - 1];
+        const previousTimestamp =
+          sortedTimestamps.length > 1 ? sortedTimestamps[sortedTimestamps.length - 2] : null;
+        
+        const latestDate = dateAggregates.get(latestTimestamp).dateStr;
+        const previousDate = previousTimestamp ? dateAggregates.get(previousTimestamp).dateStr : null;
 
-        const latest = dateAggregates.get(latestDate);
-        const previous = previousDate ? dateAggregates.get(previousDate) : null;
+        const latest = dateAggregates.get(latestTimestamp);
+        const previous = previousTimestamp ? dateAggregates.get(previousTimestamp) : null;
 
         // Update current values
         const tfaEl = document.getElementById("trendCurrentTFA");
@@ -8482,8 +8492,9 @@
         if (undrawnEl) undrawnEl.textContent = formatCurrency(latest.Undrawn);
 
         // Update date range
-        if (sortedDates.length > 0 && dateRangeEl) {
-          const dateRange = `${sortedDates[0]} to ${latestDate}`;
+        if (sortedTimestamps.length > 0 && dateRangeEl) {
+          const earliestDate = dateAggregates.get(sortedTimestamps[0]).dateStr;
+          const dateRange = `${earliestDate} to ${latestDate}`;
           dateRangeEl.textContent = dateRange;
 
           // Update info banner date range
@@ -8754,8 +8765,19 @@
       function filterDataByTimeRange(data, timeRange) {
         if (timeRange === "all") return data;
 
-        const dates = [...new Set(data.map((d) => d.Report_Date))].sort();
-        const latestDate = new Date(dates[dates.length - 1]);
+        // Get unique dates and sort chronologically
+        const dateMap = new Map(); // Map<timestamp, dateStr>
+        data.forEach((d) => {
+          const dateObj = parseDate(d.Report_Date);
+          if (dateObj) {
+            dateMap.set(dateObj.getTime(), formatDateToDDMMYYYY(dateObj));
+          }
+        });
+        
+        const sortedTimestamps = Array.from(dateMap.keys()).sort((a, b) => a - b);
+        if (sortedTimestamps.length === 0) return [];
+        
+        const latestDate = new Date(sortedTimestamps[sortedTimestamps.length - 1]);
 
         let cutoffDate;
         if (timeRange === "3m") {
@@ -8769,7 +8791,10 @@
           cutoffDate.setMonth(cutoffDate.getMonth() - 12);
         }
 
-        return data.filter((d) => new Date(d.Report_Date) >= cutoffDate);
+        return data.filter((d) => {
+          const dateObj = parseDate(d.Report_Date);
+          return dateObj && dateObj >= cutoffDate;
+        });
       }
 
       // Aggregate data by region for charts
@@ -8779,27 +8804,39 @@
           return { categories: [], series: [] };
         }
 
-        const dateMap = new Map();
+        const dateMap = new Map(); // Map<timestamp, Map<region, value>>
 
         data.forEach((row) => {
-          const date = row.Report_Date;
+          const dateObj = parseDate(row.Report_Date);
+          if (!dateObj) {
+            console.warn("Invalid date in trends data:", row.Report_Date);
+            return;
+          }
+          const timestamp = dateObj.getTime();
           const region = row.Region || "Unknown";
 
-          if (!dateMap.has(date)) {
-            dateMap.set(date, {});
+          if (!dateMap.has(timestamp)) {
+            dateMap.set(timestamp, { 
+              dateStr: formatDateToDDMMYYYY(dateObj),
+              regions: {}
+            });
           }
 
-          if (!dateMap.get(date)[region]) {
-            dateMap.get(date)[region] = 0;
+          const dateEntry = dateMap.get(timestamp);
+          if (!dateEntry.regions[region]) {
+            dateEntry.regions[region] = 0;
           }
 
           const value = parseFloat(row[metric]);
           if (!isNaN(value)) {
-            dateMap.get(date)[region] += value;
+            dateEntry.regions[region] += value;
           }
         });
 
-        const categories = Array.from(dateMap.keys()).sort();
+        // Sort timestamps chronologically
+        const sortedTimestamps = Array.from(dateMap.keys()).sort((a, b) => a - b);
+        const categories = sortedTimestamps.map(ts => dateMap.get(ts).dateStr);
+        
         const regions = [
           ...new Set(data.map((d) => d.Region).filter((r) => r)),
         ].sort();
@@ -8810,8 +8847,8 @@
 
         const series = regions.map((region) => ({
           name: region,
-          data: categories.map((date) =>
-            Math.round(dateMap.get(date)[region] || 0)
+          data: sortedTimestamps.map((timestamp) =>
+            Math.round(dateMap.get(timestamp).regions[region] || 0)
           ),
         }));
 
@@ -8915,38 +8952,39 @@
         }
 
         // Aggregate all metrics over time (total across all regions)
-        const dateMetrics = {};
+        const dateMetrics = new Map(); // Map<timestamp, {dateStr, metrics}>
 
         filteredData.forEach((record) => {
-          const date = record.Report_Date;
-          if (!dateMetrics[date]) {
-            dateMetrics[date] = {
+          const dateObj = parseDate(record.Report_Date);
+          if (!dateObj) {
+            console.warn("Invalid date in trends data:", record.Report_Date);
+            return;
+          }
+          const timestamp = dateObj.getTime();
+          
+          if (!dateMetrics.has(timestamp)) {
+            dateMetrics.set(timestamp, {
+              dateStr: formatDateToDDMMYYYY(dateObj),
               TFA: 0,
               OSUC: 0,
               Total_OS: 0,
               Unused: 0,
               Undrawn: 0,
-            };
+            });
           }
-          dateMetrics[date].TFA += record.TFA || 0;
-          dateMetrics[date].OSUC += record.OSUC || 0;
-          dateMetrics[date].Total_OS += record.Total_OS || 0;
-          dateMetrics[date].Unused += record.Total_Unused_Exposure || 0;
-          dateMetrics[date].Undrawn += record.Total_Undrawn || 0;
+          const metrics = dateMetrics.get(timestamp);
+          metrics.TFA += record.TFA || 0;
+          metrics.OSUC += record.OSUC || 0;
+          metrics.Total_OS += record.Total_OS || 0;
+          metrics.Unused += record.Total_Unused_Exposure || 0;
+          metrics.Undrawn += record.Total_Undrawn || 0;
         });
 
-        // Sort dates and prepare series data
-        const sortedDates = Object.keys(dateMetrics).sort();
+        // Sort dates chronologically
+        const sortedTimestamps = Array.from(dateMetrics.keys()).sort((a, b) => a - b);
 
-        // Use actual dates as labels (not Week numbers)
-        const actualDates = sortedDates.map((date) => {
-          const d = new Date(date);
-          return d.toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          });
-        });
+        // Use actual dates as labels (in DD/MM/YYYY format)
+        const actualDates = sortedTimestamps.map(ts => dateMetrics.get(ts).dateStr);
 
         // Use actual dates for labels
         const dateLabels = actualDates;
@@ -8954,32 +8992,32 @@
         const series = [
           {
             name: "TFA",
-            data: sortedDates.map((date) =>
-              Math.round(dateMetrics[date].TFA / 1000000)
+            data: sortedTimestamps.map((timestamp) =>
+              Math.round(dateMetrics.get(timestamp).TFA / 1000000)
             ), // Convert to millions
           },
           {
             name: "OSUC",
-            data: sortedDates.map((date) =>
-              Math.round(dateMetrics[date].OSUC / 1000000)
+            data: sortedTimestamps.map((timestamp) =>
+              Math.round(dateMetrics.get(timestamp).OSUC / 1000000)
             ),
           },
           {
             name: "Outstanding",
-            data: sortedDates.map((date) =>
-              Math.round(dateMetrics[date].Total_OS / 1000000)
+            data: sortedTimestamps.map((timestamp) =>
+              Math.round(dateMetrics.get(timestamp).Total_OS / 1000000)
             ),
           },
           {
             name: "Unused Exposure",
-            data: sortedDates.map((date) =>
-              Math.round(dateMetrics[date].Unused / 1000000)
+            data: sortedTimestamps.map((timestamp) =>
+              Math.round(dateMetrics.get(timestamp).Unused / 1000000)
             ),
           },
           {
             name: "Undrawn",
-            data: sortedDates.map((date) =>
-              Math.round(dateMetrics[date].Undrawn / 1000000)
+            data: sortedTimestamps.map((timestamp) =>
+              Math.round(dateMetrics.get(timestamp).Undrawn / 1000000)
             ),
           },
         ];
@@ -9153,22 +9191,29 @@
             aggregations[key] = {
               region,
               product,
-              dates: new Map(),
+              dates: new Map(), // Map<timestamp, {dateStr, metrics}>
               facilities: new Set(),
               relationships: new Set(),
             };
           }
 
-          const date = row.Report_Date;
-          if (!aggregations[key].dates.has(date)) {
-            aggregations[key].dates.set(date, {
+          const dateObj = parseDate(row.Report_Date);
+          if (!dateObj) {
+            console.warn("Invalid date in trends data:", row.Report_Date);
+            return;
+          }
+          const timestamp = dateObj.getTime();
+          
+          if (!aggregations[key].dates.has(timestamp)) {
+            aggregations[key].dates.set(timestamp, {
+              dateStr: formatDateToDDMMYYYY(dateObj),
               TFA: 0,
               OSUC: 0,
               Outstanding: 0,
             });
           }
 
-          const dateData = aggregations[key].dates.get(date);
+          const dateData = aggregations[key].dates.get(timestamp);
           dateData.TFA += parseFloat(row.TFA || 0);
           dateData.OSUC += parseFloat(row.OSUC || 0);
           dateData.Outstanding += parseFloat(row.Total_OS || 0);
@@ -9182,12 +9227,12 @@
         // Generate table rows
         let html = "";
         Object.values(aggregations).forEach((agg) => {
-          const sortedDates = Array.from(agg.dates.keys()).sort();
-          const latest = agg.dates.get(sortedDates[sortedDates.length - 1]);
-          const previous =
-            sortedDates.length > 1
-              ? agg.dates.get(sortedDates[sortedDates.length - 2])
-              : null;
+          const sortedTimestamps = Array.from(agg.dates.keys()).sort((a, b) => a - b);
+          const latestTimestamp = sortedTimestamps[sortedTimestamps.length - 1];
+          const previousTimestamp = sortedTimestamps.length > 1 ? sortedTimestamps[sortedTimestamps.length - 2] : null;
+          
+          const latest = agg.dates.get(latestTimestamp);
+          const previous = previousTimestamp ? agg.dates.get(previousTimestamp) : null;
 
           const tfaGrowth = previous
             ? (((latest.TFA - previous.TFA) / previous.TFA) * 100).toFixed(2)
@@ -10973,14 +11018,23 @@
           return;
         }
 
-        // Get unique dates sorted
-        const dates = [...new Set(dataToUse.map((d) => d.Report_Date))].sort();
-        if (dates.length < 2) {
+        // Get unique dates sorted chronologically
+        const dateMap = new Map(); // Map<timestamp, dateStr>
+        dataToUse.forEach((d) => {
+          const dateObj = parseDate(d.Report_Date);
+          if (dateObj) {
+            const timestamp = dateObj.getTime();
+            dateMap.set(timestamp, formatDateToDDMMYYYY(dateObj));
+          }
+        });
+        
+        const sortedTimestamps = Array.from(dateMap.keys()).sort((a, b) => a - b);
+        if (sortedTimestamps.length < 1) {
           if (tableBody) {
             tableBody.innerHTML = `
                         <tr>
                             <td colspan="12" class="px-5 py-8 text-center text-gray-400">
-                                <p class="!text-sm">Need at least 2 time periods for trend analysis</p>
+                                <p class="!text-sm">No valid dates found for trend analysis</p>
                             </td>
                         </tr>
                     `;
@@ -10988,12 +11042,13 @@
           return;
         }
 
-        const currentDate = dates[dates.length - 1];
-        const previousDate = dates[dates.length - 2];
+        const currentDate = dateMap.get(sortedTimestamps[sortedTimestamps.length - 1]);
+        const previousDate = sortedTimestamps.length > 1 ? dateMap.get(sortedTimestamps[sortedTimestamps.length - 2]) : null;
 
         // Aggregate by Region and Product for current and previous periods
         const aggregateByKey = (data, date) => {
           const map = {};
+          if (!date) return map; // Return empty map if date is null
           data
             .filter((d) => d.Report_Date === date)
             .forEach((row) => {
@@ -15965,10 +16020,26 @@
         });
       }
 
+      // Cache for dropdown population
+      let dropdownsPopulated = {
+        product: false,
+        subproduct: false,
+        underwriter: false
+      };
+
       // Populate product filter dropdown from data
       function populateProductFilterDropdown() {
         const container = document.getElementById("productFilterValues");
         if (!container || !portfolioData || portfolioData.length === 0) return;
+        
+        // Skip if already populated (performance optimization for 42K+ rows)
+        if (dropdownsPopulated.product && container.children.length > 0) {
+          console.log("Product dropdown already populated, skipping");
+          return;
+        }
+
+        console.log("Populating product dropdown from", portfolioData.length, "rows");
+        const startTime = performance.now();
 
         // Get unique product programs
         const products = [
@@ -15976,6 +16047,8 @@
             portfolioData.map((row) => row.Product_Program).filter(Boolean)
           ),
         ].sort();
+        
+        console.log("Found", products.length, "unique products in", (performance.now() - startTime).toFixed(2), "ms");
 
         // Generate HTML with Radix UI style items
         let html = "";
@@ -16006,12 +16079,23 @@
         }
 
         container.innerHTML = html;
+        dropdownsPopulated.product = true;
+        console.log("✅ Product dropdown populated in", (performance.now() - startTime).toFixed(2), "ms");
       }
 
       // Populate sub product filter dropdown from data
       function populateSubProductFilterDropdown() {
         const container = document.getElementById("subProductFilterValues");
         if (!container || !portfolioData || portfolioData.length === 0) return;
+        
+        // Skip if already populated (performance optimization for 42K+ rows)
+        if (dropdownsPopulated.subproduct && container.children.length > 0) {
+          console.log("Sub product dropdown already populated, skipping");
+          return;
+        }
+
+        console.log("Populating sub product dropdown from", portfolioData.length, "rows");
+        const startTime = performance.now();
 
         // Get unique sub products
         const subProducts = [
@@ -16019,6 +16103,8 @@
             portfolioData.map((row) => row.Product_Sub_Program).filter(Boolean)
           ),
         ].sort();
+        
+        console.log("Found", subProducts.length, "unique sub products in", (performance.now() - startTime).toFixed(2), "ms");
 
         // Generate HTML with Radix UI style items
         let html = "";
@@ -16049,6 +16135,8 @@
         }
 
         container.innerHTML = html;
+        dropdownsPopulated.subproduct = true;
+        console.log("✅ Sub product dropdown populated in", (performance.now() - startTime).toFixed(2), "ms");
       }
 
       // Filter sub product dropdown values based on search
@@ -16075,6 +16163,15 @@
       function populateUnderwriterFilterDropdown() {
         const container = document.getElementById("underwriterFilterValues");
         if (!container || !portfolioData || portfolioData.length === 0) return;
+        
+        // Skip if already populated (performance optimization for 42K+ rows)
+        if (dropdownsPopulated.underwriter && container.children.length > 0) {
+          console.log("Underwriter dropdown already populated, skipping");
+          return;
+        }
+
+        console.log("Populating underwriter dropdown from", portfolioData.length, "rows");
+        const startTime = performance.now();
 
         // Get unique underwriters
         const underwriters = [
@@ -16082,6 +16179,8 @@
             portfolioData.map((row) => row.Lead_Underwriter).filter(Boolean)
           ),
         ].sort();
+        
+        console.log("Found", underwriters.length, "unique underwriters in", (performance.now() - startTime).toFixed(2), "ms");
 
         // Generate HTML with Radix UI style items
         let html = "";
@@ -16112,6 +16211,8 @@
         }
 
         container.innerHTML = html;
+        dropdownsPopulated.underwriter = true;
+        console.log("✅ Underwriter dropdown populated in", (performance.now() - startTime).toFixed(2), "ms");
       }
 
       // Close top filter dropdowns when clicking outside (only for actual dropdowns - region, product, and underwriter)
@@ -22156,6 +22257,17 @@
         return null;
       }
 
+      // Format Date object to DD/MM/YYYY string
+      function formatDateToDDMMYYYY(date) {
+        if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+          return '';
+        }
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // JavaScript months are 0-indexed
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+      }
+
       // Aggregate expiration data for the next 3 months (counts unique Facilities only, excludes DM)
       function aggregateExpirationData(data) {
         console.log(
@@ -23254,7 +23366,7 @@
           // APAC is excluded
           const isNewFacility =
             approvalDate &&
-            approvalDate >= targetStartDate &&
+              approvalDate >= targetStartDate &&
             approvalDate <= targetEndDate;
 
           if (isNewFacility) {
@@ -23982,7 +24094,7 @@
           // APAC is excluded
           const isNewFacility =
             approvalDate &&
-            approvalDate >= targetStartDate &&
+              approvalDate >= targetStartDate &&
             approvalDate <= targetEndDate;
 
           if (isNewFacility) {

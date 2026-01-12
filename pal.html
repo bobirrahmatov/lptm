@@ -7240,7 +7240,6 @@
       // Update these values to match your Confluence page and attachment
       const CONFLUENCE_PAGE_ID = "3229979875"; // Your Confluence page ID
       const CONFLUENCE_FILE_NAME = "Portfolio_current.xlsx"; // Your attachment filename (can be .csv, .xlsx, or .xls)
-      const CONFLUENCE_PORTFOLIO_PREVIOUS_FILE = "Portfolio_previous.xlsx"; // Portfolio data file - previous period (for APAC new facilities comparison)
       const CONFLUENCE_COVENANTS_FILE = "Covenants_current.xlsx"; // Covenants data file (this week)
       const CONFLUENCE_COVENANTS_LW_FILE = "Covenants_previous.xlsx"; // Covenants data file (last week)
       const CONFLUENCE_CCM_FILE = "CCM_current.xlsx"; // CCM (Credit Committee Memos) data file - current month
@@ -7265,7 +7264,6 @@
 
       // Global variables
       let portfolioData = [];
-      let portfolioPreviousData = []; // Previous portfolio data from Portfolio_previous.xlsx (for APAC new facilities comparison)
       let covenantsData = []; // Separate covenant data from Covenants_tw.xlsx
       let covenantsDataLW = []; // Last week covenant data from Covenants_lw.xlsx
       let historicalTrendsData = [];
@@ -7988,32 +7986,26 @@
         );
 
         // Generate Historical Trends Dummy Data (Portfolio_Aggregated_History.xlsx)
+        // Generate small set of dummy data (matching real file size of ~120 rows)
         historicalTrendsData = [];
         const trendRegions = ["NAM", "EMEA", "APAC", "LATAM"];
         const trendProductPrograms = [
           "Corporate Lending",
           "Trade Finance",
-          "Working Capital",
-          "Project Finance",
         ];
         const trendProductSubs = [
           "Term Loan",
           "Revolver",
-          "LOC",
-          "Bridge Loan",
         ];
         const trendUnderwriters = [
           "John Smith",
           "Sarah Johnson",
-          "Michael Chen",
-          "Emily Davis",
-          "Robert Wilson",
         ];
         const pseOptions = ["Yes", "No"];
         const commitmentOptions = ["Yes", "No"];
 
-        // Generate 52 weeks of historical data (1 year)
-        const weeksToGenerate = 52;
+        // Generate only 15 weeks of historical data (matching ~120 rows: 15 weeks × 4 regions × 2 products)
+        const weeksToGenerate = 15;
         const endDate = new Date("2024-11-30");
 
         for (let week = 0; week < weeksToGenerate; week++) {
@@ -8079,7 +8071,7 @@
         }
 
         console.log(
-          `✅ Generated ${historicalTrendsData.length} historical trends records (${weeksToGenerate} weeks x ${trendRegions.length} regions x ${trendProductPrograms.length} products)`
+          `✅ Generated ${historicalTrendsData.length} historical trends records (${weeksToGenerate} weeks × ${trendRegions.length} regions × ${trendProductPrograms.length} products)`
         );
         console.log(
           "📈 Trends date range:",
@@ -8087,7 +8079,9 @@
           "to",
           historicalTrendsData[0].Report_Date
         );
-        console.log("📊 Sample trend record:", historicalTrendsData[0]);
+        if (historicalTrendsData.length > 0) {
+          console.log("📊 Sample trend record:", historicalTrendsData[0]);
+        }
       }
       // ===== END DUMMY DATA =====
 
@@ -8398,6 +8392,13 @@
               console.log(
                 `✅ Parsed ${jsonData.length} rows from historical trends file`
               );
+              
+              // Log the first record to see actual column names
+              if (jsonData.length > 0) {
+                console.log("📋 Trends data columns:", Object.keys(jsonData[0]));
+                console.log("📊 Sample trends record:", jsonData[0]);
+              }
+              
               resolve(jsonData);
             } catch (error) {
               console.error(
@@ -8450,6 +8451,9 @@
               TFA: 0,
               OSUC: 0,
               Outstanding: 0,
+              Direct_OS: 0,
+              Contingent_OS: 0,
+              PSE_OS: 0,
               Unused: 0,
               Undrawn: 0,
             });
@@ -8458,6 +8462,9 @@
           agg.TFA += parseFloat(row.TFA || 0);
           agg.OSUC += parseFloat(row.OSUC || 0);
           agg.Outstanding += parseFloat(row.Total_OS || 0);
+          agg.Direct_OS += parseFloat(row.Direct_OS || 0);
+          agg.Contingent_OS += parseFloat(row.Contingent_OS || 0);
+          agg.PSE_OS += parseFloat(row.PSE_OS || 0);
           agg.Unused += parseFloat(row.Total_Unused_Exposure || 0);
           agg.Undrawn += parseFloat(row.Total_Undrawn || 0);
         });
@@ -8923,6 +8930,8 @@
           "records, timeRange:",
           timeRange
         );
+        
+        console.log("🔍 Sample raw record:", historicalTrendsData[0]);
 
         const filteredData = filterDataByTimeRange(
           trendsFilteredData.length > 0
@@ -8930,6 +8939,8 @@
             : historicalTrendsData,
           timeRange
         );
+        
+        console.log("📊 Filtered data length:", filteredData.length);
 
         // Check if filteredData is empty
         if (!filteredData || filteredData.length === 0) {
@@ -8968,16 +8979,22 @@
               TFA: 0,
               OSUC: 0,
               Total_OS: 0,
+              Direct_OS: 0,
+              Contingent_OS: 0,
+              PSE_OS: 0,
               Unused: 0,
               Undrawn: 0,
             });
           }
           const metrics = dateMetrics.get(timestamp);
-          metrics.TFA += record.TFA || 0;
-          metrics.OSUC += record.OSUC || 0;
-          metrics.Total_OS += record.Total_OS || 0;
-          metrics.Unused += record.Total_Unused_Exposure || 0;
-          metrics.Undrawn += record.Total_Undrawn || 0;
+          metrics.TFA += parseFloat(record.TFA || 0);
+          metrics.OSUC += parseFloat(record.OSUC || 0);
+          metrics.Total_OS += parseFloat(record.Total_OS || 0);
+          metrics.Direct_OS += parseFloat(record.Direct_OS || 0);
+          metrics.Contingent_OS += parseFloat(record.Contingent_OS || 0);
+          metrics.PSE_OS += parseFloat(record.PSE_OS || 0);
+          metrics.Unused += parseFloat(record.Total_Unused_Exposure || 0);
+          metrics.Undrawn += parseFloat(record.Total_Undrawn || 0);
         });
 
         // Sort dates chronologically
@@ -8988,6 +9005,11 @@
 
         // Use actual dates for labels
         const dateLabels = actualDates;
+        
+        // Debug logging
+        console.log("📊 Chart data points:", sortedTimestamps.length);
+        console.log("📅 Date labels:", dateLabels);
+        console.log("📈 Sample metrics:", dateMetrics.get(sortedTimestamps[0]));
 
         const series = [
           {
@@ -9074,6 +9096,8 @@
             position: "top",
           },
           grid: {
+            borderColor: "#e5e7eb",
+            strokeDashArray: 5,
             xaxis: {
               lines: {
                 show: false,
@@ -11678,7 +11702,7 @@
             // Initial filter
             filterData();
 
-            // Load historical trends data
+            // Load historical trends data (only 120 rows - minimal memory usage)
             loadHistoricalTrendsData();
 
             // Populate portfolio balances table
@@ -11702,7 +11726,7 @@
           // Load actual data from Confluence
           loadDataFromCSV();
 
-          // Load historical trends data
+          // Load historical trends data (only 120 rows - minimal memory usage)
           loadHistoricalTrendsData();
         }
 
@@ -11831,8 +11855,6 @@
           const covenantDataLWPromise = fetchCovenantsLWFromConfluence();
           const ccmDataPromise = fetchCCMFromConfluence();
           const ccmDataPreviousPromise = fetchCCMPreviousFromConfluence();
-          const portfolioPreviousPromise =
-            fetchPortfolioPreviousFromConfluence();
 
           // Load portfolio data (largest file)
           showLoadingOverlay(
@@ -11928,21 +11950,6 @@
               window.ccmDataPrevious = [];
             }
 
-            // Load previous portfolio data for APAC new facilities comparison
-            const portfolioPreviousResult = await portfolioPreviousPromise;
-            if (portfolioPreviousResult && portfolioPreviousResult.length > 0) {
-              portfolioPreviousData = portfolioPreviousResult;
-              window.portfolioPreviousData = portfolioPreviousResult;
-              console.log(
-                `✅ Loaded ${portfolioPreviousResult.length} previous portfolio records`
-              );
-            } else {
-              console.warn(
-                `⚠️ No previous portfolio data loaded from ${CONFLUENCE_PORTFOLIO_PREVIOUS_FILE}`
-              );
-              portfolioPreviousData = [];
-              window.portfolioPreviousData = [];
-            }
 
             showLoadingOverlay(
               `Loading ${ccmData.length.toLocaleString()} CCM records...`
@@ -12434,52 +12441,6 @@
         }
       }
 
-      // Fetch previous portfolio data for APAC new facilities comparison
-      async function fetchPortfolioPreviousFromConfluence() {
-        try {
-          const url = `${CONFLUENCE_BASE_URL}/download/attachments/${CONFLUENCE_PAGE_ID}/${CONFLUENCE_PORTFOLIO_PREVIOUS_FILE}?api=v2`;
-
-          console.log("Fetching previous portfolio data from Confluence:", url);
-
-          const response = await fetchWithTimeout(
-            url,
-            {
-              headers: {
-                "X-Atlassian-Token": "no-check",
-              },
-            },
-            60000
-          ); // 60 second timeout
-
-          if (!response.ok) {
-            console.warn(
-              `Failed to fetch ${CONFLUENCE_PORTFOLIO_PREVIOUS_FILE}: ${response.status} ${response.statusText}. Previous portfolio data will not be available for APAC new facilities comparison.`
-            );
-            return null;
-          }
-
-          console.log(
-            "Successfully fetched previous portfolio file from Confluence"
-          );
-          const blob = await response.blob();
-
-          if (
-            CONFLUENCE_PORTFOLIO_PREVIOUS_FILE.endsWith(".xlsx") ||
-            CONFLUENCE_PORTFOLIO_PREVIOUS_FILE.endsWith(".xls")
-          ) {
-            console.log("Parsing previous portfolio Excel file...");
-            return await parsePortfolioExcelBlob(blob);
-          }
-
-          throw new Error("Portfolio file must be .xlsx or .xls format");
-        } catch (error) {
-          console.error(
-            "Error fetching previous portfolio data from Confluence:",
-            error.message
-          );
-          return null;
-        }
-      }
 
       // Parse CCM Excel blob
       async function parseCCMExcelBlob(blob) {

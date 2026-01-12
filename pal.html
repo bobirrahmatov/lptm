@@ -3080,7 +3080,7 @@
                     class="mt-1 text-sm text-gray-500"
                     id="newFacilitiesSubtitle"
                   >
-                    Facilities approved in reporting month
+                    Facilities approved in reporting month (excl. APAC)
                   </p>
                 </div>
                 <div class="flex items-end justify-end pt-6">
@@ -6612,7 +6612,7 @@
                 Historical Data Period
               </h4>
               <p class="!text-xs text-blue-700">
-                This tab displays weekly aggregated trends from
+                This tab displays portfolio trends by reporting date from
                 <span id="trendsInfoDateRange" class="font-semibold"
                   >loading...</span
                 >. Data is aggregated by Report Date and Region, showing Total
@@ -8102,7 +8102,7 @@
       let activeFilters = {};
       let selectedMetricType = "facilityAmount"; // Default to Facility Amount
 
-      // Smart Filter States
+      // Smart Filter States (Overview Tab only)
       let selectedRegion = "all"; // all, APAC, EMEA, LATAM, NAM
       let selectedPSE = "all"; // all, PSE, non-PSE
       let selectedStatus = "all"; // all, CM, DM
@@ -8110,6 +8110,12 @@
       let selectedAmountType = "osuc"; // direct, contingent, pse, osuc, tfa (for metrics)
       let selectedPeriod = "current"; // current, previous (for New Facilities Approved  chart)
       let selectedSearchTerm = ""; // Global search filter
+
+      // Helper function to check if we're on the Overview tab
+      function isOverviewTabActive() {
+        const overviewTab = document.querySelector('[x-show="activeTab === \'overview\'"]');
+        return overviewTab && overviewTab.style.display !== 'none';
+      }
 
       // Chart View States
       let currentCovenantViewType = "pastDue"; // pastDue, comingDue
@@ -8932,12 +8938,7 @@
         // Sort dates and prepare series data
         const sortedDates = Object.keys(dateMetrics).sort();
 
-        // Create week labels (Week 1, Week 2, etc.)
-        const weekLabels = sortedDates.map(
-          (date, index) => `Week ${index + 1}`
-        );
-
-        // Store actual dates for tooltip
+        // Use actual dates as labels (not Week numbers)
         const actualDates = sortedDates.map((date) => {
           const d = new Date(date);
           return d.toLocaleDateString("en-US", {
@@ -8946,6 +8947,9 @@
             year: "numeric",
           });
         });
+
+        // Use actual dates for labels
+        const dateLabels = actualDates;
 
         const series = [
           {
@@ -9067,7 +9071,7 @@
           },
           xaxis: {
             type: "category",
-            categories: weekLabels,
+            categories: dateLabels,
             axisBorder: {
               show: false,
             },
@@ -11904,6 +11908,7 @@
                   populateFilterOptions();
 
                   // Initialize filteredData with all data (no filters applied initially)
+                  filteredData = [...portfolioData];
                   filterData();
 
                   calculateMetrics();
@@ -13370,18 +13375,18 @@
         // Pre-calculate date ranges for date filters (avoid recalculating in loop)
         let caDateRange = null;
         let facilityDateRange = null;
-        if (filters.caMaturity) {
+        if (caMaturityPeriods.length > 0) {
           const today = new Date();
           const futureDate = new Date(
-            today.getTime() + parseInt(filters.caMaturity) * 24 * 60 * 60 * 1000
+            today.getTime() + parseInt(caMaturityPeriods[0]) * 24 * 60 * 60 * 1000
           );
           caDateRange = { today, futureDate };
         }
-        if (filters.facilityMaturity) {
+        if (facilityMaturityPeriods.length > 0) {
           const today = new Date();
           const futureDate = new Date(
             today.getTime() +
-              parseInt(filters.facilityMaturity) * 24 * 60 * 60 * 1000
+              parseInt(facilityMaturityPeriods[0]) * 24 * 60 * 60 * 1000
           );
           facilityDateRange = { today, futureDate };
         }
@@ -13864,18 +13869,18 @@
         // Pre-calculate date ranges for date filters (avoid recalculating in loop)
         let caDateRange = null;
         let facilityDateRange = null;
-        if (filters.caMaturity) {
+        if (caMaturityPeriods.length > 0) {
           const today = new Date();
           const futureDate = new Date(
-            today.getTime() + parseInt(filters.caMaturity) * 24 * 60 * 60 * 1000
+            today.getTime() + parseInt(caMaturityPeriods[0]) * 24 * 60 * 60 * 1000
           );
           caDateRange = { today, futureDate };
         }
-        if (filters.facilityMaturity) {
+        if (facilityMaturityPeriods.length > 0) {
           const today = new Date();
           const futureDate = new Date(
             today.getTime() +
-              parseInt(filters.facilityMaturity) * 24 * 60 * 60 * 1000
+              parseInt(facilityMaturityPeriods[0]) * 24 * 60 * 60 * 1000
           );
           facilityDateRange = { today, futureDate };
         }
@@ -15650,8 +15655,10 @@
         });
       }
 
-      // Apply top filter (multi-select)
+      // Apply top filter (multi-select) - Overview tab only
       function applyTopFilter(filterType) {
+        console.log("applyTopFilter called for:", filterType);
+        
         let labelId = "";
         let values = [];
 
@@ -16168,8 +16175,9 @@
         applyFilters();
       }
 
-      // Select PSE Filter (optimized)
+      // Select PSE Filter (optimized) - Overview tab only
       function selectPSEFilter(pse) {
+        console.log("selectPSEFilter called:", pse);
         selectedPSE = pse;
 
         // Update button styles using helper
@@ -16181,23 +16189,34 @@
           applyFilters();
         }
       }
+      // Make it globally accessible for Alpine.js
+      window.selectPSEFilter = selectPSEFilter;
 
-      // Select Status Filter (CM/DM) - optimized
+      // Select Status Filter (CM/DM) - optimized - Overview tab only
       function selectStatusFilter(status) {
+        console.log("selectStatusFilter called:", status, "isResettingFilters:", isResettingFilters);
+        console.log("Before update - selectedStatus:", selectedStatus);
         selectedStatus = status;
+        console.log("After update - selectedStatus:", selectedStatus);
 
         // Update button styles using helper
         updateStatusButtonsUI(status);
 
         // Only apply filters if not in batch reset mode
         if (!isResettingFilters) {
+          console.log("Applying filters from selectStatusFilter");
           updateFilterCount();
           applyFilters();
+        } else {
+          console.log("Skipping filter application (batch reset mode)");
         }
       }
+      // Make it globally accessible for Alpine.js
+      window.selectStatusFilter = selectStatusFilter;
 
-      // Select Commitment Status Filter (Committed/Uncommitted) - optimized
+      // Select Commitment Status Filter (Committed/Uncommitted) - optimized - Overview tab only
       function selectCommitmentFilter(commitment) {
+        console.log("selectCommitmentFilter called:", commitment);
         selectedCommitmentStatus = commitment;
 
         // Update button styles using helper
@@ -16209,6 +16228,8 @@
           applyFilters();
         }
       }
+      // Make it globally accessible for Alpine.js
+      window.selectCommitmentFilter = selectCommitmentFilter;
 
       // Select Amount Type Filter (Direct/Contingent/PSE/OSUC/Unused/TFA) - optimized
       function selectAmountTypeFilter(type) {
@@ -16374,11 +16395,13 @@
             try {
               console.log("🔄 Resetting Overview segmented controls...");
 
-              // Find the Overview tab to scope our search
+              // Find the Overview tab to scope our search (it's always in DOM, just hidden/shown)
               const overviewTab = document.querySelector(
                 "[x-show=\"activeTab === 'overview'\"]"
               );
               if (overviewTab) {
+                console.log("✅ Found Overview tab");
+                
                 // Reset Status - look for the div with selectedStatus data
                 const statusDivs = Array.from(
                   overviewTab.querySelectorAll("[x-data]")
@@ -23190,37 +23213,18 @@
         let totalNewCount = 0;
         let totalNewTFA = 0;
 
-        // Build set of APAC facility IDs from previous portfolio data
-        const previousAPACFacilityIds = new Set();
-        if (portfolioPreviousData && portfolioPreviousData.length > 0) {
-          portfolioPreviousData.forEach((row) => {
-            const region = (row.Region || "").toUpperCase();
-            if (region === "APAC" && row.Facility_ID) {
-              previousAPACFacilityIds.add(row.Facility_ID);
-            }
-          });
-          console.log(
-            `📊 Found ${previousAPACFacilityIds.size} APAC facilities in previous portfolio`
-          );
-        }
-
         for (let i = 0; i < portfolioData.length; i++) {
           const row = portfolioData[i];
           const productProgram = row.Product_Program || "Unknown";
           const facilityId = row.Facility_ID;
           const region = (row.Region || "").toUpperCase();
 
-          // NAM, LATAM, EMEA use Facility_First_Approval_Date
-          // APAC uses facility ID comparison with previous portfolio
+          // Only NAM, LATAM, EMEA use Facility_First_Approval_Date
+          // APAC is excluded from this chart
           let approvalDate = null;
-          let isNewAPACFacility = false;
 
           if (region === "NAM" || region === "LATAM" || region === "EMEA") {
             approvalDate = parseDate(row.Facility_First_Approval_Date);
-          } else if (region === "APAC") {
-            // For APAC: if facility ID doesn't exist in previous data, it's new
-            isNewAPACFacility =
-              facilityId && !previousAPACFacilityIds.has(facilityId);
           }
 
           if (!facilityId) continue;
@@ -23246,13 +23250,12 @@
           productTotalFacilities.get(productProgram).add(facilityId);
 
           // Check if facility is "new"
-          // For NAM, LATAM, EMEA: approved within the selected period
-          // For APAC: facility ID doesn't exist in previous portfolio
+          // Only for NAM, LATAM, EMEA: approved within the selected period
+          // APAC is excluded
           const isNewFacility =
-            (approvalDate &&
-              approvalDate >= targetStartDate &&
-              approvalDate <= targetEndDate) ||
-            isNewAPACFacility;
+            approvalDate &&
+            approvalDate >= targetStartDate &&
+            approvalDate <= targetEndDate;
 
           if (isNewFacility) {
             productNewFacilities.get(productProgram).add(facilityId);
@@ -23328,7 +23331,7 @@
             "newFacilitiesSubtitle"
           );
           if (subtitleElement) {
-            subtitleElement.textContent = `Facilities approved in ${periodLabel}`;
+            subtitleElement.textContent = `Facilities approved in ${periodLabel} (excl. APAC)`;
           }
           return;
         }
@@ -23794,7 +23797,7 @@
             "newFacilitiesSubtitle"
           );
           if (subtitleElement) {
-            subtitleElement.textContent = `Facilities approved in ${periodLabel}`;
+            subtitleElement.textContent = `Facilities approved in ${periodLabel} (excl. APAC)`;
           }
 
           console.log(
@@ -23944,34 +23947,18 @@
         const productAmounts = new Map();
         let totalNewCount = 0;
 
-        // Build set of APAC facility IDs from previous portfolio data
-        const previousAPACFacilityIds = new Set();
-        if (portfolioPreviousData && portfolioPreviousData.length > 0) {
-          portfolioPreviousData.forEach((row) => {
-            const region = (row.Region || "").toUpperCase();
-            if (region === "APAC" && row.Facility_ID) {
-              previousAPACFacilityIds.add(row.Facility_ID);
-            }
-          });
-        }
-
         for (let i = 0; i < filteredData.length; i++) {
           const row = filteredData[i];
           const productProgram = row.Product_Program || "Unknown";
           const facilityId = row.Facility_ID;
           const region = (row.Region || "").toUpperCase();
 
-          // NAM, LATAM, EMEA use Facility_First_Approval_Date
-          // APAC uses facility ID comparison with previous portfolio
+          // Only NAM, LATAM, EMEA use Facility_First_Approval_Date
+          // APAC is excluded from this chart
           let approvalDate = null;
-          let isNewAPACFacility = false;
 
           if (region === "NAM" || region === "LATAM" || region === "EMEA") {
             approvalDate = parseDate(row.Facility_First_Approval_Date);
-          } else if (region === "APAC") {
-            // For APAC: if facility ID doesn't exist in previous data, it's new
-            isNewAPACFacility =
-              facilityId && !previousAPACFacilityIds.has(facilityId);
           }
 
           if (!facilityId) continue;
@@ -23991,13 +23978,12 @@
           productTotalFacilities.get(productProgram).add(facilityId);
 
           // Check if facility is "new"
-          // For NAM, LATAM, EMEA: approved within the selected period
-          // For APAC: facility ID doesn't exist in previous portfolio
+          // Only for NAM, LATAM, EMEA: approved within the selected period
+          // APAC is excluded
           const isNewFacility =
-            (approvalDate &&
-              approvalDate >= targetStartDate &&
-              approvalDate <= targetEndDate) ||
-            isNewAPACFacility;
+            approvalDate &&
+            approvalDate >= targetStartDate &&
+            approvalDate <= targetEndDate;
 
           if (isNewFacility) {
             productNewFacilities.get(productProgram).add(facilityId);
@@ -24069,7 +24055,7 @@
             "newFacilitiesSubtitle"
           );
           if (subtitleElement) {
-            subtitleElement.textContent = `Facilities approved in ${periodLabel}`;
+            subtitleElement.textContent = `Facilities approved in ${periodLabel} (excl. APAC)`;
           }
           return;
         }
@@ -24250,7 +24236,7 @@
             "newFacilitiesSubtitle"
           );
           if (subtitleElement) {
-            subtitleElement.textContent = `Facilities first approved in ${periodLabel}`;
+            subtitleElement.textContent = `Facilities first approved in ${periodLabel} (excl. APAC)`;
           }
 
           console.log(

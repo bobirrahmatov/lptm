@@ -615,9 +615,10 @@
           <div class="custom-scrollbar overflow-x-auto">
             <table class="min-w-full" id="trendAnalysisTable">
               <thead id="trendAnalysisTableHead">
-                <tr class="bg-gray-50">
+                <tr class="bg-gray-50" style="background-color: #f9fafb !important;">
                   <th
                     class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500 sticky left-0 bg-gray-50 z-10"
+                    style="background-color: #f9fafb !important; color: #6b7280 !important; font-weight: 500 !important; text-align: center !important; padding: 1rem 1.5rem !important;"
                   >
                     Product Category
                   </th>
@@ -775,8 +776,6 @@
             });
           });
         }
-
-        console.log(`✅ Generated ${historicalTrendsData.length} dummy trend records`);
       }
 
       // ===== UTILITY FUNCTIONS =====
@@ -871,12 +870,10 @@
 
       // ===== DATA LOADING =====
       async function loadHistoricalTrendsData() {
-        console.log("📈 Loading historical trends data...");
         showLoadingOverlay("Loading Portfolio Trends...");
 
         // If dummy data mode, use the generated data
         if (ENABLE_DUMMY_DATA) {
-          console.log("📊 Using dummy historical trends data");
           setTimeout(() => {
             populateTrendsFilterDropdowns();
             populateTrendAnalysisTable();
@@ -889,8 +886,6 @@
         try {
           const fileName = CONFLUENCE_FILE_NAME;
           const url = `${CONFLUENCE_BASE_URL}/download/attachments/${CONFLUENCE_PAGE_ID}/${fileName}?api=v2`;
-
-          console.log("Fetching trends from:", url);
 
           const response = await fetch(url, {
             headers: {
@@ -910,7 +905,6 @@
           }
 
           historicalTrendsData = data;
-          console.log(`✅ Loaded ${historicalTrendsData.length} trend records`);
 
           populateTrendsFilterDropdowns();
           populateTrendAnalysisTable();
@@ -950,7 +944,7 @@
         if (tbody) {
           tbody.innerHTML = `
             <tr>
-              <td colspan="10" class="px-6 py-8 text-center text-gray-400">
+              <td colspan="10" class="px-6 py-8 text-center text-gray-400" style="text-align: center !important; padding: 2rem 1.5rem !important; color: #9ca3af !important;">
                 <p class="text-sm">No trend data available</p>
               </td>
             </tr>
@@ -972,7 +966,7 @@
         if (!dataToUse || dataToUse.length === 0) {
           tbody.innerHTML = `
             <tr>
-              <td colspan="10" class="px-6 py-8 text-center text-gray-400">
+              <td colspan="10" class="px-6 py-8 text-center text-gray-400" style="text-align: center !important; padding: 2rem 1.5rem !important; color: #9ca3af !important;">
                 <p class="text-sm">No data matches the selected filters</p>
               </td>
             </tr>
@@ -990,36 +984,41 @@
           }
         });
         
-        availableDates = Array.from(dateMap.keys()).sort((a, b) => b - a); // Most recent first
+        availableDates = Array.from(dateMap.keys()).sort((a, b) => a - b); // Earliest first
         
         // Build table header with dynamic date columns
         let headerHTML = `
-          <tr class="bg-gray-50">
-            <th class="px-6 py-4 text-left text-sm font-medium whitespace-nowrap text-gray-500 sticky left-0 bg-gray-50 z-10">
+          <tr class="bg-gray-50" style="background-color: #f9fafb !important;">
+            <th class="px-6 py-4 text-left text-sm font-medium whitespace-nowrap text-gray-500 sticky left-0 bg-gray-50 z-10" style="background-color: #f9fafb !important; color: #6b7280 !important; font-weight: 500 !important; text-align: left !important; padding: 1rem 1.5rem !important;">
               Product Category
             </th>`;
         
-        // Add date columns (show up to 4 most recent periods)
+        // Add date columns (show up to 4 periods: earliest to most recent)
         const maxDateColumns = Math.min(4, availableDates.length);
-        for (let i = 0; i < maxDateColumns; i++) {
-          const timestamp = availableDates[i];
+        const displayDates = availableDates.slice(-maxDateColumns); // Get the last 4 dates (most recent)
+        
+        for (let i = 0; i < displayDates.length; i++) {
+          const timestamp = displayDates[i];
           const dateObj = new Date(timestamp);
           const dateLabel = formatDateShort(dateObj);
           headerHTML += `
-            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">
+            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500" style="background-color: #f9fafb !important; color: #6b7280 !important; font-weight: 500 !important; text-align: center !important; padding: 1rem 1.5rem !important;">
               ${dateLabel}
             </th>`;
         }
         
+        // Update availableDates to only include the displayed dates
+        availableDates = displayDates;
+        
         // Add variance columns
         headerHTML += `
-            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">
+            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500" style="background-color: #f9fafb !important; color: #6b7280 !important; font-weight: 500 !important; text-align: center !important; padding: 1rem 1.5rem !important;">
               MoM Variance
             </th>
-            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">
+            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500" style="background-color: #f9fafb !important; color: #6b7280 !important; font-weight: 500 !important; text-align: center !important; padding: 1rem 1.5rem !important;">
               QoQ Variance
             </th>
-            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500">
+            <th class="px-6 py-4 text-center text-sm font-medium whitespace-nowrap text-gray-500" style="background-color: #f9fafb !important; color: #6b7280 !important; font-weight: 500 !important; text-align: center !important; padding: 1rem 1.5rem !important;">
               YoY Variance
             </th>
           </tr>`;
@@ -1062,27 +1061,37 @@
           periodData.Undrawn += parseFloat(row.Total_Undrawn || 0);
         });
 
+        // Sort products by the most recent period value (highest to lowest)
+        const sortedProducts = Object.values(productAggregations).sort((a, b) => {
+          const latestTimestamp = availableDates[availableDates.length - 1]; // Most recent date
+          const aData = a.periodData.get(latestTimestamp);
+          const bData = b.periodData.get(latestTimestamp);
+          const aValue = aData ? aData[selectedExposureType] : 0;
+          const bValue = bData ? bData[selectedExposureType] : 0;
+          return bValue - aValue; // Descending order (highest first)
+        });
+        
         // Generate table rows and calculate totals
         let html = "";
         const totals = {
-          periods: new Array(maxDateColumns).fill(0),
+          periods: new Array(availableDates.length).fill(0),
           momVariance: 0,
           qoqVariance: 0,
           yoyVariance: 0
         };
         
-        Object.values(productAggregations).forEach((agg) => {
+        sortedProducts.forEach((agg) => {
           html += '<tr>';
           
           // Product Category column (sticky)
           html += `
-            <td class="px-6 py-4 text-left text-sm font-medium text-gray-900 sticky left-0 bg-white z-10">
+            <td class="px-6 py-4 text-left text-sm font-medium text-gray-900 sticky left-0 bg-white z-10" style="background-color: #ffffff !important; color: #111827 !important; font-weight: 500 !important; text-align: left !important; padding: 1rem 1.5rem !important;">
               ${agg.product}
             </td>`;
           
-          // Period columns (show up to 4 most recent)
+          // Period columns (earliest to most recent)
           const periodValues = [];
-          for (let i = 0; i < maxDateColumns; i++) {
+          for (let i = 0; i < availableDates.length; i++) {
             const timestamp = availableDates[i];
             const data = agg.periodData.get(timestamp);
             const value = data ? data[selectedExposureType] : 0;
@@ -1090,32 +1099,35 @@
             totals.periods[i] += value;
             
             html += `
-              <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-700">
+              <td class="px-6 py-4 text-center text-sm whitespace-nowrap text-gray-700" style="color: #374151 !important; text-align: center !important; padding: 1rem 1.5rem !important;">
                 ${formatCurrency(value)}
               </td>`;
           }
           
           // MoM Variance (Month over Month - compare most recent 2 periods)
-          const momVariance = periodValues.length >= 2 && periodValues[1] > 0
-            ? (((periodValues[0] - periodValues[1]) / periodValues[1]) * 100).toFixed(1)
+          const mostRecent = periodValues[periodValues.length - 1];
+          const previousMonth = periodValues[periodValues.length - 2];
+          const momVariance = periodValues.length >= 2 && previousMonth > 0
+            ? (((mostRecent - previousMonth) / previousMonth) * 100).toFixed(1)
             : 0;
           html += `
-            <td class="px-6 py-4 text-center text-sm">
-              ${formatGrowthBadge(momVariance)}
+            <td class="px-6 py-4 text-center text-sm" style="text-align: center !important; padding: 1rem 1.5rem !important;">
+              ${periodValues.length >= 2 ? formatGrowthBadge(momVariance) : '<span class="text-gray-400">--</span>'}
             </td>`;
           
-          // QoQ Variance (Quarter over Quarter - compare period 0 vs period 3 if available)
-          const qoqVariance = periodValues.length >= 4 && periodValues[3] > 0
-            ? (((periodValues[0] - periodValues[3]) / periodValues[3]) * 100).toFixed(1)
+          // QoQ Variance (Quarter over Quarter - compare most recent vs 3 months back)
+          const threeMonthsAgo = periodValues[periodValues.length - 4];
+          const qoqVariance = periodValues.length >= 4 && threeMonthsAgo > 0
+            ? (((mostRecent - threeMonthsAgo) / threeMonthsAgo) * 100).toFixed(1)
             : 0;
           html += `
-            <td class="px-6 py-4 text-center text-sm">
+            <td class="px-6 py-4 text-center text-sm" style="text-align: center !important; padding: 1rem 1.5rem !important;">
               ${periodValues.length >= 4 ? formatGrowthBadge(qoqVariance) : '<span class="text-gray-400">--</span>'}
             </td>`;
           
           // YoY Variance (Year over Year - would need 12+ periods)
           html += `
-            <td class="px-6 py-4 text-center text-sm">
+            <td class="px-6 py-4 text-center text-sm" style="text-align: center !important; padding: 1rem 1.5rem !important;">
               <span class="text-gray-400">--</span>
             </td>`;
           
@@ -1123,36 +1135,40 @@
         });
 
         // Add totals row (with rounded bottom corners)
-        html += '<tr class="bg-gray-50 font-semibold border-t-2 border-gray-300">';
+        html += '<tr class="bg-gray-50 font-semibold border-t-2 border-gray-300" style="background-color: #f9fafb !important; border-top: 2px solid #d1d5db !important;">';
         html += `
-          <td class="px-6 py-4 text-left text-sm font-bold text-gray-900 sticky left-0 bg-gray-50 z-10 rounded-bl-2xl">
+          <td class="px-6 py-4 text-left text-sm font-bold text-gray-900 sticky left-0 bg-gray-50 z-10 rounded-bl-2xl" style="background-color: #f9fafb !important; color: #111827 !important; font-weight: 700 !important; text-align: left !important; padding: 1rem 1.5rem !important;">
             Total
           </td>`;
         
         // Total for each period
-        for (let i = 0; i < maxDateColumns; i++) {
+        for (let i = 0; i < availableDates.length; i++) {
           html += `
-            <td class="px-6 py-4 text-center text-sm whitespace-nowrap font-bold text-gray-900">
+            <td class="px-6 py-4 text-center text-sm whitespace-nowrap font-bold text-gray-900" style="color: #111827 !important; font-weight: 700 !important; text-align: center !important; padding: 1rem 1.5rem !important;">
               ${formatCurrency(totals.periods[i])}
             </td>`;
         }
         
-        // Calculate total variances
-        const totalMomVariance = totals.periods.length >= 2 && totals.periods[1] > 0
-          ? (((totals.periods[0] - totals.periods[1]) / totals.periods[1]) * 100).toFixed(1)
+        // Calculate total variances (using most recent periods)
+        const totalMostRecent = totals.periods[totals.periods.length - 1];
+        const totalPreviousMonth = totals.periods[totals.periods.length - 2];
+        const totalThreeMonthsAgo = totals.periods[totals.periods.length - 4];
+        
+        const totalMomVariance = totals.periods.length >= 2 && totalPreviousMonth > 0
+          ? (((totalMostRecent - totalPreviousMonth) / totalPreviousMonth) * 100).toFixed(1)
           : 0;
-        const totalQoqVariance = totals.periods.length >= 4 && totals.periods[3] > 0
-          ? (((totals.periods[0] - totals.periods[3]) / totals.periods[3]) * 100).toFixed(1)
+        const totalQoqVariance = totals.periods.length >= 4 && totalThreeMonthsAgo > 0
+          ? (((totalMostRecent - totalThreeMonthsAgo) / totalThreeMonthsAgo) * 100).toFixed(1)
           : 0;
         
         html += `
-          <td class="px-6 py-4 text-center text-sm">
-            ${formatGrowthBadge(totalMomVariance)}
+          <td class="px-6 py-4 text-center text-sm" style="text-align: center !important; padding: 1rem 1.5rem !important;">
+            ${totals.periods.length >= 2 ? formatGrowthBadge(totalMomVariance) : '<span class="text-gray-400">--</span>'}
           </td>
-          <td class="px-6 py-4 text-center text-sm">
+          <td class="px-6 py-4 text-center text-sm" style="text-align: center !important; padding: 1rem 1.5rem !important;">
             ${totals.periods.length >= 4 ? formatGrowthBadge(totalQoqVariance) : '<span class="text-gray-400">--</span>'}
           </td>
-          <td class="px-6 py-4 text-center text-sm rounded-br-2xl">
+          <td class="px-6 py-4 text-center text-sm rounded-br-2xl" style="text-align: center !important; padding: 1rem 1.5rem !important;">
             <span class="text-gray-400">--</span>
           </td>`;
         
@@ -1487,7 +1503,6 @@
 
       // ===== INITIALIZATION =====
       document.addEventListener("DOMContentLoaded", () => {
-        console.log("🚀 Initializing Trends Dashboard...");
         loadHistoricalTrendsData();
 
         // Close product dropdown when clicking outside
